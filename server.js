@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const uploadHandler = require('./api/upload');
 
 const PORT = 3000;
 const MIME_TYPES = {
@@ -15,7 +16,29 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url.split('?')[0]);
+  const urlPath = req.url.split('?')[0];
+
+  // Rutas de API Serverless
+  if (urlPath === '/api/upload') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      req.body = body;
+      res.status = (code) => {
+        res.statusCode = code;
+        return res;
+      };
+      res.json = (data) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(data));
+      };
+      uploadHandler(req, res);
+    });
+    return;
+  }
+
+  // Archivos estáticos
+  let filePath = path.join(__dirname, urlPath === '/' ? 'index.html' : urlPath);
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 

@@ -1,7 +1,6 @@
 /**
  * DULCE ATELIER - SERVICIO DE SUBIDA DE IMÁGENES CON CLOUDINARY
- * Permite subir fotos de pasteles directo a la nube de Cloudinary
- * Si no hay credenciales configuradas, utiliza fallback a Base64/DataURL
+ * Conectado con la cuenta Cloudinary: dz6apjevd
  */
 
 const CLOUDINARY_CONFIG_KEY = 'dulce_atelier_cloudinary_cfg';
@@ -9,6 +8,7 @@ const CLOUDINARY_CONFIG_KEY = 'dulce_atelier_cloudinary_cfg';
 class CloudinaryService {
   constructor() {
     this.config = this.loadConfig();
+    this.apiKey = '327352685728933';
   }
 
   loadConfig() {
@@ -21,69 +21,61 @@ class CloudinaryService {
       }
     }
     return {
-      cloudName: "", // El usuario puede ingresarlo en el panel o pasar sus credenciales
-      uploadPreset: "" // Preset unsigned configurado en Cloudinary
+      cloudName: "dz6apjevd", // Tu Cloud Name configurado
+      uploadPreset: ""
     };
   }
 
-  saveConfig(cloudName, uploadPreset) {
+  saveConfig(cloudName, uploadPreset = '') {
     this.config = {
-      cloudName: cloudName.trim(),
-      uploadPreset: uploadPreset.trim()
+      cloudName: (cloudName || 'dz6apjevd').trim(),
+      uploadPreset: (uploadPreset || '').trim()
     };
     localStorage.setItem(CLOUDINARY_CONFIG_KEY, JSON.stringify(this.config));
   }
 
-  isConfigured() {
-    return Boolean(this.config.cloudName && this.config.uploadPreset);
+  getCloudName() {
+    return this.config.cloudName || 'dz6apjevd';
   }
 
   /**
-   * Sube una imagen a Cloudinary mediante REST API (Unsigned Upload)
-   * @param {File} file - Archivo de imagen seleccionado
-   * @param {Function} onProgress - Callback de progreso opcional (porcentaje)
-   * @returns {Promise<string>} - URL segura de la imagen en Cloudinary
+   * Sube una imagen mediante el endpoint /api/upload de Vercel (Firmado de forma segura)
    */
-  async uploadImage(file, onProgress = null) {
-    // Si no está configurado Cloudinary, fallback a Base64 para que la app funcione siempre
-    if (!this.isConfigured()) {
-      console.warn("Cloudinary no está configurado aún. Utilizando almacenamiento local de imagen.");
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.onerror = (err) => reject(err);
-        reader.readAsDataURL(file);
-      });
-    }
+  async uploadImage(file) {
+    const base64Data = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
 
-    const url = `https://api.cloudinary.com/v1_1/${this.config.cloudName}/image/upload`;
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', this.config.uploadPreset);
-    formData.append('folder', 'pasteleria_productos');
+    const cloudName = this.getCloudName();
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch('/api/upload', {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: base64Data,
+          cloudName: cloudName
+        })
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        const data = await response.json();
+        if (data.secure_url) {
+          return data.secure_url;
+        }
+      } else {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Error al subir a Cloudinary");
+        console.warn("API de Cloudinary devolvió error:", errorData);
       }
-
-      const data = await response.json();
-      return data.secure_url;
-    } catch (error) {
-      console.error("Fallo la subida a Cloudinary:", error);
-      // Fallback a Base64 si falla la red o credencial
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.readAsDataURL(file);
-      });
+    } catch (err) {
+      console.warn("Fallo el endpoint /api/upload, usando fallback:", err);
     }
+
+    // Fallback si no hay conexión al backend
+    return base64Data;
   }
 }
 
