@@ -2,5 +2,13 @@
   "name": "dulce-atelier-pasteleria",
   "version": "1.0.0",
   "private": true,
-  "description": "Pastelería artesanal y desayunos"
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.4.2"
+  }
 }
