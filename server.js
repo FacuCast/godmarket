@@ -1,6 +1,22 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+
+// Cargar variables de .env local si existe (para pruebas locales)
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  envContent.split('\n').forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const [key, ...values] = trimmed.split('=');
+      if (key && values.length > 0) {
+        process.env[key.trim()] = values.join('=').trim();
+      }
+    }
+  });
+}
+
 const uploadHandler = require('./api/upload');
 
 const PORT = 3000;

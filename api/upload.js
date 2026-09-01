@@ -2,7 +2,8 @@ const crypto = require('crypto');
 
 /**
  * Serverless Function para Vercel (/api/upload)
- * Sube imágenes a Cloudinary de manera segura usando API Key y API Secret
+ * Lee las credenciales de forma 100% segura desde las Variables de Entorno de Vercel (process.env)
+ * Ningún visitante ni usuario de la web puede ver tu API Secret.
  */
 module.exports = async (req, res) => {
   // CORS Headers
@@ -22,9 +23,16 @@ module.exports = async (req, res) => {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { image, cloudName } = body || {};
 
-    const finalCloudName = process.env.CLOUDINARY_CLOUD_NAME || cloudName || 'dz6apjevd';
-    const apiKey = process.env.CLOUDINARY_API_KEY || '327352685728933';
-    const apiSecret = process.env.CLOUDINARY_API_SECRET || 'qSBrq-Xwz6wgWhT5M54ddx-6wBo';
+    // Obtener credenciales desde las variables de entorno de Vercel
+    const finalCloudName = process.env.CLOUDINARY_CLOUD_NAME || cloudName;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+    if (!finalCloudName || !apiKey || !apiSecret) {
+      return res.status(500).json({ 
+        error: 'Credenciales de Cloudinary no configuradas en las Variables de Entorno de Vercel.' 
+      });
+    }
 
     if (!image) {
       return res.status(400).json({ error: 'No se envió ninguna imagen para subir.' });
@@ -33,7 +41,7 @@ module.exports = async (req, res) => {
     const timestamp = Math.round(new Date().getTime() / 1000);
     const folder = 'pasteleria_productos';
     
-    // Generar firma SHA-1 requerida por Cloudinary
+    // Generar firma SHA-1 requerida por Cloudinary en el servidor
     const stringToSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
     const signature = crypto.createHash('sha1').update(stringToSign).digest('hex');
 
