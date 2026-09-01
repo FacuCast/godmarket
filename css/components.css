@@ -458,25 +458,28 @@
    -------------------------------------------------------------------------- */
 .floating-cart-bar {
   position: fixed;
-  bottom: 68px; /* Above bottom nav */
+  bottom: 74px; /* Perfectly elevated above bottom nav */
   left: 50%;
-  transform: translateX(-50%) translateY(120%);
+  transform: translateX(-50%) translateY(30px);
   width: calc(100% - 32px);
   max-width: 488px;
   background: var(--primary-gradient);
   color: #fff;
   border-radius: var(--radius-md);
   padding: 12px 18px;
-  display: flex;
+  display: none; /* Completely hidden when empty */
+  opacity: 0;
   align-items: center;
   justify-content: space-between;
-  box-shadow: var(--shadow-float);
+  box-shadow: 0 12px 30px rgba(217, 83, 111, 0.35);
   z-index: 95;
-  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
 }
 
 .floating-cart-bar.visible {
+  display: flex !important;
+  opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
 

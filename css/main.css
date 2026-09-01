@@ -131,7 +131,7 @@ img {
   min-height: 100vh;
   position: relative;
   background-color: var(--bg-app);
-  padding-bottom: 95px; /* Space for sticky cart/nav */
+  padding-bottom: 130px; /* Comfortable space for sticky cart and nav */
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.03);
 }
 
