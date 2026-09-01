@@ -1,0 +1,72 @@
+/* ==========================================================================
+   DULCE ATELIER - RESPONSIVE & DESKTOP STYLES
+   ========================================================================== */
+
+/* Tablet (min-width: 600px) */
+@media (min-width: 600px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .product-image-container {
+    padding-top: 80%;
+  }
+
+  .section-container {
+    padding: 0 20px;
+  }
+}
+
+/* Desktop & Laptop (min-width: 900px) */
+@media (min-width: 900px) {
+  body {
+    background: radial-gradient(circle at 10% 20%, rgba(217, 83, 111, 0.05) 0%, rgba(253, 251, 247, 1) 90%);
+    padding: 24px 0 40px 0;
+  }
+
+  .app-container {
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px rgba(43, 30, 26, 0.09);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+  }
+
+  .app-header {
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+  }
+
+  .bottom-nav {
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+  }
+
+  /* Modal center on Desktop */
+  .modal-overlay {
+    align-items: center;
+    padding: 20px;
+  }
+
+  .bottom-sheet {
+    border-radius: var(--radius-lg);
+    max-height: 85vh;
+    animation: popIn 0.3s ease forwards;
+  }
+
+  .drag-handle {
+    display: none;
+  }
+}
+
+/* Wide Desktop Screens (min-width: 1200px) */
+@media (min-width: 1200px) {
+  .app-container {
+    max-width: 580px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+}
