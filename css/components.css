@@ -816,6 +816,36 @@
   box-shadow: 0 0 0 3px var(--primary-light);
 }
 
+/* Validation Feedback Styles */
+.form-control.is-invalid {
+  border-color: var(--danger) !important;
+  background-color: #FFF5F5 !important;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.15) !important;
+}
+
+.invalid-feedback {
+  font-size: 0.72rem;
+  color: var(--danger);
+  font-weight: 600;
+  margin-top: 4px;
+  display: none;
+}
+
+.form-control.is-invalid ~ .invalid-feedback {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+
+.shake {
+  animation: shakeInput 0.35s ease;
+}
+
+@keyframes shakeInput {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
 .payment-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

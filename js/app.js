@@ -165,21 +165,115 @@ class DulceAtelierApp {
       });
     });
 
-    // Enviar Checkout a WhatsApp
+    // Limpiar errores visuales en tiempo real mientras el usuario escribe
+    const checkoutInputs = ['cust-name', 'cust-phone', 'cust-address', 'cust-time', 'cust-cash-amount'];
+    checkoutInputs.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => el.classList.remove('is-invalid'));
+      }
+    });
+
+    // Enviar Checkout a WhatsApp con Validaciones Robustas
     const checkoutForm = document.getElementById('checkout-form');
     if (checkoutForm) {
       checkoutForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        
+        // 1. Validar que el carrito no esté vacío
+        if (window.cartManager.getItemCount() === 0) {
+          this.showToast("⚠️ Tu carrito está vacío. Elige algún producto primero.");
+          this.closeModal('checkout-modal');
+          return;
+        }
+
+        let isValid = true;
+        let firstInvalidField = null;
+
+        const nameInput = document.getElementById('cust-name');
+        const phoneInput = document.getElementById('cust-phone');
+        const addressInput = document.getElementById('cust-address');
+        const timeInput = document.getElementById('cust-time');
+        const paymentMethod = document.getElementById('checkout-payment-method').value;
+        const cashAmountInput = document.getElementById('cust-cash-amount');
+
+        // Validación de Nombre (mínimo 3 caracteres, letras y espacios)
+        const nameVal = nameInput.value.trim();
+        if (!nameVal || nameVal.length < 3) {
+          nameInput.classList.add('is-invalid');
+          isValid = false;
+          if (!firstInvalidField) firstInvalidField = nameInput;
+        } else {
+          nameInput.classList.remove('is-invalid');
+        }
+
+        // Validación de Teléfono (mínimo 8 dígitos numéricos)
+        const phoneVal = phoneInput.value.trim();
+        const digitsOnly = phoneVal.replace(/\D/g, '');
+        if (!phoneVal || digitsOnly.length < 8) {
+          phoneInput.classList.add('is-invalid');
+          isValid = false;
+          if (!firstInvalidField) firstInvalidField = phoneInput;
+        } else {
+          phoneInput.classList.remove('is-invalid');
+        }
+
+        // Validación de Dirección (Obligatoria solo si es Envío a Domicilio)
+        const isDelivery = window.cartManager.deliveryType === 'delivery';
+        if (isDelivery) {
+          const addressVal = addressInput ? addressInput.value.trim() : '';
+          if (!addressVal || addressVal.length < 4) {
+            if (addressInput) addressInput.classList.add('is-invalid');
+            isValid = false;
+            if (!firstInvalidField) firstInvalidField = addressInput;
+          } else {
+            if (addressInput) addressInput.classList.remove('is-invalid');
+          }
+        }
+
+        // Validación de Horario / Fecha preferida
+        const timeVal = timeInput.value.trim();
+        if (!timeVal || timeVal.length < 2) {
+          timeInput.classList.add('is-invalid');
+          isValid = false;
+          if (!firstInvalidField) firstInvalidField = timeInput;
+        } else {
+          timeInput.classList.remove('is-invalid');
+        }
+
+        // Validación de Efectivo (si paga en efectivo con billete mayor)
+        if (paymentMethod === 'cash' && cashAmountInput) {
+          const cashVal = parseFloat(cashAmountInput.value);
+          const totalOrder = window.cartManager.getTotal();
+          if (cashVal && cashVal < totalOrder) {
+            cashAmountInput.classList.add('is-invalid');
+            isValid = false;
+            if (!firstInvalidField) firstInvalidField = cashAmountInput;
+          } else {
+            cashAmountInput.classList.remove('is-invalid');
+          }
+        }
+
+        // Si hay errores, animar el formulario y hacer foco en el primer error
+        if (!isValid) {
+          checkoutForm.classList.add('shake');
+          setTimeout(() => checkoutForm.classList.remove('shake'), 400);
+          this.showToast("⚠️ Por favor revisa los campos en rojo");
+          if (firstInvalidField) firstInvalidField.focus();
+          return;
+        }
+
+        // Si todo es válido, preparar datos y enviar a WhatsApp
         const formData = {
-          fullName: document.getElementById('cust-name').value.trim(),
-          phone: document.getElementById('cust-phone').value.trim(),
-          address: document.getElementById('cust-address')?.value.trim() || '',
+          fullName: nameVal,
+          phone: phoneVal,
+          address: isDelivery && addressInput ? addressInput.value.trim() : 'Retiro en Tienda',
           apartment: document.getElementById('cust-apt')?.value.trim() || '',
-          zone: document.getElementById('cust-zone')?.value || '',
-          deliveryTime: document.getElementById('cust-time').value.trim(),
-          paymentMethod: document.getElementById('checkout-payment-method').value,
-          cashAmount: document.getElementById('cust-cash-amount')?.value.trim(),
-          comments: document.getElementById('cust-comments')?.value.trim()
+          zone: document.getElementById('cust-zone')?.value.trim() || '',
+          deliveryTime: timeVal,
+          paymentMethod: paymentMethod,
+          cashAmount: cashAmountInput?.value.trim() || '',
+          comments: document.getElementById('cust-comments')?.value.trim() || ''
         };
 
         window.checkoutHandler.sendToWhatsApp(formData, window.cartManager);

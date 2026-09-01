@@ -56,6 +56,33 @@ class AdminManager {
 
   async handleProductSubmit(e) {
     e.preventDefault();
+
+    const nameInput = document.getElementById('prod-name');
+    const priceInput = document.getElementById('prod-price');
+    const descInput = document.getElementById('prod-desc');
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    const price = priceInput ? parseFloat(priceInput.value) : 0;
+    const description = descInput ? descInput.value.trim() : '';
+
+    if (!name || name.length < 3) {
+      window.app.showToast("⚠️ El nombre del pastel debe tener al menos 3 caracteres.");
+      if (nameInput) nameInput.focus();
+      return;
+    }
+
+    if (isNaN(price) || price <= 0) {
+      window.app.showToast("⚠️ Ingresa un precio válido mayor a 0.");
+      if (priceInput) priceInput.focus();
+      return;
+    }
+
+    if (!description || description.length < 5) {
+      window.app.showToast("⚠️ La descripción debe tener al menos 5 caracteres.");
+      if (descInput) descInput.focus();
+      return;
+    }
+
     const submitBtn = document.getElementById('btn-save-product');
     const originalBtnText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<span>⏳ Guardando y subiendo foto...</span>';
@@ -68,12 +95,9 @@ class AdminManager {
         imageUrl = await window.cloudinaryService.uploadImage(this.selectedImageFile);
       }
 
-      const name = document.getElementById('prod-name').value.trim();
       const category = document.getElementById('prod-category').value;
-      const price = parseFloat(document.getElementById('prod-price').value);
       const tag = document.getElementById('prod-tag').value.trim() || '✨ Nuevo';
       const portion = document.getElementById('prod-portion').value.trim() || '1 porción';
-      const description = document.getElementById('prod-desc').value.trim();
 
       const categoryNames = {
         tortas: 'Tortas Artesanales',
