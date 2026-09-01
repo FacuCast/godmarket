@@ -475,11 +475,17 @@ class DulceAtelierApp {
       }
     }
 
-    // Badge in bottom nav
+    // Badge in bottom nav & Desktop Header
     const navBadge = document.getElementById('nav-cart-badge');
     if (navBadge) {
       navBadge.textContent = count;
       navBadge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+
+    const headerBadge = document.getElementById('header-cart-badge');
+    if (headerBadge) {
+      headerBadge.textContent = count;
+      headerBadge.style.display = count > 0 ? 'inline-block' : 'none';
     }
 
     // Drawer de Carrito

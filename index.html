@@ -60,6 +60,10 @@
           <button class="icon-btn" onclick="window.app.openModal('admin-product-modal')" title="Agregar Producto">
             ➕
           </button>
+          <button class="icon-btn desktop-cart-btn" style="position: relative;" onclick="window.app.openModal('cart-drawer-modal')" title="Ver Carrito">
+            🛍️
+            <span id="header-cart-badge" class="badge-count" style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.65rem; padding: 1px 6px;">0</span>
+          </button>
         </div>
       </div>
 
@@ -190,49 +194,56 @@
       <div class="drag-handle"></div>
       <button class="sheet-close-btn" onclick="window.app.closeModal('product-detail-modal')">✕</button>
 
-      <img id="modal-product-img" class="modal-product-img" src="" alt="Pastel">
-      <h3 id="modal-product-title" class="modal-product-title font-serif"></h3>
-      <div id="modal-product-price" class="modal-product-price"></div>
-      <p id="modal-product-desc" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 12px;"></p>
-      
-      <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
-        <span>📏 Rendimiento:</span>
-        <strong id="modal-product-portion" style="color: var(--text-main);"></strong>
-      </div>
-
-      <!-- Customization Section (Dedication, Candle, Notes) -->
-      <div id="modal-customization-options" class="customization-section">
-        <div class="customization-title">Personaliza tu pedido:</div>
-        
-        <div class="form-group">
-          <label class="form-label" for="modal-dedication">✍️ Dedicatoria en placa de chocolate (Opcional):</label>
-          <input type="text" id="modal-dedication" class="custom-input" placeholder="Ej: ¡Feliz Cumpleaños Sofi!" maxlength="50">
+      <div class="modal-desktop-layout">
+        <div>
+          <img id="modal-product-img" class="modal-product-img" src="" alt="Pastel">
         </div>
 
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-          <input type="checkbox" id="modal-candle-checkbox" style="width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
-          <label for="modal-candle-checkbox" style="font-size: 0.85rem; font-weight: 600; cursor: pointer;">
-            🕯️ Incluir velita de cumpleaños (Sin cargo)
-          </label>
-        </div>
+        <div>
+          <h3 id="modal-product-title" class="modal-product-title font-serif"></h3>
+          <div id="modal-product-price" class="modal-product-price"></div>
+          <p id="modal-product-desc" style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 12px;"></p>
+          
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
+            <span>📏 Rendimiento:</span>
+            <strong id="modal-product-portion" style="color: var(--text-main);"></strong>
+          </div>
 
-        <div class="form-group">
-          <label class="form-label" for="modal-note">📝 Aclaración o nota para el pastelero:</label>
-          <input type="text" id="modal-note" class="custom-input" placeholder="Ej: Entregar bien frío / Alergia a nuez...">
-        </div>
-      </div>
+          <!-- Customization Section (Dedication, Candle, Notes) -->
+          <div id="modal-customization-options" class="customization-section">
+            <div class="customization-title">Personaliza tu pedido:</div>
+            
+            <div class="form-group">
+              <label class="form-label" for="modal-dedication">✍️ Dedicatoria en placa de chocolate (Opcional):</label>
+              <input type="text" id="modal-dedication" class="custom-input" placeholder="Ej: ¡Feliz Cumpleaños Sofi!" maxlength="50">
+            </div>
 
-      <!-- Actions: Quantity & Add Button -->
-      <div style="display: flex; align-items: center; gap: 14px; margin-top: 18px;">
-        <div class="quantity-stepper">
-          <button id="modal-qty-minus" class="stepper-btn">-</button>
-          <span id="modal-qty-val" class="stepper-value">1</span>
-          <button id="modal-qty-plus" class="stepper-btn">+</button>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+              <input type="checkbox" id="modal-candle-checkbox" style="width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
+              <label for="modal-candle-checkbox" style="font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                🕯️ Incluir velita de cumpleaños (Sin cargo)
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="modal-note">📝 Aclaración o nota para el pastelero:</label>
+              <input type="text" id="modal-note" class="custom-input" placeholder="Ej: Entregar bien frío / Alergia a nuez...">
+            </div>
+          </div>
+
+          <!-- Actions: Quantity & Add Button -->
+          <div style="display: flex; align-items: center; gap: 14px; margin-top: 18px;">
+            <div class="quantity-stepper">
+              <button id="modal-qty-minus" class="stepper-btn">-</button>
+              <span id="modal-qty-val" class="stepper-value">1</span>
+              <button id="modal-qty-plus" class="stepper-btn">+</button>
+            </div>
+            
+            <button id="btn-add-modal-cart" class="btn-primary" style="flex: 1;">
+              <span>Agregar al Pedido</span>
+            </button>
+          </div>
         </div>
-        
-        <button id="btn-add-modal-cart" class="btn-primary" style="flex: 1;">
-          <span>Agregar al Pedido</span>
-        </button>
       </div>
     </div>
   </div>
