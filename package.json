@@ -1,0 +1,9 @@
+{
+  "name": "dulce-atelier-pasteleria",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pastelería artesanal y desayunos",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
