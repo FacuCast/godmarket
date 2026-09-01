@@ -12,12 +12,19 @@
       <stop offset="0%" stop-color="#F4A261"/>
       <stop offset="100%" stop-color="#E76F51"/>
     </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#D9536F" flood-opacity="0.18"/>
+    </filter>
   </defs>
 
-  <rect width="400" height="400" rx="90" fill="url(#logoBgGrad)"/>
+  <!-- Background Circle -->
+  <circle cx="200" cy="200" r="185" fill="url(#logoBgGrad)" stroke="#EFE4E6" stroke-width="3" filter="url(#softShadow)"/>
+
+  <!-- Outer Decorative Ring -->
+  <circle cx="200" cy="200" r="165" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" stroke-dasharray="4,6" opacity="0.8"/>
 
   <!-- Cake Icon Group -->
-  <g transform="translate(100, 60)">
+  <g transform="translate(100, 70)">
     <!-- Sparkles -->
     <path d="M100 8 L103 16 L111 19 L103 22 L100 30 L97 22 L89 19 L97 16 Z" fill="url(#goldGrad)"/>
     <path d="M150 35 L152 40 L157 42 L152 44 L150 49 L148 44 L143 42 L148 40 Z" fill="url(#goldGrad)" opacity="0.9"/>
@@ -27,11 +34,11 @@
     <path d="M100 24 Q104 18 100 12 Q96 18 100 24 Z" fill="url(#goldGrad)"/>
     <rect x="98" y="24" width="4" height="18" rx="2" fill="#D9536F"/>
 
-    <!-- Cake Top Tier -->
+    <!-- Cake Top Tier (Frosting & Cake) -->
     <rect x="58" y="42" width="84" height="34" rx="10" fill="url(#primaryGrad)"/>
     <path d="M58 54 Q68 62 78 54 Q88 62 98 54 Q108 62 118 54 Q128 62 142 54 L142 42 L58 42 Z" fill="#FFF0F3" opacity="0.9"/>
 
-    <!-- Cake Middle Tier -->
+    <!-- Cake Middle Decorative Ribbon -->
     <rect x="42" y="76" width="116" height="38" rx="12" fill="#2B1E1A"/>
     <path d="M42 88 Q56 98 70 88 Q84 98 98 88 Q112 98 126 88 Q140 98 158 88 L158 76 L42 76 Z" fill="url(#goldGrad)" opacity="0.9"/>
 
@@ -39,13 +46,19 @@
     <rect x="26" y="114" width="148" height="42" rx="14" fill="url(#primaryGrad)"/>
     <path d="M26 128 Q44 140 62 128 Q80 140 98 128 Q116 140 134 128 Q152 140 174 128 L174 114 L26 114 Z" fill="#FFF0F3" opacity="0.9"/>
 
-    <!-- Stand -->
+    <!-- Cake Stand -->
     <path d="M16 156 Q100 162 184 156 L190 162 Q100 170 10 162 Z" fill="url(#goldGrad)"/>
     <path d="M85 162 L80 176 Q100 180 120 176 L115 162 Z" fill="url(#goldGrad)"/>
     <rect x="65" y="176" width="70" height="6" rx="3" fill="url(#goldGrad)"/>
   </g>
 
-  <!-- Typography -->
-  <text x="200" y="295" font-family="sans-serif" font-size="30" font-weight="bold" fill="#2B1E1A" text-anchor="middle">Dulce Atelier</text>
-  <text x="200" y="322" font-family="sans-serif" font-size="13" font-weight="700" fill="#D9536F" text-anchor="middle" letter-spacing="3.5">PASTELERÍA &amp; CAFÉ</text>
+  <!-- Typography: DULCE ATELIER -->
+  <text x="200" y="295" font-family="'Playfair Display', Georgia, serif" font-size="30" font-weight="bold" fill="#2B1E1A" text-anchor="middle" letter-spacing="1">Dulce Atelier</text>
+  
+  <!-- Tagline -->
+  <text x="200" y="322" font-family="'Outfit', sans-serif" font-size="12.5" font-weight="700" fill="#D9536F" text-anchor="middle" letter-spacing="3.5">PASTELERÍA &amp; DESAYUNOS</text>
+
+  <!-- Star accents -->
+  <circle cx="95" cy="318" r="2.5" fill="#F4A261"/>
+  <circle cx="305" cy="318" r="2.5" fill="#F4A261"/>
 </svg>

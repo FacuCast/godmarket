@@ -32,10 +32,10 @@
     <header class="app-header">
       <div class="header-top">
         <div class="brand-wrapper">
-          <div class="brand-logo">🍰</div>
+          <img src="assets/images/logo.svg" alt="Dulce Atelier Logo" class="brand-logo-img" style="width: 44px; height: 44px; border-radius: 12px; object-fit: cover;">
           <div class="brand-info">
             <h1>Dulce Atelier</h1>
-            <span>Pastelería & Café</span>
+            <span>Pastelería & Desayunos</span>
           </div>
         </div>
 
@@ -46,6 +46,17 @@
           <button class="icon-btn" onclick="window.app.openModal('admin-product-modal')" title="Agregar Pastel (+)">
             ➕
           </button>
+        </div>
+      </div>
+
+      <!-- Info bar: Status & Hours -->
+      <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 10px; padding: 4px 8px; background: var(--bg-surface-secondary); border-radius: var(--radius-xs);">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2A9D8F; animation: pulseGlow 2s infinite;"></span>
+          <strong style="color: #2A9D8F;">Abierto Ahora</strong> • 08:30 a 20:00 hs
+        </div>
+        <div style="color: var(--primary); font-weight: 700;">
+          🛵 Envíos en el día
         </div>
       </div>
 
@@ -94,6 +105,27 @@
     <main id="products-section-container">
       <!-- Rendered by JS -->
     </main>
+
+    <!-- Business Info & Guarantee Footer -->
+    <footer style="margin: 30px 16px 20px; padding: 20px; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-light); text-align: center;">
+      <img src="assets/images/logo.svg" alt="Dulce Atelier" style="width: 58px; height: 58px; margin: 0 auto 10px; border-radius: 50%;">
+      <h4 class="font-serif" style="font-size: 1.1rem; margin-bottom: 4px;">Dulce Atelier Pastelería</h4>
+      <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
+        Elaboración 100% artesanal con ingredientes premium.<br>
+        📍 Entregas en CABA y Gran Buenos Aires.
+      </p>
+
+      <div style="display: flex; justify-content: center; gap: 14px; margin-bottom: 14px;">
+        <a href="https://wa.me/5491156192616" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: var(--whatsapp-green); color: #fff; padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700;">
+          <span>💬 WhatsApp: 11 5619-2616</span>
+        </a>
+      </div>
+
+      <div style="font-size: 0.72rem; color: var(--text-muted); border-top: 1px dashed var(--border-light); padding-top: 12px;">
+        💳 Aceptamos Mercado Pago, Transferencias y Efectivo.<br>
+        © 2026 Dulce Atelier. Todos los derechos reservados.
+      </div>
+    </footer>
 
     <!-- Floating Sticky Cart Bar (PedidosYa style) -->
     <div id="floating-cart-bar" class="floating-cart-bar" onclick="window.app.openModal('cart-drawer-modal')">
@@ -431,27 +463,23 @@
       </div>
 
       <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
-        Configura tu <strong>Cloud Name</strong> y tu <strong>Upload Preset (Unsigned)</strong> de Cloudinary para que todas las fotos que subas se guarden directamente en tu cuenta de la nube.
+        Tu cuenta de Cloudinary está configurada y conectada de forma segura con tu Cloud Name <strong>dz6apjevd</strong>.
       </p>
 
       <form id="cloudinary-config-form">
         <div class="form-group">
           <label class="form-label" for="cfg-cloud-name">Cloudinary Cloud Name:</label>
-          <input type="text" id="cfg-cloud-name" class="form-control" placeholder="Ej: tu-cloud-name">
+          <input type="text" id="cfg-cloud-name" class="form-control" value="dz6apjevd" placeholder="Ej: dz6apjevd">
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="cfg-upload-preset">Upload Preset (Unsigned):</label>
+          <label class="form-label" for="cfg-upload-preset">Upload Preset (Opcional):</label>
           <input type="text" id="cfg-upload-preset" class="form-control" placeholder="Ej: pasteleria_preset">
         </div>
 
         <button type="submit" class="btn-primary">
           <span>Guardar Configuración</span>
         </button>
-
-        <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 10px; text-align: center;">
-          * Si aún no tienes las credenciales, puedes agregar productos igual y las imágenes se guardarán en tu navegador de prueba.
-        </p>
       </form>
     </div>
   </div>
