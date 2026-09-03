@@ -1,5 +1,5 @@
-// Service Worker para Dulce Atelier PWA (v7 - Auto Purge & Network First)
-const CACHE_NAME = 'dulce-atelier-v7';
+// Service Worker para Dulce Atelier PWA (v8 - Auto Purge & Network First)
+const CACHE_NAME = 'dulce-atelier-v8';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

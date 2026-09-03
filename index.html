@@ -69,6 +69,10 @@
         </div>
 
         <div class="header-actions">
+          <button class="icon-btn" onclick="window.app.openOrdersHistoryModal()" title="Mis Pedidos y Seguimiento" style="position: relative;">
+            📦
+            <span id="header-orders-badge" class="badge-count" style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.65rem; padding: 1px 6px; background: var(--accent-mint); color: #fff;">0</span>
+          </button>
           <button class="icon-btn" onclick="window.app.openAdminModalWithPin()" title="Agregar Producto (Admin)">
             ➕
           </button>
@@ -197,6 +201,12 @@
       <button class="nav-item" onclick="window.app.setCategory('desayunos')">
         <span class="nav-icon">🎁</span>
         <span>Desayunos</span>
+      </button>
+      <button class="nav-item" style="position: relative;" onclick="window.app.openOrdersHistoryModal()">
+        <span class="nav-icon">📦</span>
+        <span>Mis Pedidos</span>
+        <span id="nav-orders-badge" class="badge-count"
+          style="display: none; position: absolute; top: 2px; right: 10px; font-size: 0.65rem; padding: 1px 5px; background: var(--accent-mint); color: #fff;">0</span>
       </button>
       <button class="nav-item" style="position: relative;" onclick="window.app.openModal('cart-drawer-modal')">
         <span class="nav-icon">🛍️</span>
@@ -718,7 +728,31 @@
   </div>
 
 
-  <!-- 5. Admin: Add Product Modal (with Cloudinary Upload) -->
+  <!-- 5. Orders History & Live Tracking Modal ("Mis Pedidos") -->
+  <div id="orders-history-modal" class="modal-overlay"
+    onclick="if(event.target === this) window.app.closeModal('orders-history-modal')">
+    <div class="bottom-sheet" style="max-width: 520px; padding: 22px 18px; position: relative;">
+      <div class="drag-handle"></div>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('orders-history-modal')" aria-label="Cerrar modal">✕</button>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding-right: 32px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.4rem;">📦</span>
+          <h3 class="font-serif" style="font-size: 1.25rem;">Mis Pedidos & Seguimiento</h3>
+        </div>
+      </div>
+      <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
+        Tus pedidos quedan guardados en este celular para que puedas ver el estado, reabrir el comprobante o consultar por WhatsApp.
+      </p>
+
+      <div id="orders-history-list" class="orders-history-list">
+        <!-- Renderizado dinámico desde JS -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 6. Admin: Add Product Modal (with Cloudinary Upload) -->
   <div id="admin-product-modal" class="modal-overlay"
     onclick="if(event.target === this) window.app.closeModal('admin-product-modal')">
     <div class="bottom-sheet">
@@ -829,12 +863,12 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Pure Standard JavaScript Scripts -->
-  <script charset="UTF-8" src="js/products.js?v=7.0"></script>
-  <script charset="UTF-8" src="js/cart.js?v=7.0"></script>
-  <script charset="UTF-8" src="js/checkout.js?v=7.0"></script>
-  <script charset="UTF-8" src="js/cloudinary.js?v=7.0"></script>
-  <script charset="UTF-8" src="js/admin.js?v=7.0"></script>
-  <script charset="UTF-8" src="js/app.js?v=7.0"></script>
+  <script charset="UTF-8" src="js/products.js?v=8.0"></script>
+  <script charset="UTF-8" src="js/cart.js?v=8.0"></script>
+  <script charset="UTF-8" src="js/checkout.js?v=8.0"></script>
+  <script charset="UTF-8" src="js/cloudinary.js?v=8.0"></script>
+  <script charset="UTF-8" src="js/admin.js?v=8.0"></script>
+  <script charset="UTF-8" src="js/app.js?v=8.0"></script>
 </body>
 
 </html>

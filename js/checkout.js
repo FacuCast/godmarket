@@ -26,6 +26,18 @@ class CheckoutHandler {
       bank: "Mercado Pago / Banco Galicia"
     };
     this.lastOrder = null;
+
+    // Migrar dulce_last_order existente a historial si aún no se ha guardado
+    try {
+      const savedLast = localStorage.getItem('dulce_last_order');
+      if (savedLast) {
+        this.lastOrder = JSON.parse(savedLast);
+        const history = this.getOrderHistory();
+        if (history.length === 0 && this.lastOrder && this.lastOrder.orderId) {
+          this.saveOrderToHistory(this.lastOrder);
+        }
+      }
+    } catch (e) {}
   }
 
   generateOrderNumber() {
@@ -124,6 +136,48 @@ Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Much
     return this.buildWhatsAppUrl(text);
   }
 
+  getOrderHistory() {
+    try {
+      const history = localStorage.getItem('dulce_orders_history');
+      return history ? JSON.parse(history) : [];
+    } catch (e) {
+      console.error("Error al leer historial de pedidos:", e);
+      return [];
+    }
+  }
+
+  saveOrderToHistory(order) {
+    try {
+      const history = this.getOrderHistory();
+      const existingIdx = history.findIndex(o => o.orderId === order.orderId);
+      if (existingIdx > -1) {
+        history[existingIdx] = order;
+      } else {
+        history.unshift(order);
+      }
+      const trimmed = history.slice(0, 25);
+      localStorage.setItem('dulce_orders_history', JSON.stringify(trimmed));
+    } catch (e) {
+      console.error("Error al guardar pedido en historial:", e);
+    }
+  }
+
+  getOrderById(orderId) {
+    const history = this.getOrderHistory();
+    return history.find(o => o.orderId === orderId) || (this.lastOrder && this.lastOrder.orderId === orderId ? this.lastOrder : null);
+  }
+
+  deleteOrderFromHistory(orderId) {
+    try {
+      const history = this.getOrderHistory().filter(o => o.orderId !== orderId);
+      localStorage.setItem('dulce_orders_history', JSON.stringify(history));
+      return history;
+    } catch (e) {
+      console.error("Error al eliminar pedido del historial:", e);
+      return [];
+    }
+  }
+
   processOrder(formData, cart) {
     const orderId = this.generateOrderNumber();
     const total = cart.getTotal();
@@ -134,7 +188,15 @@ Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Much
     const message = this.generateWhatsAppMessage(formData, cart, orderId);
     const whatsappUrl = this.buildWhatsAppUrl(message);
 
-    // Guardar último pedido para la pantalla de confirmación
+    const now = new Date();
+    const dateFormatted = now.toLocaleDateString('es-AR', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    // Guardar último pedido para la pantalla de confirmación y persistencia
     this.lastOrder = {
       orderId,
       total,
@@ -147,10 +209,12 @@ Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Much
       proofWhatsappUrl: this.generateReceiptProofUrl(orderId, totalFormatted, formData.paymentMethod),
       whatsappUrl,
       whatsappWebUrl: this.buildWhatsAppUrl(message, true),
-      createdAt: new Date().toISOString()
+      createdAt: now.toISOString(),
+      dateFormatted
     };
 
     localStorage.setItem('dulce_last_order', JSON.stringify(this.lastOrder));
+    this.saveOrderToHistory(this.lastOrder);
 
     // Abrir WhatsApp con el pedido inicial
     window.open(whatsappUrl, '_blank');

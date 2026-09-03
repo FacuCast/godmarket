@@ -21,6 +21,7 @@ class DulceAtelierApp {
     this.renderCategories();
     this.renderProducts();
     this.updateCartUI();
+    this.updateOrdersBadges();
 
     // Suscribirse a cambios en el carrito
     window.cartManager.subscribe(() => this.updateCartUI());
@@ -322,6 +323,7 @@ class DulceAtelierApp {
         // Procesar orden generando Número de Orden único y enviando a WhatsApp
         const order = window.checkoutHandler.processOrder(formData, window.cartManager);
         this.closeModal('checkout-modal');
+        this.updateOrdersBadges();
 
         // Renderizar el ticket de confirmación estilo ByronCode / Perlato
         this.renderOrderTicket(order);
@@ -863,8 +865,181 @@ class DulceAtelierApp {
         btnMpTicket.innerHTML = '<span>✓</span> ¡Copiado!';
         setTimeout(() => { btnMpTicket.innerHTML = '<span>📋</span> Copiar'; }, 2000);
       }
-      this.showToast(`🏦 CVU copiado con éxito`);
+      this.showToast(`💳 CVU ${cvu} copiado con éxito`);
     });
+  }
+
+  updateOrdersBadges() {
+    const history = window.checkoutHandler?.getOrderHistory() || [];
+    const count = history.length;
+    
+    ['header-orders-badge', 'nav-orders-badge'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (count > 0) {
+          el.textContent = count > 99 ? '99+' : count;
+          el.style.display = 'inline-block';
+        } else {
+          el.style.display = 'none';
+        }
+      }
+    });
+  }
+
+  openOrdersHistoryModal() {
+    this.renderOrdersHistoryList();
+    this.openModal('orders-history-modal');
+  }
+
+  renderOrdersHistoryList() {
+    const container = document.getElementById('orders-history-list');
+    if (!container) return;
+
+    const history = window.checkoutHandler?.getOrderHistory() || [];
+
+    if (history.length === 0) {
+      container.innerHTML = `
+        <div class="orders-empty-state">
+          <div class="orders-empty-icon">🧁</div>
+          <h4 class="font-serif" style="font-size: 1.15rem; margin-bottom: 6px;">No tienes pedidos registrados</h4>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.4;">
+            Cuando realices un pedido en Dulce Atelier, quedará guardado automáticamente en tu celular con su seguimiento en vivo.
+          </p>
+          <button type="button" class="btn-primary" onclick="window.app.closeModal('orders-history-modal')" style="width: auto; padding: 8px 20px; margin: 0 auto; font-size: 0.85rem;">
+            Ver Menú y Elegir Delicias
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    const now = Date.now();
+
+    container.innerHTML = history.map(order => {
+      const orderTime = order.createdAt ? new Date(order.createdAt).getTime() : now;
+      const elapsedMinutes = Math.floor((now - orderTime) / 60000);
+
+      let step1Class = 'active';
+      let step2Class = '';
+      let step3Class = '';
+      let statusBadge = '<span style="background: #E8F5E9; color: #2E7D32; padding: 3px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 700;">🟢 En Preparación</span>';
+
+      const isPickup = order.formData?.address?.includes('Retiro') || order.formData?.address === 'Retiro en Tienda';
+      const step3Label = isPickup ? 'Listo para retirar' : 'En camino';
+
+      if (elapsedMinutes < 40) {
+        step1Class = 'active';
+        step2Class = 'current';
+        statusBadge = '<span style="background: #E8F5E9; color: #2E7D32; padding: 3px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 700;">🧁 En Cocina / Preparación</span>';
+      } else if (elapsedMinutes < 90) {
+        step1Class = 'active';
+        step2Class = 'active';
+        step3Class = 'current';
+        statusBadge = `<span style="background: #E3F2FD; color: #1565C0; padding: 3px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 700;">🛵 ${step3Label}</span>`;
+      } else {
+        step1Class = 'active';
+        step2Class = 'active';
+        step3Class = 'active';
+        statusBadge = '<span style="background: #F3E5F5; color: #7B1FA2; padding: 3px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 700;">✨ Entregado / Listo</span>';
+      }
+
+      const itemsSummary = (order.items || []).map(it => 
+        `<strong>${it.quantity}x</strong> ${this.escapeHTML(it.product?.name || 'Delicia')}${it.customization?.flavor ? ` (${this.escapeHTML(it.customization.flavor)})` : ''}`
+      ).join(', ');
+
+      const dateStr = order.dateFormatted || (order.createdAt ? new Date(order.createdAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Reciente');
+
+      const addressText = isPickup 
+        ? '🏪 Retiro en Tienda'
+        : `📍 ${this.escapeHTML(order.formData?.address || 'Envío a Domicilio')}${order.formData?.zone ? ` (${this.escapeHTML(order.formData.zone)})` : ''}`;
+
+      return `
+        <div class="order-history-card">
+          <div class="order-history-header">
+            <div>
+              <div class="order-history-id">
+                <span>#${this.escapeHTML(order.orderId)}</span>
+                ${statusBadge}
+              </div>
+              <div class="order-history-date">📅 ${dateStr}</div>
+            </div>
+            <button type="button" class="btn-order-delete" onclick="window.app.deleteOrderHistory('${this.escapeHTML(order.orderId)}')" title="Eliminar del historial">
+              🗑️
+            </button>
+          </div>
+
+          <!-- Stepper de Seguimiento en Vivo -->
+          <div class="order-tracking-stepper">
+            <div class="tracking-step ${step1Class}">
+              <div class="tracking-dot">✓</div>
+              <div class="tracking-label">Recibido</div>
+            </div>
+            <div class="tracking-step ${step2Class}">
+              <div class="tracking-dot">${step2Class === 'active' ? '✓' : '2'}</div>
+              <div class="tracking-label">En preparación</div>
+            </div>
+            <div class="tracking-step ${step3Class}">
+              <div class="tracking-dot">${step3Class === 'active' ? '✓' : '3'}</div>
+              <div class="tracking-label">${step3Label}</div>
+            </div>
+          </div>
+
+          <div class="order-history-items-summary">
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 2px; text-transform: uppercase; font-weight: 700;">Productos:</div>
+            <div>${itemsSummary || 'Detalle del pedido'}</div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 5px;">
+              ${addressText} • 🕒 ${this.escapeHTML(order.formData?.deliveryTime || 'Horario coordinado')}
+            </div>
+          </div>
+
+          <div class="order-history-footer">
+            <div>
+              <span style="font-size: 0.7rem; color: var(--text-muted); display: block; text-transform: uppercase; font-weight: 700;">Total:</span>
+              <span class="order-history-total" style="color: var(--primary);">${order.totalFormatted || '$' + (order.total || 0)}</span>
+            </div>
+
+            <div class="order-history-actions">
+              <button type="button" class="btn-order-action btn-order-ticket" onclick="window.app.viewOrderTicket('${this.escapeHTML(order.orderId)}')">
+                <span>🧾</span> Ver Ticket
+              </button>
+              <button type="button" class="btn-order-action btn-order-whatsapp" onclick="window.app.trackOrderWhatsApp('${this.escapeHTML(order.orderId)}')">
+                <span>💬</span> Consultar
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  viewOrderTicket(orderId) {
+    const order = window.checkoutHandler?.getOrderById(orderId);
+    if (!order) {
+      this.showToast("⚠️ No se encontró la información del pedido");
+      return;
+    }
+    this.closeModal('orders-history-modal');
+    this.renderOrderTicket(order);
+    this.openModal('order-success-modal');
+  }
+
+  trackOrderWhatsApp(orderId) {
+    const order = window.checkoutHandler?.getOrderById(orderId);
+    if (!order) return;
+
+    const name = order.formData?.fullName || '';
+    const text = `¡Hola Dulce Atelier! ✦ Quisiera consultar el estado de mi pedido #${order.orderId}${name ? ` a nombre de ${name}` : ''}. ¡Muchas gracias!`;
+    const url = window.checkoutHandler.buildWhatsAppUrl(text);
+    window.open(url, '_blank');
+  }
+
+  deleteOrderHistory(orderId) {
+    if (confirm(`¿Deseas quitar la orden #${orderId} de tu celular?`)) {
+      window.checkoutHandler?.deleteOrderFromHistory(orderId);
+      this.renderOrdersHistoryList();
+      this.updateOrdersBadges();
+      this.showToast(`🗑️ Pedido #${orderId} eliminado del historial`);
+    }
   }
 
   selectQuickTime(btn) {
