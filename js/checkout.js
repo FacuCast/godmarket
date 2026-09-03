@@ -6,29 +6,15 @@
 
 const WHATSAPP_PHONE = "5491156192616";
 
-// Constantes de emojis en formato Unicode seguro (evita caracteres corruptos  en cualquier navegador)
-const EMOJIS = {
-  cake: '\u{1F382}',         // 🎂
-  sparkles: '\u{2728}',     // ✨
-  bell: '\u{1F514}',         // 🔔
-  bag: '\u{1F6CD}\u{FE0F}',  // 🛍️
-  pastry: '\u{1F370}',       // 🍰
-  honey: '\u{1F36F}',        // 🍯
-  ruler: '\u{1F4CF}',        // 📏
-  pen: '\u{270D}\u{FE0F}',   // ✍️
-  candle: '\u{1F56F}\u{FE0F}',// 🕯️
-  memo: '\u{1F4DD}',         // 📝
-  scooter: '\u{1F6F5}',      // 🛵
-  pin: '\u{1F4CD}',          // 📍
-  map: '\u{1F5FA}\u{FE0F}',  // 🗺️
-  store: '\u{1F3EA}',        // 🏪
-  clock: '\u{23F0}',         // ⏰
-  cash: '\u{1F4B5}',         // 💵
-  moneyBag: '\u{1F4B0}',     // 💰
-  tag: '\u{1F3F7}\u{FE0F}',  // 🏷️
-  user: '\u{1F464}',         // 👤
-  pushpin: '\u{1F4CC}',      // 📌
-  heart: '\u{1F496}'         // 💖
+// Símbolos tipográficos universales 100% compatibles con WhatsApp y navegadores
+// Garantizan que no aparezcan signos de interrogación ni rombos  en ninguna vista previa ni dispositivo
+const ICONS = {
+  star: '✦',
+  bullet: '•',
+  sub: '▫',
+  arrow: '►',
+  box: '◆',
+  line: '━━━━━━━━━━━━━━━━━━━━'
 };
 
 class CheckoutHandler {
@@ -55,33 +41,33 @@ class CheckoutHandler {
 
     items.forEach((item) => {
       const subtotal = item.product.price * item.quantity;
-      itemsText += `\n${EMOJIS.pastry} *${item.quantity}x ${item.product.name}* (${cart.formatCurrency(subtotal)})`;
+      itemsText += `\n• *${item.quantity}x ${item.product.name}* (${cart.formatCurrency(subtotal)})`;
       
       if (item.customization && item.customization.flavor) {
-        itemsText += `\n   ${EMOJIS.honey} _Relleno/Gusto:_ ${item.customization.flavor}`;
+        itemsText += `\n   ▫ _Relleno/Gusto:_ ${item.customization.flavor}`;
       }
       if (item.customization && item.customization.size) {
-        itemsText += `\n   ${EMOJIS.ruler} _Tamaño:_ ${item.customization.size}`;
+        itemsText += `\n   ▫ _Tamaño:_ ${item.customization.size}`;
       }
       if (item.customization && item.customization.dedication) {
-        itemsText += `\n   ${EMOJIS.pen} _Dedicatoria:_ "${item.customization.dedication}"`;
+        itemsText += `\n   ▫ _Dedicatoria:_ "${item.customization.dedication}"`;
       }
       if (item.customization && item.customization.candle) {
-        itemsText += `\n   ${EMOJIS.candle} _Velita incluida:_ Sí`;
+        itemsText += `\n   ▫ _Velita incluida:_ Sí`;
       }
       if (item.customization && item.customization.note) {
-        itemsText += `\n   ${EMOJIS.memo} _Nota:_ ${item.customization.note}`;
+        itemsText += `\n   ▫ _Nota:_ ${item.customization.note}`;
       }
     });
 
     const isDelivery = cart.deliveryType === 'delivery';
     const deliveryText = isDelivery 
-      ? `${EMOJIS.scooter} *Envío a Domicilio:* ${cart.formatCurrency(cart.getEffectiveDeliveryFee())}\n${EMOJIS.pin} *Dirección:* ${formData.address}${formData.apartment ? ` (Piso/Depto: ${formData.apartment})` : ''}\n${EMOJIS.map} *Zona/Barrio:* ${formData.zone || 'A coordinar'}`
-      : `${EMOJIS.store} *Modalidad:* Retiro en Tienda (Gratis)`;
+      ? `• *Envío a Domicilio:* ${cart.formatCurrency(cart.getEffectiveDeliveryFee())}\n• *Dirección:* ${formData.address}${formData.apartment ? ` (Piso/Depto: ${formData.apartment})` : ''}\n• *Zona/Barrio:* ${formData.zone || 'A coordinar'}`
+      : `• *Modalidad:* Retiro en Tienda (Gratis)`;
 
     const scheduleText = formData.deliveryTime 
-      ? `${EMOJIS.clock} *Fecha y Horario:* ${formData.deliveryTime}`
-      : `${EMOJIS.clock} *Horario:* Lo antes posible`;
+      ? `• *Fecha y Horario:* ${formData.deliveryTime}`
+      : `• *Horario:* Lo antes posible`;
 
     let paymentMethodName = "Efectivo";
     if (formData.paymentMethod === 'transfer') {
@@ -91,48 +77,50 @@ class CheckoutHandler {
     }
 
     const cashNote = (formData.paymentMethod === 'cash' && formData.cashAmount) 
-      ? `\n${EMOJIS.cash} *Paga con:* $${formData.cashAmount}` 
+      ? `\n• *Paga con:* $${formData.cashAmount}` 
       : '';
 
     const message = 
-`¡Hola Dulce Atelier! ${EMOJIS.cake}${EMOJIS.sparkles}
-${EMOJIS.bell} *NUEVO PEDIDO #${orderId}*
+`¡Hola Dulce Atelier! ✦
+*NUEVO PEDIDO #${orderId}*
 
 ━━━━━━━━━━━━━━━━━━━━
-${EMOJIS.bag} *RESUMEN DEL PEDIDO:*${itemsText}
+◆ *RESUMEN DEL PEDIDO:*${itemsText}
 
-${EMOJIS.moneyBag} *Subtotal:* ${cart.formatCurrency(cart.getSubtotal())}
+• *Subtotal:* ${cart.formatCurrency(cart.getSubtotal())}
 ${deliveryText}
-${EMOJIS.tag} *TOTAL A PAGAR:* ${cart.formatCurrency(cart.getTotal())}
+• *TOTAL A PAGAR:* ${cart.formatCurrency(cart.getTotal())}
 ━━━━━━━━━━━━━━━━━━━━
 
-${EMOJIS.user} *DATOS DEL CLIENTE:*
+► *DATOS DEL CLIENTE:*
 - *Nombre:* ${formData.fullName}
 - *Teléfono:* ${formData.phone}
 ${scheduleText}
 - *Forma de Pago:* ${paymentMethodName}${cashNote}
-${formData.comments ? `\n${EMOJIS.pushpin} *Comentarios adicionales:* ${formData.comments}` : ''}
+${formData.comments ? `\n• *Comentarios adicionales:* ${formData.comments}` : ''}
 
-Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Muchas gracias! ${EMOJIS.heart}`;
+Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Muchas gracias! ✦`;
 
     return message;
   }
 
-  buildWhatsAppUrl(text) {
+  buildWhatsAppUrl(text, forceWeb = false) {
     const encoded = encodeURIComponent(text);
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    // En PC / Desktop usamos web.whatsapp.com para ir directo al chat sin pasar por la pantalla
-    // intermedia de api.whatsapp.com (la cual tiene un bug en los servidores de Meta que convierte emojis en  en su preview).
-    // En Móvil usamos api.whatsapp.com, el cual es interceptado por el SO para abrir la App oficial directamente.
-    const baseUrl = isMobile ? 'https://api.whatsapp.com/send' : 'https://web.whatsapp.com/send';
-    return `${baseUrl}?phone=${WHATSAPP_PHONE}&text=${encoded}`;
+    if (forceWeb) {
+      return `https://web.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encoded}`;
+    }
+    // api.whatsapp.com es el estándar oficial universal:
+    // - En celular: abre la app de WhatsApp directamente
+    // - En PC: abre la página de enlace donde el cliente puede hacer clic en 'Continuar al chat'
+    //   para abrir WhatsApp de Windows (app de escritorio) o WhatsApp Web SIN quedar forzado al código QR.
+    return `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encoded}`;
   }
 
   generateReceiptProofUrl(orderId, totalFormatted, paymentMethod = 'transfer') {
     const isMP = paymentMethod === 'mercadopago';
     const text = isMP
-      ? `¡Hola Dulce Atelier! ${EMOJIS.pastry} Adjunto el comprobante de pago de Mercado Pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`
-      : `¡Hola Dulce Atelier! ${EMOJIS.pastry} Adjunto el comprobante de pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`;
+      ? `¡Hola Dulce Atelier! ✦ Adjunto el comprobante de pago de Mercado Pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`
+      : `¡Hola Dulce Atelier! ✦ Adjunto el comprobante de pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`;
     return this.buildWhatsAppUrl(text);
   }
 
@@ -158,6 +146,7 @@ Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Much
       paymentMethod: formData.paymentMethod,
       proofWhatsappUrl: this.generateReceiptProofUrl(orderId, totalFormatted, formData.paymentMethod),
       whatsappUrl,
+      whatsappWebUrl: this.buildWhatsAppUrl(message, true),
       createdAt: new Date().toISOString()
     };
 

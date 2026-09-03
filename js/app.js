@@ -777,6 +777,12 @@ class DulceAtelierApp {
       reopenBtn.href = order.whatsappUrl;
       reopenBtn.style.display = 'flex';
     }
+
+    const webBtn = document.getElementById('ticket-web-whatsapp-btn');
+    if (webBtn && order.whatsappWebUrl) {
+      webBtn.href = order.whatsappWebUrl;
+      webBtn.style.display = 'flex';
+    }
   }
 
   copyOrderMessage() {
