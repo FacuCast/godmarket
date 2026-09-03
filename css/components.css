@@ -1261,3 +1261,42 @@
   0% { transform: translateY(0) scale(1); }
   100% { transform: translateY(-7px) scale(1.05); }
 }
+
+/* --------------------------------------------------------------------------
+   11. Quick Time Selection Chips (Ahora / Programar)
+   -------------------------------------------------------------------------- */
+.time-quick-chips {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.time-chip {
+  background: var(--bg-surface-secondary);
+  border: 1.5px solid var(--border-light);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.time-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.time-chip.active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(217, 83, 111, 0.18);
+}

@@ -183,6 +183,13 @@ class DulceAtelierApp {
       }
     });
 
+    const custTimeInput = document.getElementById('cust-time');
+    if (custTimeInput) {
+      custTimeInput.addEventListener('input', () => {
+        document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('active'));
+      });
+    }
+
     // Botón Continuar del Carrito al Checkout (Paso siguiente)
     const btnProceedCheckout = document.getElementById('btn-proceed-checkout');
     if (btnProceedCheckout) {
@@ -801,6 +808,17 @@ class DulceAtelierApp {
       }
       this.showToast(`🏦 CVU copiado con éxito`);
     });
+  }
+
+  selectQuickTime(btn) {
+    document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    const timeVal = btn.dataset.time;
+    const input = document.getElementById('cust-time');
+    if (input) {
+      input.value = timeVal;
+      input.classList.remove('is-invalid');
+    }
   }
 
   openModal(modalId) {

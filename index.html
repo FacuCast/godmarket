@@ -431,8 +431,21 @@
 
         <div class="form-group">
           <label class="form-label" for="cust-time">Fecha y Horario preferido de entrega *</label>
-          <input type="text" id="cust-time" class="form-control" placeholder="Ej: Hoy 16:30 hs / Mañana 9:00 hs"
-            required>
+          
+          <!-- Botones de selección rápida (Ahora / Programado) -->
+          <div class="time-quick-chips">
+            <button type="button" class="time-chip active" data-time="Lo antes posible (Ahora)" onclick="window.app.selectQuickTime(this)">
+              ⚡ Ahora (40 a 60 min)
+            </button>
+            <button type="button" class="time-chip" data-time="Hoy por la tarde (16:00 a 19:30 hs)" onclick="window.app.selectQuickTime(this)">
+              🕒 Hoy por la tarde
+            </button>
+            <button type="button" class="time-chip" data-time="Mañana por la mañana (09:00 a 12:30 hs)" onclick="window.app.selectQuickTime(this)">
+              ☀️ Mañana
+            </button>
+          </div>
+
+          <input type="text" id="cust-time" class="form-control" placeholder="Ej: Hoy 16:30 hs / Mañana 9:00 hs" value="Lo antes posible (Ahora)" required>
           <span class="invalid-feedback">Indica la fecha y franja horaria preferida para recibir tu pedido.</span>
         </div>
 
