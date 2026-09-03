@@ -130,8 +130,9 @@ class DulceAtelierApp {
           const dedication = document.getElementById('modal-dedication')?.value.trim() || '';
           const candle = document.getElementById('modal-candle-checkbox')?.checked || false;
           const note = document.getElementById('modal-note')?.value.trim() || '';
+          const flavor = document.getElementById('modal-selected-flavor')?.value || 'Dulce de Leche';
 
-          window.cartManager.addItem(this.selectedProductForModal, qty, { dedication, candle, note });
+          window.cartManager.addItem(this.selectedProductForModal, qty, { dedication, candle, note, flavor });
           this.showToast(`✨ ${qty}x ${this.selectedProductForModal.name} agregado`);
           this.closeModal('product-detail-modal');
         }
@@ -263,7 +264,7 @@ class DulceAtelierApp {
           return;
         }
 
-        // Si todo es válido, preparar datos y enviar a WhatsApp
+        // Si todo es válido, preparar datos y procesar la orden
         const formData = {
           fullName: nameVal,
           phone: phoneVal,
@@ -276,8 +277,12 @@ class DulceAtelierApp {
           comments: document.getElementById('cust-comments')?.value.trim() || ''
         };
 
-        window.checkoutHandler.sendToWhatsApp(formData, window.cartManager);
+        // Procesar orden generando Número de Orden único y enviando a WhatsApp
+        const order = window.checkoutHandler.processOrder(formData, window.cartManager);
         this.closeModal('checkout-modal');
+
+        // Renderizar el ticket de confirmación estilo ByronCode / Perlato
+        this.renderOrderTicket(order);
         this.openModal('order-success-modal');
       });
     }
@@ -439,7 +444,21 @@ class DulceAtelierApp {
     const note = document.getElementById('modal-note');
     if (note) note.value = '';
 
-    // Mostrar sección de velita/dedicatoria especialmente para tortas y desayunos
+    // Manejar selección interactiva de gustos / rellenos (estilo ByronCode / Perlato)
+    const flavorChips = document.querySelectorAll('#modal-flavor-chips .flavor-chip');
+    const hiddenFlavor = document.getElementById('modal-selected-flavor');
+    if (hiddenFlavor) hiddenFlavor.value = 'Dulce de Leche';
+    
+    flavorChips.forEach((chip, i) => {
+      chip.classList.toggle('active', i === 0);
+      chip.onclick = () => {
+        flavorChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        if (hiddenFlavor) hiddenFlavor.value = chip.dataset.flavor;
+      };
+    });
+
+    // Mostrar sección de velita/dedicatoria y gustos especialmente para tortas y desayunos
     const customSection = document.getElementById('modal-customization-options');
     if (customSection) {
       customSection.style.display = (product.category === 'tortas' || product.category === 'desayunos') ? 'block' : 'none';
@@ -530,6 +549,7 @@ class DulceAtelierApp {
         <img class="cart-item-img" src="${item.product.image}" alt="${item.product.name}">
         <div class="cart-item-info">
           <div class="cart-item-title">${item.product.name}</div>
+          ${item.customization?.flavor ? `<div class="cart-item-custom">🍯 ${item.customization.flavor}</div>` : ''}
           ${item.customization?.dedication ? `<div class="cart-item-custom">✍️ "${item.customization.dedication}"</div>` : ''}
           ${item.customization?.candle ? `<div class="cart-item-custom">🕯️ Con velita</div>` : ''}
           <div class="cart-item-price">${window.cartManager.formatCurrency(item.product.price * item.quantity)}</div>
@@ -541,6 +561,93 @@ class DulceAtelierApp {
         </div>
       </div>
     `).join('');
+  }
+
+  renderOrderTicket(order) {
+    if (!order) return;
+
+    // Número de Orden
+    const orderIdEl = document.getElementById('ticket-order-id');
+    if (orderIdEl) orderIdEl.textContent = '#' + order.orderId;
+
+    // Totales
+    const orderTotalEl = document.getElementById('ticket-order-total');
+    if (orderTotalEl) orderTotalEl.textContent = order.totalFormatted;
+
+    const transferAmountEl = document.getElementById('ticket-transfer-amount');
+    if (transferAmountEl) transferAmountEl.textContent = order.totalFormatted;
+
+    const cashAmountEl = document.getElementById('ticket-cash-amount');
+    if (cashAmountEl) cashAmountEl.textContent = order.totalFormatted;
+
+    // Detalle de ítems
+    const itemsContainer = document.getElementById('ticket-items-list');
+    if (itemsContainer && order.items) {
+      itemsContainer.innerHTML = order.items.map(it => `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dotted var(--border-light);">
+          <div>
+            <strong>${it.quantity}x</strong> ${it.product.name}
+            ${it.customization?.flavor ? `<div style="font-size: 0.74rem; color: var(--text-muted);">🍯 ${it.customization.flavor}</div>` : ''}
+            ${it.customization?.dedication ? `<div style="font-size: 0.74rem; color: var(--primary);">✍️ "${it.customization.dedication}"</div>` : ''}
+          </div>
+          <strong style="color: var(--text-main); margin-left: 10px;">${(it.product.price * it.quantity).toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })}</strong>
+        </div>
+      `).join('');
+    }
+
+    // Mostrar sección de transferencia o de efectivo
+    const transferBox = document.getElementById('ticket-transfer-details');
+    const cashBox = document.getElementById('ticket-cash-details');
+    const whatsappProofBtn = document.getElementById('ticket-whatsapp-proof-btn');
+
+    if (order.paymentMethod === 'transfer') {
+      if (transferBox) transferBox.style.display = 'block';
+      if (cashBox) cashBox.style.display = 'none';
+      if (whatsappProofBtn) {
+        whatsappProofBtn.href = order.proofWhatsappUrl;
+        whatsappProofBtn.innerHTML = `
+          <span style="font-size: 1.3rem;">📲</span>
+          <span>Enviar comprobante por WhatsApp</span>
+        `;
+      }
+    } else {
+      if (transferBox) transferBox.style.display = 'none';
+      if (cashBox) cashBox.style.display = 'block';
+      if (whatsappProofBtn) {
+        whatsappProofBtn.href = order.proofWhatsappUrl;
+        whatsappProofBtn.innerHTML = `
+          <span style="font-size: 1.3rem;">📲</span>
+          <span>Consultar estado por WhatsApp</span>
+        `;
+      }
+    }
+  }
+
+  copyOrderId() {
+    const orderIdEl = document.getElementById('ticket-order-id');
+    const text = orderIdEl ? orderIdEl.textContent.trim() : '';
+    if (!text) return;
+
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btn-copy-order');
+      if (btn) {
+        btn.innerHTML = '<span>✓</span> ¡Copiado!';
+        setTimeout(() => { btn.innerHTML = '<span>📋</span> Copiar'; }, 2000);
+      }
+      this.showToast(`📋 ${text} copiado al portapapeles`);
+    });
+  }
+
+  copyAlias() {
+    const alias = "DULCE.ATELIER.BA";
+    navigator.clipboard.writeText(alias).then(() => {
+      const btnTicket = document.getElementById('btn-copy-alias-ticket');
+      if (btnTicket) {
+        btnTicket.innerHTML = '<span>✓</span> ¡Copiado!';
+        setTimeout(() => { btnTicket.innerHTML = '<span>📋</span> Copiar Alias'; }, 2000);
+      }
+      this.showToast(`🏦 Alias ${alias} copiado con éxito`);
+    });
   }
 
   openModal(modalId) {

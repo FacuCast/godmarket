@@ -1,6 +1,7 @@
 /**
  * DULCE ATELIER - CHECKOUT Y CONSTRUCTOR DE PEDIDO DE WHATSAPP
  * Destinatario de WhatsApp: 1156192616 (Código internacional +54 9 11 5619-2616)
+ * Sistema de Número de Orden Automático y Envío de Comprobante (Estilo ByronCode / Perlato)
  */
 
 const WHATSAPP_PHONE = "5491156192616";
@@ -13,16 +14,30 @@ class CheckoutHandler {
       holder: "Dulce Atelier Pastelería Artesanal",
       bank: "Mercado Pago / Banco Galicia"
     };
+    this.lastOrder = null;
   }
 
-  generateWhatsAppMessage(formData, cart) {
+  generateOrderNumber() {
+    let lastNum = parseInt(localStorage.getItem('dulce_last_order_num') || '1040', 10);
+    lastNum += 1;
+    localStorage.setItem('dulce_last_order_num', lastNum.toString());
+    return 'ORD-' + lastNum;
+  }
+
+  generateWhatsAppMessage(formData, cart, orderId) {
     const items = cart.items;
     let itemsText = "";
 
-    items.forEach((item, index) => {
+    items.forEach((item) => {
       const subtotal = item.product.price * item.quantity;
       itemsText += `\n🍰 *${item.quantity}x ${item.product.name}* (${cart.formatCurrency(subtotal)})`;
       
+      if (item.customization && item.customization.flavor) {
+        itemsText += `\n   🍯 _Relleno/Gusto:_ ${item.customization.flavor}`;
+      }
+      if (item.customization && item.customization.size) {
+        itemsText += `\n   📏 _Tamaño:_ ${item.customization.size}`;
+      }
       if (item.customization && item.customization.dedication) {
         itemsText += `\n   ✍️ _Dedicatoria:_ "${item.customization.dedication}"`;
       }
@@ -40,7 +55,7 @@ class CheckoutHandler {
       : `🏪 *Modalidad:* Retiro en Tienda (Gratis)`;
 
     const scheduleText = formData.deliveryTime 
-      ? `⏰ *Fecha y Horario de entrega:* ${formData.deliveryTime}`
+      ? `⏰ *Fecha y Horario:* ${formData.deliveryTime}`
       : `⏰ *Horario:* Lo antes posible`;
 
     let paymentMethodName = "Efectivo";
@@ -56,14 +71,14 @@ class CheckoutHandler {
 
     const message = 
 `¡Hola Dulce Atelier! 🎂✨
-Quiero confirmar mi pedido a través de la tienda web:
+🔔 *NUEVO PEDIDO #${orderId}*
 
 ━━━━━━━━━━━━━━━━━━━━
 🛍️ *RESUMEN DEL PEDIDO:*${itemsText}
 
 💰 *Subtotal:* ${cart.formatCurrency(cart.getSubtotal())}
 ${deliveryText}
-🏷️ *TOTAL:* ${cart.formatCurrency(cart.getTotal())}
+🏷️ *TOTAL A PAGAR:* ${cart.formatCurrency(cart.getTotal())}
 ━━━━━━━━━━━━━━━━━━━━
 
 👤 *DATOS DEL CLIENTE:*
@@ -73,21 +88,50 @@ ${scheduleText}
 - *Forma de Pago:* ${paymentMethodName}${cashNote}
 ${formData.comments ? `\n📌 *Comentarios adicionales:* ${formData.comments}` : ''}
 
-Por favor confírmenme la recepción del pedido para realizar el pago. ¡Muchas gracias! 💖`;
+Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Muchas gracias! 💖`;
 
     return message;
   }
 
-  sendToWhatsApp(formData, cart) {
-    const message = this.generateWhatsAppMessage(formData, cart);
+  generateReceiptProofUrl(orderId, totalFormatted) {
+    const text = `¡Hola Dulce Atelier! 🍰 Adjunto el comprobante de pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`;
+    return `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(text)}`;
+  }
+
+  processOrder(formData, cart) {
+    const orderId = this.generateOrderNumber();
+    const total = cart.getTotal();
+    const totalFormatted = cart.formatCurrency(total);
+    const subtotalFormatted = cart.formatCurrency(cart.getSubtotal());
+    const itemsCopy = JSON.parse(JSON.stringify(cart.items));
+
+    const message = this.generateWhatsAppMessage(formData, cart, orderId);
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${encodedMessage}`;
-    
-    // Abrir WhatsApp en nueva pestaña o app nativa
+
+    // Guardar último pedido para la pantalla de confirmación
+    this.lastOrder = {
+      orderId,
+      total,
+      totalFormatted,
+      subtotalFormatted,
+      items: itemsCopy,
+      formData,
+      paymentMethod: formData.paymentMethod,
+      proofWhatsappUrl: this.generateReceiptProofUrl(orderId, totalFormatted),
+      whatsappUrl,
+      createdAt: new Date().toISOString()
+    };
+
+    localStorage.setItem('dulce_last_order', JSON.stringify(this.lastOrder));
+
+    // Abrir WhatsApp con el pedido inicial
     window.open(whatsappUrl, '_blank');
-    
-    // Limpiar carrito después de enviar y registrar orden
+
+    // Limpiar carrito
     cart.clearCart();
+
+    return this.lastOrder;
   }
 }
 

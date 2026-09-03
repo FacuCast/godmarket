@@ -211,8 +211,19 @@
 
           <!-- Customization Section (Dedication, Candle, Notes) -->
           <div id="modal-customization-options" class="customization-section">
-            <div class="customization-title">Personaliza tu pedido:</div>
-            
+            <!-- Flavor / Gustos Chips (Estilo ByronCode / Perlato) -->
+            <div class="form-group" id="modal-flavor-group">
+              <label class="form-label">🍯 Elige tu gusto o relleno favorito:</label>
+              <div class="flavor-chips-grid" id="modal-flavor-chips">
+                <div class="flavor-chip active" data-flavor="Dulce de Leche Repostero">Dulce de Leche</div>
+                <div class="flavor-chip" data-flavor="Nutella & Avellanas">Nutella & Avellanas</div>
+                <div class="flavor-chip" data-flavor="Frutos Rojos & Crema">Frutos Rojos</div>
+                <div class="flavor-chip" data-flavor="Crema Bariloche">Crema Bariloche</div>
+                <div class="flavor-chip" data-flavor="Clásica de la Casa">Clásica</div>
+              </div>
+              <input type="hidden" id="modal-selected-flavor" value="Dulce de Leche">
+            </div>
+
             <div class="form-group">
               <label class="form-label" for="modal-dedication">✍️ Dedicatoria en placa de chocolate (Opcional):</label>
               <input type="text" id="modal-dedication" class="custom-input" placeholder="Ej: ¡Feliz Cumpleaños Sofi!" maxlength="50">
@@ -260,30 +271,32 @@
         <h3 class="font-serif" style="font-size: 1.25rem;">Tu Carrito de Delicias</h3>
       </div>
 
-      <div id="cart-drawer-list" class="cart-items-list">
-        <!-- Rendered by JS -->
+      <div id="cart-drawer-items" class="cart-items-container">
+        <!-- Dynamically rendered cart items -->
       </div>
 
-      <!-- Price Breakdown -->
-      <div style="background: var(--bg-surface-secondary); padding: 14px; border-radius: var(--radius-sm); margin: 14px 0; font-size: 0.85rem;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-          <span style="color: var(--text-secondary);">Subtotal:</span>
-          <span class="cart-calc-subtotal" style="font-weight: 700;">$0</span>
+      <div class="cart-footer">
+        <div class="cart-summary-row">
+          <span>Subtotal:</span>
+          <span id="cart-drawer-subtotal">$0</span>
         </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-          <span style="color: var(--text-secondary);">Costo de Entrega:</span>
-          <span class="cart-calc-delivery" style="font-weight: 700; color: var(--success);">$1.500</span>
+        <div class="cart-summary-row" id="cart-delivery-fee-row">
+          <span>Envío a Domicilio:</span>
+          <span id="cart-drawer-shipping">$1.500</span>
         </div>
-        <div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--border-light); font-size: 1.05rem;">
-          <strong style="color: var(--text-main);">Total a Pagar:</strong>
-          <strong class="cart-calc-total" style="color: var(--primary);">$0</strong>
+        <div class="cart-summary-row total">
+          <span>Total:</span>
+          <span id="cart-drawer-total" style="color: var(--primary);">$0</span>
         </div>
-      </div>
 
-      <button id="btn-to-checkout" class="btn-primary" onclick="window.app.closeModal('cart-drawer-modal'); window.app.openModal('checkout-modal');">
-        <span>Proceder al Checkout</span>
-        <span>→</span>
-      </button>
+        <div style="font-size: 0.72rem; color: var(--accent-mint); font-weight: 600; text-align: center; margin: 6px 0;">
+          🛵 Envío gratis a partir de $50.000
+        </div>
+
+        <button id="btn-proceed-checkout" class="btn-primary" style="margin-top: 10px;">
+          <span>Continuar con los Datos de Entrega →</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -345,30 +358,32 @@
           <label class="form-label">Forma de Pago:</label>
           <div class="payment-options">
             <div class="payment-card active" data-payment="transfer">
-              <div class="payment-card-icon">🏦</div>
-              <div class="payment-card-title">Transferencia</div>
+              <div class="payment-icon">🏦</div>
+              <div class="payment-name">Transferencia</div>
             </div>
             <div class="payment-card" data-payment="mercadopago">
-              <div class="payment-card-icon">💳</div>
-              <div class="payment-card-title">Mercado Pago</div>
+              <div class="payment-icon">💳</div>
+              <div class="payment-name">Mercado Pago</div>
             </div>
             <div class="payment-card" data-payment="cash">
-              <div class="payment-card-icon">💵</div>
-              <div class="payment-card-title">Efectivo</div>
+              <div class="payment-icon">💵</div>
+              <div class="payment-name">Efectivo</div>
             </div>
           </div>
         </div>
 
-        <!-- Bank Details Card (Shown if Transfer) -->
-        <div id="bank-transfer-info" style="background: var(--primary-light); border: 1px dashed var(--primary); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 0.8rem;">
-          <div style="font-weight: 700; color: var(--primary); margin-bottom: 4px;">📌 Datos para Transferencia:</div>
-          <div><strong>Alias:</strong> DULCE.ATELIER.BA 
-            <button type="button" onclick="window.app.copyToClipboard('DULCE.ATELIER.BA', '¡Alias copiado!')" style="color: var(--primary); text-decoration: underline; font-size: 0.75rem; margin-left: 6px;">
-              Copiar Alias
-            </button>
+        <!-- Bank details summary box -->
+        <div id="bank-transfer-info" class="bank-details-box">
+          <div class="bank-title">Datos para Transferencia Bancaria:</div>
+          <div class="bank-row">
+            <span>Alias:</span>
+            <strong id="bank-alias" style="letter-spacing: 0.5px;">DULCE.ATELIER.BA</strong>
+            <button type="button" class="copy-btn" onclick="window.app.copyAlias()">Copiar</button>
           </div>
-          <div><strong>Titular:</strong> Dulce Atelier Pastelería</div>
-          <div style="color: var(--text-muted); margin-top: 4px; font-size: 0.72rem;">* Podrás adjuntar el comprobante en la conversación de WhatsApp.</div>
+          <div class="bank-row">
+            <span>Titular:</span>
+            <span>Dulce Atelier Pastelería</span>
+          </div>
         </div>
 
         <!-- Cash amount box (Shown if Cash) -->
@@ -390,24 +405,102 @@
         </button>
 
         <p style="text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 8px;">
-          Al hacer clic, se abrirá WhatsApp con el detalle formateado para el número <strong>1156192616</strong>.
+          Al hacer clic, se generará tu <strong>Número de Orden</strong> y se enviará el pedido al WhatsApp <strong>1156192616</strong>.
         </p>
       </form>
     </div>
   </div>
 
 
-  <!-- 4. Order Success Modal -->
+  <!-- 4. Order Confirmation Ticket Modal (Estilo ByronCode / Perlato) -->
   <div id="order-success-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('order-success-modal')">
-    <div class="bottom-sheet" style="text-align: center; padding: 30px 20px;">
-      <div style="font-size: 3.5rem; margin-bottom: 12px; animation: popIn 0.4s ease;">🎉</div>
-      <h3 class="font-serif" style="font-size: 1.4rem; margin-bottom: 8px;">¡Pedido Enviado!</h3>
-      <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 20px;">
-        Tu pedido ha sido preparado y redirigido a nuestro WhatsApp oficial (<strong>1156192616</strong>). En breve te responderemos para confirmar el pago y la hora exacta de entrega.
-      </p>
-      <button class="btn-primary" onclick="window.app.closeModal('order-success-modal')">
-        Volver a la Tienda
-      </button>
+    <div class="bottom-sheet" style="max-width: 520px; padding: 24px 20px;">
+      <div class="order-ticket">
+        <div class="ticket-icon-top">🎉</div>
+        <div class="ticket-status-pill">
+          <span>🟢</span> ¡Pedido Confirmado con Éxito!
+        </div>
+        <h3 class="font-serif" style="font-size: 1.4rem; margin-bottom: 4px;">¡Gracias por tu compra!</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">
+          El pedido ya ingresó a cocina y te enviamos una copia a WhatsApp.
+        </p>
+
+        <!-- Order Number Badge with Copy Button -->
+        <div class="ticket-order-badge">
+          <div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Número de Orden</div>
+            <div class="ticket-order-num" id="ticket-order-id">#ORD-1041</div>
+          </div>
+          <button type="button" class="btn-copy-sm" onclick="window.app.copyOrderId()" id="btn-copy-order">
+            <span>📋</span> Copiar
+          </button>
+        </div>
+
+        <!-- Order Items & Total Summary -->
+        <div id="ticket-items-list" style="text-align: left; font-size: 0.84rem; background: var(--bg-surface-secondary); padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 14px; max-height: 140px; overflow-y: auto;">
+          <!-- Dynamically filled -->
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 6px; font-weight: 800; font-size: 1.05rem; border-bottom: 1px solid var(--border-light); margin-bottom: 14px;">
+          <span>Total del Pedido:</span>
+          <span style="color: var(--primary);" id="ticket-order-total">$0</span>
+        </div>
+
+        <!-- Bank Transfer Details (if Transfer) -->
+        <div id="ticket-transfer-details" class="ticket-alias-box">
+          <div class="ticket-alias-header">
+            <span>🏦</span> Datos para realizar la transferencia:
+          </div>
+          
+          <div class="ticket-alias-value-row">
+            <div>
+              <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700;">ALIAS:</div>
+              <div class="ticket-alias-code" id="ticket-alias-code">DULCE.ATELIER.BA</div>
+            </div>
+            <button type="button" class="btn-copy-sm" onclick="window.app.copyAlias()" id="btn-copy-alias-ticket">
+              <span>📋</span> Copiar Alias
+            </button>
+          </div>
+
+          <div style="font-size: 0.76rem; color: var(--text-secondary); line-height: 1.4;">
+            <div><strong>Titular:</strong> Dulce Atelier Pastelería Artesanal</div>
+            <div><strong>Cuenta:</strong> Mercado Pago / Banco Galicia</div>
+          </div>
+
+          <div class="ticket-amount-row">
+            <span style="font-weight: 700; color: var(--text-main);">Monto exacto a transferir:</span>
+            <strong style="color: var(--primary); font-size: 1.15rem;" id="ticket-transfer-amount">$0</strong>
+          </div>
+        </div>
+
+        <!-- Cash Details (if Cash) -->
+        <div id="ticket-cash-details" style="display: none; background: #F4FBF7; border: 1.5px dashed #2A9D8F; border-radius: var(--radius-md); padding: 14px; margin-bottom: 14px; text-align: left; font-size: 0.85rem;">
+          <div style="font-weight: 800; color: #2A9D8F; margin-bottom: 4px;">💵 Pago en Efectivo al recibir o retirar:</div>
+          <p style="color: var(--text-secondary); margin: 0;">
+            Abonarás el total exacto de <strong id="ticket-cash-amount">$0</strong> en mano. ¡Por favor ten el dinero preparado!
+          </p>
+        </div>
+
+        <!-- WhatsApp Button to Send Payment Proof -->
+        <a id="ticket-whatsapp-proof-btn" href="#" target="_blank" class="btn-primary btn-whatsapp" style="text-decoration: none; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span style="font-size: 1.3rem;">📲</span>
+          <span>Enviar comprobante por WhatsApp</span>
+        </a>
+
+        <!-- Local Phone & Direct Link -->
+        <div class="ticket-contact-footer">
+          <div style="font-size: 0.78rem; color: var(--text-muted);">
+            ¿Tienes alguna consulta o quieres avisar algo?
+          </div>
+          <a href="https://wa.me/5491156192616" target="_blank" class="phone-link-pill">
+            <span>💬</span> WhatsApp Oficial: <strong>11 5619-2616</strong>
+          </a>
+        </div>
+
+        <button type="button" class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="window.app.closeModal('order-success-modal')">
+          Volver a la Tienda / Hacer otro pedido
+        </button>
+      </div>
     </div>
   </div>
 
