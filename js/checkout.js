@@ -62,7 +62,7 @@ class CheckoutHandler {
     if (formData.paymentMethod === 'transfer') {
       paymentMethodName = "Transferencia Bancaria (Alias: DULCE.ATELIER.BA)";
     } else if (formData.paymentMethod === 'mercadopago') {
-      paymentMethodName = "Mercado Pago";
+      paymentMethodName = "Mercado Pago (Alias: DULCE.ATELIER.MP)";
     }
 
     const cashNote = (formData.paymentMethod === 'cash' && formData.cashAmount) 
@@ -93,8 +93,11 @@ Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Much
     return message;
   }
 
-  generateReceiptProofUrl(orderId, totalFormatted) {
-    const text = `¡Hola Dulce Atelier! 🍰 Adjunto el comprobante de pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`;
+  generateReceiptProofUrl(orderId, totalFormatted, paymentMethod = 'transfer') {
+    const isMP = paymentMethod === 'mercadopago';
+    const text = isMP
+      ? `¡Hola Dulce Atelier! 🍰 Adjunto el comprobante de pago de Mercado Pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`
+      : `¡Hola Dulce Atelier! 🍰 Adjunto el comprobante de pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`;
     return `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(text)}`;
   }
 
@@ -118,7 +121,7 @@ Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Much
       items: itemsCopy,
       formData,
       paymentMethod: formData.paymentMethod,
-      proofWhatsappUrl: this.generateReceiptProofUrl(orderId, totalFormatted),
+      proofWhatsappUrl: this.generateReceiptProofUrl(orderId, totalFormatted, formData.paymentMethod),
       whatsappUrl,
       createdAt: new Date().toISOString()
     };

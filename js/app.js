@@ -164,10 +164,12 @@ class DulceAtelierApp {
         const method = e.currentTarget.dataset.payment;
         document.getElementById('checkout-payment-method').value = method;
 
-        // Mostrar u ocultar datos bancarios / efectivo
+        // Mostrar u ocultar datos bancarios / mercado pago / efectivo
         const bankInfo = document.getElementById('bank-transfer-info');
+        const mpInfo = document.getElementById('mercadopago-info');
         const cashInfo = document.getElementById('cash-payment-info');
         if (bankInfo) bankInfo.style.display = (method === 'transfer') ? 'block' : 'none';
+        if (mpInfo) mpInfo.style.display = (method === 'mercadopago') ? 'block' : 'none';
         if (cashInfo) cashInfo.style.display = (method === 'cash') ? 'block' : 'none';
       });
     });
@@ -696,23 +698,39 @@ class DulceAtelierApp {
       `).join('');
     }
 
-    // Mostrar sección de transferencia o de efectivo
+    // Mostrar sección de transferencia, mercado pago o de efectivo
     const transferBox = document.getElementById('ticket-transfer-details');
+    const mpBox = document.getElementById('ticket-mp-details');
     const cashBox = document.getElementById('ticket-cash-details');
     const whatsappProofBtn = document.getElementById('ticket-whatsapp-proof-btn');
+    const mpAmountEl = document.getElementById('ticket-mp-amount');
+    if (mpAmountEl) mpAmountEl.textContent = order.totalFormatted;
 
     if (order.paymentMethod === 'transfer') {
       if (transferBox) transferBox.style.display = 'block';
+      if (mpBox) mpBox.style.display = 'none';
       if (cashBox) cashBox.style.display = 'none';
       if (whatsappProofBtn) {
         whatsappProofBtn.href = order.proofWhatsappUrl;
         whatsappProofBtn.innerHTML = `
           <span style="font-size: 1.3rem;">📲</span>
-          <span>Enviar comprobante por WhatsApp</span>
+          <span>Ya transferí, enviar comprobante</span>
+        `;
+      }
+    } else if (order.paymentMethod === 'mercadopago') {
+      if (transferBox) transferBox.style.display = 'none';
+      if (mpBox) mpBox.style.display = 'block';
+      if (cashBox) cashBox.style.display = 'none';
+      if (whatsappProofBtn) {
+        whatsappProofBtn.href = order.proofWhatsappUrl;
+        whatsappProofBtn.innerHTML = `
+          <span style="font-size: 1.3rem;">📲</span>
+          <span>Ya pagué por Mercado Pago, enviar comprobante</span>
         `;
       }
     } else {
       if (transferBox) transferBox.style.display = 'none';
+      if (mpBox) mpBox.style.display = 'none';
       if (cashBox) cashBox.style.display = 'block';
       if (whatsappProofBtn) {
         whatsappProofBtn.href = order.proofWhatsappUrl;
@@ -751,13 +769,35 @@ class DulceAtelierApp {
     });
   }
 
+  copyMPAlias() {
+    const alias = "DULCE.ATELIER.MP";
+    navigator.clipboard.writeText(alias).then(() => {
+      const btnTicket = document.getElementById('btn-copy-mp-alias-ticket');
+      const btnForm = document.getElementById('btn-copy-mp-alias');
+      if (btnTicket) {
+        btnTicket.innerHTML = '<span>✓</span> ¡Copiado!';
+        setTimeout(() => { btnTicket.innerHTML = '<span>📋</span> Copiar'; }, 2000);
+      }
+      if (btnForm) {
+        btnForm.innerHTML = '✓ Copiado';
+        setTimeout(() => { btnForm.innerHTML = 'Copiar'; }, 2000);
+      }
+      this.showToast(`💳 Alias MP ${alias} copiado con éxito`);
+    });
+  }
+
   copyCVU() {
     const cvu = "0000003100012345678901";
     navigator.clipboard.writeText(cvu).then(() => {
       const btnTicket = document.getElementById('btn-copy-cvu-ticket');
+      const btnMpTicket = document.getElementById('btn-copy-mp-cvu-ticket');
       if (btnTicket) {
         btnTicket.innerHTML = '<span>✓</span> ¡Copiado!';
         setTimeout(() => { btnTicket.innerHTML = '<span>📋</span> Copiar'; }, 2000);
+      }
+      if (btnMpTicket) {
+        btnMpTicket.innerHTML = '<span>✓</span> ¡Copiado!';
+        setTimeout(() => { btnMpTicket.innerHTML = '<span>📋</span> Copiar'; }, 2000);
       }
       this.showToast(`🏦 CVU copiado con éxito`);
     });

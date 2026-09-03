@@ -469,6 +469,33 @@
           </div>
         </div>
 
+        <!-- Mercado Pago details summary box -->
+        <div id="mercadopago-info" class="bank-details-box" style="display: none; background: #F0F9FF; border-color: #009EE3;">
+          <div class="bank-title" style="color: #009EE3; display: flex; align-items: center; gap: 6px;">
+            <span>💳</span> Datos para Pagar con Mercado Pago:
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.4;">
+            Transfiere desde tu app de Mercado Pago o cualquier banco / billetera virtual:
+          </div>
+          <div class="bank-row">
+            <span>Alias MP:</span>
+            <strong id="mp-alias" style="letter-spacing: 0.5px; color: #009EE3;">DULCE.ATELIER.MP</strong>
+            <button type="button" class="copy-btn" onclick="window.app.copyMPAlias()" id="btn-copy-mp-alias">Copiar</button>
+          </div>
+          <div class="bank-row">
+            <span>CVU MP:</span>
+            <strong style="font-size: 0.78rem;">0000003100012345678901</strong>
+            <button type="button" class="copy-btn" onclick="window.app.copyCVU()">Copiar</button>
+          </div>
+          <div class="bank-row">
+            <span>Titular:</span>
+            <span>Dulce Atelier (Mercado Pago Oficial)</span>
+          </div>
+          <div style="font-size: 0.72rem; color: #009EE3; font-weight: 600; margin-top: 6px;">
+            ✨ También puedes solicitar el Link de Pago con tarjeta de crédito/débito al confirmar por WhatsApp.
+          </div>
+        </div>
+
         <!-- Cash amount box (Shown if Cash) -->
         <div id="cash-payment-info" style="display: none;" class="form-group">
           <label class="form-label" for="cust-cash-amount">¿Con cuánto abonas? (Para llevarte cambio):</label>
@@ -574,6 +601,42 @@
           <div class="ticket-amount-row">
             <span style="font-weight: 700; color: var(--text-main);">Monto exacto a transferir:</span>
             <strong style="color: var(--primary); font-size: 1.15rem;" id="ticket-transfer-amount">$0</strong>
+          </div>
+        </div>
+
+        <!-- Mercado Pago Ticket Box (Estilo ByronCode) -->
+        <div id="ticket-mp-details"
+          style="display: none; background: #F0F9FF; border: 1.5px dashed #009EE3; border-radius: var(--radius-md); padding: 14px; margin-bottom: 14px; text-align: left; font-size: 0.85rem;">
+          <div style="font-weight: 800; color: #009EE3; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <span>💳</span> Para completar el pago con Mercado Pago:
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 8px;">
+            <strong>Titular:</strong> Dulce Atelier (Mercado Pago Oficial)
+          </div>
+
+          <div class="ticket-alias-value-row" style="margin-bottom: 6px;">
+            <div>
+              <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700;">ALIAS MERCADO PAGO:</div>
+              <div class="ticket-alias-code" style="color: #009EE3;" id="ticket-mp-alias-code">DULCE.ATELIER.MP</div>
+            </div>
+            <button type="button" class="btn-copy-sm" onclick="window.app.copyMPAlias()" id="btn-copy-mp-alias-ticket">
+              <span>📋</span> Copiar
+            </button>
+          </div>
+
+          <div class="ticket-alias-value-row" style="margin-bottom: 8px;">
+            <div>
+              <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700;">CVU MERCADO PAGO:</div>
+              <div class="ticket-alias-code" style="font-size: 0.85rem;">0000003100012345678901</div>
+            </div>
+            <button type="button" class="btn-copy-sm" onclick="window.app.copyCVU()" id="btn-copy-mp-cvu-ticket">
+              <span>📋</span> Copiar
+            </button>
+          </div>
+
+          <div class="ticket-amount-row" style="border-top: 1px dashed rgba(0, 158, 227, 0.3); padding-top: 6px;">
+            <span style="font-weight: 700; color: var(--text-main);">Monto a transferir / abonar:</span>
+            <strong style="color: #009EE3; font-size: 1.15rem;" id="ticket-mp-amount">$0</strong>
           </div>
         </div>
 
