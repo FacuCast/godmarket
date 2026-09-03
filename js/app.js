@@ -104,7 +104,7 @@ class DulceAtelierApp {
       });
     }
 
-    // Modal de Producto: Modificadores de cantidad
+    // Modal de Producto: Modificadores de cantidad dinámicos
     const qtyMinus = document.getElementById('modal-qty-minus');
     const qtyPlus = document.getElementById('modal-qty-plus');
     const qtyVal = document.getElementById('modal-qty-val');
@@ -112,12 +112,16 @@ class DulceAtelierApp {
     if (qtyMinus && qtyPlus && qtyVal) {
       qtyMinus.addEventListener('click', () => {
         let current = parseInt(qtyVal.textContent, 10);
-        if (current > 1) qtyVal.textContent = current - 1;
+        if (current > 1) {
+          qtyVal.textContent = current - 1;
+          this.updateModalAddButton(current - 1);
+        }
       });
 
       qtyPlus.addEventListener('click', () => {
         let current = parseInt(qtyVal.textContent, 10);
         qtyVal.textContent = current + 1;
+        this.updateModalAddButton(current + 1);
       });
     }
 
@@ -464,7 +468,17 @@ class DulceAtelierApp {
       customSection.style.display = (product.category === 'tortas' || product.category === 'desayunos') ? 'block' : 'none';
     }
 
+    // Actualizar texto del botón con precio calculado
+    this.updateModalAddButton(1);
+
     this.openModal('product-detail-modal');
+  }
+
+  updateModalAddButton(qty) {
+    const btn = document.getElementById('btn-add-modal-cart');
+    if (!btn || !this.selectedProductForModal) return;
+    const total = this.selectedProductForModal.price * qty;
+    btn.innerHTML = `<span>Agregar al Pedido • ${window.cartManager.formatCurrency(total)}</span>`;
   }
 
   quickAddToCart(productId, event) {
