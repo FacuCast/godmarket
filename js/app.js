@@ -58,8 +58,19 @@ class DulceAtelierApp {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('ServiceWorker registrado:', reg.scope))
+          .then(reg => {
+            console.log('ServiceWorker registrado:', reg.scope);
+            reg.update();
+          })
           .catch(err => console.log('Error al registrar ServiceWorker:', err));
+      });
+
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
       });
     }
 
@@ -190,19 +201,21 @@ class DulceAtelierApp {
       });
     }
 
-    // Botón Continuar del Carrito al Checkout (Paso siguiente)
-    const btnProceedCheckout = document.getElementById('btn-proceed-checkout');
-    if (btnProceedCheckout) {
-      btnProceedCheckout.addEventListener('click', () => {
-        if (window.cartManager.getItemCount() === 0) {
-          this.showToast("⚠️ Tu carrito está vacío. Elige una delicia primero.");
+    // Botón Continuar / Proceder del Carrito al Checkout (Soporta btn-proceed-checkout y btn-to-checkout)
+    ['btn-proceed-checkout', 'btn-to-checkout'].forEach(btnId => {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          if (window.cartManager.getItemCount() === 0) {
+            this.showToast("⚠️ Tu carrito está vacío. Elige una delicia primero.");
+            this.closeModal('cart-drawer-modal');
+            return;
+          }
           this.closeModal('cart-drawer-modal');
-          return;
-        }
-        this.closeModal('cart-drawer-modal');
-        this.openModal('checkout-modal');
-      });
-    }
+          this.openModal('checkout-modal');
+        });
+      }
+    });
 
     // Enviar Checkout a WhatsApp con Validaciones Robustas
     const checkoutForm = document.getElementById('checkout-form');
@@ -604,15 +617,26 @@ class DulceAtelierApp {
     // Drawer de Carrito
     this.renderCartDrawerItems();
 
-    // Resúmenes de precio en Drawer y Checkout
-    const subtotalEl = document.getElementById('cart-drawer-subtotal');
-    if (subtotalEl) subtotalEl.textContent = window.cartManager.formatCurrency(subtotal);
+    // Resúmenes de precio en Drawer y Checkout (Compatible con IDs y Clases)
+    const subtotalEls = [
+      document.getElementById('cart-drawer-subtotal'),
+      ...document.querySelectorAll('.cart-calc-subtotal')
+    ].filter(Boolean);
+    subtotalEls.forEach(el => el.textContent = window.cartManager.formatCurrency(subtotal));
 
-    const shippingEl = document.getElementById('cart-drawer-shipping');
-    if (shippingEl) shippingEl.textContent = deliveryFee === 0 ? '¡Gratis!' : window.cartManager.formatCurrency(deliveryFee);
+    const shippingEls = [
+      document.getElementById('cart-drawer-shipping'),
+      ...document.querySelectorAll('.cart-calc-delivery')
+    ].filter(Boolean);
+    shippingEls.forEach(el => {
+      el.textContent = deliveryFee === 0 ? '¡Gratis!' : window.cartManager.formatCurrency(deliveryFee);
+    });
 
-    const totalEl = document.getElementById('cart-drawer-total');
-    if (totalEl) totalEl.textContent = window.cartManager.formatCurrency(total);
+    const totalEls = [
+      document.getElementById('cart-drawer-total'),
+      ...document.querySelectorAll('.cart-calc-total')
+    ].filter(Boolean);
+    totalEls.forEach(el => el.textContent = window.cartManager.formatCurrency(total));
 
     // Resumen en Modal de Checkout
     const checkoutCountEl = document.getElementById('checkout-summary-items-count');
