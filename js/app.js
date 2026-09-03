@@ -771,6 +771,33 @@ class DulceAtelierApp {
         `;
       }
     }
+
+    const reopenBtn = document.getElementById('ticket-reopen-whatsapp-btn');
+    if (reopenBtn && order.whatsappUrl) {
+      reopenBtn.href = order.whatsappUrl;
+      reopenBtn.style.display = 'flex';
+    }
+  }
+
+  copyOrderMessage() {
+    const lastOrder = window.checkoutHandler?.lastOrder;
+    if (!lastOrder || !lastOrder.rawMessage) {
+      this.showToast("⚠️ No hay datos del pedido para copiar");
+      return;
+    }
+
+    navigator.clipboard.writeText(lastOrder.rawMessage).then(() => {
+      const btn = document.getElementById('btn-copy-full-order');
+      if (btn) {
+        btn.innerHTML = '<span>✓</span> ¡Mensaje del Pedido Copiado!';
+        setTimeout(() => {
+          btn.innerHTML = '<span>📋</span> <span>Copiar Mensaje del Pedido</span>';
+        }, 2000);
+      }
+      this.showToast('📋 Mensaje completo del pedido copiado con éxito');
+    }).catch(() => {
+      this.showToast('⚠️ No se pudo acceder al portapapeles');
+    });
   }
 
   copyOrderId() {

@@ -110,7 +110,7 @@ class CartManager {
       style: 'currency',
       currency: 'ARS',
       maximumFractionDigits: 0
-    }).format(amount);
+    }).format(amount).replace(/\u00a0/g, ' ');
   }
 }
 

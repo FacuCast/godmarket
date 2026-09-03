@@ -118,12 +118,22 @@ Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Much
     return message;
   }
 
+  buildWhatsAppUrl(text) {
+    const encoded = encodeURIComponent(text);
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    // En PC / Desktop usamos web.whatsapp.com para ir directo al chat sin pasar por la pantalla
+    // intermedia de api.whatsapp.com (la cual tiene un bug en los servidores de Meta que convierte emojis en  en su preview).
+    // En Móvil usamos api.whatsapp.com, el cual es interceptado por el SO para abrir la App oficial directamente.
+    const baseUrl = isMobile ? 'https://api.whatsapp.com/send' : 'https://web.whatsapp.com/send';
+    return `${baseUrl}?phone=${WHATSAPP_PHONE}&text=${encoded}`;
+  }
+
   generateReceiptProofUrl(orderId, totalFormatted, paymentMethod = 'transfer') {
     const isMP = paymentMethod === 'mercadopago';
     const text = isMP
       ? `¡Hola Dulce Atelier! ${EMOJIS.pastry} Adjunto el comprobante de pago de Mercado Pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`
       : `¡Hola Dulce Atelier! ${EMOJIS.pastry} Adjunto el comprobante de pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`;
-    return `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(text)}`;
+    return this.buildWhatsAppUrl(text);
   }
 
   processOrder(formData, cart) {
@@ -134,8 +144,7 @@ Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Much
     const itemsCopy = JSON.parse(JSON.stringify(cart.items));
 
     const message = this.generateWhatsAppMessage(formData, cart, orderId);
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodedMessage}`;
+    const whatsappUrl = this.buildWhatsAppUrl(message);
 
     // Guardar último pedido para la pantalla de confirmación
     this.lastOrder = {
@@ -145,6 +154,7 @@ Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Much
       subtotalFormatted,
       items: itemsCopy,
       formData,
+      rawMessage: message,
       paymentMethod: formData.paymentMethod,
       proofWhatsappUrl: this.generateReceiptProofUrl(orderId, totalFormatted, formData.paymentMethod),
       whatsappUrl,

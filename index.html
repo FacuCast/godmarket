@@ -665,10 +665,24 @@
 
         <!-- Botón Verde Principal: Enviar Comprobante / Ya transferí -->
         <a id="ticket-whatsapp-proof-btn" href="#" target="_blank" class="btn-primary btn-whatsapp"
-          style="text-decoration: none; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          style="text-decoration: none; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
           <span style="font-size: 1.3rem;">📲</span>
           <span id="ticket-btn-text">Ya transferí, enviar comprobante</span>
         </a>
+
+        <!-- Botón Reabrir Pedido en WhatsApp (por si se cerró o se bloqueó la pestaña) -->
+        <a id="ticket-reopen-whatsapp-btn" href="#" target="_blank" class="btn-outline"
+          style="display: none; width: 100%; margin-bottom: 8px; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.84rem; padding: 9px 12px; border-radius: var(--radius-sm); border: 1.5px solid #25D366; color: #128C7E; font-weight: 700;">
+          <span style="font-size: 1.1rem;">💬</span>
+          <span>Reabrir Pedido en WhatsApp</span>
+        </a>
+
+        <!-- Botón Copiar Mensaje Completo del Pedido -->
+        <button type="button" class="btn-secondary" id="btn-copy-full-order" onclick="window.app.copyOrderMessage()"
+          style="width: 100%; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.82rem; padding: 8px 12px;">
+          <span>📋</span>
+          <span>Copiar Mensaje del Pedido</span>
+        </button>
 
         <!-- Tiempo estimado y contacto directo como ByronCode -->
         <div
@@ -806,12 +820,12 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Pure Standard JavaScript Scripts -->
-  <script charset="UTF-8" src="js/products.js?v=4.0"></script>
-  <script charset="UTF-8" src="js/cart.js?v=4.0"></script>
-  <script charset="UTF-8" src="js/checkout.js?v=4.0"></script>
-  <script charset="UTF-8" src="js/cloudinary.js?v=4.0"></script>
-  <script charset="UTF-8" src="js/admin.js?v=4.0"></script>
-  <script charset="UTF-8" src="js/app.js?v=4.0"></script>
+  <script charset="UTF-8" src="js/products.js?v=5.0"></script>
+  <script charset="UTF-8" src="js/cart.js?v=5.0"></script>
+  <script charset="UTF-8" src="js/checkout.js?v=5.0"></script>
+  <script charset="UTF-8" src="js/cloudinary.js?v=5.0"></script>
+  <script charset="UTF-8" src="js/admin.js?v=5.0"></script>
+  <script charset="UTF-8" src="js/app.js?v=5.0"></script>
 </body>
 
 </html>
