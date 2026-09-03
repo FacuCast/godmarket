@@ -219,7 +219,20 @@
 
       <div class="modal-desktop-layout">
         <div>
-          <img id="modal-product-img" class="modal-product-img" src="" alt="Pastel">
+          <div class="modal-img-container">
+            <img id="modal-product-img" class="modal-product-img" src="" alt="Pastel" style="transition: opacity 0.25s ease, transform 0.3s ease; display: block; width: 100%;">
+            
+            <!-- Badge Dinámico del Sabor Seleccionado -->
+            <div id="modal-flavor-badge" class="flavor-preview-badge">
+              <span id="modal-flavor-badge-text">🍰 Clásica</span>
+            </div>
+
+            <!-- Overlay Dinámico de Velita de Cumpleaños -->
+            <div id="modal-candle-badge" class="candle-preview-badge" style="display: none;">
+              <span class="candle-flame">🕯️</span>
+              <span>¡Con velita de cumpleaños!</span>
+            </div>
+          </div>
         </div>
 
         <div>

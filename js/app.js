@@ -443,22 +443,44 @@ class DulceAtelierApp {
     document.getElementById('modal-qty-val').textContent = '1';
     const dedication = document.getElementById('modal-dedication');
     if (dedication) dedication.value = '';
-    const candle = document.getElementById('modal-candle-checkbox');
-    if (candle) candle.checked = false;
     const note = document.getElementById('modal-note');
     if (note) note.value = '';
 
-    // Manejar selección interactiva de gustos / rellenos (estilo ByronCode / Perlato)
+    // Manejo interactivo de Velita de Cumpleaños con badge sobre la foto
+    const candleBadge = document.getElementById('modal-candle-badge');
+    const candleCheckbox = document.getElementById('modal-candle-checkbox');
+    if (candleBadge) candleBadge.style.display = 'none';
+
+    if (candleCheckbox) {
+      candleCheckbox.checked = false;
+      candleCheckbox.onchange = () => {
+        if (candleBadge) {
+          candleBadge.style.display = candleCheckbox.checked ? 'flex' : 'none';
+        }
+        if (candleCheckbox.checked) {
+          this.showToast("🕯️ ¡Velita de cumpleaños agregada al pastel!");
+        }
+      };
+    }
+
+    // Manejar selección interactiva de gustos / rellenos con cambio de foto en vivo
     const flavorChips = document.querySelectorAll('#modal-flavor-chips .flavor-chip');
     const hiddenFlavor = document.getElementById('modal-selected-flavor');
+    const flavorBadgeText = document.getElementById('modal-flavor-badge-text');
     if (hiddenFlavor) hiddenFlavor.value = 'Dulce de Leche';
+    if (flavorBadgeText) flavorBadgeText.textContent = '🍯 Dulce de Leche';
 
     flavorChips.forEach((chip, i) => {
       chip.classList.toggle('active', i === 0);
       chip.onclick = () => {
         flavorChips.forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
-        if (hiddenFlavor) hiddenFlavor.value = chip.dataset.flavor;
+        const flavor = chip.dataset.flavor;
+        if (hiddenFlavor) hiddenFlavor.value = flavor;
+        if (flavorBadgeText) flavorBadgeText.textContent = '🍯 ' + flavor;
+        
+        // Cambiar la imagen del pastel según el sabor elegido con animación suave
+        this.switchModalCakeImage(flavor, product);
       };
     });
 
@@ -472,6 +494,39 @@ class DulceAtelierApp {
     this.updateModalAddButton(1);
 
     this.openModal('product-detail-modal');
+  }
+
+  switchModalCakeImage(flavor, product) {
+    const img = document.getElementById('modal-product-img');
+    if (!img) return;
+
+    // Catálogo fotográfico gourmet según sabor/relleno
+    const FLAVOR_IMAGES = {
+      'Dulce de Leche': 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=800&q=80',
+      'Nutella & Avellanas': 'https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?auto=format&fit=crop&w=800&q=80',
+      'Frutos Rojos': 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=800&q=80',
+      'Crema Bariloche': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
+      'Clásica': (product || this.selectedProductForModal)?.image
+    };
+
+    const targetUrl = FLAVOR_IMAGES[flavor] || (product || this.selectedProductForModal)?.image;
+    if (!targetUrl || img.src === targetUrl) return;
+
+    // Transición suave de fundido cruzado
+    img.style.opacity = '0.3';
+    img.style.transform = 'scale(0.97)';
+    
+    setTimeout(() => {
+      img.src = targetUrl;
+      img.onload = () => {
+        img.style.opacity = '1';
+        img.style.transform = 'scale(1)';
+      };
+      setTimeout(() => {
+        img.style.opacity = '1';
+        img.style.transform = 'scale(1)';
+      }, 150);
+    }, 120);
   }
 
   updateModalAddButton(qty) {
