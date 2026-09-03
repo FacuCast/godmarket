@@ -644,9 +644,21 @@ class DulceAtelierApp {
       const btnTicket = document.getElementById('btn-copy-alias-ticket');
       if (btnTicket) {
         btnTicket.innerHTML = '<span>✓</span> ¡Copiado!';
-        setTimeout(() => { btnTicket.innerHTML = '<span>📋</span> Copiar Alias'; }, 2000);
+        setTimeout(() => { btnTicket.innerHTML = '<span>📋</span> Copiar'; }, 2000);
       }
       this.showToast(`🏦 Alias ${alias} copiado con éxito`);
+    });
+  }
+
+  copyCVU() {
+    const cvu = "0000003100012345678901";
+    navigator.clipboard.writeText(cvu).then(() => {
+      const btnTicket = document.getElementById('btn-copy-cvu-ticket');
+      if (btnTicket) {
+        btnTicket.innerHTML = '<span>✓</span> ¡Copiado!';
+        setTimeout(() => { btnTicket.innerHTML = '<span>📋</span> Copiar'; }, 2000);
+      }
+      this.showToast(`🏦 CVU copiado con éxito`);
     });
   }
 

@@ -231,13 +231,16 @@
   gap: 12px;
   overflow-x: auto;
   padding: 0 16px 8px 16px;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE */
   margin-bottom: 18px;
 }
 
 .categories-slider::-webkit-scrollbar {
-  display: none; /* Chrome */
+  display: none;
+  /* Chrome */
 }
 
 .category-item {
@@ -319,7 +322,8 @@
 .product-image-container {
   position: relative;
   width: 100%;
-  padding-top: 85%; /* 4:3.4 Aspect Ratio */
+  padding-top: 85%;
+  /* 4:3.4 Aspect Ratio */
   background: var(--bg-surface-secondary);
   overflow: hidden;
 }
@@ -349,7 +353,7 @@
   font-weight: 700;
   padding: 3px 6px;
   border-radius: var(--radius-xs);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .favorite-btn {
@@ -458,7 +462,8 @@
    -------------------------------------------------------------------------- */
 .floating-cart-bar {
   position: fixed;
-  bottom: 74px; /* Perfectly elevated above bottom nav */
+  bottom: 74px;
+  /* Perfectly elevated above bottom nav */
   left: 50%;
   transform: translateX(-50%) translateY(30px);
   width: calc(100% - 32px);
@@ -467,7 +472,8 @@
   color: #fff;
   border-radius: var(--radius-md);
   padding: 12px 18px;
-  display: none; /* Completely hidden when empty */
+  display: none;
+  /* Completely hidden when empty */
   opacity: 0;
   align-items: center;
   justify-content: space-between;
@@ -546,7 +552,7 @@
   align-items: center;
   justify-content: space-around;
   z-index: 90;
-  box-shadow: 0 -4px 16px rgba(0,0,0,0.03);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.03);
 }
 
 .nav-item {
@@ -561,7 +567,8 @@
   padding: 6px 12px;
 }
 
-.nav-item i, .nav-item .nav-icon {
+.nav-item i,
+.nav-item .nav-icon {
   font-size: 1.25rem;
 }
 
@@ -585,7 +592,8 @@
   visibility: hidden;
   transition: all var(--transition-smooth);
   display: flex;
-  align-items: flex-end; /* Bottom sheet on mobile */
+  align-items: flex-end;
+  /* Bottom sheet on mobile */
   justify-content: center;
 }
 
@@ -831,7 +839,7 @@
   display: none;
 }
 
-.form-control.is-invalid ~ .invalid-feedback {
+.form-control.is-invalid~.invalid-feedback {
   display: block;
   animation: fadeIn 0.2s ease;
 }
@@ -841,9 +849,21 @@
 }
 
 @keyframes shakeInput {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-6px); }
-  40%, 80% { transform: translateX(6px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
 }
 
 .payment-options {

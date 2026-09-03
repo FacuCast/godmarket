@@ -412,23 +412,25 @@
   </div>
 
 
-  <!-- 4. Order Confirmation Ticket Modal (Estilo ByronCode / Perlato) -->
+  <!-- 4. Order Confirmation Ticket Modal (Estilo Exacto ByronCode / Perlato) -->
   <div id="order-success-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('order-success-modal')">
-    <div class="bottom-sheet" style="max-width: 520px; padding: 24px 20px;">
+    <div class="bottom-sheet" style="max-width: 500px; padding: 26px 20px;">
       <div class="order-ticket">
-        <div class="ticket-icon-top">🎉</div>
+        <div class="ticket-icon-top">🧁</div>
+        
         <div class="ticket-status-pill">
-          <span>🟢</span> ¡Pedido Confirmado con Éxito!
+          <span>🟢</span> ¡Orden Registrada con Éxito!
         </div>
-        <h3 class="font-serif" style="font-size: 1.4rem; margin-bottom: 4px;">¡Gracias por tu compra!</h3>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">
-          El pedido ya ingresó a cocina y te enviamos una copia a WhatsApp.
+        
+        <h3 class="font-serif" style="font-size: 1.45rem; margin-bottom: 2px;">Registramos tu orden</h3>
+        <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 10px;">
+          Tu pedido ya ingresó al sistema y estamos preparando todo.
         </p>
 
-        <!-- Order Number Badge with Copy Button -->
+        <!-- Número de Orden Destacado -->
         <div class="ticket-order-badge">
           <div>
-            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Número de Orden</div>
+            <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Número de Orden</div>
             <div class="ticket-order-num" id="ticket-order-id">#ORD-1041</div>
           </div>
           <button type="button" class="btn-copy-sm" onclick="window.app.copyOrderId()" id="btn-copy-order">
@@ -436,35 +438,46 @@
           </button>
         </div>
 
-        <!-- Order Items & Total Summary -->
-        <div id="ticket-items-list" style="text-align: left; font-size: 0.84rem; background: var(--bg-surface-secondary); padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 14px; max-height: 140px; overflow-y: auto;">
-          <!-- Dynamically filled -->
+        <!-- Resumen de Productos -->
+        <div id="ticket-items-list" style="text-align: left; font-size: 0.82rem; background: var(--bg-surface-secondary); padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 12px; max-height: 120px; overflow-y: auto;">
+          <!-- Dinámico -->
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 6px; font-weight: 800; font-size: 1.05rem; border-bottom: 1px solid var(--border-light); margin-bottom: 14px;">
-          <span>Total del Pedido:</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 4px; font-weight: 800; font-size: 1.05rem; border-bottom: 1px solid var(--border-light); margin-bottom: 14px;">
+          <span>Total a Pagar:</span>
           <span style="color: var(--primary);" id="ticket-order-total">$0</span>
         </div>
 
-        <!-- Bank Transfer Details (if Transfer) -->
+        <!-- Datos de Transferencia (Estilo Exacto ByronCode / Perlato) -->
         <div id="ticket-transfer-details" class="ticket-alias-box">
           <div class="ticket-alias-header">
-            <span>🏦</span> Datos para realizar la transferencia:
+            <span>🏦</span> Para completar el pago, realiza la transferencia:
           </div>
           
+          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 8px;">
+            <strong>Titular:</strong> Dulce Atelier Pastelería Artesanal
+          </div>
+
+          <!-- Fila Alias con botón copiar -->
           <div class="ticket-alias-value-row">
             <div>
               <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700;">ALIAS:</div>
               <div class="ticket-alias-code" id="ticket-alias-code">DULCE.ATELIER.BA</div>
             </div>
             <button type="button" class="btn-copy-sm" onclick="window.app.copyAlias()" id="btn-copy-alias-ticket">
-              <span>📋</span> Copiar Alias
+              <span>📋</span> Copiar
             </button>
           </div>
 
-          <div style="font-size: 0.76rem; color: var(--text-secondary); line-height: 1.4;">
-            <div><strong>Titular:</strong> Dulce Atelier Pastelería Artesanal</div>
-            <div><strong>Cuenta:</strong> Mercado Pago / Banco Galicia</div>
+          <!-- Fila CVU con botón copiar -->
+          <div class="ticket-alias-value-row">
+            <div>
+              <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700;">CVU:</div>
+              <div class="ticket-alias-code" style="font-size: 0.85rem;" id="ticket-cvu-code">0000003100012345678901</div>
+            </div>
+            <button type="button" class="btn-copy-sm" onclick="window.app.copyCVU()" id="btn-copy-cvu-ticket">
+              <span>📋</span> Copiar
+            </button>
           </div>
 
           <div class="ticket-amount-row">
@@ -473,32 +486,37 @@
           </div>
         </div>
 
-        <!-- Cash Details (if Cash) -->
+        <!-- Efectivo -->
         <div id="ticket-cash-details" style="display: none; background: #F4FBF7; border: 1.5px dashed #2A9D8F; border-radius: var(--radius-md); padding: 14px; margin-bottom: 14px; text-align: left; font-size: 0.85rem;">
           <div style="font-weight: 800; color: #2A9D8F; margin-bottom: 4px;">💵 Pago en Efectivo al recibir o retirar:</div>
           <p style="color: var(--text-secondary); margin: 0;">
-            Abonarás el total exacto de <strong id="ticket-cash-amount">$0</strong> en mano. ¡Por favor ten el dinero preparado!
+            Abonarás el total de <strong id="ticket-cash-amount">$0</strong> en mano. ¡Por favor ten el cambio listo!
           </p>
         </div>
 
-        <!-- WhatsApp Button to Send Payment Proof -->
-        <a id="ticket-whatsapp-proof-btn" href="#" target="_blank" class="btn-primary btn-whatsapp" style="text-decoration: none; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <!-- Botón Verde Principal: Enviar Comprobante / Ya transferí -->
+        <a id="ticket-whatsapp-proof-btn" href="#" target="_blank" class="btn-primary btn-whatsapp" style="text-decoration: none; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
           <span style="font-size: 1.3rem;">📲</span>
-          <span>Enviar comprobante por WhatsApp</span>
+          <span id="ticket-btn-text">Ya transferí, enviar comprobante</span>
         </a>
 
-        <!-- Local Phone & Direct Link -->
+        <!-- Tiempo estimado y contacto directo como ByronCode -->
+        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; color: var(--text-secondary); margin: 6px 0 12px;">
+          <span>🛵 Tiempo estimado de entrega:</span>
+          <strong style="color: var(--text-main);">40 a 60 min</strong>
+        </div>
+
         <div class="ticket-contact-footer">
           <div style="font-size: 0.78rem; color: var(--text-muted);">
-            ¿Tienes alguna consulta o quieres avisar algo?
+            Recuerda enviar el comprobante a nuestro WhatsApp:
           </div>
           <a href="https://wa.me/5491156192616" target="_blank" class="phone-link-pill">
-            <span>💬</span> WhatsApp Oficial: <strong>11 5619-2616</strong>
+            <span>💬</span> <strong>+54 9 11 5619-2616</strong>
           </a>
         </div>
 
         <button type="button" class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="window.app.closeModal('order-success-modal')">
-          Volver a la Tienda / Hacer otro pedido
+          Volver al Menú / Hacer otro pedido
         </button>
       </div>
     </div>
