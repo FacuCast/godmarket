@@ -180,7 +180,7 @@ class DulceAtelierApp {
     if (checkoutForm) {
       checkoutForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
+
         // 1. Validar que el carrito no esté vacío
         if (window.cartManager.getItemCount() === 0) {
           this.showToast("⚠️ Tu carrito está vacío. Elige algún producto primero.");
@@ -448,7 +448,7 @@ class DulceAtelierApp {
     const flavorChips = document.querySelectorAll('#modal-flavor-chips .flavor-chip');
     const hiddenFlavor = document.getElementById('modal-selected-flavor');
     if (hiddenFlavor) hiddenFlavor.value = 'Dulce de Leche';
-    
+
     flavorChips.forEach((chip, i) => {
       chip.classList.toggle('active', i === 0);
       chip.onclick = () => {

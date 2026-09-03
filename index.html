@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Dulce Atelier | Pastelería Artesanal, Desayunos & Meriendas</title>
-  <meta name="description" content="Pide las mejores tortas artesanales, desayunos sorpresa y meriendas gourmet con entrega a domicilio o retiro. Pedido directo a WhatsApp.">
+  <meta name="description"
+    content="Pide las mejores tortas artesanales, desayunos sorpresa y meriendas gourmet con entrega a domicilio o retiro. Pedido directo a WhatsApp.">
   <meta name="theme-color" content="#D9536F">
 
   <!-- Open Graph / WhatsApp / Facebook Link Preview Card (HD High-Contrast Logo) -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="🍰 Dulce Atelier | Pastelería Artesanal & Desayunos">
-  <meta property="og:description" content="Pide las mejores tortas artesanales, desayunos sorpresa y meriendas gourmet con entrega a domicilio. ¡Haz tu pedido directo a WhatsApp!">
-  <meta property="og:image" content="https://res.cloudinary.com/dz6apjevd/image/upload/f_png,q_auto:best,w_800,h_800/v1788225590/pasteleria_branding/dulce_atelier_og_hd.png">
-  <meta property="og:image:secure_url" content="https://res.cloudinary.com/dz6apjevd/image/upload/f_png,q_auto:best,w_800,h_800/v1788225590/pasteleria_branding/dulce_atelier_og_hd.png">
+  <meta property="og:description"
+    content="Pide las mejores tortas artesanales, desayunos sorpresa y meriendas gourmet con entrega a domicilio. ¡Haz tu pedido directo a WhatsApp!">
+  <meta property="og:image"
+    content="https://res.cloudinary.com/dz6apjevd/image/upload/f_png,q_auto:best,w_800,h_800/v1788225590/pasteleria_branding/dulce_atelier_og_hd.png">
+  <meta property="og:image:secure_url"
+    content="https://res.cloudinary.com/dz6apjevd/image/upload/f_png,q_auto:best,w_800,h_800/v1788225590/pasteleria_branding/dulce_atelier_og_hd.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="800">
   <meta property="og:image:height" content="800">
@@ -20,8 +25,10 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="🍰 Dulce Atelier | Pastelería Artesanal & Desayunos">
-  <meta name="twitter:description" content="Pide las mejores tortas artesanales, desayunos sorpresa y meriendas gourmet con entrega a domicilio. ¡Haz tu pedido directo a WhatsApp!">
-  <meta name="twitter:image" content="https://res.cloudinary.com/dz6apjevd/image/upload/f_png,q_auto:best,w_800,h_800/v1788225590/pasteleria_branding/dulce_atelier_og_hd.png">
+  <meta name="twitter:description"
+    content="Pide las mejores tortas artesanales, desayunos sorpresa y meriendas gourmet con entrega a domicilio. ¡Haz tu pedido directo a WhatsApp!">
+  <meta name="twitter:image"
+    content="https://res.cloudinary.com/dz6apjevd/image/upload/f_png,q_auto:best,w_800,h_800/v1788225590/pasteleria_branding/dulce_atelier_og_hd.png">
 
   <!-- PWA & Mobile Web App Meta -->
   <link rel="manifest" href="manifest.json">
@@ -37,6 +44,7 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/responsive.css">
 </head>
+
 <body>
 
   <!-- Toast Notification Container -->
@@ -49,7 +57,8 @@
     <header class="app-header">
       <div class="header-top">
         <div class="brand-wrapper">
-          <img src="assets/images/logo.svg" alt="Dulce Atelier Logo" class="brand-logo-img" style="width: 44px; height: 44px; border-radius: 12px; object-fit: cover;">
+          <img src="assets/images/logo.svg" alt="Dulce Atelier Logo" class="brand-logo-img"
+            style="width: 44px; height: 44px; border-radius: 12px; object-fit: cover;">
           <div class="brand-info">
             <h1>Dulce Atelier</h1>
             <span>Pastelería & Desayunos</span>
@@ -60,17 +69,21 @@
           <button class="icon-btn" onclick="window.app.openModal('admin-product-modal')" title="Agregar Producto">
             ➕
           </button>
-          <button class="icon-btn desktop-cart-btn" style="position: relative;" onclick="window.app.openModal('cart-drawer-modal')" title="Ver Carrito">
+          <button class="icon-btn desktop-cart-btn" style="position: relative;"
+            onclick="window.app.openModal('cart-drawer-modal')" title="Ver Carrito">
             🛍️
-            <span id="header-cart-badge" class="badge-count" style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.65rem; padding: 1px 6px;">0</span>
+            <span id="header-cart-badge" class="badge-count"
+              style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.65rem; padding: 1px 6px;">0</span>
           </button>
         </div>
       </div>
 
       <!-- Info bar: Status & Hours -->
-      <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 10px; padding: 4px 8px; background: var(--bg-surface-secondary); border-radius: var(--radius-xs);">
+      <div
+        style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 10px; padding: 4px 8px; background: var(--bg-surface-secondary); border-radius: var(--radius-xs);">
         <div style="display: flex; align-items: center; gap: 6px;">
-          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2A9D8F; animation: pulseGlow 2s infinite;"></span>
+          <span
+            style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2A9D8F; animation: pulseGlow 2s infinite;"></span>
           <strong style="color: #2A9D8F;">Abierto Ahora</strong> • 08:30 a 20:00 hs
         </div>
         <div style="color: var(--primary); font-weight: 700;">
@@ -91,15 +104,18 @@
       <!-- Realtime Search Bar -->
       <div class="search-wrapper">
         <span class="search-icon">🔍</span>
-        <input type="text" id="main-search-input" class="search-input" placeholder="Buscar tortas, desayunos, porciones..." autocomplete="off">
+        <input type="text" id="main-search-input" class="search-input"
+          placeholder="Buscar tortas, desayunos, porciones..." autocomplete="off">
         <span id="search-clear-btn" class="search-clear">✖</span>
       </div>
     </header>
 
     <!-- PWA Install Banner Pill (Visible if installable) -->
-    <div id="pwa-install-pill" style="display: none; margin: 10px 16px 0; background: var(--accent-mint-light); border: 1px solid var(--accent-mint); padding: 8px 14px; border-radius: var(--radius-sm); align-items: center; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #2B1E1A;">
+    <div id="pwa-install-pill"
+      style="display: none; margin: 10px 16px 0; background: var(--accent-mint-light); border: 1px solid var(--accent-mint); padding: 8px 14px; border-radius: var(--radius-sm); align-items: center; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #2B1E1A;">
       <span>📲 ¡Instala nuestra App en tu celular!</span>
-      <button onclick="window.app.installPWA()" style="background: var(--accent-mint); color: #fff; padding: 4px 10px; border-radius: var(--radius-full); font-weight: 700; font-size: 0.75rem;">
+      <button onclick="window.app.installPWA()"
+        style="background: var(--accent-mint); color: #fff; padding: 4px 10px; border-radius: var(--radius-full); font-weight: 700; font-size: 0.75rem;">
         Instalar
       </button>
     </div>
@@ -125,8 +141,10 @@
     </main>
 
     <!-- Business Info & Guarantee Footer -->
-    <footer style="margin: 30px 16px 20px; padding: 20px; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-light); text-align: center;">
-      <img src="assets/images/logo.svg" alt="Dulce Atelier" style="width: 58px; height: 58px; margin: 0 auto 10px; border-radius: 50%;">
+    <footer
+      style="margin: 30px 16px 20px; padding: 20px; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-light); text-align: center;">
+      <img src="assets/images/logo.svg" alt="Dulce Atelier"
+        style="width: 58px; height: 58px; margin: 0 auto 10px; border-radius: 50%;">
       <h4 class="font-serif" style="font-size: 1.1rem; margin-bottom: 4px;">Dulce Atelier Pastelería</h4>
       <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
         Elaboración 100% artesanal con ingredientes premium.<br>
@@ -134,12 +152,14 @@
       </p>
 
       <div style="display: flex; justify-content: center; gap: 14px; margin-bottom: 14px;">
-        <a href="https://wa.me/5491156192616" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: var(--whatsapp-green); color: #fff; padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700;">
+        <a href="https://wa.me/5491156192616" target="_blank"
+          style="display: inline-flex; align-items: center; gap: 6px; background: var(--whatsapp-green); color: #fff; padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700;">
           <span>💬 WhatsApp: 11 5619-2616</span>
         </a>
       </div>
 
-      <div style="font-size: 0.72rem; color: var(--text-muted); border-top: 1px dashed var(--border-light); padding-top: 12px;">
+      <div
+        style="font-size: 0.72rem; color: var(--text-muted); border-top: 1px dashed var(--border-light); padding-top: 12px;">
         💳 Aceptamos Mercado Pago, Transferencias y Efectivo.<br>
         © 2026 Dulce Atelier. Todos los derechos reservados.
       </div>
@@ -162,7 +182,8 @@
 
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
-      <button class="nav-item active" onclick="window.app.setCategory('todos'); window.scrollTo({top:0, behavior:'smooth'});">
+      <button class="nav-item active"
+        onclick="window.app.setCategory('todos'); window.scrollTo({top:0, behavior:'smooth'});">
         <span class="nav-icon">🏠</span>
         <span>Inicio</span>
       </button>
@@ -177,7 +198,8 @@
       <button class="nav-item" style="position: relative;" onclick="window.app.openModal('cart-drawer-modal')">
         <span class="nav-icon">🛍️</span>
         <span>Carrito</span>
-        <span id="nav-cart-badge" class="badge-count" style="display: none; position: absolute; top: 2px; right: 12px; font-size: 0.65rem; padding: 1px 5px;">0</span>
+        <span id="nav-cart-badge" class="badge-count"
+          style="display: none; position: absolute; top: 2px; right: 12px; font-size: 0.65rem; padding: 1px 5px;">0</span>
       </button>
     </nav>
 
@@ -189,7 +211,8 @@
        ========================================================================= -->
 
   <!-- 1. Product Detail Bottom Sheet Modal -->
-  <div id="product-detail-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('product-detail-modal')">
+  <div id="product-detail-modal" class="modal-overlay"
+    onclick="if(event.target === this) window.app.closeModal('product-detail-modal')">
     <div class="bottom-sheet">
       <div class="drag-handle"></div>
       <button class="sheet-close-btn" onclick="window.app.closeModal('product-detail-modal')">✕</button>
@@ -202,9 +225,11 @@
         <div>
           <h3 id="modal-product-title" class="modal-product-title font-serif"></h3>
           <div id="modal-product-price" class="modal-product-price"></div>
-          <p id="modal-product-desc" style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 12px;"></p>
-          
-          <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
+          <p id="modal-product-desc"
+            style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 12px;"></p>
+
+          <div
+            style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
             <span>📏 Rendimiento:</span>
             <strong id="modal-product-portion" style="color: var(--text-main);"></strong>
           </div>
@@ -226,11 +251,13 @@
 
             <div class="form-group">
               <label class="form-label" for="modal-dedication">✍️ Dedicatoria en placa de chocolate (Opcional):</label>
-              <input type="text" id="modal-dedication" class="custom-input" placeholder="Ej: ¡Feliz Cumpleaños Sofi!" maxlength="50">
+              <input type="text" id="modal-dedication" class="custom-input" placeholder="Ej: ¡Feliz Cumpleaños Sofi!"
+                maxlength="50">
             </div>
 
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-              <input type="checkbox" id="modal-candle-checkbox" style="width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
+              <input type="checkbox" id="modal-candle-checkbox"
+                style="width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
               <label for="modal-candle-checkbox" style="font-size: 0.85rem; font-weight: 600; cursor: pointer;">
                 🕯️ Incluir velita de cumpleaños (Sin cargo)
               </label>
@@ -238,7 +265,8 @@
 
             <div class="form-group">
               <label class="form-label" for="modal-note">📝 Aclaración o nota para el pastelero:</label>
-              <input type="text" id="modal-note" class="custom-input" placeholder="Ej: Entregar bien frío / Alergia a nuez...">
+              <input type="text" id="modal-note" class="custom-input"
+                placeholder="Ej: Entregar bien frío / Alergia a nuez...">
             </div>
           </div>
 
@@ -249,7 +277,7 @@
               <span id="modal-qty-val" class="stepper-value">1</span>
               <button id="modal-qty-plus" class="stepper-btn">+</button>
             </div>
-            
+
             <button id="btn-add-modal-cart" class="btn-primary" style="flex: 1;">
               <span>Agregar al Pedido</span>
             </button>
@@ -261,7 +289,8 @@
 
 
   <!-- 2. Cart Drawer Modal -->
-  <div id="cart-drawer-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('cart-drawer-modal')">
+  <div id="cart-drawer-modal" class="modal-overlay"
+    onclick="if(event.target === this) window.app.closeModal('cart-drawer-modal')">
     <div class="bottom-sheet">
       <div class="drag-handle"></div>
       <button class="sheet-close-btn" onclick="window.app.closeModal('cart-drawer-modal')">✕</button>
@@ -289,7 +318,8 @@
           <span id="cart-drawer-total" style="color: var(--primary);">$0</span>
         </div>
 
-        <div style="font-size: 0.72rem; color: var(--accent-mint); font-weight: 600; text-align: center; margin: 6px 0;">
+        <div
+          style="font-size: 0.72rem; color: var(--accent-mint); font-weight: 600; text-align: center; margin: 6px 0;">
           🛵 Envío gratis a partir de $50.000
         </div>
 
@@ -302,7 +332,8 @@
 
 
   <!-- 3. Checkout Modal (WhatsApp Order) -->
-  <div id="checkout-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('checkout-modal')">
+  <div id="checkout-modal" class="modal-overlay"
+    onclick="if(event.target === this) window.app.closeModal('checkout-modal')">
     <div class="bottom-sheet">
       <div class="drag-handle"></div>
       <button class="sheet-close-btn" onclick="window.app.closeModal('checkout-modal')">✕</button>
@@ -349,7 +380,8 @@
 
         <div class="form-group">
           <label class="form-label" for="cust-time">Fecha y Horario preferido de entrega *</label>
-          <input type="text" id="cust-time" class="form-control" placeholder="Ej: Hoy 16:30 hs / Mañana 9:00 hs" required>
+          <input type="text" id="cust-time" class="form-control" placeholder="Ej: Hoy 16:30 hs / Mañana 9:00 hs"
+            required>
           <span class="invalid-feedback">Indica la fecha y franja horaria preferida para recibir tu pedido.</span>
         </div>
 
@@ -390,12 +422,14 @@
         <div id="cash-payment-info" style="display: none;" class="form-group">
           <label class="form-label" for="cust-cash-amount">¿Con cuánto abonas? (Para llevarte cambio):</label>
           <input type="number" id="cust-cash-amount" class="form-control" placeholder="Ej: $50000">
-          <span id="cash-amount-feedback" class="invalid-feedback">El monto ingresado debe ser mayor o igual al total a pagar.</span>
+          <span id="cash-amount-feedback" class="invalid-feedback">El monto ingresado debe ser mayor o igual al total a
+            pagar.</span>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="cust-comments">Observaciones adicionales:</label>
-          <input type="text" id="cust-comments" class="form-control" placeholder="Ej: Tocar timbre de abajo / Dejar en recepción">
+          <input type="text" id="cust-comments" class="form-control"
+            placeholder="Ej: Tocar timbre de abajo / Dejar en recepción">
         </div>
 
         <!-- Submit to WhatsApp Button -->
@@ -405,7 +439,8 @@
         </button>
 
         <p style="text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 8px;">
-          Al hacer clic, se generará tu <strong>Número de Orden</strong> y se enviará el pedido al WhatsApp <strong>1156192616</strong>.
+          Al hacer clic, se generará tu <strong>Número de Orden</strong> y se enviará el pedido al WhatsApp
+          <strong>1156192616</strong>.
         </p>
       </form>
     </div>
@@ -413,15 +448,16 @@
 
 
   <!-- 4. Order Confirmation Ticket Modal (Estilo Exacto ByronCode / Perlato) -->
-  <div id="order-success-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('order-success-modal')">
+  <div id="order-success-modal" class="modal-overlay"
+    onclick="if(event.target === this) window.app.closeModal('order-success-modal')">
     <div class="bottom-sheet" style="max-width: 500px; padding: 26px 20px;">
       <div class="order-ticket">
         <div class="ticket-icon-top">🧁</div>
-        
+
         <div class="ticket-status-pill">
           <span>🟢</span> ¡Orden Registrada con Éxito!
         </div>
-        
+
         <h3 class="font-serif" style="font-size: 1.45rem; margin-bottom: 2px;">Registramos tu orden</h3>
         <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 10px;">
           Tu pedido ya ingresó al sistema y estamos preparando todo.
@@ -430,7 +466,8 @@
         <!-- Número de Orden Destacado -->
         <div class="ticket-order-badge">
           <div>
-            <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Número de Orden</div>
+            <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">
+              Número de Orden</div>
             <div class="ticket-order-num" id="ticket-order-id">#ORD-1041</div>
           </div>
           <button type="button" class="btn-copy-sm" onclick="window.app.copyOrderId()" id="btn-copy-order">
@@ -439,11 +476,13 @@
         </div>
 
         <!-- Resumen de Productos -->
-        <div id="ticket-items-list" style="text-align: left; font-size: 0.82rem; background: var(--bg-surface-secondary); padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 12px; max-height: 120px; overflow-y: auto;">
+        <div id="ticket-items-list"
+          style="text-align: left; font-size: 0.82rem; background: var(--bg-surface-secondary); padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 12px; max-height: 120px; overflow-y: auto;">
           <!-- Dinámico -->
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 4px; font-weight: 800; font-size: 1.05rem; border-bottom: 1px solid var(--border-light); margin-bottom: 14px;">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; padding: 6px 4px; font-weight: 800; font-size: 1.05rem; border-bottom: 1px solid var(--border-light); margin-bottom: 14px;">
           <span>Total a Pagar:</span>
           <span style="color: var(--primary);" id="ticket-order-total">$0</span>
         </div>
@@ -453,7 +492,7 @@
           <div class="ticket-alias-header">
             <span>🏦</span> Para completar el pago, realiza la transferencia:
           </div>
-          
+
           <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 8px;">
             <strong>Titular:</strong> Dulce Atelier Pastelería Artesanal
           </div>
@@ -473,7 +512,8 @@
           <div class="ticket-alias-value-row">
             <div>
               <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700;">CVU:</div>
-              <div class="ticket-alias-code" style="font-size: 0.85rem;" id="ticket-cvu-code">0000003100012345678901</div>
+              <div class="ticket-alias-code" style="font-size: 0.85rem;" id="ticket-cvu-code">0000003100012345678901
+              </div>
             </div>
             <button type="button" class="btn-copy-sm" onclick="window.app.copyCVU()" id="btn-copy-cvu-ticket">
               <span>📋</span> Copiar
@@ -487,21 +527,25 @@
         </div>
 
         <!-- Efectivo -->
-        <div id="ticket-cash-details" style="display: none; background: #F4FBF7; border: 1.5px dashed #2A9D8F; border-radius: var(--radius-md); padding: 14px; margin-bottom: 14px; text-align: left; font-size: 0.85rem;">
-          <div style="font-weight: 800; color: #2A9D8F; margin-bottom: 4px;">💵 Pago en Efectivo al recibir o retirar:</div>
+        <div id="ticket-cash-details"
+          style="display: none; background: #F4FBF7; border: 1.5px dashed #2A9D8F; border-radius: var(--radius-md); padding: 14px; margin-bottom: 14px; text-align: left; font-size: 0.85rem;">
+          <div style="font-weight: 800; color: #2A9D8F; margin-bottom: 4px;">💵 Pago en Efectivo al recibir o retirar:
+          </div>
           <p style="color: var(--text-secondary); margin: 0;">
             Abonarás el total de <strong id="ticket-cash-amount">$0</strong> en mano. ¡Por favor ten el cambio listo!
           </p>
         </div>
 
         <!-- Botón Verde Principal: Enviar Comprobante / Ya transferí -->
-        <a id="ticket-whatsapp-proof-btn" href="#" target="_blank" class="btn-primary btn-whatsapp" style="text-decoration: none; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <a id="ticket-whatsapp-proof-btn" href="#" target="_blank" class="btn-primary btn-whatsapp"
+          style="text-decoration: none; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
           <span style="font-size: 1.3rem;">📲</span>
           <span id="ticket-btn-text">Ya transferí, enviar comprobante</span>
         </a>
 
         <!-- Tiempo estimado y contacto directo como ByronCode -->
-        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; color: var(--text-secondary); margin: 6px 0 12px;">
+        <div
+          style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; color: var(--text-secondary); margin: 6px 0 12px;">
           <span>🛵 Tiempo estimado de entrega:</span>
           <strong style="color: var(--text-main);">40 a 60 min</strong>
         </div>
@@ -515,7 +559,8 @@
           </a>
         </div>
 
-        <button type="button" class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="window.app.closeModal('order-success-modal')">
+        <button type="button" class="btn-secondary" style="width: 100%; margin-top: 10px;"
+          onclick="window.app.closeModal('order-success-modal')">
           Volver al Menú / Hacer otro pedido
         </button>
       </div>
@@ -524,7 +569,8 @@
 
 
   <!-- 5. Admin: Add Product Modal (with Cloudinary Upload) -->
-  <div id="admin-product-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('admin-product-modal')">
+  <div id="admin-product-modal" class="modal-overlay"
+    onclick="if(event.target === this) window.app.closeModal('admin-product-modal')">
     <div class="bottom-sheet">
       <div class="drag-handle"></div>
       <button class="sheet-close-btn" onclick="window.app.closeModal('admin-product-modal')">✕</button>
@@ -542,7 +588,8 @@
           <div class="upload-prompt">
             <span style="font-size: 2rem;">📸</span>
             <div style="font-weight: 700; font-size: 0.85rem; margin-top: 4px;">Subir Foto del Pastel</div>
-            <span style="font-size: 0.72rem; color: var(--text-muted);">Toca aquí para seleccionar una imagen (Cloudinary)</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Toca aquí para seleccionar una imagen
+              (Cloudinary)</span>
           </div>
         </div>
 
@@ -581,7 +628,8 @@
 
         <div class="form-group">
           <label class="form-label" for="prod-desc">Descripción detallada *</label>
-          <textarea id="prod-desc" class="form-control" rows="3" placeholder="Describe los ingredientes, texturas y detalles..." required></textarea>
+          <textarea id="prod-desc" class="form-control" rows="3"
+            placeholder="Describe los ingredientes, texturas y detalles..." required></textarea>
         </div>
 
         <button type="submit" id="btn-save-product" class="btn-primary">
@@ -593,7 +641,8 @@
 
 
   <!-- 6. Cloudinary Configuration Modal -->
-  <div id="cloudinary-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('cloudinary-modal')">
+  <div id="cloudinary-modal" class="modal-overlay"
+    onclick="if(event.target === this) window.app.closeModal('cloudinary-modal')">
     <div class="bottom-sheet">
       <div class="drag-handle"></div>
       <button class="sheet-close-btn" onclick="window.app.closeModal('cloudinary-modal')">✕</button>
@@ -604,7 +653,8 @@
       </div>
 
       <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
-        Tu cuenta de Cloudinary está configurada y conectada de forma segura con tu Cloud Name <strong>dz6apjevd</strong>.
+        Tu cuenta de Cloudinary está configurada y conectada de forma segura con tu Cloud Name
+        <strong>dz6apjevd</strong>.
       </p>
 
       <form id="cloudinary-config-form">
@@ -633,4 +683,5 @@
   <script src="js/admin.js"></script>
   <script src="js/app.js"></script>
 </body>
+
 </html>
