@@ -1194,3 +1194,70 @@
   50% { transform: scale(1.2) rotate(3deg); filter: drop-shadow(0 0 10px #FFD166); }
   100% { transform: scale(0.95) rotate(-2deg); filter: drop-shadow(0 0 5px #F4A261); }
 }
+
+/* --------------------------------------------------------------------------
+   10. Interactive Delivery Map & Red Pin Picker
+   -------------------------------------------------------------------------- */
+.btn-map-toggle {
+  background: var(--bg-surface-secondary);
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-map-toggle:hover {
+  background: var(--primary-light);
+  transform: translateY(-1px);
+}
+
+.btn-gps-locate {
+  background: #fff;
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.btn-gps-locate:hover {
+  background: var(--accent-mint-light);
+  color: #2A9D8F;
+  border-color: #2A9D8F;
+}
+
+.custom-red-pin {
+  background: none !important;
+  border: none !important;
+}
+
+.map-red-pin-wrapper {
+  animation: bounceMapPin 1.4s ease-in-out infinite alternate;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+}
+
+.map-red-pin-wrapper:active {
+  cursor: grabbing;
+}
+
+@keyframes bounceMapPin {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-7px) scale(1.05); }
+}

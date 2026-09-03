@@ -39,6 +39,9 @@
   <meta name="apple-mobile-web-app-title" content="Dulce Atelier">
   <link rel="apple-touch-icon" href="assets/icons/icon.svg">
 
+  <!-- Leaflet Maps CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
   <!-- Stylesheets (Pure CSS) -->
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
@@ -380,9 +383,28 @@
         <!-- Address group (hidden if pickup) -->
         <div id="delivery-address-group">
           <div class="form-group">
-            <label class="form-label" for="cust-address">Dirección de Entrega (Calle y Altura) *</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label class="form-label" for="cust-address" style="margin-bottom: 0;">Dirección de Entrega (Calle y Altura) *</label>
+              <button type="button" id="btn-toggle-map" class="btn-map-toggle" onclick="window.app.toggleMapPicker()">
+                🗺️ Marcar en el Mapa
+              </button>
+            </div>
             <input type="text" id="cust-address" class="form-control" placeholder="Ej: Av. del Libertador 4500">
             <span class="invalid-feedback">Ingresa la calle y altura para realizar el envío a domicilio.</span>
+          </div>
+
+          <!-- Contenedor del Mapa Interactivo con Pin Rojo -->
+          <div id="checkout-map-container" style="display: none; margin-bottom: 14px; background: var(--bg-surface-secondary); padding: 10px; border-radius: var(--radius-md); border: 1.5px solid var(--border-light);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.78rem;">
+              <span style="color: var(--text-secondary); font-weight: 600;">📍 Mueve el pin rojo para marcar tu dirección</span>
+              <button type="button" class="btn-gps-locate" onclick="window.app.locateUserGPS()" title="Ubicarme por GPS">
+                🎯 Mi ubicación
+              </button>
+            </div>
+            <div id="delivery-map" style="width: 100%; height: 210px; border-radius: var(--radius-sm); z-index: 1;"></div>
+            <div id="map-address-status" style="margin-top: 8px; font-size: 0.76rem; color: var(--primary); font-weight: 700; min-height: 18px;">
+              📍 Mueve el pin para capturar la dirección exacta
+            </div>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -693,6 +715,9 @@
       </form>
     </div>
   </div>
+
+  <!-- Leaflet Map JS Engine -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Pure Standard JavaScript Scripts -->
   <script src="js/products.js"></script>

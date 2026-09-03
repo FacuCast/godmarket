@@ -9,6 +9,8 @@ class DulceAtelierApp {
     this.selectedProductForModal = null;
     this.favorites = this.loadFavorites();
     this.deferredPrompt = null;
+    this.deliveryMap = null;
+    this.deliveryMarker = null;
 
     document.addEventListener('DOMContentLoaded', () => this.init());
   }
@@ -811,6 +813,173 @@ class DulceAtelierApp {
       toast.style.transition = 'all 0.3s ease';
       setTimeout(() => toast.remove(), 300);
     }, 2800);
+  }
+
+  /* =========================================================================
+     MAPA INTERACTIVO Y CAPTURA DE DIRECCIÓN POR PIN ROJO (LEAFLET / OSM)
+     ========================================================================= */
+  toggleMapPicker() {
+    const mapContainer = document.getElementById('checkout-map-container');
+    const toggleBtn = document.getElementById('btn-toggle-map');
+    if (!mapContainer) return;
+
+    const isVisible = mapContainer.style.display === 'block';
+    if (isVisible) {
+      mapContainer.style.display = 'none';
+      if (toggleBtn) toggleBtn.innerHTML = '🗺️ Marcar en el Mapa';
+    } else {
+      mapContainer.style.display = 'block';
+      if (toggleBtn) toggleBtn.innerHTML = '✕ Ocultar Mapa';
+
+      this.initDeliveryMap();
+      setTimeout(() => {
+        if (this.deliveryMap) {
+          this.deliveryMap.invalidateSize();
+        }
+      }, 200);
+    }
+  }
+
+  initDeliveryMap() {
+    if (this.deliveryMap) return;
+    const mapEl = document.getElementById('delivery-map');
+    if (!mapEl || typeof L === 'undefined') return;
+
+    // Coordenadas por defecto (Buenos Aires / Centro)
+    const defaultLat = -34.6037;
+    const defaultLng = -58.3816;
+
+    this.deliveryMap = L.map('delivery-map', {
+      center: [defaultLat, defaultLng],
+      zoom: 14,
+      zoomControl: true
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(this.deliveryMap);
+
+    const redPinSvg = `
+      <div class="map-red-pin-wrapper">
+        <svg viewBox="0 0 24 24" width="38" height="38" fill="#D9536F" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+      </div>
+    `;
+
+    const redIcon = L.divIcon({
+      className: 'custom-red-pin',
+      html: redPinSvg,
+      iconSize: [38, 38],
+      iconAnchor: [19, 36]
+    });
+
+    this.deliveryMarker = L.marker([defaultLat, defaultLng], {
+      draggable: true,
+      icon: redIcon
+    }).addTo(this.deliveryMap);
+
+    // Evento al arrastrar el pin rojo
+    this.deliveryMarker.on('dragend', () => {
+      const pos = this.deliveryMarker.getLatLng();
+      this.reverseGeocode(pos.lat, pos.lng);
+    });
+
+    // Evento al tocar en cualquier punto del mapa
+    this.deliveryMap.on('click', (e) => {
+      this.deliveryMarker.setLatLng(e.latlng);
+      this.reverseGeocode(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Si el navegador permite geolocalización, centramos automáticamente
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          if (this.deliveryMap && this.deliveryMarker) {
+            this.deliveryMap.setView([latitude, longitude], 16);
+            this.deliveryMarker.setLatLng([latitude, longitude]);
+            this.reverseGeocode(latitude, longitude);
+          }
+        },
+        () => {}
+      );
+    }
+  }
+
+  locateUserGPS() {
+    if (!navigator.geolocation) {
+      this.showToast('⚠️ Tu navegador no soporta geolocalización.');
+      return;
+    }
+
+    const statusEl = document.getElementById('map-address-status');
+    if (statusEl) statusEl.textContent = '📡 Localizando tu posición GPS...';
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        if (this.deliveryMap && this.deliveryMarker) {
+          this.deliveryMap.flyTo([latitude, longitude], 17, { duration: 1.2 });
+          this.deliveryMarker.setLatLng([latitude, longitude]);
+          this.reverseGeocode(latitude, longitude);
+        }
+      },
+      (err) => {
+        console.warn('Geolocation error:', err);
+        this.showToast('⚠️ No se pudo obtener la ubicación GPS. Mueve el pin rojo manualmente.');
+        if (statusEl) statusEl.textContent = '📍 Mueve el pin rojo para marcar tu dirección';
+      },
+      { timeout: 8000, enableHighAccuracy: true }
+    );
+  }
+
+  async reverseGeocode(lat, lng) {
+    const statusEl = document.getElementById('map-address-status');
+    if (statusEl) statusEl.textContent = '⏳ Identificando calle y altura...';
+
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+        headers: { 'Accept-Language': 'es' }
+      });
+      const data = await res.json();
+
+      if (data && data.address) {
+        const addr = data.address;
+        const street = addr.road || addr.pedestrian || addr.street || addr.footway || '';
+        const number = addr.house_number || '';
+        const zone = addr.suburb || addr.neighbourhood || addr.city_district || addr.quarter || addr.city || '';
+
+        let fullAddress = street;
+        if (street && number) {
+          fullAddress = `${street} ${number}`;
+        } else if (!street) {
+          fullAddress = data.display_name.split(',')[0];
+        }
+
+        const addressInput = document.getElementById('cust-address');
+        const zoneInput = document.getElementById('cust-zone');
+
+        if (addressInput && fullAddress) {
+          addressInput.value = fullAddress;
+          addressInput.classList.remove('is-invalid');
+        }
+        if (zoneInput && zone) {
+          zoneInput.value = zone;
+        }
+
+        if (statusEl) {
+          statusEl.innerHTML = `✅ <strong>Dirección tomada:</strong> ${fullAddress} ${zone ? `(${zone})` : ''}`;
+        }
+        this.showToast(`📍 Dirección tomada: ${fullAddress}`);
+      } else {
+        if (statusEl) statusEl.textContent = '📍 Ubicación seleccionada en el mapa';
+      }
+    } catch (err) {
+      console.warn('Error en reverse geocoding:', err);
+      if (statusEl) statusEl.textContent = '📍 Coordenadas tomadas (Verifica la altura)';
+    }
   }
 
   copyToClipboard(text, successMsg) {
