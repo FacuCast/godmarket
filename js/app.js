@@ -22,6 +22,10 @@ class DulceAtelierApp {
     this.renderProducts();
     this.updateCartUI();
     this.updateOrdersBadges();
+    this.updateStoreStatusUI();
+
+    // Actualizar estado del horario de la tienda cada minuto
+    setInterval(() => this.updateStoreStatusUI(), 60000);
 
     // Suscribirse a cambios en el carrito
     window.cartManager.subscribe(() => this.updateCartUI());
@@ -281,6 +285,11 @@ class DulceAtelierApp {
           timeInput.classList.add('is-invalid');
           isValid = false;
           if (!firstInvalidField) firstInvalidField = timeInput;
+        } else if (!this.isStoreOpen() && (timeVal.toLowerCase().includes('ahora') || timeVal.toLowerCase().includes('antes posible'))) {
+          timeInput.classList.add('is-invalid');
+          isValid = false;
+          if (!firstInvalidField) firstInvalidField = timeInput;
+          this.showToast("🌙 El local está cerrado (08:30 a 20:00 hs). Por favor elige un horario programado.");
         } else {
           timeInput.classList.remove('is-invalid');
         }
@@ -891,6 +900,96 @@ class DulceAtelierApp {
     this.openModal('orders-history-modal');
   }
 
+  getArgentinaTime() {
+    const now = new Date();
+    const options = { timeZone: 'America/Argentina/Buenos_Aires', hour12: false, hour: 'numeric', minute: 'numeric' };
+    const formatter = new Intl.DateTimeFormat('es-AR', options);
+    const parts = formatter.formatToParts(now);
+    const hour = parseInt(parts.find(p => p.type === 'hour')?.value || '0', 10);
+    const minute = parseInt(parts.find(p => p.type === 'minute')?.value || '0', 10);
+    return { hour, minute, totalMinutes: hour * 60 + minute };
+  }
+
+  isStoreOpen() {
+    const { totalMinutes } = this.getArgentinaTime();
+    // Horario de atención: 08:30 (510 min) a 20:00 (1200 min) hora Argentina
+    return totalMinutes >= 510 && totalMinutes < 1200;
+  }
+
+  updateStoreStatusUI() {
+    const dot = document.getElementById('store-status-dot');
+    const info = document.getElementById('store-status-info');
+    const tag = document.getElementById('store-delivery-tag');
+    if (!dot || !info) return;
+
+    const isOpen = this.isStoreOpen();
+    const { hour, minute } = this.getArgentinaTime();
+
+    if (isOpen) {
+      dot.style.background = '#2A9D8F';
+      dot.style.animation = 'pulseGlow 2s infinite';
+      info.innerHTML = '<strong style="color: #2A9D8F;">Abierto Ahora</strong> • 08:30 a 20:00 hs';
+      if (tag) {
+        tag.textContent = '🛵 Envíos en el día';
+        tag.style.color = 'var(--primary)';
+      }
+    } else {
+      dot.style.background = '#E63946';
+      dot.style.animation = 'none';
+      const isMorning = hour < 8 || (hour === 8 && minute < 30);
+      const nextOpen = isMorning ? 'Abre hoy 08:30 hs' : 'Abre mañana 08:30 hs';
+      info.innerHTML = `<strong style="color: #E63946;">Cerrado Ahora</strong> • ${nextOpen}`;
+      if (tag) {
+        tag.textContent = '🌙 Pedidos programados';
+        tag.style.color = '#E65100';
+      }
+    }
+  }
+
+  setupCheckoutStoreHours() {
+    const isOpen = this.isStoreOpen();
+    const banner = document.getElementById('checkout-store-closed-banner');
+    const chipNow = document.getElementById('chip-time-now');
+    const chipAfternoon = document.getElementById('chip-time-afternoon');
+    const chipTomorrow = document.getElementById('chip-time-tomorrow');
+    const timeInput = document.getElementById('cust-time');
+    const { hour, minute } = this.getArgentinaTime();
+
+    if (banner) banner.style.display = isOpen ? 'none' : 'block';
+
+    if (isOpen) {
+      if (chipNow) {
+        chipNow.style.display = 'inline-flex';
+        chipNow.classList.add('active');
+      }
+      if (chipTomorrow) chipTomorrow.classList.remove('active');
+      if (timeInput && (!timeInput.value || timeInput.value.includes('Mañana') || timeInput.value.includes('desde 08:30'))) {
+        timeInput.value = 'Lo antes posible (Ahora)';
+      }
+    } else {
+      // Local cerrado en horario argentino
+      if (chipNow) {
+        chipNow.style.display = 'none';
+        chipNow.classList.remove('active');
+      }
+
+      const isMorning = hour < 8 || (hour === 8 && minute < 30);
+      if (isMorning) {
+        if (chipAfternoon) {
+          chipAfternoon.dataset.time = 'Hoy desde 08:30 hs';
+          chipAfternoon.innerHTML = '☀️ Hoy desde 08:30 hs';
+          chipAfternoon.classList.add('active');
+        }
+        if (timeInput) timeInput.value = 'Hoy desde 08:30 hs';
+      } else {
+        if (chipTomorrow) {
+          chipTomorrow.classList.add('active');
+        }
+        if (timeInput) timeInput.value = 'Mañana por la mañana (09:00 a 12:30 hs)';
+      }
+    }
+  }
+
   renderOrdersHistoryList() {
     const container = document.getElementById('orders-history-list');
     if (!container) return;
@@ -903,7 +1002,7 @@ class DulceAtelierApp {
           <div class="orders-empty-icon">🧁</div>
           <h4 class="font-serif" style="font-size: 1.15rem; margin-bottom: 6px;">No tienes pedidos registrados</h4>
           <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.4;">
-            Cuando realices un pedido en Dulce Atelier, quedará guardado automáticamente en tu celular con su seguimiento en vivo.
+            Cuando realices un pedido en Dulce Atelier, quedará guardado automáticamente en tu celular para ver tu historial y comprobantes.
           </p>
           <button type="button" class="btn-primary" onclick="window.app.closeModal('orders-history-modal')" style="width: auto; padding: 8px 20px; margin: 0 auto; font-size: 0.85rem;">
             Ver Menú y Elegir Delicias
@@ -913,42 +1012,14 @@ class DulceAtelierApp {
       return;
     }
 
-    const now = Date.now();
-
     container.innerHTML = history.map(order => {
-      const orderTime = order.createdAt ? new Date(order.createdAt).getTime() : now;
-      const elapsedMinutes = Math.floor((now - orderTime) / 60000);
-
-      let step1Class = 'active';
-      let step2Class = '';
-      let step3Class = '';
-      let statusBadge = '<span style="background: #E8F5E9; color: #2E7D32; padding: 3px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 700;">🟢 En Preparación</span>';
-
-      const isPickup = order.formData?.address?.includes('Retiro') || order.formData?.address === 'Retiro en Tienda';
-      const step3Label = isPickup ? 'Listo para retirar' : 'En camino';
-
-      if (elapsedMinutes < 40) {
-        step1Class = 'active';
-        step2Class = 'current';
-        statusBadge = '<span style="background: #E8F5E9; color: #2E7D32; padding: 3px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 700;">🧁 En Cocina / Preparación</span>';
-      } else if (elapsedMinutes < 90) {
-        step1Class = 'active';
-        step2Class = 'active';
-        step3Class = 'current';
-        statusBadge = `<span style="background: #E3F2FD; color: #1565C0; padding: 3px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 700;">🛵 ${step3Label}</span>`;
-      } else {
-        step1Class = 'active';
-        step2Class = 'active';
-        step3Class = 'active';
-        statusBadge = '<span style="background: #F3E5F5; color: #7B1FA2; padding: 3px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 700;">✨ Entregado / Listo</span>';
-      }
-
       const itemsSummary = (order.items || []).map(it => 
         `<strong>${it.quantity}x</strong> ${this.escapeHTML(it.product?.name || 'Delicia')}${it.customization?.flavor ? ` (${this.escapeHTML(it.customization.flavor)})` : ''}`
       ).join(', ');
 
       const dateStr = order.dateFormatted || (order.createdAt ? new Date(order.createdAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Reciente');
 
+      const isPickup = order.formData?.address?.includes('Retiro') || order.formData?.address === 'Retiro en Tienda';
       const addressText = isPickup 
         ? '🏪 Retiro en Tienda'
         : `📍 ${this.escapeHTML(order.formData?.address || 'Envío a Domicilio')}${order.formData?.zone ? ` (${this.escapeHTML(order.formData.zone)})` : ''}`;
@@ -959,7 +1030,6 @@ class DulceAtelierApp {
             <div>
               <div class="order-history-id">
                 <span>#${this.escapeHTML(order.orderId)}</span>
-                ${statusBadge}
               </div>
               <div class="order-history-date">📅 ${dateStr}</div>
             </div>
@@ -968,26 +1038,10 @@ class DulceAtelierApp {
             </button>
           </div>
 
-          <!-- Stepper de Seguimiento en Vivo -->
-          <div class="order-tracking-stepper">
-            <div class="tracking-step ${step1Class}">
-              <div class="tracking-dot">✓</div>
-              <div class="tracking-label">Recibido</div>
-            </div>
-            <div class="tracking-step ${step2Class}">
-              <div class="tracking-dot">${step2Class === 'active' ? '✓' : '2'}</div>
-              <div class="tracking-label">En preparación</div>
-            </div>
-            <div class="tracking-step ${step3Class}">
-              <div class="tracking-dot">${step3Class === 'active' ? '✓' : '3'}</div>
-              <div class="tracking-label">${step3Label}</div>
-            </div>
-          </div>
-
           <div class="order-history-items-summary">
-            <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 2px; text-transform: uppercase; font-weight: 700;">Productos:</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 3px; text-transform: uppercase; font-weight: 700;">Productos:</div>
             <div>${itemsSummary || 'Detalle del pedido'}</div>
-            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 5px;">
+            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 6px; border-top: 1px dashed var(--border-light); padding-top: 4px;">
               ${addressText} • 🕒 ${this.escapeHTML(order.formData?.deliveryTime || 'Horario coordinado')}
             </div>
           </div>
@@ -1003,7 +1057,7 @@ class DulceAtelierApp {
                 <span>🧾</span> Ver Ticket
               </button>
               <button type="button" class="btn-order-action btn-order-whatsapp" onclick="window.app.trackOrderWhatsApp('${this.escapeHTML(order.orderId)}')">
-                <span>💬</span> Consultar
+                <span>💬</span> WhatsApp
               </button>
             </div>
           </div>
@@ -1028,7 +1082,7 @@ class DulceAtelierApp {
     if (!order) return;
 
     const name = order.formData?.fullName || '';
-    const text = `¡Hola Dulce Atelier! ✦ Quisiera consultar el estado de mi pedido #${order.orderId}${name ? ` a nombre de ${name}` : ''}. ¡Muchas gracias!`;
+    const text = `¡Hola Dulce Atelier! ✦ Me comunico por mi pedido #${order.orderId}${name ? ` a nombre de ${name}` : ''}. ¡Muchas gracias!`;
     const url = window.checkoutHandler.buildWhatsAppUrl(text);
     window.open(url, '_blank');
   }
@@ -1058,6 +1112,9 @@ class DulceAtelierApp {
     if (modal) {
       if (modalId === 'cart-drawer-modal' || modalId === 'checkout-modal') {
         this.updateCartUI();
+      }
+      if (modalId === 'checkout-modal') {
+        this.setupCheckoutStoreHours();
       }
       modal.classList.add('active');
     }

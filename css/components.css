@@ -1302,7 +1302,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   12. Orders History & Live Tracking Styles ("Mis Pedidos")
+   12. Orders History Styles ("Mis Pedidos")
    -------------------------------------------------------------------------- */
 .orders-history-list {
   display: flex;
@@ -1333,13 +1333,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .order-history-id {
   font-family: var(--font-serif);
   font-weight: 800;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   color: var(--primary);
   display: flex;
   align-items: center;
@@ -1347,87 +1347,17 @@
 }
 
 .order-history-date {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--text-muted);
   font-weight: 600;
-}
-
-/* Stepper de Seguimiento en Vivo */
-.order-tracking-stepper {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  position: relative;
-  margin: 12px 0 14px;
-  padding-top: 6px;
-}
-
-.order-tracking-stepper::before {
-  content: '';
-  position: absolute;
-  top: 14px;
-  left: 16%;
-  right: 16%;
-  height: 3px;
-  background: var(--border-light);
-  z-index: 1;
-}
-
-.tracking-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  z-index: 2;
-  text-align: center;
-}
-
-.tracking-dot {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--border-light);
-  border: 2px solid #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.6rem;
-  color: #fff;
-  transition: all 0.3s ease;
-}
-
-.tracking-step.active .tracking-dot {
-  background: #2A9D8F;
-  box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.2);
-}
-
-.tracking-step.current .tracking-dot {
-  background: var(--primary);
-  box-shadow: 0 0 0 3px rgba(217, 83, 111, 0.25);
-  animation: pulseGlow 1.8s infinite;
-}
-
-.tracking-label {
-  font-size: 0.66rem;
-  color: var(--text-muted);
-  font-weight: 600;
-}
-
-.tracking-step.active .tracking-label {
-  color: #2A9D8F;
-  font-weight: 700;
-}
-
-.tracking-step.current .tracking-label {
-  color: var(--primary);
-  font-weight: 800;
 }
 
 /* Items Preview en la tarjeta */
 .order-history-items-summary {
   background: var(--bg-surface-secondary);
   border-radius: var(--radius-sm);
-  padding: 8px 10px;
-  font-size: 0.78rem;
+  padding: 10px 12px;
+  font-size: 0.8rem;
   margin-bottom: 10px;
   line-height: 1.45;
 }
@@ -1443,25 +1373,25 @@
 
 .order-history-total {
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: var(--text-main);
 }
 
 .order-history-actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 .btn-order-action {
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: var(--radius-full);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   border: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   transition: all 0.2s ease;
   text-decoration: none;
 }
@@ -1495,7 +1425,7 @@
   border-radius: var(--radius-xs);
   border: none;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   transition: color 0.2s ease;
 }
 

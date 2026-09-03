@@ -85,15 +85,15 @@
         </div>
       </div>
 
-      <!-- Info bar: Status & Hours -->
-      <div
+      <!-- Info bar: Status & Hours (Dinámico Argentina 08:30 a 20:00 hs) -->
+      <div id="store-status-bar"
         style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 10px; padding: 4px 8px; background: var(--bg-surface-secondary); border-radius: var(--radius-xs);">
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <span
+        <div id="store-status-indicator" style="display: flex; align-items: center; gap: 6px;">
+          <span id="store-status-dot"
             style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2A9D8F; animation: pulseGlow 2s infinite;"></span>
-          <strong style="color: #2A9D8F;">Abierto Ahora</strong> • 08:30 a 20:00 hs
+          <span id="store-status-info"><strong id="store-status-text" style="color: #2A9D8F;">Abierto Ahora</strong> • 08:30 a 20:00 hs</span>
         </div>
-        <div style="color: var(--primary); font-weight: 700;">
+        <div id="store-delivery-tag" style="color: var(--primary); font-weight: 700;">
           🛵 Envíos en el día
         </div>
       </div>
@@ -203,7 +203,7 @@
         <span>Desayunos</span>
       </button>
       <button class="nav-item" style="position: relative;" onclick="window.app.openOrdersHistoryModal()">
-        <span class="nav-icon">📦</span>
+        <span class="nav-icon">📋</span>
         <span>Mis Pedidos</span>
         <span id="nav-orders-badge" class="badge-count"
           style="display: none; position: absolute; top: 2px; right: 10px; font-size: 0.65rem; padding: 1px 5px; background: var(--accent-mint); color: #fff;">0</span>
@@ -442,15 +442,21 @@
         <div class="form-group">
           <label class="form-label" for="cust-time">Fecha y Horario preferido de entrega *</label>
           
+          <!-- Aviso si el local está cerrado (Horario 08:30 a 20:00 hs) -->
+          <div id="checkout-store-closed-banner" style="display: none; background: #FFF3E0; border: 1px solid #FFE082; color: #B78103; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600; margin-bottom: 10px; line-height: 1.35;">
+            🌙 <strong>Local Cerrado en este momento</strong> (Horario de atención: 08:30 a 20:00 hs Argentina).<br>
+            Tu pedido quedará agendado para la próxima franja horaria o la fecha que elijas.
+          </div>
+
           <!-- Botones de selección rápida (Ahora / Programado) -->
           <div class="time-quick-chips">
-            <button type="button" class="time-chip active" data-time="Lo antes posible (Ahora)" onclick="window.app.selectQuickTime(this)">
+            <button type="button" class="time-chip active" id="chip-time-now" data-time="Lo antes posible (Ahora)" onclick="window.app.selectQuickTime(this)">
               ⚡ Ahora (40 a 60 min)
             </button>
-            <button type="button" class="time-chip" data-time="Hoy por la tarde (16:00 a 19:30 hs)" onclick="window.app.selectQuickTime(this)">
+            <button type="button" class="time-chip" id="chip-time-afternoon" data-time="Hoy por la tarde (16:00 a 19:30 hs)" onclick="window.app.selectQuickTime(this)">
               🕒 Hoy por la tarde
             </button>
-            <button type="button" class="time-chip" data-time="Mañana por la mañana (09:00 a 12:30 hs)" onclick="window.app.selectQuickTime(this)">
+            <button type="button" class="time-chip" id="chip-time-tomorrow" data-time="Mañana por la mañana (09:00 a 12:30 hs)" onclick="window.app.selectQuickTime(this)">
               ☀️ Mañana
             </button>
           </div>
@@ -737,12 +743,12 @@
 
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding-right: 32px;">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 1.4rem;">📦</span>
-          <h3 class="font-serif" style="font-size: 1.25rem;">Mis Pedidos & Seguimiento</h3>
+          <span style="font-size: 1.4rem;">📋</span>
+          <h3 class="font-serif" style="font-size: 1.25rem;">Mis Pedidos Realizados</h3>
         </div>
       </div>
       <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
-        Tus pedidos quedan guardados en este celular para que puedas ver el estado, reabrir el comprobante o consultar por WhatsApp.
+        Tus pedidos quedan guardados en este celular para que puedas ver el detalle, reabrir el comprobante de pago o comunicarte por WhatsApp.
       </p>
 
       <div id="orders-history-list" class="orders-history-list">
@@ -863,12 +869,12 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Pure Standard JavaScript Scripts -->
-  <script charset="UTF-8" src="js/products.js?v=8.0"></script>
-  <script charset="UTF-8" src="js/cart.js?v=8.0"></script>
-  <script charset="UTF-8" src="js/checkout.js?v=8.0"></script>
-  <script charset="UTF-8" src="js/cloudinary.js?v=8.0"></script>
-  <script charset="UTF-8" src="js/admin.js?v=8.0"></script>
-  <script charset="UTF-8" src="js/app.js?v=8.0"></script>
+  <script charset="UTF-8" src="js/products.js?v=9.0"></script>
+  <script charset="UTF-8" src="js/cart.js?v=9.0"></script>
+  <script charset="UTF-8" src="js/checkout.js?v=9.0"></script>
+  <script charset="UTF-8" src="js/cloudinary.js?v=9.0"></script>
+  <script charset="UTF-8" src="js/admin.js?v=9.0"></script>
+  <script charset="UTF-8" src="js/app.js?v=9.0"></script>
 </body>
 
 </html>
