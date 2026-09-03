@@ -179,6 +179,20 @@ class DulceAtelierApp {
       }
     });
 
+    // Botón Continuar del Carrito al Checkout (Paso siguiente)
+    const btnProceedCheckout = document.getElementById('btn-proceed-checkout');
+    if (btnProceedCheckout) {
+      btnProceedCheckout.addEventListener('click', () => {
+        if (window.cartManager.getItemCount() === 0) {
+          this.showToast("⚠️ Tu carrito está vacío. Elige una delicia primero.");
+          this.closeModal('cart-drawer-modal');
+          return;
+        }
+        this.closeModal('cart-drawer-modal');
+        this.openModal('checkout-modal');
+      });
+    }
+
     // Enviar Checkout a WhatsApp con Validaciones Robustas
     const checkoutForm = document.getElementById('checkout-form');
     if (checkoutForm) {
@@ -580,38 +594,39 @@ class DulceAtelierApp {
     this.renderCartDrawerItems();
 
     // Resúmenes de precio en Drawer y Checkout
-    const subtotalEls = document.querySelectorAll('.cart-calc-subtotal');
-    subtotalEls.forEach(el => el.textContent = window.cartManager.formatCurrency(subtotal));
+    const subtotalEl = document.getElementById('cart-drawer-subtotal');
+    if (subtotalEl) subtotalEl.textContent = window.cartManager.formatCurrency(subtotal);
 
-    const deliveryEls = document.querySelectorAll('.cart-calc-delivery');
-    deliveryEls.forEach(el => {
-      el.textContent = deliveryFee === 0 ? '¡Gratis!' : window.cartManager.formatCurrency(deliveryFee);
-    });
+    const shippingEl = document.getElementById('cart-drawer-shipping');
+    if (shippingEl) shippingEl.textContent = deliveryFee === 0 ? '¡Gratis!' : window.cartManager.formatCurrency(deliveryFee);
 
-    const totalEls = document.querySelectorAll('.cart-calc-total');
-    totalEls.forEach(el => el.textContent = window.cartManager.formatCurrency(total));
+    const totalEl = document.getElementById('cart-drawer-total');
+    if (totalEl) totalEl.textContent = window.cartManager.formatCurrency(total);
   }
 
   renderCartDrawerItems() {
-    const list = document.getElementById('cart-drawer-list');
+    const list = document.getElementById('cart-drawer-items') || document.getElementById('cart-drawer-list');
     if (!list) return;
 
     const items = window.cartManager.items;
+    const footer = document.querySelector('.cart-footer');
+
     if (items.length === 0) {
       list.innerHTML = `
-        <div style="text-align:center; padding: 30px 10px; color: var(--text-muted);">
-          <span style="font-size: 2.5rem;">🛍️</span>
-          <p style="margin-top: 8px; font-weight: 600;">Tu carrito está vacío</p>
-          <span style="font-size: 0.8rem;">Elige una delicia de nuestro menú</span>
+        <div style="text-align: center; padding: 40px 16px; color: var(--text-muted);">
+          <div style="font-size: 3.2rem; margin-bottom: 12px; animation: popIn 0.3s ease;">🛍️</div>
+          <h4 style="font-size: 1.15rem; color: var(--text-main); margin-bottom: 6px;">Tu carrito está vacío</h4>
+          <p style="font-size: 0.85rem; margin-bottom: 20px; line-height: 1.4;">Elige alguna de nuestras tortas, desayunos o postres para armar tu pedido.</p>
+          <button type="button" class="btn-primary" onclick="window.app.closeModal('cart-drawer-modal'); window.scrollTo({top: 350, behavior: 'smooth'});" style="max-width: 220px; margin: 0 auto; padding: 12px 20px; font-size: 0.9rem;">
+            🍰 Explorar la Carta
+          </button>
         </div>
       `;
-      const checkoutBtn = document.getElementById('btn-to-checkout');
-      if (checkoutBtn) checkoutBtn.disabled = true;
+      if (footer) footer.style.display = 'none';
       return;
     }
 
-    const checkoutBtn = document.getElementById('btn-to-checkout');
-    if (checkoutBtn) checkoutBtn.disabled = false;
+    if (footer) footer.style.display = 'block';
 
     list.innerHTML = items.map((item, idx) => `
       <div class="cart-item">
@@ -623,10 +638,15 @@ class DulceAtelierApp {
           ${item.customization?.candle ? `<div class="cart-item-custom">🕯️ Con velita</div>` : ''}
           <div class="cart-item-price">${window.cartManager.formatCurrency(item.product.price * item.quantity)}</div>
         </div>
-        <div class="quantity-stepper" style="transform: scale(0.85);">
-          <button class="stepper-btn" onclick="window.cartManager.updateQuantity(${idx}, ${item.quantity - 1})">-</button>
-          <span class="stepper-value">${item.quantity}</span>
-          <button class="stepper-btn" onclick="window.cartManager.updateQuantity(${idx}, ${item.quantity + 1})">+</button>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+          <div class="quantity-stepper" style="transform: scale(0.85); transform-origin: right center;">
+            <button class="stepper-btn" onclick="window.cartManager.updateQuantity(${idx}, ${item.quantity - 1})">-</button>
+            <span class="stepper-value">${item.quantity}</span>
+            <button class="stepper-btn" onclick="window.cartManager.updateQuantity(${idx}, ${item.quantity + 1})">+</button>
+          </div>
+          <button type="button" onclick="window.cartManager.removeItem(${idx})" style="background: none; border: none; font-size: 0.72rem; color: var(--danger); cursor: pointer; padding: 2px 4px; display: flex; align-items: center; gap: 2px;">
+            🗑️ Eliminar
+          </button>
         </div>
       </div>
     `).join('');
