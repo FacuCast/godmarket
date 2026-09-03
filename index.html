@@ -393,17 +393,27 @@
             <span class="invalid-feedback">Ingresa la calle y altura para realizar el envío a domicilio.</span>
           </div>
 
-          <!-- Contenedor del Mapa Interactivo con Pin Rojo -->
-          <div id="checkout-map-container" style="display: none; margin-bottom: 14px; background: var(--bg-surface-secondary); padding: 10px; border-radius: var(--radius-md); border: 1.5px solid var(--border-light);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.78rem;">
-              <span style="color: var(--text-secondary); font-weight: 600;">📍 Mueve el pin rojo para marcar tu dirección</span>
-              <button type="button" class="btn-gps-locate" onclick="window.app.locateUserGPS()" title="Ubicarme por GPS">
-                🎯 Mi ubicación
+          <!-- Contenedor del Mapa Interactivo con Pin Rojo y Buscador -->
+          <div id="checkout-map-container" style="display: none; margin-bottom: 14px; background: var(--bg-surface-secondary); padding: 12px; border-radius: var(--radius-md); border: 1.5px solid var(--border-light);">
+            <!-- Buscador directo en el mapa -->
+            <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+              <input type="text" id="map-search-input" class="form-control" placeholder="Escribe tu calle (Ej: Cilento 81)..." style="font-size: 0.82rem; padding: 7px 10px; background: #fff;" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.app.searchAddressOnMap();}">
+              <button type="button" class="btn-primary" onclick="window.app.searchAddressOnMap()" style="width: auto; padding: 6px 14px; font-size: 0.8rem; white-space: nowrap;">
+                🔍 Buscar
+              </button>
+              <button type="button" class="btn-gps-locate" onclick="window.app.locateUserGPS()" title="Ubicar por GPS">
+                🎯 GPS
               </button>
             </div>
-            <div id="delivery-map" style="width: 100%; height: 210px; border-radius: var(--radius-sm); z-index: 1;"></div>
-            <div id="map-address-status" style="margin-top: 8px; font-size: 0.76rem; color: var(--primary); font-weight: 700; min-height: 18px;">
-              📍 Mueve el pin para capturar la dirección exacta
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.72rem; color: var(--text-secondary);">
+              <span>📍 Mueve el pin rojo o escribe tu calle para fijar el punto</span>
+            </div>
+
+            <div id="delivery-map" style="width: 100%; height: 220px; border-radius: var(--radius-sm); z-index: 1;"></div>
+            
+            <div id="map-address-status" style="margin-top: 8px; font-size: 0.78rem; color: var(--primary); font-weight: 700; min-height: 18px; line-height: 1.35;">
+              📍 Mueve el pin o escribe tu calle para capturar la dirección
             </div>
           </div>
 

@@ -837,6 +837,52 @@ class DulceAtelierApp {
           this.deliveryMap.invalidateSize();
         }
       }, 200);
+
+      // Si el usuario ya escribió algo en Dirección (ej: "cilento 81"), buscarlo automáticamente
+      const currentAddress = document.getElementById('cust-address')?.value.trim();
+      const mapSearchInput = document.getElementById('map-search-input');
+      if (currentAddress) {
+        if (mapSearchInput) mapSearchInput.value = currentAddress;
+        setTimeout(() => this.searchAddressOnMap(currentAddress), 350);
+      }
+    }
+  }
+
+  async searchAddressOnMap(query) {
+    const input = document.getElementById('map-search-input');
+    const addressInput = document.getElementById('cust-address');
+    const searchQuery = (query || input?.value || addressInput?.value || '').trim();
+
+    if (!searchQuery) {
+      this.showToast('ℹ️ Escribe una calle o localidad para buscar en el mapa.');
+      return;
+    }
+
+    const statusEl = document.getElementById('map-address-status');
+    if (statusEl) statusEl.textContent = `🔍 Buscando "${searchQuery}" en el mapa...`;
+
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery + ', argentina')}&addressdetails=1&limit=3`;
+      const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+      const results = await res.json();
+
+      if (results && results.length > 0) {
+        const first = results[0];
+        const lat = parseFloat(first.lat);
+        const lng = parseFloat(first.lon);
+
+        if (this.deliveryMap && this.deliveryMarker) {
+          this.deliveryMap.flyTo([lat, lng], 16, { duration: 1.2 });
+          this.deliveryMarker.setLatLng([lat, lng]);
+          this.reverseGeocode(lat, lng);
+        }
+      } else {
+        if (statusEl) statusEl.textContent = `⚠️ No se ubicó "${searchQuery}". Puedes mover el pin rojo manualmente.`;
+        this.showToast(`⚠️ No se encontró "${searchQuery}". Mueve el pin rojo o añade la localidad.`);
+      }
+    } catch (err) {
+      console.error('Error al buscar dirección:', err);
+      if (statusEl) statusEl.textContent = '📍 Mueve el pin rojo manualmente sobre el mapa';
     }
   }
 
@@ -891,21 +937,6 @@ class DulceAtelierApp {
       this.deliveryMarker.setLatLng(e.latlng);
       this.reverseGeocode(e.latlng.lat, e.latlng.lng);
     });
-
-    // Si el navegador permite geolocalización, centramos automáticamente
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          if (this.deliveryMap && this.deliveryMarker) {
-            this.deliveryMap.setView([latitude, longitude], 16);
-            this.deliveryMarker.setLatLng([latitude, longitude]);
-            this.reverseGeocode(latitude, longitude);
-          }
-        },
-        () => {}
-      );
-    }
   }
 
   locateUserGPS() {
@@ -915,24 +946,34 @@ class DulceAtelierApp {
     }
 
     const statusEl = document.getElementById('map-address-status');
-    if (statusEl) statusEl.textContent = '📡 Localizando tu posición GPS...';
+    if (statusEl) statusEl.textContent = '📡 Conectando con tu ubicación...';
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        if (this.deliveryMap && this.deliveryMarker) {
-          this.deliveryMap.flyTo([latitude, longitude], 17, { duration: 1.2 });
-          this.deliveryMarker.setLatLng([latitude, longitude]);
-          this.reverseGeocode(latitude, longitude);
-        }
-      },
-      (err) => {
-        console.warn('Geolocation error:', err);
-        this.showToast('⚠️ No se pudo obtener la ubicación GPS. Mueve el pin rojo manualmente.');
-        if (statusEl) statusEl.textContent = '📍 Mueve el pin rojo para marcar tu dirección';
-      },
-      { timeout: 8000, enableHighAccuracy: true }
-    );
+    const onGeoSuccess = (pos) => {
+      const { latitude, longitude } = pos.coords;
+      if (this.deliveryMap && this.deliveryMarker) {
+        this.deliveryMap.flyTo([latitude, longitude], 17, { duration: 1.2 });
+        this.deliveryMarker.setLatLng([latitude, longitude]);
+        this.reverseGeocode(latitude, longitude);
+      }
+    };
+
+    const onGeoError = (err) => {
+      console.warn('Geolocation error:', err);
+      if (err.code === 1) {
+        this.showToast('ℹ️ Permiso de ubicación no otorgado. Puedes buscar tu calle escribiéndola arriba.');
+        if (statusEl) statusEl.textContent = 'ℹ️ Permiso denegado. Escribe tu calle o mueve el pin rojo.';
+      } else {
+        this.showToast('ℹ️ Ubicación GPS no detectada. Escribe tu calle en el buscador del mapa.');
+        if (statusEl) statusEl.textContent = '📍 Escribe tu calle arriba o arrastra el pin rojo.';
+      }
+    };
+
+    // Intentar con configuración estándar compatible con PC y celular
+    navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, {
+      enableHighAccuracy: false,
+      timeout: 9000,
+      maximumAge: 120000
+    });
   }
 
   async reverseGeocode(lat, lng) {
