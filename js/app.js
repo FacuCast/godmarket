@@ -602,6 +602,16 @@ class DulceAtelierApp {
 
     const totalEl = document.getElementById('cart-drawer-total');
     if (totalEl) totalEl.textContent = window.cartManager.formatCurrency(total);
+
+    // Resumen en Modal de Checkout
+    const checkoutCountEl = document.getElementById('checkout-summary-items-count');
+    if (checkoutCountEl) {
+      checkoutCountEl.textContent = `🛒 Tu Pedido (${count} ${count === 1 ? 'producto' : 'productos'})`;
+    }
+    const checkoutTotalEl = document.getElementById('checkout-summary-total');
+    if (checkoutTotalEl) {
+      checkoutTotalEl.textContent = window.cartManager.formatCurrency(total);
+    }
   }
 
   renderCartDrawerItems() {
@@ -753,7 +763,12 @@ class DulceAtelierApp {
 
   openModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) modal.classList.add('active');
+    if (modal) {
+      if (modalId === 'cart-drawer-modal' || modalId === 'checkout-modal') {
+        this.updateCartUI();
+      }
+      modal.classList.add('active');
+    }
   }
 
   closeModal(modalId) {

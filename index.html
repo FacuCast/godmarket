@@ -313,7 +313,7 @@
         <h3 class="font-serif" style="font-size: 1.25rem;">Tu Carrito de Delicias</h3>
       </div>
 
-      <div id="cart-drawer-items" class="cart-items-container">
+      <div id="cart-drawer-items" class="cart-items-list">
         <!-- Dynamically rendered cart items -->
       </div>
 
@@ -351,9 +351,15 @@
       <div class="drag-handle"></div>
       <button class="sheet-close-btn" onclick="window.app.closeModal('checkout-modal')">✕</button>
 
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
         <span style="font-size: 1.4rem;">📋</span>
         <h3 class="font-serif" style="font-size: 1.25rem;">Finalizar Pedido</h3>
+      </div>
+
+      <!-- Resumen Compacto del Pedido -->
+      <div id="checkout-order-summary-pill" style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-secondary); padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.85rem; border: 1px solid var(--border-light);">
+        <span id="checkout-summary-items-count">🛒 Tu Pedido (0 ítems)</span>
+        <strong style="color: var(--primary); font-size: 1.05rem;" id="checkout-summary-total">$0</strong>
       </div>
 
       <form id="checkout-form" novalidate>
