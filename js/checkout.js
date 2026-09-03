@@ -123,7 +123,7 @@ Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Much
     const text = isMP
       ? `¡Hola Dulce Atelier! ${EMOJIS.pastry} Adjunto el comprobante de pago de Mercado Pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`
       : `¡Hola Dulce Atelier! ${EMOJIS.pastry} Adjunto el comprobante de pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`;
-    return `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(text)}`;
+    return `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(text)}`;
   }
 
   processOrder(formData, cart) {
@@ -135,7 +135,7 @@ Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Much
 
     const message = this.generateWhatsAppMessage(formData, cart, orderId);
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${encodedMessage}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodedMessage}`;
 
     // Guardar último pedido para la pantalla de confirmación
     this.lastOrder = {

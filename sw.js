@@ -1,5 +1,5 @@
 // Service Worker para Dulce Atelier PWA
-const CACHE_NAME = 'dulce-atelier-v1';
+const CACHE_NAME = 'dulce-atelier-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
