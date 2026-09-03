@@ -3,13 +3,13 @@ const crypto = require('crypto');
 /**
  * Serverless Function para Vercel (/api/upload)
  * Sube imágenes a Cloudinary de manera segura usando API Key y API Secret
- * Las credenciales se obtienen de las variables de entorno de Vercel (process.env)
+ * Las credenciales se obtienen EXCLUSIVAMENTE de las variables de entorno de Vercel (process.env)
  */
 module.exports = async (req, res) => {
-  // CORS Headers
+  // CORS Headers restringidos y seguros
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Admin-Token');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -20,15 +20,31 @@ module.exports = async (req, res) => {
   }
 
   try {
+    const finalCloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+    if (!finalCloudName || !apiKey || !apiSecret) {
+      return res.status(500).json({ 
+        error: 'Configuración del servidor incompleta. Faltan variables de entorno de Cloudinary en Vercel.' 
+      });
+    }
+
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { image, cloudName } = body || {};
+    const { image } = body || {};
 
-    const finalCloudName = process.env.CLOUDINARY_CLOUD_NAME || cloudName || 'dz6apjevd';
-    const apiKey = process.env.CLOUDINARY_API_KEY || '327352685728933';
-    const apiSecret = process.env.CLOUDINARY_API_SECRET || 'qSBrq-Xwz6wgWhT5M54ddx-6wBo';
+    if (!image || typeof image !== 'string') {
+      return res.status(400).json({ error: 'No se envió ninguna imagen válida para subir.' });
+    }
 
-    if (!image) {
-      return res.status(400).json({ error: 'No se envió ninguna imagen para subir.' });
+    // Validación de seguridad: solo formatos de imagen permitidos
+    if (!image.startsWith('data:image/')) {
+      return res.status(400).json({ error: 'El archivo enviado no es una imagen válida (debe ser JPEG, PNG o WebP).' });
+    }
+
+    // Validación de tamaño máximo (10 MB aproximados en base64)
+    if (image.length > 14 * 1024 * 1024) {
+      return res.status(413).json({ error: 'La imagen excede el límite máximo permitido de 10 MB.' });
     }
 
     const timestamp = Math.round(new Date().getTime() / 1000);

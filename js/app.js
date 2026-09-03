@@ -560,11 +560,11 @@ class DulceAtelierApp {
 
     list.innerHTML = items.map((item, idx) => `
       <div class="cart-item">
-        <img class="cart-item-img" src="${item.product.image}" alt="${item.product.name}">
+        <img class="cart-item-img" src="${item.product.image}" alt="${this.escapeHTML(item.product.name)}">
         <div class="cart-item-info">
-          <div class="cart-item-title">${item.product.name}</div>
-          ${item.customization?.flavor ? `<div class="cart-item-custom">🍯 ${item.customization.flavor}</div>` : ''}
-          ${item.customization?.dedication ? `<div class="cart-item-custom">✍️ "${item.customization.dedication}"</div>` : ''}
+          <div class="cart-item-title">${this.escapeHTML(item.product.name)}</div>
+          ${item.customization?.flavor ? `<div class="cart-item-custom">🍯 ${this.escapeHTML(item.customization.flavor)}</div>` : ''}
+          ${item.customization?.dedication ? `<div class="cart-item-custom">✍️ "${this.escapeHTML(item.customization.dedication)}"</div>` : ''}
           ${item.customization?.candle ? `<div class="cart-item-custom">🕯️ Con velita</div>` : ''}
           <div class="cart-item-price">${window.cartManager.formatCurrency(item.product.price * item.quantity)}</div>
         </div>
@@ -594,15 +594,15 @@ class DulceAtelierApp {
     const cashAmountEl = document.getElementById('ticket-cash-amount');
     if (cashAmountEl) cashAmountEl.textContent = order.totalFormatted;
 
-    // Detalle de ítems
+    // Detalle de ítems con sanitización anti-XSS
     const itemsContainer = document.getElementById('ticket-items-list');
     if (itemsContainer && order.items) {
       itemsContainer.innerHTML = order.items.map(it => `
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dotted var(--border-light);">
           <div>
-            <strong>${it.quantity}x</strong> ${it.product.name}
-            ${it.customization?.flavor ? `<div style="font-size: 0.74rem; color: var(--text-muted);">🍯 ${it.customization.flavor}</div>` : ''}
-            ${it.customization?.dedication ? `<div style="font-size: 0.74rem; color: var(--primary);">✍️ "${it.customization.dedication}"</div>` : ''}
+            <strong>${it.quantity}x</strong> ${this.escapeHTML(it.product.name)}
+            ${it.customization?.flavor ? `<div style="font-size: 0.74rem; color: var(--text-muted);">🍯 ${this.escapeHTML(it.customization.flavor)}</div>` : ''}
+            ${it.customization?.dedication ? `<div style="font-size: 0.74rem; color: var(--primary);">✍️ "${this.escapeHTML(it.customization.dedication)}"</div>` : ''}
           </div>
           <strong style="color: var(--text-main); margin-left: 10px;">${(it.product.price * it.quantity).toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })}</strong>
         </div>
@@ -686,13 +686,33 @@ class DulceAtelierApp {
     if (modal) modal.classList.remove('active');
   }
 
+  openAdminModalWithPin() {
+    const savedPin = localStorage.getItem('dulce_admin_pin') || '1234';
+    const entered = prompt('🔐 Ingrese el PIN de Administrador (por defecto: 1234):');
+    if (entered === savedPin) {
+      this.openModal('admin-product-modal');
+    } else if (entered !== null) {
+      this.showToast('❌ PIN de Administrador incorrecto');
+    }
+  }
+
+  escapeHTML(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   showToast(message) {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
     const toast = document.createElement('div');
     toast.className = 'toast';
-    toast.innerHTML = `<span>🍰</span> ${message}`;
+    toast.innerHTML = `<span>🍰</span> ${this.escapeHTML(message)}`;
     container.appendChild(toast);
 
     setTimeout(() => {
