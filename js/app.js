@@ -551,7 +551,7 @@ class DulceAtelierApp {
 
     // Catálogo fotográfico gourmet según sabor/relleno
     const FLAVOR_IMAGES = {
-      'Dulce de Leche': 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=800&q=80',
+      'Dulce de Leche': 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=800&q=80',
       'Nutella & Avellanas': 'https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?auto=format&fit=crop&w=800&q=80',
       'Frutos Rojos': 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=800&q=80',
       'Crema Bariloche': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',

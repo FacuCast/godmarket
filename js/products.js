@@ -143,7 +143,7 @@ const INITIAL_PRODUCTS = [
     rating: 4.8,
     reviews: 67,
     description: "Pionono esponjoso, merenguitos secos crocantes, dulce de leche, crema chantilly, castañas en almíbar y suave lluvia de coco tostado.",
-    image: "https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=800&q=80",
     portion: "10 a 12 porciones",
     featured: true
   },
@@ -522,7 +522,7 @@ const INITIAL_PRODUCTS = [
 ];
 
 // Almacenamiento local para permitir agregar nuevos productos dinámicamente
-const STORAGE_KEY = 'dulce_atelier_products_v3';
+const STORAGE_KEY = 'dulce_atelier_products_v4';
 
 class ProductManager {
   constructor() {
