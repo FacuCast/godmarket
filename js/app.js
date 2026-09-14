@@ -397,17 +397,17 @@ class DulceAtelierApp {
       return;
     }
 
-    // Si estamos en "Todos", agrupar con vista destacada de 4 items por categoría
+    // Si estamos en "Todos", agrupar con vista completa por categoría
     if (this.currentCategory === 'todos' && !this.searchQuery) {
       const sections = [
-        { id: 'tortas', title: '🎂 Tortas & Pasteles Artesanales', subtitle: '4 favoritos para celebrar' },
+        { id: 'tortas', title: '🎂 Tortas & Pasteles Artesanales', subtitle: 'Delicias caseras para celebrar' },
         { id: 'desayunos', title: '🎁 Desayunos & Meriendas Sorpresa', subtitle: 'Listos para regalar o compartir' },
         { id: 'postres', title: '🥐 Postres & Porciones Individuales', subtitle: 'El bocado dulce perfecto' }
       ];
 
       let html = '';
       sections.forEach(sec => {
-        const secProducts = products.filter(p => p.category === sec.id).slice(0, 4); // Muestra 4 productos por pantalla
+        const secProducts = products.filter(p => p.category === sec.id);
         if (secProducts.length > 0) {
           html += `
             <div class="section-container animate-fade">
