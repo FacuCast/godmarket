@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flyer Imprimible - Dulce Atelier Pastelería</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,800;0,900;1,600;1,700&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+
+  <style>
+    :root {
+      --primary: #D9536F;
+      --primary-dark: #B23B54;
+      --primary-light: #FFF0F3;
+      --gold: #D4AF37;
+      --dark: #2B1818;
+      --cream: #FAF6F0;
+      --white: #FFFFFF;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #4A4040;
+      color: var(--dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 12px;
+      min-height: 100vh;
+    }
+
+    /* Barra Superior para la Pantalla (No se imprime) */
+    .screen-controls {
+      width: 100%;
+      max-width: 210mm;
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+
+    .screen-controls .info {
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .screen-controls .info strong {
+      color: var(--primary);
+    }
+
+    .btn-action {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 50px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .btn-action:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #F0F0F0;
+      color: #333;
+    }
+    .btn-secondary:hover {
+      background: #E0E0E0;
+    }
+
+    /* ==========================================================================
+       HOJA DE IMPRESIÓN A4 (210mm x 297mm)
+       ========================================================================== */
+    .flyer-sheet {
+      width: 210mm;
+      min-height: 297mm;
+      height: 297mm;
+      background: var(--cream);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.35);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid #ddd;
+    }
+
+    /* Marco decorativo perimetral */
+    .flyer-border {
+      position: absolute;
+      top: 6mm;
+      left: 6mm;
+      right: 6mm;
+      bottom: 44mm; /* Espacio para las tiras recortables */
+      border: 2px solid rgba(217, 83, 111, 0.35);
+      border-radius: 10px;
+      pointer-events: none;
+    }
+
+    /* Encabezado */
+    .flyer-header {
+      padding: 24px 28px 10px;
+      text-align: center;
+      background: linear-gradient(180deg, #FFEBEF 0%, rgba(255,235,239,0) 100%);
+      position: relative;
+    }
+
+    .brand-eyebrow {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--primary);
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+
+    .brand-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.7rem;
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1;
+      letter-spacing: -0.5px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .brand-slogan {
+      font-size: 0.92rem;
+      color: #6D5656;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* Titular de Impacto para la calle */
+    .street-headline {
+      text-align: center;
+      padding: 10px 24px 8px;
+    }
+
+    .headline-pill {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      font-size: 1.15rem;
+      font-weight: 900;
+      padding: 6px 18px;
+      border-radius: 50px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(217, 83, 111, 0.3);
+      text-transform: uppercase;
+    }
+
+    .headline-sub {
+      font-size: 0.9rem;
+      color: #5C4343;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    /* Grilla de 4 Fotos Tentadoras */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 8px 24px;
+    }
+
+    .photo-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      border: 1px solid rgba(217, 83, 111, 0.15);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: 75px;
+      object-fit: cover;
+    }
+
+    .photo-card .label {
+      padding: 4px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-align: center;
+      color: var(--dark);
+      line-height: 1.15;
+      background: #FFFBFB;
+    }
+
+    /* SECCIÓN CENTRAL: CÓDIGO QR GIGANTE */
+    .qr-hero-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 28px;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .qr-frame-box {
+      background: white;
+      border: 3px solid var(--primary);
+      border-radius: 18px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(217, 83, 111, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .qr-frame-box::before {
+      content: "📲 ESCANEÁ AQUÍ";
+      position: absolute;
+      top: -12px;
+      background: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 900;
+      padding: 2px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .qr-img {
+      width: 160px;
+      height: 160px;
+      display: block;
+      margin: 4px 0;
+      border-radius: 8px;
+    }
+
+    .qr-caption {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .qr-bullets {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .qr-bullet-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.75);
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(217, 83, 111, 0.15);
+    }
+
+    .qr-bullet-item .icon {
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+
+    .qr-bullet-item .text h4 {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .qr-bullet-item .text p {
+      font-size: 0.75rem;
+      color: #555;
+      line-height: 1.25;
+    }
+
+    /* Banner Promo / Descuento */
+    .promo-banner {
+      margin: 0 24px 10px;
+      background: linear-gradient(135deg, #FFF0F3 0%, #FFE3E8 100%);
+      border: 2px dashed var(--primary);
+      border-radius: 12px;
+      padding: 8px 16px;
+      text-align: center;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .promo-banner .promo-code {
+      font-size: 0.82rem;
+      color: var(--dark);
+    }
+    .promo-banner .promo-code strong {
+      background: var(--primary);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      margin-left: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .promo-banner .delivery-badge {
+      font-size: 0.78rem;
+      color: #2A7E62;
+      font-weight: 700;
+    }
+
+    /* Barra de Contacto / WhatsApp */
+    .whatsapp-strip {
+      background: #25D366;
+      color: white;
+      margin: 0 24px 8px;
+      border-radius: 10px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+    }
+
+    .whatsapp-strip .wa-icon {
+      font-size: 1.4rem;
+    }
+
+    .whatsapp-strip .wa-text {
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    /* ==========================================================================
+       TIRAS RECORTABLES DE CALLE (Tear-off tabs)
+       ========================================================================== */
+    .tear-off-section {
+      margin-top: auto;
+      border-top: 2px dashed #999;
+      position: relative;
+      background: white;
+      padding-top: 4px;
+      height: 42mm;
+    }
+
+    .cut-line-indicator {
+      position: absolute;
+      top: -12px;
+      left: 12px;
+      background: white;
+      padding: 0 8px;
+      font-size: 0.68rem;
+      color: #777;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tabs-container {
+      display: flex;
+      height: 100%;
+      width: 100%;
+    }
+
+    .tab-item {
+      flex: 1;
+      border-right: 1px dashed #BBB;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 4px 2px;
+      overflow: hidden;
+    }
+
+    .tab-item:last-child {
+      border-right: none;
+    }
+
+    /* Texto vertical estilo tira de calle */
+    .tab-vertical-content {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--dark);
+      letter-spacing: 0.5px;
+      height: 100%;
+    }
+
+    .tab-vertical-content .name {
+      color: var(--primary);
+      font-weight: 900;
+      font-size: 0.72rem;
+    }
+
+    .tab-vertical-content .phone {
+      background: #E8F8EE;
+      color: #1A8A42;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-weight: 800;
+    }
+
+    .tab-vertical-content .link {
+      color: #555;
+      font-size: 0.62rem;
+    }
+
+    /* ==========================================================================
+       CONFIGURACIÓN DE IMPRESIÓN DIRECTA
+       ========================================================================== */
+    @media print {
+      body {
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .screen-controls {
+        display: none !important;
+      }
+
+      .flyer-sheet {
+        box-shadow: none !important;
+        border: none !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        min-height: 297mm !important;
+        page-break-after: always;
+        page-break-inside: avoid;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Barra de control en pantalla para el usuario -->
+  <div class="screen-controls">
+    <div class="info">
+      <strong>📄 Flyer Callejero con QR Oficial</strong> — Listo para imprimir en <strong>Hoja A4</strong>.
+      <div style="font-size: 0.8rem; color: #777;">Tip: Al imprimir en tu navegador, activa la opción <em>"Gráficos de fondo"</em>.</div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-action" onclick="window.print()">
+        <span>🖨️ Imprimir Flyer (o Guardar PDF)</span>
+      </button>
+      <a href="index.html" class="btn-action btn-secondary">
+        <span>🍰 Ir a la Tienda</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- HOJA A4 IMPRIMIBLE -->
+  <div class="flyer-sheet">
+    <!-- Borde estético -->
+    <div class="flyer-border"></div>
+
+    <!-- 1. Encabezado de la Marca -->
+    <header class="flyer-header">
+      <div class="brand-eyebrow">Pastelería Artesanal • Boutique Bakery</div>
+      <h1 class="brand-title">Dulce Atelier</h1>
+      <div class="brand-slogan">El Sabor De Los Momentos Felices</div>
+    </header>
+
+    <!-- 2. Titular de Impacto -->
+    <section class="street-headline">
+      <div class="headline-pill">✨ ¿Antojo de algo dulce? ✨</div>
+      <p class="headline-sub">Tortas Artesanales • Desayunos Sorpresa • Postres Gourmet</p>
+    </section>
+
+    <!-- 3. Fotos Reales Tentadoras -->
+    <section class="photo-grid">
+      <div class="photo-card">
+        <img src="https://images.unsplash.com/photo-1586788680434-30d324b2d46f?auto=format&fit=crop&w=400&q=80" alt="Red Velvet">
+        <div class="label">Red Velvet Supreme</div>
+      </div>
+      <div class="photo-card">
+        <img src="https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?auto=format&fit=crop&w=400&q=80" alt="Marquise Chocolate">
+        <div class="label">Marquise con DDL</div>
+      </div>
+      <div class="photo-card">
+        <img src="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=400&q=80" alt="Box Desayuno">
+        <div class="label">Box Desayuno Regalo</div>
+      </div>
+      <div class="photo-card">
+        <img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=400&q=80" alt="Croissant Pistacho">
+        <div class="label">Croissant & Postres</div>
+      </div>
+    </section>
+
+    <!-- 4. Sección Central con QR Gigante y Beneficios -->
+    <section class="qr-hero-section">
+      <!-- Caja del QR -->
+      <div class="qr-frame-box">
+        <!-- Código QR oficial generado dinámicamente en alta resolución -->
+        <img class="qr-img" 
+             src="https://api.qrserver.com/v1/create-qr-code/?size=350x350&margin=10&data=https%3A%2F%2Fpasteleriadulce-atelier.vercel.app%2F" 
+             alt="Código QR Dulce Atelier">
+        <span class="qr-caption">Apuntá tu cámara y pedí online</span>
+      </div>
+
+      <!-- Beneficios rápidos -->
+      <div class="qr-bullets">
+        <div class="qr-bullet-item">
+          <span class="icon">🎂</span>
+          <div class="text">
+            <h4>Más de 35 Delicias Online</h4>
+            <p>Elegí gustos, dedicatorias y velitas para tu cumpleaños en segundos.</p>
+          </div>
+        </div>
+
+        <div class="qr-bullet-item">
+          <span class="icon">🛵</span>
+          <div class="text">
+            <h4>Envíos a Domicilio</h4>
+            <p>Ubicá tu casa en nuestro mapa interactivo o retirá sin costo.</p>
+          </div>
+        </div>
+
+        <div class="qr-bullet-item">
+          <span class="icon">💳</span>
+          <div class="text">
+            <h4>Mercado Pago & Transferencia</h4>
+            <p>Pagá con Alias, CVU o Efectivo con confirmación al instante.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Cupón de Descuento Promocional -->
+    <div class="promo-banner">
+      <div class="promo-code">
+        🎁 <strong>10% OFF</strong> en tu primer pedido con código: <strong>DULCE10</strong>
+      </div>
+      <div class="delivery-badge">
+        🛵 ¡Envío Gratis a partir de $50.000!
+      </div>
+    </div>
+
+    <!-- 6. Franja Verde WhatsApp -->
+    <div class="whatsapp-strip">
+      <span class="wa-icon">💬</span>
+      <span class="wa-text">WhatsApp Oficial: 11 5619-2616</span>
+      <span style="font-size: 0.85rem; opacity: 0.9;">• pasteleriadulce-atelier.vercel.app</span>
+    </div>
+
+    <!-- 7. Tiras Recortables para la Calle (Tear-off tabs) -->
+    <footer class="tear-off-section">
+      <div class="cut-line-indicator">
+        <span>✂️</span> Cortar por las líneas punteadas
+      </div>
+
+      <div class="tabs-container">
+        <!-- Generar 10 tiras recortables -->
+        <!-- Tab 1 -->
+        <div class="tab-item">
+          <div class="tab-vertical-content">
+            <span class="name">🍰 DULCE ATELIER</span>
+            <span class="phone">📲 11 5619-2616</span>
+            <span class="link">dulce-atelier.vercel.app</span>
+          </div>
+        </div>
+        <!-- Tab 2 -->
+        <div class="tab-item">
+          <div class="tab-vertical-content">
+            <span class="name">🍰 DULCE ATELIER</span>
+            <span class="phone">📲 11 5619-2616</span>
+            <span class="link">dulce-atelier.vercel.app</span>
+          </div>
+        </div>
+        <!-- Tab 3 -->
+        <div class="tab-item">
+          <div class="tab-vertical-content">
+            <span class="name">🍰 DULCE ATELIER</span>
+            <span class="phone">📲 11 5619-2616</span>
+            <span class="link">dulce-atelier.vercel.app</span>
+          </div>
+        </div>
+        <!-- Tab 4 -->
+        <div class="tab-item">
+          <div class="tab-vertical-content">
+            <span class="name">🍰 DULCE ATELIER</span>
+            <span class="phone">📲 11 5619-2616</span>
+            <span class="link">dulce-atelier.vercel.app</span>
+          </div>
+        </div>
+        <!-- Tab 5 -->
+        <div class="tab-item">
+          <div class="tab-vertical-content">
+            <span class="name">🍰 DULCE ATELIER</span>
+            <span class="phone">📲 11 5619-2616</span>
+            <span class="link">dulce-atelier.vercel.app</span>
+          </div>
+        </div>
+        <!-- Tab 6 -->
+        <div class="tab-item">
+          <div class="tab-vertical-content">
+            <span class="name">🍰 DULCE ATELIER</span>
+            <span class="phone">📲 11 5619-2616</span>
+            <span class="link">dulce-atelier.vercel.app</span>
+          </div>
+        </div>
+        <!-- Tab 7 -->
+        <div class="tab-item">
+          <div class="tab-vertical-content">
+            <span class="name">🍰 DULCE ATELIER</span>
+            <span class="phone">📲 11 5619-2616</span>
+            <span class="link">dulce-atelier.vercel.app</span>
+          </div>
+        </div>
+        <!-- Tab 8 -->
+        <div class="tab-item">
+          <div class="tab-vertical-content">
+            <span class="name">🍰 DULCE ATELIER</span>
+            <span class="phone">📲 11 5619-2616</span>
+            <span class="link">dulce-atelier.vercel.app</span>
+          </div>
+        </div>
+        <!-- Tab 9 -->
+        <div class="tab-item">
+          <div class="tab-vertical-content">
+            <span class="name">🍰 DULCE ATELIER</span>
+            <span class="phone">📲 11 5619-2616</span>
+            <span class="link">dulce-atelier.vercel.app</span>
+          </div>
+        </div>
+        <!-- Tab 10 -->
+        <div class="tab-item">
+          <div class="tab-vertical-content">
+            <span class="name">🍰 DULCE ATELIER</span>
+            <span class="phone">📲 11 5619-2616</span>
+            <span class="link">dulce-atelier.vercel.app</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+</body>
+</html>
