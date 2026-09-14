@@ -157,7 +157,7 @@ const INITIAL_PRODUCTS = [
     rating: 5.0,
     reviews: 89,
     description: "Tres capas de suave mousse aireada: chocolate negro al 70%, chocolate con leche y chocolate blanco sobre base crocante de cookies de chocolate.",
-    image: "https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1511018556340-d16986a1c194?auto=format&fit=crop&w=800&q=80",
     portion: "8 a 10 porciones",
     featured: true
   },
@@ -315,7 +315,7 @@ const INITIAL_PRODUCTS = [
     rating: 4.9,
     reviews: 130,
     description: "Yerba mate premium orgánica, bizcochitos de grasa caseros, tortitas negras, cañoncitos de hojaldre con dulce de leche, chipá calentito recién horneado y mate artesanal.",
-    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&w=800&q=80",
     portion: "Para compartir en familia",
     featured: true
   },
@@ -329,7 +329,7 @@ const INITIAL_PRODUCTS = [
     rating: 4.8,
     reviews: 92,
     description: "6 mini tartitas individuales: lemon pie, cabsha con chocolate y DDL, toffee de nuez, tarta frutal con pastelera, crumble de manzana y cheesecake de frutos rojos.",
-    image: "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1505976378723-9726b54e9bb9?auto=format&fit=crop&w=800&q=80",
     portion: "Para 2 o 3 personas",
     featured: true
   },
@@ -343,7 +343,7 @@ const INITIAL_PRODUCTS = [
     rating: 4.9,
     reviews: 54,
     description: "Termo de café frío infusionado, sándwiches ciabatta de jamón cocido natural y queso danbo, mini budines cítricos, alfajores de nuez y mantelito para picnic.",
-    image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80",
     portion: "Para 2 personas",
     featured: true
   },
@@ -375,7 +375,7 @@ const INITIAL_PRODUCTS = [
     rating: 4.8,
     reviews: 105,
     description: "Roll de canela recién horneado con abundante canela de Ceilán y baño de glaseado cremoso de vainilla.",
-    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1509365465985-25d11c17e812?auto=format&fit=crop&w=800&q=80",
     portion: "1 porción",
     featured: true
   },
@@ -417,7 +417,7 @@ const INITIAL_PRODUCTS = [
     rating: 5.0,
     reviews: 145,
     description: "Masa de hojaldre circular súper aireada y crocante, rellena hasta el centro de Nutella cremosa y bañada en chocolate con avellanas tostadas.",
-    image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&w=800&q=80",
     portion: "1 unidad grande",
     featured: true
   },
@@ -501,7 +501,7 @@ const INITIAL_PRODUCTS = [
     rating: 4.9,
     reviews: 185,
     description: "Media docena de medialunas de manteca hojaldradas, almibaradas y rellenas con generoso dulce de leche repostero colonial.",
-    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?auto=format&fit=crop&w=800&q=80",
     portion: "Caja de 6 unidades",
     featured: true
   },
@@ -522,7 +522,7 @@ const INITIAL_PRODUCTS = [
 ];
 
 // Almacenamiento local para permitir agregar nuevos productos dinámicamente
-const STORAGE_KEY = 'dulce_atelier_products_v2';
+const STORAGE_KEY = 'dulce_atelier_products_v3';
 
 class ProductManager {
   constructor() {
