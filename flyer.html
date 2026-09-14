@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flyer Imprimible - Dulce Atelier Pastelería</title>
+  <title>Flyer A4 Imprimible - Dulce Atelier Pastelería</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,800;0,900;1,600;1,700&display=swap" rel="stylesheet">
@@ -39,7 +39,7 @@
       min-height: 100vh;
     }
 
-    /* Barra Superior para la Pantalla (No se imprime) */
+    /* Barra Superior en Pantalla (No se imprime) */
     .screen-controls {
       width: 100%;
       max-width: 210mm;
@@ -67,7 +67,7 @@
       background: var(--primary);
       color: white;
       border: none;
-      padding: 10px 18px;
+      padding: 10px 20px;
       font-size: 0.95rem;
       font-weight: 700;
       border-radius: 50px;
@@ -92,354 +92,327 @@
     }
 
     /* ==========================================================================
-       HOJA DE IMPRESIÓN A4 (210mm x 297mm)
+       HOJA DE IMPRESIÓN EXACTA A4 (210mm x 297mm)
        ========================================================================== */
     .flyer-sheet {
       width: 210mm;
-      min-height: 297mm;
       height: 297mm;
+      min-height: 297mm;
+      max-height: 297mm;
       background: var(--cream);
       box-shadow: 0 12px 36px rgba(0,0,0,0.35);
       position: relative;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
       overflow: hidden;
       border: 1px solid #ddd;
+      padding: 10mm;
     }
 
-    /* Marco decorativo perimetral */
+    /* Marco perimetral decorativo dorado y rosa */
     .flyer-border {
       position: absolute;
       top: 6mm;
       left: 6mm;
       right: 6mm;
-      bottom: 44mm; /* Espacio para las tiras recortables */
-      border: 2px solid rgba(217, 83, 111, 0.35);
+      bottom: 6mm;
+      border: 2px solid rgba(217, 83, 111, 0.4);
+      border-radius: 12px;
+      pointer-events: none;
+    }
+
+    .flyer-border-inner {
+      position: absolute;
+      top: 7.5mm;
+      left: 7.5mm;
+      right: 7.5mm;
+      bottom: 7.5mm;
+      border: 1px dashed rgba(212, 175, 55, 0.5);
       border-radius: 10px;
       pointer-events: none;
     }
 
-    /* Encabezado */
+    /* 1. Encabezado de la Marca */
     .flyer-header {
-      padding: 24px 28px 10px;
       text-align: center;
+      padding: 12px 16px 8px;
       background: linear-gradient(180deg, #FFEBEF 0%, rgba(255,235,239,0) 100%);
-      position: relative;
+      border-radius: 10px;
     }
 
     .brand-eyebrow {
-      font-size: 0.78rem;
+      font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 3px;
       color: var(--primary);
       font-weight: 800;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
     }
 
     .brand-title {
       font-family: 'Playfair Display', serif;
-      font-size: 2.7rem;
+      font-size: 3.1rem;
       font-weight: 900;
       color: var(--primary);
-      line-height: 1;
+      line-height: 1.05;
       letter-spacing: -0.5px;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.06);
     }
 
     .brand-slogan {
-      font-size: 0.92rem;
+      font-size: 1.05rem;
       color: #6D5656;
       font-weight: 600;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       margin-top: 4px;
     }
 
-    /* Titular de Impacto para la calle */
+    /* 2. Titular de Impacto para la calle */
     .street-headline {
       text-align: center;
-      padding: 10px 24px 8px;
+      margin: 8px 0;
     }
 
     .headline-pill {
       display: inline-block;
       background: var(--primary);
       color: white;
-      font-size: 1.15rem;
+      font-size: 1.35rem;
       font-weight: 900;
-      padding: 6px 18px;
+      padding: 8px 24px;
       border-radius: 50px;
       letter-spacing: 0.5px;
-      box-shadow: 0 4px 12px rgba(217, 83, 111, 0.3);
+      box-shadow: 0 4px 14px rgba(217, 83, 111, 0.35);
       text-transform: uppercase;
     }
 
     .headline-sub {
-      font-size: 0.9rem;
+      font-size: 1rem;
       color: #5C4343;
-      margin-top: 6px;
-      font-weight: 600;
+      margin-top: 8px;
+      font-weight: 700;
     }
 
-    /* Grilla de 4 Fotos Tentadoras */
+    /* 3. Grilla de Fotos Tentadoras */
     .photo-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      padding: 8px 24px;
+      gap: 10px;
+      margin: 6px 0;
     }
 
     .photo-card {
       background: white;
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-      border: 1px solid rgba(217, 83, 111, 0.15);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      border: 1px solid rgba(217, 83, 111, 0.2);
       display: flex;
       flex-direction: column;
     }
 
     .photo-card img {
       width: 100%;
-      height: 75px;
+      height: 92px;
       object-fit: cover;
     }
 
     .photo-card .label {
-      padding: 4px;
-      font-size: 0.68rem;
-      font-weight: 700;
+      padding: 6px 4px;
+      font-size: 0.76rem;
+      font-weight: 800;
       text-align: center;
       color: var(--dark);
-      line-height: 1.15;
+      line-height: 1.2;
       background: #FFFBFB;
     }
 
-    /* SECCIÓN CENTRAL: CÓDIGO QR GIGANTE */
+    /* 4. SECCIÓN CENTRAL: CÓDIGO QR GIGANTE Y BENEFICIOS */
     .qr-hero-section {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 12px 28px;
-      gap: 20px;
-      flex: 1;
+      gap: 22px;
+      background: white;
+      border-radius: 16px;
+      padding: 16px 20px;
+      border: 2px solid rgba(217, 83, 111, 0.25);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      margin: 8px 0;
     }
 
     .qr-frame-box {
-      background: white;
-      border: 3px solid var(--primary);
+      background: var(--primary-light);
+      border: 3.5px solid var(--primary);
       border-radius: 18px;
       padding: 14px;
       text-align: center;
-      box-shadow: 0 8px 20px rgba(217, 83, 111, 0.2);
+      box-shadow: 0 8px 22px rgba(217, 83, 111, 0.25);
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
+      min-width: 190px;
     }
 
     .qr-frame-box::before {
       content: "📲 ESCANEÁ AQUÍ";
       position: absolute;
-      top: -12px;
+      top: -13px;
       background: var(--primary);
       color: white;
-      font-size: 0.75rem;
+      font-size: 0.82rem;
       font-weight: 900;
-      padding: 2px 12px;
+      padding: 3px 14px;
       border-radius: 20px;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
     }
 
     .qr-img {
-      width: 160px;
-      height: 160px;
+      width: 165px;
+      height: 165px;
       display: block;
-      margin: 4px 0;
+      margin: 6px 0;
       border-radius: 8px;
+      background: white;
+      padding: 4px;
     }
 
     .qr-caption {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #666;
-      margin-top: 4px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-top: 2px;
     }
 
     .qr-bullets {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .qr-bullet-item {
       display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.75);
-      padding: 8px 12px;
+      align-items: center;
+      gap: 12px;
+      background: #FAF6F0;
+      padding: 10px 14px;
       border-radius: 10px;
-      border: 1px solid rgba(217, 83, 111, 0.15);
+      border-left: 4px solid var(--primary);
     }
 
     .qr-bullet-item .icon {
-      font-size: 1.3rem;
+      font-size: 1.5rem;
       line-height: 1;
     }
 
     .qr-bullet-item .text h4 {
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: var(--primary);
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: var(--dark);
+      margin-bottom: 2px;
     }
 
     .qr-bullet-item .text p {
-      font-size: 0.75rem;
-      color: #555;
-      line-height: 1.25;
+      font-size: 0.82rem;
+      color: #666;
+      line-height: 1.3;
     }
 
-    /* Banner Promo / Descuento */
+    /* 5. Banner Promo de Descuento */
     .promo-banner {
-      margin: 0 24px 10px;
-      background: linear-gradient(135deg, #FFF0F3 0%, #FFE3E8 100%);
+      background: linear-gradient(135deg, #FFF0F3 0%, #FFE1E7 100%);
       border: 2px dashed var(--primary);
       border-radius: 12px;
-      padding: 8px 16px;
-      text-align: center;
+      padding: 10px 18px;
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
       align-items: center;
+      margin: 6px 0;
     }
 
     .promo-banner .promo-code {
-      font-size: 0.82rem;
+      font-size: 0.95rem;
       color: var(--dark);
+      font-weight: 700;
     }
+
     .promo-banner .promo-code strong {
       background: var(--primary);
       color: white;
-      padding: 2px 8px;
+      padding: 3px 10px;
       border-radius: 6px;
-      font-size: 0.85rem;
-      margin-left: 4px;
-      letter-spacing: 0.5px;
+      font-size: 1rem;
+      margin-left: 6px;
+      letter-spacing: 0.8px;
     }
 
     .promo-banner .delivery-badge {
-      font-size: 0.78rem;
-      color: #2A7E62;
-      font-weight: 700;
+      font-size: 0.88rem;
+      color: #1F7A59;
+      font-weight: 800;
     }
 
-    /* Barra de Contacto / WhatsApp */
+    /* 6. Franja WhatsApp & Pedidos Online */
     .whatsapp-strip {
       background: #25D366;
       color: white;
-      margin: 0 24px 8px;
-      border-radius: 10px;
-      padding: 8px 16px;
+      border-radius: 12px;
+      padding: 12px 20px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 10px;
-      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+      justify-content: space-between;
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+    }
+
+    .whatsapp-strip .wa-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .whatsapp-strip .wa-icon {
-      font-size: 1.4rem;
+      font-size: 1.8rem;
     }
 
-    .whatsapp-strip .wa-text {
-      font-size: 1rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-    }
-
-    /* ==========================================================================
-       TIRAS RECORTABLES DE CALLE (Tear-off tabs)
-       ========================================================================== */
-    .tear-off-section {
-      margin-top: auto;
-      border-top: 2px dashed #999;
-      position: relative;
-      background: white;
-      padding-top: 4px;
-      height: 42mm;
-    }
-
-    .cut-line-indicator {
-      position: absolute;
-      top: -12px;
-      left: 12px;
-      background: white;
-      padding: 0 8px;
-      font-size: 0.68rem;
-      color: #777;
+    .whatsapp-strip .wa-title {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.95;
       font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
 
-    .tabs-container {
-      display: flex;
-      height: 100%;
-      width: 100%;
-    }
-
-    .tab-item {
-      flex: 1;
-      border-right: 1px dashed #BBB;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 4px 2px;
-      overflow: hidden;
-    }
-
-    .tab-item:last-child {
-      border-right: none;
-    }
-
-    /* Texto vertical estilo tira de calle */
-    .tab-vertical-content {
-      writing-mode: vertical-rl;
-      transform: rotate(180deg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--dark);
-      letter-spacing: 0.5px;
-      height: 100%;
-    }
-
-    .tab-vertical-content .name {
-      color: var(--primary);
+    .whatsapp-strip .wa-number {
+      font-size: 1.35rem;
       font-weight: 900;
-      font-size: 0.72rem;
+      letter-spacing: 0.5px;
     }
 
-    .tab-vertical-content .phone {
-      background: #E8F8EE;
-      color: #1A8A42;
-      padding: 2px 4px;
-      border-radius: 4px;
-      font-weight: 800;
+    .whatsapp-strip .wa-right {
+      text-align: right;
+      font-size: 0.85rem;
+      font-weight: 700;
     }
 
-    .tab-vertical-content .link {
-      color: #555;
-      font-size: 0.62rem;
+    /* 7. Pie de Impresión Elegante */
+    .flyer-footer {
+      text-align: center;
+      padding-top: 6px;
+      font-size: 0.8rem;
+      color: #7A6666;
+      font-weight: 600;
+      border-top: 1px solid rgba(217, 83, 111, 0.2);
+    }
+
+    .flyer-footer strong {
+      color: var(--primary);
     }
 
     /* ==========================================================================
-       CONFIGURACIÓN DE IMPRESIÓN DIRECTA
+       CONFIGURACIÓN DE IMPRESIÓN PURA A4
        ========================================================================== */
     @media print {
       body {
@@ -458,6 +431,9 @@
         width: 210mm !important;
         height: 297mm !important;
         min-height: 297mm !important;
+        max-height: 297mm !important;
+        padding: 10mm !important;
+        margin: 0 !important;
         page-break-after: always;
         page-break-inside: avoid;
       }
@@ -475,7 +451,7 @@
   <!-- Barra de control en pantalla para el usuario -->
   <div class="screen-controls">
     <div class="info">
-      <strong>📄 Flyer Callejero con QR Oficial</strong> — Listo para imprimir en <strong>Hoja A4</strong>.
+      <strong>📄 Flyer Callejero A4 (Sin tiras recortables)</strong> — Formato completo listo para imprimir en <strong>Hoja A4</strong>.
       <div style="font-size: 0.8rem; color: #777;">Tip: Al imprimir en tu navegador, activa la opción <em>"Gráficos de fondo"</em>.</div>
     </div>
     <div style="display: flex; gap: 8px;">
@@ -490,8 +466,9 @@
 
   <!-- HOJA A4 IMPRIMIBLE -->
   <div class="flyer-sheet">
-    <!-- Borde estético -->
+    <!-- Marcos perimetrales decorativos -->
     <div class="flyer-border"></div>
+    <div class="flyer-border-inner"></div>
 
     <!-- 1. Encabezado de la Marca -->
     <header class="flyer-header">
@@ -575,102 +552,24 @@
       </div>
     </div>
 
-    <!-- 6. Franja Verde WhatsApp -->
+    <!-- 6. Franja Verde WhatsApp & Web Oficial -->
     <div class="whatsapp-strip">
-      <span class="wa-icon">💬</span>
-      <span class="wa-text">WhatsApp Oficial: 11 5619-2616</span>
-      <span style="font-size: 0.85rem; opacity: 0.9;">• pasteleriadulce-atelier.vercel.app</span>
+      <div class="wa-left">
+        <span class="wa-icon">💬</span>
+        <div>
+          <div class="wa-title">Hacé tu pedido directo al WhatsApp</div>
+          <div class="wa-number">11 5619-2616</div>
+        </div>
+      </div>
+      <div class="wa-right">
+        <div>pasteleriadulce-atelier.vercel.app</div>
+        <div style="font-size: 0.75rem; opacity: 0.9; font-weight: 500;">Envíos en Garín, Escobar y Zona Norte</div>
+      </div>
     </div>
 
-    <!-- 7. Tiras Recortables para la Calle (Tear-off tabs) -->
-    <footer class="tear-off-section">
-      <div class="cut-line-indicator">
-        <span>✂️</span> Cortar por las líneas punteadas
-      </div>
-
-      <div class="tabs-container">
-        <!-- Generar 10 tiras recortables -->
-        <!-- Tab 1 -->
-        <div class="tab-item">
-          <div class="tab-vertical-content">
-            <span class="name">🍰 DULCE ATELIER</span>
-            <span class="phone">📲 11 5619-2616</span>
-            <span class="link">dulce-atelier.vercel.app</span>
-          </div>
-        </div>
-        <!-- Tab 2 -->
-        <div class="tab-item">
-          <div class="tab-vertical-content">
-            <span class="name">🍰 DULCE ATELIER</span>
-            <span class="phone">📲 11 5619-2616</span>
-            <span class="link">dulce-atelier.vercel.app</span>
-          </div>
-        </div>
-        <!-- Tab 3 -->
-        <div class="tab-item">
-          <div class="tab-vertical-content">
-            <span class="name">🍰 DULCE ATELIER</span>
-            <span class="phone">📲 11 5619-2616</span>
-            <span class="link">dulce-atelier.vercel.app</span>
-          </div>
-        </div>
-        <!-- Tab 4 -->
-        <div class="tab-item">
-          <div class="tab-vertical-content">
-            <span class="name">🍰 DULCE ATELIER</span>
-            <span class="phone">📲 11 5619-2616</span>
-            <span class="link">dulce-atelier.vercel.app</span>
-          </div>
-        </div>
-        <!-- Tab 5 -->
-        <div class="tab-item">
-          <div class="tab-vertical-content">
-            <span class="name">🍰 DULCE ATELIER</span>
-            <span class="phone">📲 11 5619-2616</span>
-            <span class="link">dulce-atelier.vercel.app</span>
-          </div>
-        </div>
-        <!-- Tab 6 -->
-        <div class="tab-item">
-          <div class="tab-vertical-content">
-            <span class="name">🍰 DULCE ATELIER</span>
-            <span class="phone">📲 11 5619-2616</span>
-            <span class="link">dulce-atelier.vercel.app</span>
-          </div>
-        </div>
-        <!-- Tab 7 -->
-        <div class="tab-item">
-          <div class="tab-vertical-content">
-            <span class="name">🍰 DULCE ATELIER</span>
-            <span class="phone">📲 11 5619-2616</span>
-            <span class="link">dulce-atelier.vercel.app</span>
-          </div>
-        </div>
-        <!-- Tab 8 -->
-        <div class="tab-item">
-          <div class="tab-vertical-content">
-            <span class="name">🍰 DULCE ATELIER</span>
-            <span class="phone">📲 11 5619-2616</span>
-            <span class="link">dulce-atelier.vercel.app</span>
-          </div>
-        </div>
-        <!-- Tab 9 -->
-        <div class="tab-item">
-          <div class="tab-vertical-content">
-            <span class="name">🍰 DULCE ATELIER</span>
-            <span class="phone">📲 11 5619-2616</span>
-            <span class="link">dulce-atelier.vercel.app</span>
-          </div>
-        </div>
-        <!-- Tab 10 -->
-        <div class="tab-item">
-          <div class="tab-vertical-content">
-            <span class="name">🍰 DULCE ATELIER</span>
-            <span class="phone">📲 11 5619-2616</span>
-            <span class="link">dulce-atelier.vercel.app</span>
-          </div>
-        </div>
-      </div>
+    <!-- 7. Pie de Cartel -->
+    <footer class="flyer-footer">
+      <span>Elaboración 100% artesanal con materias primas de primera calidad • <strong>Dulce Atelier</strong></span>
     </footer>
   </div>
 
