@@ -1,0 +1,197 @@
+﻿/* ═══════════════════════════════════════════════════════════════
+   DULCE ATELIER — MEJORAS PREMIUM 2026
+   Performance + Micro-animations + Visual Polish
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Header: badge pulsante más llamativo ────────────────── */
+.badge-count {
+  animation: badgePulse 2.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(217, 83, 111, 0.4); }
+  50%       { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(217, 83, 111, 0); }
+}
+
+/* ── Icon buttons: hover más premium ─────────────────────── */
+.icon-btn {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.icon-btn:hover {
+  background: var(--primary-light) !important;
+  border-color: rgba(217, 83, 111, 0.25) !important;
+  transform: scale(1.08) !important;
+  box-shadow: 0 4px 12px rgba(217, 83, 111, 0.15) !important;
+}
+
+/* ── Status dot: glow más visible ────────────────────────── */
+#store-status-dot {
+  animation: statusGlow 2s ease-in-out infinite !important;
+  box-shadow: 0 0 0 0 rgba(42, 157, 143, 0.5);
+}
+
+@keyframes statusGlow {
+  0%  { box-shadow: 0 0 0 0 rgba(42, 157, 143, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(42, 157, 143, 0); }
+  100%{ box-shadow: 0 0 0 0 rgba(42, 157, 143, 0); }
+}
+
+/* ── Product cards: shimmer skeleton + hover elevado ─────── */
+.product-card {
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease !important;
+  will-change: transform;
+}
+
+.product-card:hover {
+  transform: translateY(-6px) scale(1.01) !important;
+  box-shadow:
+    0 16px 40px rgba(43, 30, 26, 0.14),
+    0 0 0 1.5px rgba(217, 83, 111, 0.18) !important;
+}
+
+.product-card:active {
+  transform: translateY(-2px) scale(0.99) !important;
+  transition-duration: 0.1s !important;
+}
+
+/* ── Imagen de producto: zoom suave ──────────────────────── */
+.product-img {
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  will-change: transform;
+}
+
+.product-card:hover .product-img {
+  transform: scale(1.06) !important;
+}
+
+/* ── Botón WhatsApp cart: efecto ripple ──────────────────── */
+.btn-whatsapp,
+[class*="btn"][class*="primary"] {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-whatsapp::after,
+[class*="btn"][class*="primary"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.45s ease, height 0.45s ease, opacity 0.5s ease;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.btn-whatsapp:active::after,
+[class*="btn"][class*="primary"]:active::after {
+  width: 200px;
+  height: 200px;
+  opacity: 0;
+}
+
+/* ── Category tabs: indicador animado ────────────────────── */
+.category-tab {
+  position: relative;
+  transition: color 0.25s ease, background 0.25s ease !important;
+}
+
+.category-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 2.5px;
+  background: var(--primary);
+  border-radius: 2px;
+  animation: tabSlide 0.25s ease forwards;
+}
+
+@keyframes tabSlide {
+  from { width: 0; opacity: 0; }
+  to   { width: 28px; opacity: 1; }
+}
+
+/* ── Cart drawer: entrada más fluida ─────────────────────── */
+.modal-overlay {
+  animation: overlayFadeIn 0.25s ease forwards !important;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Toast: animación más suave ──────────────────────────── */
+.toast {
+  animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toastSlideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* ── Sección hero: degradado background mejorado ─────────── */
+.app-header {
+  background: var(--bg-surface) !important;
+  box-shadow: 0 1px 0 var(--border-light), 0 4px 16px rgba(43, 30, 26, 0.05) !important;
+}
+
+/* ── Delivery switcher: transición premium ───────────────── */
+.delivery-tab {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.delivery-tab.active {
+  background: var(--bg-surface) !important;
+  box-shadow: 0 2px 8px rgba(43, 30, 26, 0.1) !important;
+  color: var(--primary) !important;
+}
+
+/* ── Section titles: shimmer rosado ──────────────────────── */
+.section-title {
+  position: relative;
+}
+
+/* ── Scrollbar personalizada ─────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-surface-secondary); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary), var(--accent-gold));
+  border-radius: 5px;
+}
+
+/* ── Lazy images: placeholder animado ────────────────────── */
+img {
+  background: linear-gradient(90deg, var(--bg-surface-secondary) 25%, var(--bg-surface) 50%, var(--bg-surface-secondary) 75%);
+  background-size: 200% 100%;
+}
+
+/* ── Performance: contención CSS ─────────────────────────── */
+.product-card,
+.modal-overlay,
+.toast {
+  contain: layout style;
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.1ms !important;
+  }
+}

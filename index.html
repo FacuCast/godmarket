@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -40,12 +40,13 @@
   <link rel="apple-touch-icon" href="assets/icons/icon.svg">
 
   <!-- Leaflet Maps CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" onload="this.onload=null;this.rel='stylesheet'">
 
   <!-- Stylesheets (Pure CSS) -->
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/mejoras-premium.css">
 </head>
 
 <body>
@@ -60,7 +61,7 @@
     <header class="app-header">
       <div class="header-top">
         <div class="brand-wrapper">
-          <img src="assets/images/logo.svg" alt="Dulce Atelier Logo" class="brand-logo-img"
+          <img src="assets/images/logo.svg" alt="Dulce Atelier Logo" class="brand-logo-img" loading="eager"
             style="width: 44px; height: 44px; border-radius: 12px; object-fit: cover;">
           <div class="brand-info">
             <h1>Dulce Atelier</h1>
