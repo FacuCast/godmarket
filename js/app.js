@@ -4,6 +4,7 @@
 
 class DulceAtelierApp {
   constructor() {
+    this.selectedBusiness = 'todos';
     this.currentCategory = 'todos';
     this.searchQuery = '';
     this.selectedProductForModal = null;
@@ -18,6 +19,8 @@ class DulceAtelierApp {
   init() {
     this.setupPWA();
     this.setupEventListeners();
+    this.renderBusinessesSlider();
+    this.renderBusinessSpotlight();
     this.renderCategories();
     this.renderProducts();
     this.updateCartUI();
@@ -348,12 +351,98 @@ class DulceAtelierApp {
     }
   }
 
+  renderBusinessesSlider() {
+    const container = document.getElementById('businesses-slider');
+    if (!container) return;
+
+    const businesses = window.productManager.getAllBusinesses();
+
+    let html = `
+      <div class="business-chip ${this.selectedBusiness === 'todos' ? 'active' : ''}" 
+           onclick="window.app.setBusiness('todos')">
+        <div class="business-chip-avatar">✨</div>
+        <div class="business-chip-info">
+          <span class="business-chip-name">Todas (7)</span>
+          <span class="business-chip-zone">Marketplace</span>
+        </div>
+      </div>
+    `;
+
+    businesses.forEach(b => {
+      const isActive = this.selectedBusiness === b.id;
+      html += `
+        <div class="business-chip ${isActive ? 'active' : ''}" 
+             onclick="window.app.setBusiness('${b.id}')">
+          <div class="business-chip-avatar">${b.avatar}</div>
+          <div class="business-chip-info">
+            <span class="business-chip-name">${this.escapeHTML(b.name)}</span>
+            <span class="business-chip-zone">📍 ${this.escapeHTML(b.neighborhood)}</span>
+          </div>
+          <div class="business-chip-rating">⭐ ${b.rating}</div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  setBusiness(businessId) {
+    this.selectedBusiness = businessId;
+    this.renderBusinessesSlider();
+    this.renderBusinessSpotlight();
+    this.renderProducts();
+  }
+
+  renderBusinessSpotlight() {
+    const container = document.getElementById('store-spotlight-container');
+    if (!container) return;
+
+    if (this.selectedBusiness === 'todos') {
+      container.innerHTML = '';
+      container.style.display = 'none';
+      return;
+    }
+
+    const business = window.productManager.getBusinessById(this.selectedBusiness);
+    if (!business) {
+      container.style.display = 'none';
+      return;
+    }
+
+    container.style.display = 'block';
+    container.innerHTML = `
+      <div class="store-spotlight-card animate-fade">
+        <div class="store-spotlight-header">
+          <div class="store-spotlight-avatar">${business.avatar}</div>
+          <div class="store-spotlight-info">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <h3 class="store-spotlight-title font-serif">${this.escapeHTML(business.name)}</h3>
+              <span class="store-spotlight-badge">${this.escapeHTML(business.badge || '⭐ Destacado')}</span>
+            </div>
+            <p class="store-spotlight-tagline">${this.escapeHTML(business.tagline)}</p>
+            <div class="store-spotlight-meta">
+              <span>📍 ${this.escapeHTML(business.neighborhood)}</span>
+              <span>•</span>
+              <span>⭐ ${business.rating} (${business.reviews} opiniones)</span>
+              <span>•</span>
+              <span>🛵 ${business.deliveryTime}</span>
+            </div>
+          </div>
+          <button class="store-spotlight-close" onclick="window.app.setBusiness('todos')" title="Ver todas las pastelerías">
+            ✕ Ver todas
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   renderCategories() {
     const categories = [
       { id: 'todos', name: 'Todo el Menú', icon: '✨' },
-      { id: 'tortas', name: 'Tortas & Cakes', icon: '🎂' },
-      { id: 'desayunos', name: 'Desayunos & Boxes', icon: '🎁' },
-      { id: 'postres', name: 'Postres & Porciones', icon: '🥐' }
+      { id: 'desayunos', name: 'Desayunos Sorpresa', icon: '☀️' },
+      { id: 'meriendas', name: 'Meriendas & Té', icon: '☕' },
+      { id: 'brunch', name: 'Brunch & Salado', icon: '🥐' },
+      { id: 'boxes', name: 'Boxes Regalo', icon: '🎁' }
     ];
 
     const container = document.getElementById('categories-slider');
@@ -378,48 +467,49 @@ class DulceAtelierApp {
     const container = document.getElementById('products-section-container');
     if (!container) return;
 
-    let products = window.productManager.getAll();
-
-    if (this.searchQuery) {
-      products = window.productManager.search(this.searchQuery);
-    } else if (this.currentCategory !== 'todos') {
-      products = window.productManager.getByCategory(this.currentCategory);
-    }
+    let products = window.productManager.search(this.searchQuery, this.selectedBusiness, this.currentCategory);
 
     if (products.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
-          <div style="font-size: 3rem; margin-bottom: 10px;">🧁</div>
-          <h3>No encontramos productos</h3>
-          <p style="font-size: 0.85rem;">Prueba con otra palabra o categoría.</p>
+          <div style="font-size: 3rem; margin-bottom: 10px;">🥐</div>
+          <h3>No encontramos desayunos ni meriendas</h3>
+          <p style="font-size: 0.85rem;">Prueba buscando otra pastelería, producto o cambiando de categoría.</p>
+          <button class="btn-primary" onclick="window.app.setBusiness('todos'); window.app.setCategory('todos');" style="margin: 16px auto 0; max-width: 240px; padding: 10px 18px; font-size: 0.85rem;">
+            Ver todo el Marketplace
+          </button>
         </div>
       `;
       return;
     }
 
-    // Si estamos en "Todos", agrupar con vista completa por categoría
-    if (this.currentCategory === 'todos' && !this.searchQuery) {
-      const sections = [
-        { id: 'tortas', title: '🎂 Tortas & Pasteles Artesanales', subtitle: 'Delicias caseras para celebrar' },
-        { id: 'desayunos', title: '🎁 Desayunos & Meriendas Sorpresa', subtitle: 'Listos para regalar o compartir' },
-        { id: 'postres', title: '🥐 Postres & Porciones Individuales', subtitle: 'El bocado dulce perfecto' }
-      ];
-
+    // Si estamos viendo "todos" sin búsqueda y sin negocio específico seleccionado, agrupar por los 7 negocios
+    if (this.selectedBusiness === 'todos' && this.currentCategory === 'todos' && !this.searchQuery) {
+      const businesses = window.productManager.getAllBusinesses();
       let html = '';
-      sections.forEach(sec => {
-        const secProducts = products.filter(p => p.category === sec.id);
-        if (secProducts.length > 0) {
+
+      businesses.forEach(b => {
+        const bProducts = products.filter(p => p.businessId === b.id);
+        if (bProducts.length > 0) {
           html += `
-            <div class="section-container animate-fade">
-              <div class="section-header">
-                <div>
-                  <h3 class="section-title">${sec.title}</h3>
-                  <p class="section-subtitle">${sec.subtitle}</p>
+            <div class="section-container animate-fade store-section-block">
+              <div class="section-header store-section-header">
+                <div class="store-section-title-wrap">
+                  <div class="store-section-icon">${b.avatar}</div>
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <h3 class="section-title">${this.escapeHTML(b.name)}</h3>
+                      <span class="store-mini-badge">${this.escapeHTML(b.neighborhood)}</span>
+                    </div>
+                    <p class="section-subtitle">${this.escapeHTML(b.tagline)} • ⭐ ${b.rating} (${b.reviews}) • 🛵 ${b.deliveryTime}</p>
+                  </div>
                 </div>
-                <span class="badge-count">${secProducts.length}</span>
+                <button class="btn-view-store" onclick="window.app.setBusiness('${b.id}')">
+                  Ver Carta →
+                </button>
               </div>
               <div class="products-grid">
-                ${secProducts.map(p => this.renderProductCard(p)).join('')}
+                ${bProducts.map(p => this.renderProductCard(p)).join('')}
               </div>
             </div>
           `;
@@ -427,14 +517,34 @@ class DulceAtelierApp {
       });
       container.innerHTML = html;
     } else {
-      // Vista filtrada por categoría o búsqueda
+      // Vista filtrada por negocio, categoría o búsqueda
+      let title = "Resultados del Marketplace";
+      let subtitle = `${products.length} delicias disponibles`;
+
+      if (this.selectedBusiness !== 'todos') {
+        const bObj = window.productManager.getBusinessById(this.selectedBusiness);
+        if (bObj) {
+          title = `${bObj.avatar} Carta de ${bObj.name}`;
+          subtitle = `${products.length} productos en ${bObj.neighborhood}`;
+        }
+      } else if (this.currentCategory !== 'todos') {
+        const catMap = {
+          desayunos: '☀️ Desayunos Sorpresa',
+          meriendas: '☕ Meriendas & Té de la Tarde',
+          brunch: '🥐 Brunch & Opciones Saladas',
+          boxes: '🎁 Boxes de Cumpleaños & Regalo'
+        };
+        title = catMap[this.currentCategory] || 'Categoría';
+      }
+
       container.innerHTML = `
         <div class="section-container animate-fade">
           <div class="section-header">
             <div>
-              <h3 class="section-title">Resultados</h3>
-              <p class="section-subtitle">${products.length} productos disponibles</p>
+              <h3 class="section-title">${title}</h3>
+              <p class="section-subtitle">${subtitle}</p>
             </div>
+            <span class="badge-count">${products.length}</span>
           </div>
           <div class="products-grid">
             ${products.map(p => this.renderProductCard(p)).join('')}
@@ -449,9 +559,9 @@ class DulceAtelierApp {
     return `
       <div class="product-card" onclick="window.app.openProductModal('${product.id}')">
         <div class="product-image-container">
-          <img class="product-image" src="${product.image}" alt="${product.name}" loading="lazy" 
-               onerror="this.src='https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80'">
-          ${product.tag ? `<div class="product-tag">${product.tag}</div>` : ''}
+          <img class="product-image" src="${product.image}" alt="${this.escapeHTML(product.name)}" loading="lazy" 
+               onerror="this.src='https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80'">
+          ${product.tag ? `<div class="product-tag">${this.escapeHTML(product.tag)}</div>` : ''}
           <button class="favorite-btn ${isFav ? 'active' : ''}" 
                   onclick="window.app.toggleFavorite('${product.id}', event)" 
                   title="Favorito">
@@ -459,9 +569,14 @@ class DulceAtelierApp {
           </button>
         </div>
         <div class="product-content">
-          <span class="product-category-label">${product.categoryName}</span>
-          <h4 class="product-title">${product.name}</h4>
-          <p class="product-desc-short">${product.description}</p>
+          <div class="product-store-badge">
+            <span class="store-badge-avatar">${product.businessAvatar || '🏪'}</span>
+            <span class="store-badge-name">${this.escapeHTML(product.businessName || 'Pastelería')}</span>
+            <span class="store-badge-zone">• ${this.escapeHTML(product.businessNeighborhood || '')}</span>
+          </div>
+          <h4 class="product-title">${this.escapeHTML(product.name)}</h4>
+          <p class="product-desc-short">${this.escapeHTML(product.description)}</p>
+          <div class="product-portion-tag">📏 ${this.escapeHTML(product.portion || '1 o 2 pers.')}</div>
           <div class="product-footer">
             <div class="product-price">
               ${window.cartManager.formatCurrency(product.price)}
@@ -487,6 +602,13 @@ class DulceAtelierApp {
     document.getElementById('modal-product-price').textContent = window.cartManager.formatCurrency(product.price);
     document.getElementById('modal-product-desc').textContent = product.description;
     document.getElementById('modal-product-portion').textContent = product.portion || 'Porción artesanal';
+
+    const storeAvatar = document.getElementById('modal-store-avatar');
+    const storeName = document.getElementById('modal-store-name');
+    const storeZone = document.getElementById('modal-store-zone');
+    if (storeAvatar) storeAvatar.textContent = product.businessAvatar || '🏪';
+    if (storeName) storeName.textContent = product.businessName || 'Pastelería Asociada';
+    if (storeZone) storeZone.textContent = product.businessNeighborhood ? `• 📍 ${product.businessNeighborhood}` : '';
 
     // Reset inputs
     document.getElementById('modal-qty-val').textContent = '1';
@@ -688,6 +810,7 @@ class DulceAtelierApp {
       <div class="cart-item">
         <img class="cart-item-img" src="${item.product.image}" alt="${this.escapeHTML(item.product.name)}">
         <div class="cart-item-info">
+          <div class="cart-item-store-tag">🏪 ${this.escapeHTML(item.product.businessName || 'Pastelería')}${item.product.businessNeighborhood ? ' • ' + this.escapeHTML(item.product.businessNeighborhood) : ''}</div>
           <div class="cart-item-title">${this.escapeHTML(item.product.name)}</div>
           ${item.customization?.flavor ? `<div class="cart-item-custom">🍯 ${this.escapeHTML(item.customization.flavor)}</div>` : ''}
           ${item.customization?.dedication ? `<div class="cart-item-custom">✍️ "${this.escapeHTML(item.customization.dedication)}"</div>` : ''}
@@ -1127,11 +1250,14 @@ class DulceAtelierApp {
 
   openAdminModalWithPin() {
     const savedPin = localStorage.getItem('dulce_admin_pin') || '1234';
-    const entered = prompt('🔐 Ingrese el PIN de Administrador (por defecto: 1234):');
+    const entered = prompt('🔐 Ingrese el PIN de Acceso para Negocios (por defecto: 1234):');
     if (entered === savedPin) {
+      if (window.adminManager && typeof window.adminManager.populateBusinessSelect === 'function') {
+        window.adminManager.populateBusinessSelect();
+      }
       this.openModal('admin-product-modal');
     } else if (entered !== null) {
-      this.showToast('❌ PIN de Administrador incorrecto');
+      this.showToast('❌ PIN incorrecto');
     }
   }
 

@@ -50,16 +50,19 @@ class CheckoutHandler {
   generateWhatsAppMessage(formData, cart, orderId) {
     const items = cart.items;
     let itemsText = "";
+    const businessesSet = new Set();
 
     items.forEach((item) => {
+      const bizName = item.product.businessName || 'Pastelería Asociada';
+      const bizZone = item.product.businessNeighborhood ? ` (${item.product.businessNeighborhood})` : '';
+      businessesSet.add(`${bizName}${bizZone}`);
+
       const subtotal = item.product.price * item.quantity;
       itemsText += `\n• *${item.quantity}x ${item.product.name}* (${cart.formatCurrency(subtotal)})`;
+      itemsText += `\n   🏪 _Negocio:_ ${bizName}${bizZone}`;
       
       if (item.customization && item.customization.flavor) {
-        itemsText += `\n   ▫ _Relleno/Gusto:_ ${item.customization.flavor}`;
-      }
-      if (item.customization && item.customization.size) {
-        itemsText += `\n   ▫ _Tamaño:_ ${item.customization.size}`;
+        itemsText += `\n   ▫ _Gusto/Relleno:_ ${item.customization.flavor}`;
       }
       if (item.customization && item.customization.dedication) {
         itemsText += `\n   ▫ _Dedicatoria:_ "${item.customization.dedication}"`;
@@ -71,6 +74,8 @@ class CheckoutHandler {
         itemsText += `\n   ▫ _Nota:_ ${item.customization.note}`;
       }
     });
+
+    const businessesListStr = Array.from(businessesSet).join(', ');
 
     const isDelivery = cart.deliveryType === 'delivery';
     const deliveryText = isDelivery 
@@ -93,8 +98,10 @@ class CheckoutHandler {
       : '';
 
     const message = 
-`¡Hola Dulce Atelier! ✦
-*NUEVO PEDIDO #${orderId}*
+`¡Hola Dulce Market! ✦
+*NUEVO PEDIDO MARKETPLACE #${orderId}*
+
+🏪 *PASTELERÍAS INCLUIDAS:* ${businessesListStr}
 
 ━━━━━━━━━━━━━━━━━━━━
 ◆ *RESUMEN DEL PEDIDO:*${itemsText}
@@ -111,7 +118,7 @@ ${scheduleText}
 - *Forma de Pago:* ${paymentMethodName}${cashNote}
 ${formData.comments ? `\n• *Comentarios adicionales:* ${formData.comments}` : ''}
 
-Por favor confírmenme la recepción del pedido para preparar la entrega. ¡Muchas gracias! ✦`;
+Por favor confírmenme la recepción del pedido para coordinar con las pastelerías. ¡Muchas gracias! ✦`;
 
     return message;
   }

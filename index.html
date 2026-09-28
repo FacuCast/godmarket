@@ -1,34 +1,34 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Dulce Atelier | Pastelería Artesanal, Desayunos & Meriendas</title>
+  <title>Dulce Market | Marketplace de Desayunos & Meriendas de 7 Pastelerías</title>
   <meta name="description"
-    content="Pide las mejores tortas artesanales, desayunos sorpresa y meriendas gourmet con entrega a domicilio o retiro. Pedido directo a WhatsApp.">
+    content="El Marketplace de las mejores pastelerías y cafeterías de autor de Buenos Aires. Elige entre 7 negocios, desayunos sorpresa, brunch y meriendas con envío directo o retiro.">
   <meta name="theme-color" content="#D9536F">
 
-  <!-- Open Graph / WhatsApp / Facebook Link Preview Card (HD High-Contrast Logo) -->
+  <!-- Open Graph / WhatsApp / Facebook Link Preview Card -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="🍰 Dulce Atelier | Pastelería Artesanal & Desayunos">
+  <meta property="og:title" content="🧁 Dulce Market | Marketplace de Desayunos & Meriendas">
   <meta property="og:description"
-    content="Pide las mejores tortas artesanales, desayunos sorpresa y meriendas gourmet con entrega a domicilio. ¡Haz tu pedido directo a WhatsApp!">
+    content="Descubre y pide desayunos sorpresa, meriendas y delicias de 7 pastelerías artesanales. ¡Envío rápido a domicilio o retiro!">
   <meta property="og:image"
-    content="https://res.cloudinary.com/dz6apjevd/image/upload/f_png,q_auto:best,w_800,h_800/v1788225590/pasteleria_branding/dulce_atelier_og_hd.png">
+    content="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80">
   <meta property="og:image:secure_url"
-    content="https://res.cloudinary.com/dz6apjevd/image/upload/f_png,q_auto:best,w_800,h_800/v1788225590/pasteleria_branding/dulce_atelier_og_hd.png">
-  <meta property="og:image:type" content="image/png">
+    content="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80">
+  <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="800">
   <meta property="og:image:height" content="800">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="🍰 Dulce Atelier | Pastelería Artesanal & Desayunos">
+  <meta name="twitter:title" content="🧁 Dulce Market | Marketplace de Desayunos & Meriendas">
   <meta name="twitter:description"
-    content="Pide las mejores tortas artesanales, desayunos sorpresa y meriendas gourmet con entrega a domicilio. ¡Haz tu pedido directo a WhatsApp!">
+    content="Descubre y pide desayunos sorpresa, meriendas y delicias de 7 pastelerías artesanales. ¡Envío rápido a domicilio!">
   <meta name="twitter:image"
-    content="https://res.cloudinary.com/dz6apjevd/image/upload/f_png,q_auto:best,w_800,h_800/v1788225590/pasteleria_branding/dulce_atelier_og_hd.png">
+    content="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80">
 
   <!-- PWA & Mobile Web App Meta -->
   <link rel="manifest" href="manifest.json">
@@ -36,7 +36,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Dulce Atelier">
+  <meta name="apple-mobile-web-app-title" content="Dulce Market">
   <link rel="apple-touch-icon" href="assets/icons/icon.svg">
 
   <!-- Leaflet Maps CSS -->
@@ -60,12 +60,13 @@
     <!-- Header Sticky -->
     <header class="app-header">
       <div class="header-top">
-        <div class="brand-wrapper">
-          <img src="assets/images/logo.svg" alt="Dulce Atelier Logo" class="brand-logo-img" loading="eager"
-            style="width: 44px; height: 44px; border-radius: 12px; object-fit: cover;">
+        <div class="brand-wrapper" onclick="window.app.setBusiness('todos'); window.app.setCategory('todos');" style="cursor: pointer;">
+          <div class="brand-logo" style="background: var(--primary-gradient); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 14px rgba(217, 83, 111, 0.28);">
+            🥐
+          </div>
           <div class="brand-info">
-            <h1>Dulce Atelier</h1>
-            <span>Pastelería & Desayunos</span>
+            <h1 style="font-size: 1.2rem; line-height: 1.1;">Dulce Market</h1>
+            <span style="font-size: 0.7rem; color: var(--primary); font-weight: 700;">Desayunos & Meriendas</span>
           </div>
         </div>
 
@@ -74,8 +75,8 @@
             📦
             <span id="header-orders-badge" class="badge-count" style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.65rem; padding: 1px 6px; background: var(--accent-mint); color: #fff;">0</span>
           </button>
-          <button class="icon-btn" onclick="window.app.openAdminModalWithPin()" title="Agregar Producto (Admin)">
-            ➕
+          <button class="icon-btn" onclick="window.app.openAdminModalWithPin()" title="Portal Negocios: Publicar Desayuno">
+            🏪
           </button>
           <a href="flyer.html" target="_blank" class="icon-btn" title="Imprimir Flyer con QR para la calle" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
             📄
@@ -89,13 +90,13 @@
         </div>
       </div>
 
-      <!-- Info bar: Status & Hours (Dinámico Argentina 08:30 a 20:00 hs) -->
+      <!-- Info bar: Status & Hours -->
       <div id="store-status-bar"
-        style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 10px; padding: 4px 8px; background: var(--bg-surface-secondary); border-radius: var(--radius-xs);">
+        style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 10px; padding: 5px 10px; background: var(--bg-surface-secondary); border-radius: var(--radius-xs); border: 1px solid var(--border-light);">
         <div id="store-status-indicator" style="display: flex; align-items: center; gap: 6px;">
           <span id="store-status-dot"
             style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2A9D8F; animation: pulseGlow 2s infinite;"></span>
-          <span id="store-status-info"><strong id="store-status-text" style="color: #2A9D8F;">Abierto Ahora</strong> • 08:30 a 20:00 hs</span>
+          <span id="store-status-info"><strong id="store-status-text" style="color: #2A9D8F;">7 Pastelerías Activas</strong> • Envíos 08:30 a 20:00 hs</span>
         </div>
         <div id="store-delivery-tag" style="color: var(--primary); font-weight: 700;">
           🛵 Envíos en el día
@@ -108,7 +109,7 @@
           🛵 Envío a Domicilio
         </button>
         <button class="delivery-tab" data-type="pickup">
-          🏪 Retiro en Tienda
+          🏪 Retiro en Negocio
         </button>
       </div>
 
@@ -116,7 +117,7 @@
       <div class="search-wrapper">
         <span class="search-icon">🔍</span>
         <input type="text" id="main-search-input" class="search-input"
-          placeholder="Buscar tortas, desayunos, porciones..." autocomplete="off">
+          placeholder="Buscar desayunos, croissants, meriendas, pastelerías..." autocomplete="off">
         <span id="search-clear-btn" class="search-clear">✖</span>
       </div>
     </header>
@@ -124,59 +125,90 @@
     <!-- PWA Install Banner Pill (Visible if installable) -->
     <div id="pwa-install-pill"
       style="display: none; margin: 10px 16px 0; background: var(--accent-mint-light); border: 1px solid var(--accent-mint); padding: 8px 14px; border-radius: var(--radius-sm); align-items: center; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #2B1E1A;">
-      <span>📲 ¡Instala nuestra App en tu celular!</span>
+      <span>📲 ¡Instala Dulce Market en tu celular!</span>
       <button onclick="window.app.installPWA()"
         style="background: var(--accent-mint); color: #fff; padding: 4px 10px; border-radius: var(--radius-full); font-weight: 700; font-size: 0.75rem;">
         Instalar
       </button>
     </div>
 
-    <!-- Promo Banner Hero -->
+    <!-- Promo Banner Hero (Marketplace style) -->
     <section class="promo-banner">
-      <span class="promo-badge">✨ Promo Especial</span>
-      <h2>Celebra con Dulzura</h2>
-      <p>15% OFF en Box Desayuno Cumpleaños con el código <strong>DULCE15</strong></p>
-      <button class="promo-btn" onclick="window.app.setCategory('desayunos')">
-        Ver Desayunos →
-      </button>
+      <span class="promo-badge">✨ Marketplace de Pastelerías</span>
+      <h2>Desayunos & Meriendas de Autor</h2>
+      <p>Elegí entre <strong>7 pastelerías y cafeterías artesanales</strong> de Buenos Aires y recibí en tu puerta.</p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="promo-btn" onclick="window.app.setCategory('desayunos')">
+          ☀️ Ver Desayunos
+        </button>
+        <button class="promo-btn" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);" onclick="window.app.openAdminModalWithPin()">
+          🏪 Sumar mi Negocio
+        </button>
+      </div>
     </section>
 
-    <!-- Stories / Category Circles -->
+    <!-- 7 NEGOCIOS ASOCIADOS (Interactive Marketplace Slider) -->
+    <section class="businesses-section">
+      <div class="businesses-section-header">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-size: 1.15rem;">🏪</span>
+          <h3 class="font-serif" style="font-size: 1.05rem;">Nuestras 7 Pastelerías</h3>
+          <span class="badge-count" style="font-size: 0.65rem; padding: 1px 6px;">7 Activas</span>
+        </div>
+        <button class="btn-publish-pill" onclick="window.app.openAdminModalWithPin()" title="Portal para Pastelerías">
+          <span>➕</span> Publicar
+        </button>
+      </div>
+      <div id="businesses-slider" class="businesses-slider">
+        <!-- Renderizado dinámicamente por JS -->
+      </div>
+    </section>
+
+    <!-- Store Spotlight Banner (visible cuando se selecciona una pastelería) -->
+    <div id="store-spotlight-container" style="display: none;"></div>
+
+    <!-- Categorías / Filtros rápidos -->
     <div id="categories-slider" class="categories-slider">
       <!-- Generated by JS -->
     </div>
 
-    <!-- Dynamic Product Showcase (4 items per screen highlight) -->
+    <!-- Dynamic Product Showcase -->
     <main id="products-section-container">
       <!-- Rendered by JS -->
     </main>
 
     <!-- Business Info & Guarantee Footer -->
     <footer
-      style="margin: 30px 16px 20px; padding: 20px; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-light); text-align: center;">
-      <img src="assets/images/logo.svg" alt="Dulce Atelier"
-        style="width: 58px; height: 58px; margin: 0 auto 10px; border-radius: 50%;">
-      <h4 class="font-serif" style="font-size: 1.1rem; margin-bottom: 4px;">Dulce Atelier Pastelería</h4>
-      <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
-        Elaboración 100% artesanal con ingredientes premium.<br>
-        📍 Entregas en CABA y Gran Buenos Aires.
+      style="margin: 30px 16px 20px; padding: 22px 18px; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-light); text-align: center;">
+      <div style="font-size: 2.2rem; margin-bottom: 6px;">🥐</div>
+      <h4 class="font-serif" style="font-size: 1.15rem; margin-bottom: 2px;">Dulce Market</h4>
+      <p style="font-size: 0.78rem; color: var(--primary); font-weight: 700; margin-bottom: 6px;">
+        Marketplace de Desayunos & Meriendas Artesanales
+      </p>
+      <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.45;">
+        Conectamos a 7 pastelerías y cafeterías artesanales de autor con tu mesa y ocasiones especiales.<br>
+        📍 Entregas en Palermo, Recoleta, Belgrano, San Telmo, Urquiza, Colegiales y Caballito.
       </p>
 
-      <div style="display: flex; justify-content: center; gap: 14px; margin-bottom: 14px;">
+      <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
         <a href="https://wa.me/5491156192616" target="_blank"
-          style="display: inline-flex; align-items: center; gap: 6px; background: var(--whatsapp-green); color: #fff; padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700;">
-          <span>💬 WhatsApp: 11 5619-2616</span>
+          style="display: inline-flex; align-items: center; gap: 6px; background: var(--whatsapp-green); color: #fff; padding: 7px 16px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700;">
+          <span>💬 Coordinación WhatsApp: 11 5619-2616</span>
         </a>
+        <button type="button" onclick="window.app.openAdminModalWithPin()"
+          style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-surface-secondary); color: var(--text-main); border: 1px solid var(--border-light); padding: 7px 14px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 600;">
+          <span>🏪</span> Sumar mi Pastelería
+        </button>
       </div>
 
       <div
         style="font-size: 0.72rem; color: var(--text-muted); border-top: 1px dashed var(--border-light); padding-top: 12px;">
-        💳 Aceptamos Mercado Pago, Transferencias y Efectivo.<br>
-        © 2026 Dulce Atelier. Todos los derechos reservados.
-        <div style="margin-top: 14px;">
-          <a href="flyer.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(217, 83, 111, 0.1); color: var(--primary); padding: 6px 14px; border-radius: 50px; text-decoration: none; font-size: 0.78rem; font-weight: 700; border: 1px solid rgba(217, 83, 111, 0.25);">
+        💳 Pagos coordinados vía Transferencia Bancaria, Mercado Pago o Efectivo.<br>
+        © 2026 Dulce Market. La red de pastelerías artesanales.
+        <div style="margin-top: 12px;">
+          <a href="flyer.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(217, 83, 111, 0.08); color: var(--primary); padding: 5px 12px; border-radius: 50px; text-decoration: none; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(217, 83, 111, 0.2);">
             <span>📄</span>
-            <span>Imprimir Cartel / Flyer con QR para la calle</span>
+            <span>Cartel / Flyer Imprimible del Marketplace</span>
           </a>
         </div>
       </div>
@@ -200,23 +232,21 @@
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
       <button class="nav-item active"
-        onclick="window.app.setCategory('todos'); window.scrollTo({top:0, behavior:'smooth'});">
+        onclick="window.app.setBusiness('todos'); window.app.setCategory('todos'); window.scrollTo({top:0, behavior:'smooth'});">
         <span class="nav-icon">🏠</span>
         <span>Inicio</span>
       </button>
-      <button class="nav-item" onclick="window.app.setCategory('tortas')">
-        <span class="nav-icon">🎂</span>
-        <span>Tortas</span>
+      <button class="nav-item" onclick="document.querySelector('.businesses-section')?.scrollIntoView({behavior: 'smooth'});">
+        <span class="nav-icon">🏪</span>
+        <span>Pastelerías</span>
       </button>
       <button class="nav-item" onclick="window.app.setCategory('desayunos')">
-        <span class="nav-icon">🎁</span>
+        <span class="nav-icon">☀️</span>
         <span>Desayunos</span>
       </button>
-      <button class="nav-item" style="position: relative;" onclick="window.app.openOrdersHistoryModal()">
-        <span class="nav-icon">📋</span>
-        <span>Mis Pedidos</span>
-        <span id="nav-orders-badge" class="badge-count"
-          style="display: none; position: absolute; top: 2px; right: 10px; font-size: 0.65rem; padding: 1px 5px; background: var(--accent-mint); color: #fff;">0</span>
+      <button class="nav-item" onclick="window.app.setCategory('meriendas')">
+        <span class="nav-icon">☕</span>
+        <span>Meriendas</span>
       </button>
       <button class="nav-item" style="position: relative;" onclick="window.app.openModal('cart-drawer-modal')">
         <span class="nav-icon">🛍️</span>
@@ -259,6 +289,11 @@
         </div>
 
         <div>
+          <div id="modal-product-store" class="modal-store-pill">
+            <span id="modal-store-avatar">🏪</span>
+            <strong id="modal-store-name">Pastelería Asociada</strong>
+            <span id="modal-store-zone">• Palermo</span>
+          </div>
           <h3 id="modal-product-title" class="modal-product-title font-serif"></h3>
           <div id="modal-product-price" class="modal-product-price"></div>
           <p id="modal-product-desc"
@@ -768,72 +803,120 @@
   </div>
 
 
-  <!-- 6. Admin: Add Product Modal (with Cloudinary Upload) -->
+  <!-- 6. Portal de Negocios: Publicar Desayuno o Merienda -->
   <div id="admin-product-modal" class="modal-overlay"
     onclick="if(event.target === this) window.app.closeModal('admin-product-modal')">
-    <div class="bottom-sheet">
+    <div class="bottom-sheet" style="max-height: 92vh; overflow-y: auto;">
       <div class="drag-handle"></div>
       <button class="sheet-close-btn" onclick="window.app.closeModal('admin-product-modal')">✕</button>
 
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-        <span style="font-size: 1.4rem;">🧁</span>
-        <h3 class="font-serif" style="font-size: 1.25rem;">Agregar Nuevo Producto</h3>
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span style="font-size: 1.4rem;">🏪</span>
+        <h3 class="font-serif" style="font-size: 1.25rem;">Publicar Desayuno o Merienda</h3>
       </div>
+      <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.35;">
+        Portal para negocios del Marketplace. Publica tu propuesta y comenzá a recibir pedidos.
+      </p>
 
       <form id="add-product-form">
-        <!-- Cloudinary Upload Box -->
-        <input type="file" id="product-image-input" accept="image/*" style="display: none;">
-        <div id="cloudinary-upload-box" class="cloudinary-upload-box">
-          <img id="upload-preview-img" class="upload-preview" alt="Vista previa">
-          <div class="upload-prompt">
-            <span style="font-size: 2rem;">📸</span>
-            <div style="font-weight: 700; font-size: 0.85rem; margin-top: 4px;">Subir Foto del Pastel</div>
-            <span style="font-size: 0.72rem; color: var(--text-muted);">Toca aquí para seleccionar una imagen
-              (Cloudinary)</span>
+        <!-- 1. Selección de Negocio / Pastelería -->
+        <div class="form-group">
+          <label class="form-label" for="prod-business">🏪 Pastelería / Negocio que Publica *</label>
+          <select id="prod-business" class="form-control" required style="font-weight: 600;">
+            <!-- Populated dynamically by JS -->
+          </select>
+        </div>
+
+        <!-- Campos adicionales si registra un nuevo negocio -->
+        <div id="new-business-fields" style="display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; background: var(--bg-surface-secondary); padding: 10px; border-radius: var(--radius-sm); border: 1.5px dashed var(--border-light);">
+          <div>
+            <label class="form-label" for="new-biz-name" style="font-size: 0.75rem;">Nombre del Local *</label>
+            <input type="text" id="new-biz-name" class="form-control" placeholder="Ej: Café de las Flores" style="font-size: 0.82rem;">
+          </div>
+          <div>
+            <label class="form-label" for="new-biz-neighborhood" style="font-size: 0.75rem;">Barrio / Zona *</label>
+            <input type="text" id="new-biz-neighborhood" class="form-control" placeholder="Ej: Palermo / Devoto" style="font-size: 0.82rem;">
+          </div>
+        </div>
+
+        <!-- 2. Fotos: Preset Rápido de Desayunos o Subida Propia -->
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label">📸 Foto del Desayuno / Merienda:</label>
+          
+          <div class="preset-images-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px;">
+            <div class="preset-img-chip active" data-img="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80">
+              <span>☀️ Box Completo</span>
+            </div>
+            <div class="preset-img-chip" data-img="https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=80">
+              <span>🥐 Croissants</span>
+            </div>
+            <div class="preset-img-chip" data-img="https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=800&q=80">
+              <span>🧇 Waffles & Berries</span>
+            </div>
+            <div class="preset-img-chip" data-img="https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80">
+              <span>🥑 Brunch Palta</span>
+            </div>
+            <div class="preset-img-chip" data-img="https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=800&q=80">
+              <span>☕ Merienda & Té</span>
+            </div>
+            <div class="preset-img-chip" data-img="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80">
+              <span>🎂 Box Cumple</span>
+            </div>
+          </div>
+
+          <!-- Cloudinary Upload Box -->
+          <input type="file" id="product-image-input" accept="image/*" style="display: none;">
+          <div id="cloudinary-upload-box" class="cloudinary-upload-box" style="padding: 10px; min-height: 80px;">
+            <img id="upload-preview-img" class="upload-preview" alt="Vista previa" style="display: block; max-height: 120px; src: https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80;">
+            <div class="upload-prompt hidden">
+              <span style="font-size: 1.5rem;">📁</span>
+              <div style="font-weight: 700; font-size: 0.8rem; margin-top: 2px;">O subir imagen desde tu dispositivo</div>
+            </div>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="prod-name">Nombre del Producto *</label>
-          <input type="text" id="prod-name" class="form-control" placeholder="Ej: Torta Chocotorta Deluxe" required>
+          <label class="form-label" for="prod-name">Título del Desayuno o Merienda *</label>
+          <input type="text" id="prod-name" class="form-control" placeholder="Ej: Box Desayuno Primavera con Croissant" required>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div class="form-group">
             <label class="form-label" for="prod-category">Categoría *</label>
             <select id="prod-category" class="form-control" required>
-              <option value="tortas">🎂 Tortas & Pasteles</option>
-              <option value="desayunos">🎁 Desayunos & Meriendas</option>
-              <option value="postres">🥐 Postres & Porciones</option>
+              <option value="desayunos">☀️ Desayunos Sorpresa</option>
+              <option value="meriendas">☕ Meriendas & Té</option>
+              <option value="brunch">🥐 Brunch & Salado</option>
+              <option value="boxes">🎁 Boxes de Regalo</option>
             </select>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="prod-price">Precio (ARS) *</label>
-            <input type="number" id="prod-price" class="form-control" placeholder="Ej: 16500" required>
+            <input type="number" id="prod-price" class="form-control" placeholder="Ej: 21500" required>
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div class="form-group">
             <label class="form-label" for="prod-tag">Etiqueta Destacada</label>
-            <input type="text" id="prod-tag" class="form-control" placeholder="Ej: ⭐ Especial / 🔥 Nuevo">
+            <input type="text" id="prod-tag" class="form-control" placeholder="Ej: ⭐ Box Especial / 🥐 Recién horneado">
           </div>
 
           <div class="form-group">
             <label class="form-label" for="prod-portion">Rendimiento / Porciones</label>
-            <input type="text" id="prod-portion" class="form-control" placeholder="Ej: 8 a 10 porciones">
+            <input type="text" id="prod-portion" class="form-control" placeholder="Ej: Para 1 o 2 personas">
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="prod-desc">Descripción detallada *</label>
+          <label class="form-label" for="prod-desc">Descripción de qué incluye *</label>
           <textarea id="prod-desc" class="form-control" rows="3"
-            placeholder="Describe los ingredientes, texturas y detalles..." required></textarea>
+            placeholder="Detalla qué incluye el desayuno (croissant, jugo natural, mini torta, taza de regalo, etc.)..." required></textarea>
         </div>
 
-        <button type="submit" id="btn-save-product" class="btn-primary">
-          <span>Guardar y Publicar en la Web</span>
+        <button type="submit" id="btn-save-product" class="btn-primary" style="margin-top: 10px;">
+          <span>Publicar en Dulce Market →</span>
         </button>
       </form>
     </div>

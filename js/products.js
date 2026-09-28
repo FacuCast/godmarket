@@ -1,541 +1,595 @@
 /**
- * DULCE ATELIER - CATÁLOGO DE PRODUCTOS
- * Contiene el catálogo completo de delicias artesanales y la sincronización con LocalStorage / Cloudinary
+ * DULCE MARKET - MARKETPLACE DE DESAYUNOS & MERIENDAS ARTESANALES
+ * Catálogo de 7 negocios/pastelerías asociados y gestión local simulada (Mock State & LocalStorage)
  */
 
-const INITIAL_PRODUCTS = [
-  // ==========================================
-  // --- 1. TORTAS & PASTELES ARTESANALES ---
-  // ==========================================
+// ============================================================================
+// 1. LOS 7 NEGOCIOS / PASTELERÍAS ASOCIADAS AL MARKETPLACE
+// ============================================================================
+const INITIAL_BUSINESSES = [
   {
-    id: "torta-red-velvet",
-    name: "Torta Red Velvet Supreme",
-    category: "tortas",
-    categoryName: "Tortas Artesanales",
-    price: 18500,
-    tag: "⭐ Más Pedido",
+    id: "dulce-atelier",
+    name: "Dulce Atelier",
+    tagline: "Pastelería de Autor & Boxes Románticos",
+    neighborhood: "Palermo Hollywood",
     rating: 4.9,
-    reviews: 128,
-    description: "Bizcochuelo terciopelo rojo húmedo relleno con suave frosting de queso crema Philadelphia y frutos rojos frescos.",
-    image: "https://images.unsplash.com/photo-1586788680434-30d324b2d46f?auto=format&fit=crop&w=800&q=80",
-    portion: "8 a 10 porciones",
-    featured: true
+    reviews: 184,
+    deliveryTime: "35-50 min",
+    deliveryFee: 1500,
+    avatar: "🍰",
+    badge: "⭐ Destacado",
+    phone: "5491156192616",
+    address: "Humboldt 1950, Palermo",
+    description: "Especialistas en pastelería fina, tortas húmedas, desayunos gourmet sorpresa y packaging de lujo."
   },
   {
-    id: "torta-marquise-ddl",
-    name: "Marquise de Chocolate & DDL",
-    category: "tortas",
-    categoryName: "Tortas Artesanales",
-    price: 19800,
-    tag: "🍫 Puro Chocolate",
+    id: "la-petite-croissant",
+    name: "La Petite Croissant",
+    tagline: "Boulangerie & Croissanterie Francesa",
+    neighborhood: "Recoleta",
     rating: 5.0,
-    reviews: 94,
-    description: "Base húmeda de puro chocolate semiamargo, abundante dulce de leche repostero, crema chantilly y rulos de chocolate.",
-    image: "https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?auto=format&fit=crop&w=800&q=80",
-    portion: "10 a 12 porciones",
-    featured: true
+    reviews: 215,
+    deliveryTime: "30-45 min",
+    deliveryFee: 1500,
+    avatar: "🥐",
+    badge: "🇫🇷 Tradición Francesa",
+    phone: "5491156192616",
+    address: "Av. Alvear 1750, Recoleta",
+    description: "Auténtica manteca francesa, hojaldres crujientes horneados al amanecer, pain au chocolat y café de especialidad."
   },
   {
-    id: "torta-cheesecake-frutos",
-    name: "Cheesecake New York & Frutos Rojos",
-    category: "tortas",
-    categoryName: "Tortas Artesanales",
-    price: 17900,
-    tag: "🍓 Clásico",
+    id: "cafe-botanica",
+    name: "Café & Botánica",
+    tagline: "Brunch Saludable, Bowls & Cold Brew",
+    neighborhood: "Belgrano R",
     rating: 4.8,
-    reviews: 86,
-    description: "El auténtico cheesecake horneado estilo New York sobre crocante base de galletitas y coulis casero de frambuesas y moras.",
-    image: "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=800&q=80",
-    portion: "8 a 10 porciones",
-    featured: true
+    reviews: 142,
+    deliveryTime: "25-40 min",
+    deliveryFee: 1400,
+    avatar: "🥑",
+    badge: "🌿 Opciones Saludables",
+    phone: "5491156192616",
+    address: "Echeverría 3120, Belgrano",
+    description: "Ingredientes orgánicos, panes de masa madre, tostones con palta, huevos de campo y meriendas llenas de energía."
   },
   {
-    id: "torta-lemon-pie",
-    name: "Lemon Pie Gourmet con Merengue",
-    category: "tortas",
-    categoryName: "Tortas Artesanales",
-    price: 15400,
-    tag: "🍋 Cítrico Fresco",
+    id: "antojos-del-sur",
+    name: "Antojos del Sur",
+    tagline: "Desayunos Criollos & Facturas con DDL",
+    neighborhood: "San Telmo",
     rating: 4.9,
-    reviews: 110,
-    description: "Masa sablée crocante, curd cremoso de limones seleccionados y suave merengue italiano flameado.",
-    image: "https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=800&q=80",
-    portion: "8 porciones",
-    featured: true
+    reviews: 268,
+    deliveryTime: "30-45 min",
+    deliveryFee: 1600,
+    avatar: "🧉",
+    badge: "👑 Clásico Criollo",
+    phone: "5491156192616",
+    address: "Defensa 840, San Telmo",
+    description: "El sabor porteño de siempre: medialunas de manteca bien almibaradas, chipás calientes, alfajores y submarino."
   },
   {
-    id: "torta-chocotorta-deluxe",
-    name: "Chocotorta Clásica Argentina",
-    category: "tortas",
-    categoryName: "Tortas Artesanales",
-    price: 18900,
-    tag: "⭐ Favorita",
+    id: "velvet-bakery",
+    name: "Velvet Bakery",
+    tagline: "New York Style Cakes, Cookies XL & Waffles",
+    neighborhood: "Villa Urquiza",
+    rating: 4.9,
+    reviews: 176,
+    deliveryTime: "35-50 min",
+    deliveryFee: 1500,
+    avatar: "🍪",
+    badge: "🗽 Estilo New York",
+    phone: "5491156192616",
+    address: "Av. Olazábal 4920, Urquiza",
+    description: "Estilo americano moderno: cookies gigantes con centros fundidos, cheesecake New York y torres de waffles dorados."
+  },
+  {
+    id: "maison-matcha",
+    name: "Maison Matcha & Co.",
+    tagline: "Té de Especialidad, Roll Cakes & Brunch Fusión",
+    neighborhood: "Colegiales",
+    rating: 4.8,
+    reviews: 119,
+    deliveryTime: "40-55 min",
+    deliveryFee: 1600,
+    avatar: "🍵",
+    badge: "✨ Especialidad & Fusión",
+    phone: "5491156192616",
+    address: "Conde 1250, Colegiales",
+    description: "Experiencias sutiles con té matcha japonés ceremonial, scones ingleses con mermeladas de autor y roll cakes soufflé."
+  },
+  {
+    id: "dona-clara",
+    name: "Doña Clara Pastelería",
+    tagline: "Meriendas Caseras de la Abuela & Frolitas",
+    neighborhood: "Caballito",
     rating: 5.0,
-    reviews: 154,
-    description: "Capas de galletitas Chocolinas embebidas en café suave con el balance perfecto de dulce de leche repostero colonial y queso crema, decorada con rulos de chocolate y bombones.",
-    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80",
-    portion: "10 a 12 porciones",
-    featured: true
-  },
-  {
-    id: "torta-havannet-chocolate",
-    name: "Tarta Havannet & Ganache Belga",
-    category: "tortas",
-    categoryName: "Tortas Artesanales",
-    price: 16800,
-    tag: "🍫 Puro DDL & Choco",
-    rating: 4.9,
-    reviews: 97,
-    description: "Base crocante de masa sablée de cacao amargo, generosa montaña de dulce de leche repostero y baño satinado de ganache de chocolate semiamargo.",
-    image: "https://images.unsplash.com/photo-1542826438-bd32f43d626f?auto=format&fit=crop&w=800&q=80",
-    portion: "8 a 10 porciones",
-    featured: true
-  },
-  {
-    id: "torta-rogel-artesanal",
-    name: "Torta Rogel Tradicional con Merengue",
-    category: "tortas",
-    categoryName: "Tortas Artesanales",
-    price: 17500,
-    tag: "👑 Clásico Criollo",
-    rating: 4.8,
-    reviews: 83,
-    description: "Ocho finísimas y crujientes capas de masa de hojaldre casera intercaladas con puro dulce de leche repostero, coronada con abundante merengue italiano flameado.",
-    image: "https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&w=800&q=80",
-    portion: "10 a 12 porciones",
-    featured: true
-  },
-  {
-    id: "torta-carrot-cake-supreme",
-    name: "Carrot Cake & Frosting de Mascarpone",
-    category: "tortas",
-    categoryName: "Tortas Artesanales",
-    price: 17200,
-    tag: "🥕 Especiada & Húmeda",
-    rating: 4.9,
-    reviews: 104,
-    description: "Bizcocho súper húmedo de zanahorias tiernas, nueces tostadas y toque sutil de canela, relleno y cubierto con crema de queso mascarpone y lluvia de nueces pecanas.",
-    image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=800&q=80",
-    portion: "8 a 10 porciones",
-    featured: true
-  },
-  {
-    id: "torta-tarta-frutillas",
-    name: "Tarta de Frutillas con Pastelera",
-    category: "tortas",
-    categoryName: "Tortas Artesanales",
-    price: 16500,
-    tag: "🍓 Frescura Natural",
-    rating: 4.9,
-    reviews: 115,
-    description: "Masa sablée perfumada a la vainilla bourbon, suave crema pastelera casera y abundante corona de frutillas frescas de estación con brillo pastelero.",
-    image: "https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?auto=format&fit=crop&w=800&q=80",
-    portion: "8 porciones",
-    featured: true
-  },
-  {
-    id: "torta-balcarce-artesanal",
-    name: "Torta Balcarce Clásica",
-    category: "tortas",
-    categoryName: "Tortas Artesanales",
-    price: 18200,
-    tag: "🌰 Tradición",
-    rating: 4.8,
-    reviews: 67,
-    description: "Pionono esponjoso, merenguitos secos crocantes, dulce de leche, crema chantilly, castañas en almíbar y suave lluvia de coco tostado.",
-    image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=800&q=80",
-    portion: "10 a 12 porciones",
-    featured: true
-  },
-  {
-    id: "torta-mousse-tres-chocolates",
-    name: "Torta Mousse Tres Chocolates",
-    category: "tortas",
-    categoryName: "Tortas Artesanales",
-    price: 19400,
-    tag: "🍫 100% Cacao",
-    rating: 5.0,
-    reviews: 89,
-    description: "Tres capas de suave mousse aireada: chocolate negro al 70%, chocolate con leche y chocolate blanco sobre base crocante de cookies de chocolate.",
-    image: "https://images.unsplash.com/photo-1511018556340-d16986a1c194?auto=format&fit=crop&w=800&q=80",
-    portion: "8 a 10 porciones",
-    featured: true
-  },
-  {
-    id: "torta-selva-negra-kirsch",
-    name: "Torta Selva Negra con Cerezas",
-    category: "tortas",
-    categoryName: "Tortas Artesanales",
-    price: 18700,
-    tag: "🍒 Clásico Europeo",
-    rating: 4.9,
-    reviews: 76,
-    description: "Bizcochuelo de chocolate húmedo embebido en almíbar de licor de cerezas, relleno de crema chantilly, compota artesanal de cerezas y rulos de chocolate belga.",
-    image: "https://images.unsplash.com/photo-1549576490-b0b4831ef60a?auto=format&fit=crop&w=800&q=80",
-    portion: "10 a 12 porciones",
-    featured: true
-  },
+    reviews: 310,
+    deliveryTime: "30-40 min",
+    deliveryFee: 1400,
+    avatar: "👵",
+    badge: "❤️ 100% Casero",
+    phone: "5491156192616",
+    address: "Av. Rivadavia 5430, Caballito",
+    description: "Recetas familiares transmitidas por generaciones: tarta de ricota suave, pastafrolas de membrillo y budines esponjosos."
+  }
+];
 
-  // ==========================================
-  // --- 2. DESAYUNOS & MERIENDAS COMPLETOS ---
-  // ==========================================
+// ============================================================================
+// 2. CATÁLOGO INICIAL DE DESAYUNOS Y MERIENDAS DE LOS 7 NEGOCIOS
+// ============================================================================
+const INITIAL_PRODUCTS = [
+  // --------------------------------------------------------------------------
+  // NEGOCIO 1: DULCE ATELIER (Palermo)
+  // --------------------------------------------------------------------------
   {
-    id: "desayuno-premium-box",
-    name: "Box Desayuno 'Despertar Dulce'",
+    id: "da-desayuno-amour-deluxe",
+    businessId: "dulce-atelier",
+    businessName: "Dulce Atelier",
+    businessNeighborhood: "Palermo",
+    businessAvatar: "🍰",
+    name: "Box Desayuno Romántico 'Amour Deluxe'",
     category: "desayunos",
-    categoryName: "Desayunos & Meriendas",
+    categoryName: "Desayunos Sorpresa",
     price: 24500,
-    tag: "🎁 Ideal Regalo",
+    tag: "⭐ El Más Elegido",
     rating: 5.0,
-    reviews: 164,
-    description: "Taza artesanal, café en saquitos blend, medialunas rellenas, sándwich de jamón crudo y queso brie, mini cake a elección y jugo de naranja exprimido.",
+    reviews: 148,
+    description: "Bandeja artesanal con mini tarta de frutos rojos, sándwich de jamón crudo y queso brie en pan brioche, 2 medialunas de manteca, jugo de naranja recién exprimido, alfajor de almendras y taza de cerámica de regalo.",
     image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80",
     portion: "Para 1 o 2 personas",
     featured: true
   },
   {
-    id: "desayuno-box-cumple",
-    name: "Box Cumpleaños Feliz & Velita",
-    category: "desayunos",
-    categoryName: "Desayunos & Meriendas",
-    price: 26800,
-    tag: "🎂 Especial Cumple",
-    rating: 4.9,
-    reviews: 98,
-    description: "Bento cake personalizada, macarons surtidos, cookies con chips de chocolate, croissant relleno, velita mágica y tarjeta dedicatoria.",
-    image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80",
-    portion: "Box completo de festejo",
-    featured: true
-  },
-  {
-    id: "merienda-tea-time",
-    name: "Afternoon Tea Box Parisino",
-    category: "desayunos",
-    categoryName: "Desayunos & Meriendas",
-    price: 21900,
-    tag: "☕ Momento Té",
-    rating: 4.8,
-    reviews: 52,
-    description: "Scones ingleses con mermelada y queso crema, alfajorcitos de maicena caseros, mini roll de canela glaseado y té en hebras premium.",
-    image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80",
-    portion: "Para compartir",
-    featured: true
-  },
-  {
-    id: "desayuno-healthy-fit",
-    name: "Desayuno Vitality & Frutas",
-    category: "desayunos",
-    categoryName: "Desayunos & Meriendas",
-    price: 19500,
-    tag: "🌱 Saludable & Fresco",
-    rating: 4.9,
-    reviews: 41,
-    description: "Bowl de yogur griego con granola casera y frutos rojos, avocado toast en pan de masa madre, mini budín integral y limonada con menta.",
-    image: "https://images.unsplash.com/photo-1494859802809-d069c3b71a8a?auto=format&fit=crop&w=800&q=80",
-    portion: "1 persona",
-    featured: true
-  },
-  {
-    id: "desayuno-brunch-gourmet",
-    name: "Box Brunch Dulce & Salado",
-    category: "desayunos",
-    categoryName: "Desayunos & Meriendas",
-    price: 25900,
-    tag: "🥑 Brunch Completo",
-    rating: 5.0,
-    reviews: 112,
-    description: "Croissants rellenos de jamón crudo y rúcula, mini quiche de queso y espinaca, yogurt parfait con frutos secos, mini carrot cake, tostadas de masa madre y jugo natural.",
-    image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80",
-    portion: "Para 2 personas",
-    featured: true
-  },
-  {
-    id: "desayuno-box-aniversario",
-    name: "Box Romántico 'Aniversario & Amor'",
-    category: "desayunos",
-    categoryName: "Desayunos & Meriendas",
-    price: 27500,
-    tag: "❤️ Romántico",
-    rating: 5.0,
-    reviews: 88,
-    description: "Taza personalizada, bento cake especial 'Te Amo', bombones belgas artesanales, mini espumante, sándwiches en pan brioche y mini bouquet de flores secas.",
-    image: "https://images.unsplash.com/photo-1516054575922-f0b8eeadec1a?auto=format&fit=crop&w=800&q=80",
-    portion: "Box especial para 2",
-    featured: true
-  },
-  {
-    id: "desayuno-box-coffee-specialty",
-    name: "Box Cafetería de Especialidad en Casa",
-    category: "desayunos",
-    categoryName: "Desayunos & Meriendas",
-    price: 22800,
-    tag: "☕ Coffee Lovers",
+    id: "da-merienda-degustacion-pastelera",
+    businessId: "dulce-atelier",
+    businessName: "Dulce Atelier",
+    businessNeighborhood: "Palermo",
+    businessAvatar: "🍰",
+    name: "Merienda Degustación Pastelera & Té",
+    category: "meriendas",
+    categoryName: "Meriendas & Té",
+    price: 19800,
+    tag: "🍓 Degustación",
     rating: 4.9,
     reviews: 95,
-    description: "Drip coffee blend de especialidad tostado fresco, cookies estilo NY rellenas, pain au chocolat hojaldrado, scone de queso parmesano y tazón de cerámica artesanal.",
-    image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80",
-    portion: "Para 1 o 2 personas",
-    featured: true
-  },
-  {
-    id: "desayuno-box-kids-festejo",
-    name: "Box Merienda Infantil de Festejo",
-    category: "desayunos",
-    categoryName: "Desayunos & Meriendas",
-    price: 20900,
-    tag: "🎉 Para Niños",
-    rating: 4.8,
-    reviews: 63,
-    description: "Donas glaseadas de colores, cupcakes temáticos con dulce de leche, alfajorcitos de maicena con granas, chocolatada artesanal y jugo de naranja exprimido.",
-    image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=800&q=80",
-    portion: "Para 1 o 2 niños",
-    featured: true
-  },
-  {
-    id: "desayuno-box-chocolate-lover",
-    name: "Box Despertar 'Chocolate Lover'",
-    category: "desayunos",
-    categoryName: "Desayunos & Meriendas",
-    price: 23400,
-    tag: "🍫 Full Chocolate",
-    rating: 4.9,
-    reviews: 78,
-    description: "Submarino con barrita de chocolate artesanal, alfajores de brownie con DDL, cookies doble chocolate, muffin con corazón de Nutella y wafle belga con miel.",
-    image: "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=800&q=80",
-    portion: "Para 1 o 2 personas",
-    featured: true
-  },
-  {
-    id: "desayuno-box-matero-criollo",
-    name: "Box Merienda Matera Tradicional",
-    category: "desayunos",
-    categoryName: "Desayunos & Meriendas",
-    price: 19800,
-    tag: "🧉 100% Argentino",
-    rating: 4.9,
-    reviews: 130,
-    description: "Yerba mate premium orgánica, bizcochitos de grasa caseros, tortitas negras, cañoncitos de hojaldre con dulce de leche, chipá calentito recién horneado y mate artesanal.",
-    image: "https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&w=800&q=80",
-    portion: "Para compartir en familia",
-    featured: true
-  },
-  {
-    id: "desayuno-box-degustacion-mini",
-    name: "Box Degustación de Mini Tartas (x 6)",
-    category: "desayunos",
-    categoryName: "Desayunos & Meriendas",
-    price: 21500,
-    tag: "🧁 Mini Variedad",
-    rating: 4.8,
-    reviews: 92,
-    description: "6 mini tartitas individuales: lemon pie, cabsha con chocolate y DDL, toffee de nuez, tarta frutal con pastelera, crumble de manzana y cheesecake de frutos rojos.",
-    image: "https://images.unsplash.com/photo-1505976378723-9726b54e9bb9?auto=format&fit=crop&w=800&q=80",
-    portion: "Para 2 o 3 personas",
-    featured: true
-  },
-  {
-    id: "desayuno-box-picnic-primavera",
-    name: "Box Picnic & Tarde al Aire Libre",
-    category: "desayunos",
-    categoryName: "Desayunos & Meriendas",
-    price: 26400,
-    tag: "🧺 Para Compartir",
-    rating: 4.9,
-    reviews: 54,
-    description: "Termo de café frío infusionado, sándwiches ciabatta de jamón cocido natural y queso danbo, mini budines cítricos, alfajores de nuez y mantelito para picnic.",
-    image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80",
+    description: "Porción generosa de Torta Red Velvet, 3 macarons franceses rellenos, 2 scones tibios de queso gouda, dip de queso crema y mermelada casera de frambuesas con blend de té en hebras premium.",
+    image: "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=800&q=80",
     portion: "Para 2 personas",
+    featured: true
+  },
+  {
+    id: "da-box-cumple-sorpresa",
+    businessId: "dulce-atelier",
+    businessName: "Dulce Atelier",
+    businessNeighborhood: "Palermo",
+    businessAvatar: "🍰",
+    name: "Box Desayuno Cumpleaños Sorpresa",
+    category: "boxes",
+    categoryName: "Boxes de Regalo",
+    price: 26900,
+    tag: "🎂 Incluye Velita",
+    rating: 5.0,
+    reviews: 180,
+    description: "Mini torta Chocotorta Deluxe con velita de cumpleaños, cookies con chips de chocolate belga, alfajor marplatense gigante, juguito natural, globito festivo y tarjeta con tu dedicatoria escrita a mano.",
+    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80",
+    portion: "Box individual de fiesta",
     featured: true
   },
 
-  // ==========================================
-  // --- 3. POSTRES & PORCIONES INDIVIDUALES ---
-  // ==========================================
+  // --------------------------------------------------------------------------
+  // NEGOCIO 2: LA PETITE CROISSANT (Recoleta)
+  // --------------------------------------------------------------------------
   {
-    id: "postre-croissant-pistacho",
-    name: "Croissant Relleno Crema de Pistacho",
-    category: "postres",
-    categoryName: "Postres & Porciones",
-    price: 5200,
-    tag: "✨ Tendencia",
-    rating: 4.9,
-    reviews: 87,
-    description: "Croissant 100% manteca de hojaldre francés relleno con suave crema pastelera de pistachos y lluvia de praliné.",
+    id: "lpc-desayuno-parisien-classique",
+    businessId: "la-petite-croissant",
+    businessName: "La Petite Croissant",
+    businessNeighborhood: "Recoleta",
+    businessAvatar: "🥐",
+    name: "Desayuno Parisien Clásico & Croissants",
+    category: "desayunos",
+    categoryName: "Desayunos Sorpresa",
+    price: 18900,
+    tag: "🥐 Hojaldre de Manteca",
+    rating: 5.0,
+    reviews: 210,
+    description: "2 Croissants de pura manteca francesa recién horneados, 1 pain au chocolat relleno con chocolate semiamargo, manteca de campo, mermelada artesanal de damasco y café flat white espumoso.",
     image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=80",
-    portion: "1 unidad grande",
+    portion: "Para 1 o 2 personas",
     featured: true
   },
   {
-    id: "postre-cinnamon-roll",
-    name: "Cinnamon Roll Glaseado Clásico",
-    category: "postres",
-    categoryName: "Postres & Porciones",
-    price: 4300,
-    tag: "🔥 Tibio & Esponjoso",
-    rating: 4.8,
-    reviews: 105,
-    description: "Roll de canela recién horneado con abundante canela de Ceilán y baño de glaseado cremoso de vainilla.",
-    image: "https://images.unsplash.com/photo-1509365465985-25d11c17e812?auto=format&fit=crop&w=800&q=80",
-    portion: "1 porción",
+    id: "lpc-merienda-croissant-royale",
+    businessId: "la-petite-croissant",
+    businessName: "La Petite Croissant",
+    businessNeighborhood: "Recoleta",
+    businessAvatar: "🥐",
+    name: "Merienda Croissant Royale Salmón & Brie",
+    category: "brunch",
+    categoryName: "Brunch & Salado",
+    price: 21500,
+    tag: "👑 Gourmet Salado",
+    rating: 4.9,
+    reviews: 134,
+    description: "Croissant gigante relleno con queso brie fundido, palta fresca, salmón ahumado del sur y rúcula tierna, acompañado de un financier de pistacho y jugo de pomelo rosado exprimido.",
+    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80",
+    portion: "1 porción brunch completa",
     featured: true
   },
   {
-    id: "postre-macarons-box",
-    name: "Caja de 6 Macarons Franceses",
-    category: "postres",
-    categoryName: "Postres & Porciones",
-    price: 8900,
-    tag: "🎨 Variedad",
-    rating: 5.0,
-    reviews: 73,
-    description: "Selección de macarons: Pistacho, Frambuesa, Chocolate Belga, Caramelo Salado, Vainilla de Madagascar y Maracuyá.",
+    id: "lpc-box-merienda-sweet-paris",
+    businessId: "la-petite-croissant",
+    businessName: "La Petite Croissant",
+    businessNeighborhood: "Recoleta",
+    businessAvatar: "🥐",
+    name: "Box Merienda Sweet Paris & Tartelette",
+    category: "meriendas",
+    categoryName: "Meriendas & Té",
+    price: 19400,
+    tag: "🇫🇷 100% Francés",
+    rating: 4.9,
+    reviews: 88,
+    description: "Tartelette de masa sablée crujiente con crema diplomata y frambuesas frescas, 2 medialunas hojaldradas almibaradas, 2 chouquettes de azúcar perlado y café con leche de autor.",
     image: "https://images.unsplash.com/photo-1569864358642-9d1684040f43?auto=format&fit=crop&w=800&q=80",
-    portion: "Caja de 6 unidades",
+    portion: "Para 1 o 2 personas",
     featured: true
   },
+
+  // --------------------------------------------------------------------------
+  // NEGOCIO 3: CAFÉ & BOTÁNICA (Belgrano R)
+  // --------------------------------------------------------------------------
   {
-    id: "postre-alfajores-artesanales",
-    name: "Trilogía de Alfajores Premium",
-    category: "postres",
-    categoryName: "Postres & Porciones",
-    price: 6400,
-    tag: "🇦🇷 Artesanal",
+    id: "cb-brunch-energetico-vital",
+    businessId: "cafe-botanica",
+    businessName: "Café & Botánica",
+    businessNeighborhood: "Belgrano R",
+    businessAvatar: "🥑",
+    name: "Brunch & Desayuno Energético Vital",
+    category: "brunch",
+    categoryName: "Brunch & Salado",
+    price: 22800,
+    tag: "🥑 Súper Completo",
     rating: 4.9,
-    reviews: 91,
-    description: "3 alfajores artesanales: 1 de masa de nuez con dulce de leche, 1 bañado en chocolate amargo al 70% y 1 blanco con frambuesas.",
-    image: "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=800&q=80",
-    portion: "3 unidades",
+    reviews: 167,
+    description: "Tostón de masa madre de centeno con palta pisada al limón, huevo poché y lluvia de semillas tostadas, bowl de yogur natural cremoso con granola horneada y frutas de estación + cold brew infusionado 18hs.",
+    image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80",
+    portion: "Brunch abundante (1 a 2 pers.)",
     featured: true
   },
   {
-    id: "postre-ny-roll-nutella",
-    name: "New York Roll relleno de Nutella",
-    category: "postres",
-    categoryName: "Postres & Porciones",
-    price: 5600,
-    tag: "🥐 Viral & Crocante",
-    rating: 5.0,
-    reviews: 145,
-    description: "Masa de hojaldre circular súper aireada y crocante, rellena hasta el centro de Nutella cremosa y bañada en chocolate con avellanas tostadas.",
-    image: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&w=800&q=80",
-    portion: "1 unidad grande",
-    featured: true
-  },
-  {
-    id: "postre-tiramisu-italiano",
-    name: "Tiramisú Tradicional al Café y Mascarpone",
-    category: "postres",
-    categoryName: "Postres & Porciones",
-    price: 6200,
-    tag: "🇮🇹 Receta Italiana",
-    rating: 4.9,
-    reviews: 119,
-    description: "Vainillas artesanales embebidas en espresso intenso y licor de café, crema sabayón a base de queso mascarpone y lluvia de cacao amargo.",
-    image: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=800&q=80",
-    portion: "Copa individual 220g",
-    featured: true
-  },
-  {
-    id: "postre-cookies-ny-box",
-    name: "Cookies New York Style Rellenas (Caja x 4)",
-    category: "postres",
-    categoryName: "Postres & Porciones",
-    price: 7800,
-    tag: "🍪 Centro Húmedo",
-    rating: 4.9,
-    reviews: 160,
-    description: "Caja de 4 cookies gigantes estilo Levain Bakery: Red Velvet con chocolate blanco, Chispas clásicas semi-amargas, Doble chocolate fudge y Nuez con dulce de leche.",
-    image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=800&q=80",
-    portion: "4 cookies gigantes (120g c/u)",
-    featured: true
-  },
-  {
-    id: "postre-bento-cake-individual",
-    name: "Mini Cake Bento de Regalo",
-    category: "postres",
-    categoryName: "Postres & Porciones",
-    price: 9200,
-    tag: "🎂 Bento Trend",
-    rating: 5.0,
-    reviews: 104,
-    description: "Mini tortita de 10 cm ideal para regalo individual, bizcochuelo húmedo relleno de dulce de leche y merengue, decorada a mano en cajita eco take-away.",
-    image: "https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?auto=format&fit=crop&w=800&q=80",
-    portion: "1 a 2 porciones",
-    featured: true
-  },
-  {
-    id: "postre-eclair-chocolate",
-    name: "Éclair de Chocolate Belga & Pastelera",
-    category: "postres",
-    categoryName: "Postres & Porciones",
-    price: 4900,
-    tag: "🇫🇷 Pâtisserie",
+    id: "cb-merienda-waffles-berries",
+    businessId: "cafe-botanica",
+    businessName: "Café & Botánica",
+    businessNeighborhood: "Belgrano R",
+    businessAvatar: "🥑",
+    name: "Merienda Waffles Belgas & Berries Frescos",
+    category: "meriendas",
+    categoryName: "Meriendas & Té",
+    price: 18500,
+    tag: "🍓 Delicioso & Liviano",
     rating: 4.8,
-    reviews: 58,
-    description: "Masa choux clásica dorada y crocante, rellena de abundante crema pastelera a la vainilla natural y glaseada con ganache brillante de chocolate al 60%.",
-    image: "https://images.unsplash.com/photo-1612203985729-70726954388c?auto=format&fit=crop&w=800&q=80",
-    portion: "1 unidad grande",
+    reviews: 112,
+    description: "Dos waffles belgas dorados y crujientes por fuera, coronados con arándanos frescos, frutillas fileteadas, miel de campo pura, crema batida suave y latte con leche vegetal.",
+    image: "https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=800&q=80",
+    portion: "Para 1 o 2 personas",
     featured: true
   },
   {
-    id: "postre-apple-crumble",
-    name: "Crumble de Manzanas Tibio & Canela",
-    category: "postres",
-    categoryName: "Postres & Porciones",
-    price: 5400,
-    tag: "🍏 Casero",
+    id: "cb-desayuno-acai-granola-bowl",
+    businessId: "cafe-botanica",
+    businessName: "Café & Botánica",
+    businessNeighborhood: "Belgrano R",
+    businessAvatar: "🥑",
+    name: "Desayuno Acai Bowl & Tostada de Campo",
+    category: "desayunos",
+    categoryName: "Desayunos Sorpresa",
+    price: 19200,
+    tag: "🌿 Healthy & Fit",
     rating: 4.9,
-    reviews: 72,
-    description: "Colchón de manzanas caramelizadas con manteca, azúcar morena y canela, cubierto por una capa extra crocante de crumble de manteca y avena tostada.",
-    image: "https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?auto=format&fit=crop&w=800&q=80",
-    portion: "Porción individual generosa",
+    reviews: 94,
+    description: "Bowl helado de pulpa de açai orgánico con banana, mango, nibs de cacao y granola de frutos secos, acompañado de tostadas de pan de semillas con hummus casero y té verde de jazmín.",
+    image: "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=800&q=80",
+    portion: "1 persona",
     featured: true
   },
+
+  // --------------------------------------------------------------------------
+  // NEGOCIO 4: ANTOJOS DEL SUR (San Telmo)
+  // --------------------------------------------------------------------------
   {
-    id: "postre-medialunas-rellenas-box",
-    name: "Medialunas de Manteca con DDL (x 6)",
-    category: "postres",
-    categoryName: "Postres & Porciones",
-    price: 6900,
+    id: "ads-desayuno-criollo-campestre",
+    businessId: "antojos-del-sur",
+    businessName: "Antojos del Sur",
+    businessNeighborhood: "San Telmo",
+    businessAvatar: "🧉",
+    name: "Desayuno Criollo Campestre con Facturas",
+    category: "desayunos",
+    categoryName: "Desayunos Sorpresa",
+    price: 16500,
     tag: "🥐 Clásico Porteño",
     rating: 4.9,
-    reviews: 185,
-    description: "Media docena de medialunas de manteca hojaldradas, almibaradas y rellenas con generoso dulce de leche repostero colonial.",
+    reviews: 245,
+    description: "4 Medialunas de manteca hojaldradas y almibaradas rellenas con generoso dulce de leche repostero colonial, 2 vigilantes con pastelera y azúcar negra, más café con leche cremoso en jarrito térmico.",
     image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?auto=format&fit=crop&w=800&q=80",
-    portion: "Caja de 6 unidades",
+    portion: "Para 2 personas",
     featured: true
   },
   {
-    id: "postre-brownie-fudgy-ddl",
-    name: "Brownie con Nuez, DDL & Merengue",
-    category: "postres",
-    categoryName: "Postres & Porciones",
-    price: 5100,
-    tag: "🍫 Puro Placer",
+    id: "ads-merienda-submarino-alfajores",
+    businessId: "antojos-del-sur",
+    businessName: "Antojos del Sur",
+    businessNeighborhood: "San Telmo",
+    businessAvatar: "🧉",
+    name: "Merienda Merendero Porteño & Submarino",
+    category: "meriendas",
+    categoryName: "Meriendas & Té",
+    price: 17200,
+    tag: "🍫 Puro DDL & Choco",
     rating: 5.0,
+    reviews: 198,
+    description: "2 Alfajores marplatenses artesanales con 70g de dulce de leche bañados en chocolate semiamargo, porción tibia de pastafrola casera y vaso de leche caliente con tableta de chocolate colonial para derretir.",
+    image: "https://images.unsplash.com/photo-1542826438-bd32f43d626f?auto=format&fit=crop&w=800&q=80",
+    portion: "Para 2 personas",
+    featured: true
+  },
+  {
+    id: "ads-box-matero-san-telmo",
+    businessId: "antojos-del-sur",
+    businessName: "Antojos del Sur",
+    businessNeighborhood: "San Telmo",
+    businessAvatar: "🧉",
+    name: "Box Merienda Matera & Chipás Calientes",
+    category: "boxes",
+    categoryName: "Boxes de Regalo",
+    price: 18900,
+    tag: "🧉 Especial Mate",
+    rating: 4.8,
+    reviews: 156,
+    description: "6 Chipás caseros de tres quesos recién horneados, 4 tortitas negras azucaradas, cuadraditos de frola de membrillo y paquete de yerba mate selección especial de regalo.",
+    image: "https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&w=800&q=80",
+    portion: "Para compartir entre 2 a 4 personas",
+    featured: true
+  },
+
+  // --------------------------------------------------------------------------
+  // NEGOCIO 5: VELVET BAKERY (Villa Urquiza)
+  // --------------------------------------------------------------------------
+  {
+    id: "vb-desayuno-sweet-velvet-box",
+    businessId: "velvet-bakery",
+    businessName: "Velvet Bakery",
+    businessNeighborhood: "Villa Urquiza",
+    businessAvatar: "🍪",
+    name: "Desayuno Sweet Velvet Box & Cookie XL",
+    category: "desayunos",
+    categoryName: "Desayunos Sorpresa",
+    price: 21900,
+    tag: "🍪 Centro Fundido",
+    rating: 4.9,
     reviews: 140,
-    description: "Cuadrado de brownie húmedo y fudgy repleto de nueces mariposa, copo gigante de dulce de leche repostero y merengue italiano flameado.",
+    description: "Mini bundt cake Red Velvet con frosting de queso crema Philadelphia, 1 cookie XL recién horneada con centro fundido de Nutella, sándwich tostado de queso gouda y café mocha con cacao.",
+    image: "https://images.unsplash.com/photo-1586788680434-30d324b2d46f?auto=format&fit=crop&w=800&q=80",
+    portion: "Para 1 o 2 personas",
+    featured: true
+  },
+  {
+    id: "vb-merienda-cheesecake-cookies",
+    businessId: "velvet-bakery",
+    businessName: "Velvet Bakery",
+    businessNeighborhood: "Villa Urquiza",
+    businessAvatar: "🍪",
+    name: "Merienda Cheesecake New York & Cookies Lovers",
+    category: "meriendas",
+    categoryName: "Meriendas & Té",
+    price: 20400,
+    tag: "🗽 Estilo New York",
+    rating: 5.0,
+    reviews: 165,
+    description: "Generosa porción del auténtico cheesecake estilo New York horneado con coulis de frambuesas y moras, 2 cookies crocantes con nueces pecanas y frappé helado de caramelo artesanal.",
+    image: "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=800&q=80",
+    portion: "Para 2 personas",
+    featured: true
+  },
+  {
+    id: "vb-box-pancakes-torre-miel",
+    businessId: "velvet-bakery",
+    businessName: "Velvet Bakery",
+    businessNeighborhood: "Villa Urquiza",
+    businessAvatar: "🍪",
+    name: "Box Pancakes Torre Dorada con Miel & Frutas",
+    category: "boxes",
+    categoryName: "Boxes de Regalo",
+    price: 22500,
+    tag: "🥞 Esponjosos XL",
+    rating: 4.9,
+    reviews: 118,
+    description: "Torre de 5 pancakes súper esponjosos, manteca dulce pomada, syrup de arce puro, porción de frutos rojos frescos, chips de chocolate y dos cafés latte para compartir.",
+    image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=800&q=80",
+    portion: "Para 2 o 3 personas",
+    featured: true
+  },
+
+  // --------------------------------------------------------------------------
+  // NEGOCIO 6: MAISON MATCHA & CO. (Colegiales)
+  // --------------------------------------------------------------------------
+  {
+    id: "mm-desayuno-matcha-zen-scones",
+    businessId: "maison-matcha",
+    businessName: "Maison Matcha & Co.",
+    businessNeighborhood: "Colegiales",
+    businessAvatar: "🍵",
+    name: "Desayuno Matcha Zen & Scones Ingleses",
+    category: "desayunos",
+    categoryName: "Desayunos Sorpresa",
+    price: 23400,
+    tag: "🍵 Matcha Ceremonial",
+    rating: 4.8,
+    reviews: 104,
+    description: "Iced Matcha Latte con leche de almendras y vainilla, 2 scones ingleses tibios con clotted cream y mermelada casera de higos, tostadas de pan brioche y fruta fresca de estación.",
+    image: "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=800&q=80",
+    portion: "Para 1 o 2 personas",
+    featured: true
+  },
+  {
+    id: "mm-merienda-japonesa-sakura",
+    businessId: "maison-matcha",
+    businessName: "Maison Matcha & Co.",
+    businessNeighborhood: "Colegiales",
+    businessAvatar: "🍵",
+    name: "Merienda Japonesa Sakura & Roll Cake",
+    category: "meriendas",
+    categoryName: "Meriendas & Té",
+    price: 21000,
+    tag: "🌸 Delicadeza & Textura",
+    rating: 4.9,
+    reviews: 86,
+    description: "Roll cake esponjoso soufflé de té verde relleno con crema chantilly de frutillas, 2 dorayakis artesanales y tetera individual de té japonés tostado Genmaicha.",
+    image: "https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=800&q=80",
+    portion: "Para 1 o 2 personas",
+    featured: true
+  },
+  {
+    id: "mm-brunch-salmon-brioche",
+    businessId: "maison-matcha",
+    businessName: "Maison Matcha & Co.",
+    businessNeighborhood: "Colegiales",
+    businessAvatar: "🍵",
+    name: "Box Brunch Fusión Salmón & Brioche Tostado",
+    category: "brunch",
+    categoryName: "Brunch & Salado",
+    price: 25500,
+    tag: "✨ Fusión Gourmet",
+    rating: 4.9,
+    reviews: 92,
+    description: "Tostón de brioche caramelizado con trucha ahumada patagónica, crema ácida al eneldo, pepinos encurtidos y brotes orgánicos, acompañado de jugo natural prensado en frío de maracuyá y naranja.",
+    image: "https://images.unsplash.com/photo-1513442543415-1a63f730a827?auto=format&fit=crop&w=800&q=80",
+    portion: "Brunch completo para 1 a 2 pers.",
+    featured: true
+  },
+
+  // --------------------------------------------------------------------------
+  // NEGOCIO 7: DOÑA CLARA PASTELERÍA (Caballito)
+  // --------------------------------------------------------------------------
+  {
+    id: "dc-desayuno-abuela-clara",
+    businessId: "dona-clara",
+    businessName: "Doña Clara Pastelería",
+    businessNeighborhood: "Caballito",
+    businessAvatar: "👵",
+    name: "Desayuno de la Abuela Clara con Pan Casero",
+    category: "desayunos",
+    categoryName: "Desayunos Sorpresa",
+    price: 17800,
+    tag: "❤️ Amor de Abuela",
+    rating: 5.0,
+    reviews: 290,
+    description: "Café con leche espumoso, generosas rebanadas de pan casero de campo tostadas con manteca pomada y dulce de leche repostero, 3 colaciones cordobesas con glaseado real crocante.",
+    image: "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?auto=format&fit=crop&w=800&q=80",
+    portion: "Para 2 personas",
+    featured: true
+  },
+  {
+    id: "dc-merienda-ricota-frolita",
+    businessId: "dona-clara",
+    businessName: "Doña Clara Pastelería",
+    businessNeighborhood: "Caballito",
+    businessAvatar: "👵",
+    name: "Merienda de Barrio: Tarta de Ricota & Fosforitos",
+    category: "meriendas",
+    categoryName: "Meriendas & Té",
+    price: 18200,
+    tag: "🥧 Tradición Casera",
+    rating: 4.9,
+    reviews: 215,
+    description: "Abundante porción de tarta de ricota suave y perfumada al limón, 2 fosforitos agridulces de hojaldre casero con jamón cocido y queso, y té clásico servido con masitas secas.",
+    image: "https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=800&q=80",
+    portion: "Para 2 personas",
+    featured: true
+  },
+  {
+    id: "dc-box-familiar-surtido",
+    businessId: "dona-clara",
+    businessName: "Doña Clara Pastelería",
+    businessNeighborhood: "Caballito",
+    businessAvatar: "👵",
+    name: "Box Merienda Familiar Doña Clara (Para 4 pers.)",
+    category: "boxes",
+    categoryName: "Boxes de Regalo",
+    price: 24900,
+    tag: "👨‍👩‍👧‍👦 Súper Rinde",
+    rating: 5.0,
+    reviews: 178,
+    description: "Bandeja familiar con medio budín de limón glaseado, 4 alfajores de maicena con coco, 4 medialunas rellenas, 2 porciones de brownie con nuez y dulce de leche para compartir en familia.",
     image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=800&q=80",
-    portion: "1 porción cuadrada generosa",
+    portion: "Para 3 a 5 personas",
     featured: true
   }
 ];
 
-// Almacenamiento local para permitir agregar nuevos productos dinámicamente
-const STORAGE_KEY = 'dulce_atelier_products_v4';
+// ============================================================================
+// 3. STORAGE & GESTOR DEL MARKETPLACE
+// ============================================================================
+const STORAGE_KEY_PRODUCTS = 'dulce_marketplace_products_v5';
+const STORAGE_KEY_BUSINESSES = 'dulce_marketplace_businesses_v5';
 
 class ProductManager {
   constructor() {
+    this.businesses = this.loadBusinesses();
     this.products = this.loadProducts();
   }
 
-  loadProducts() {
-    const saved = localStorage.getItem(STORAGE_KEY);
+  loadBusinesses() {
+    const saved = localStorage.getItem(STORAGE_KEY_BUSINESSES);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Si hay datos guardados y tienen al menos la cantidad de productos actuales, usarlos
-        if (Array.isArray(parsed) && parsed.length >= INITIAL_PRODUCTS.length) {
+        if (Array.isArray(parsed) && parsed.length >= INITIAL_BUSINESSES.length) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error("Error al cargar negocios:", e);
+      }
+    }
+    this.saveBusinesses(INITIAL_BUSINESSES);
+    return INITIAL_BUSINESSES;
+  }
+
+  saveBusinesses(businesses) {
+    this.businesses = businesses;
+    localStorage.setItem(STORAGE_KEY_BUSINESSES, JSON.stringify(businesses));
+  }
+
+  getAllBusinesses() {
+    return this.businesses;
+  }
+
+  getBusinessById(id) {
+    return this.businesses.find(b => b.id === id);
+  }
+
+  addBusiness(newBusiness) {
+    const business = {
+      id: 'biz-' + Date.now(),
+      rating: 5.0,
+      reviews: 1,
+      deliveryTime: "30-45 min",
+      deliveryFee: 1500,
+      avatar: "🏪",
+      badge: "✨ Nuevo en el Market",
+      phone: "5491156192616",
+      ...newBusiness
+    };
+    this.businesses.push(business);
+    this.saveBusinesses(this.businesses);
+    return business;
+  }
+
+  loadProducts() {
+    const saved = localStorage.getItem(STORAGE_KEY_PRODUCTS);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Verificar que los datos tengan la estructura de marketplace con businessId
+        if (Array.isArray(parsed) && parsed.length >= INITIAL_PRODUCTS.length && parsed[0].businessId) {
           return parsed;
         }
       } catch (e) {
@@ -548,7 +602,7 @@ class ProductManager {
 
   saveProducts(products) {
     this.products = products;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(products));
   }
 
   getAll() {
@@ -564,13 +618,30 @@ class ProductManager {
     return this.products.filter(p => p.category === category);
   }
 
-  search(query) {
-    if (!query) return this.products;
+  getByBusiness(businessId) {
+    if (businessId === 'todos' || !businessId) return this.products;
+    return this.products.filter(p => p.businessId === businessId);
+  }
+
+  filter(businessId = 'todos', category = 'todos') {
+    return this.products.filter(p => {
+      const matchBiz = (businessId === 'todos' || !businessId) ? true : p.businessId === businessId;
+      const matchCat = (category === 'todos' || !category) ? true : p.category === category;
+      return matchBiz && matchCat;
+    });
+  }
+
+  search(query, businessId = 'todos', category = 'todos') {
+    let list = this.filter(businessId, category);
+    if (!query) return list;
+
     const q = query.toLowerCase().trim();
-    return this.products.filter(p => 
+    return list.filter(p => 
       p.name.toLowerCase().includes(q) || 
       p.description.toLowerCase().includes(q) ||
-      (p.tag && p.tag.toLowerCase().includes(q))
+      (p.tag && p.tag.toLowerCase().includes(q)) ||
+      (p.businessName && p.businessName.toLowerCase().includes(q)) ||
+      (p.businessNeighborhood && p.businessNeighborhood.toLowerCase().includes(q))
     );
   }
 
