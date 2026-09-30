@@ -553,3 +553,665 @@ img {
   font-weight: 700;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   PEDIDOSYA STYLE MARKETPLACE UPGRADES (MOBILE-FIRST)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Top Address & Location Selector Bar (PedidosYa Header) ── */
+.top-location-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-surface-secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.top-location-bar:active {
+  transform: scale(0.99);
+  background: var(--primary-light);
+}
+
+.location-info-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.location-pin-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.location-text-col {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.location-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.location-current-address {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.location-chevron {
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+/* ── Vendor Logistics Guarantee Banner ─────────────────────── */
+.vendor-logistics-banner {
+  background: linear-gradient(135deg, #FFF5F7 0%, #FFF9F0 100%);
+  border: 1px solid rgba(217, 83, 111, 0.22);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin: 0 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--text-main);
+  box-shadow: 0 2px 8px rgba(217, 83, 111, 0.05);
+}
+
+.vendor-logistics-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.vendor-logistics-text strong {
+  color: var(--primary);
+}
+
+/* ── PedidosYa Stories / Category Circles ──────────────────── */
+.stories-section {
+  margin: 0 16px 16px;
+}
+
+.stories-slider {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 2px 8px 2px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.stories-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.story-bubble {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  width: 68px;
+  text-align: center;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+
+.story-bubble:active {
+  transform: scale(0.93);
+}
+
+.story-ring {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  padding: 2.5px;
+  background: linear-gradient(45deg, #F4A261, #D9536F, #81B29A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(217, 83, 111, 0.18);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.story-bubble.active .story-ring {
+  background: var(--primary);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--primary);
+}
+
+.story-avatar-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  border: 2px solid #fff;
+  overflow: hidden;
+}
+
+.story-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 68px;
+}
+
+.story-bubble.active .story-label {
+  color: var(--primary);
+}
+
+/* ── PedidosYa Quick Filter Chips ──────────────────────────── */
+.filter-chips-section {
+  margin: 0 16px 14px;
+}
+
+.filter-chips-slider {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 6px 2px;
+  scrollbar-width: none;
+}
+
+.filter-chips-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-chip-py {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  user-select: none;
+}
+
+.filter-chip-py:hover {
+  border-color: rgba(217, 83, 111, 0.4);
+  color: var(--text-main);
+}
+
+.filter-chip-py.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 3px 10px rgba(217, 83, 111, 0.28);
+}
+
+/* ── PedidosYa Store Cards (Pastelerías con Envío Propio) ── */
+.stores-py-section {
+  margin: 0 16px 22px;
+}
+
+.stores-py-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.stores-py-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 600px) {
+  .stores-py-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.store-card-py {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-light);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.store-card-py:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(217, 83, 111, 0.3);
+}
+
+.store-card-cover-wrap {
+  position: relative;
+  width: 100%;
+  height: 125px;
+  overflow: hidden;
+  background: var(--bg-surface-secondary);
+}
+
+.store-card-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.store-card-py:hover .store-card-cover-img {
+  transform: scale(1.05);
+}
+
+.store-card-badge-open {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(42, 157, 143, 0.95);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.store-card-badge-promo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 2px 8px rgba(217, 83, 111, 0.35);
+}
+
+.store-card-avatar-floating {
+  position: absolute;
+  bottom: -16px;
+  left: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fff;
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.14);
+  z-index: 2;
+}
+
+.store-card-body {
+  padding: 22px 14px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.store-card-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.store-card-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.store-card-verified {
+  color: #009EE3;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.store-card-rating {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #E76F51;
+  background: #FEF3EE;
+  padding: 2px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.store-card-tagline {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tag específico: Envío por el vendedor */
+.store-vendor-shipping-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #F0F9F5;
+  border: 1px solid rgba(42, 157, 143, 0.3);
+  color: #1E6B61;
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  font-size: 0.72rem;
+  font-weight: 700;
+  width: fit-content;
+  margin-top: 2px;
+}
+
+.store-card-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ── Perfil Detallado de Pastelería (Store Spotlight PedidosYa) ── */
+.store-profile-hero {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-light);
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.store-profile-cover {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  position: relative;
+}
+
+.store-profile-content {
+  padding: 14px 16px;
+  position: relative;
+}
+
+.store-profile-avatar-wrap {
+  position: absolute;
+  top: -30px;
+  left: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: #fff;
+  border: 3px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.14);
+}
+
+.store-profile-header-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.btn-chat-seller {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--whatsapp-green);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(37, 211, 102, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-chat-seller:hover {
+  transform: translateY(-1px);
+  background: var(--whatsapp-hover);
+}
+
+.btn-close-store-view {
+  background: var(--bg-surface-secondary);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.store-profile-policy-box {
+  background: #F0F9F5;
+  border: 1px dashed #2A9D8F;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-top: 10px;
+  font-size: 0.76rem;
+  color: #1E6B61;
+  line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* ── Modern Bottom Navigation Bar (App Bar) ───────────────── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 1000;
+  padding: 4px 6px max(6px, env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 6px 10px;
+  border-radius: var(--radius-xs);
+  flex: 1;
+  position: relative;
+}
+
+.nav-item:active {
+  transform: scale(0.92);
+}
+
+.nav-item.active {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.nav-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-item.active .nav-icon {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+}
+
+/* ── Sticky Floating Cart Bar (Above Bottom Nav) ───────────── */
+.floating-cart-bar {
+  position: fixed;
+  bottom: 74px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 448px;
+  background: var(--primary-gradient);
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 8px 24px rgba(217, 83, 111, 0.38);
+  z-index: 999;
+  cursor: pointer;
+  animation: cartFloatBounce 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cartFloatBounce {
+  0% { transform: translate(-50%, 20px) scale(0.95); opacity: 0; }
+  100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+}
+
+.floating-cart-bar:active {
+  transform: translateX(-50%) scale(0.98);
+}
+
+.cart-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cart-badge-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.cart-bar-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-bar-info span:first-child {
+  font-size: 0.72rem;
+  opacity: 0.9;
+  font-weight: 600;
+}
+
+.cart-bar-total {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.cart-bar-cta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+}
+
+/* ── Address Selector Bottom Sheet Modal ──────────────────── */
+.neighborhoods-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.neighborhood-btn {
+  background: var(--bg-surface-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.neighborhood-btn:hover,
+.neighborhood-btn.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+
