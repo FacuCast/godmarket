@@ -1018,6 +1018,68 @@
     </div>
   </div>
 
+  <!-- 7. Address & Location Bottom Sheet Modal (PedidosYa style) -->
+  <div id="address-picker-modal" class="modal-overlay"
+    onclick="if(event.target === this) window.app.closeModal('address-picker-modal')">
+    <div class="bottom-sheet" style="max-width: 500px;">
+      <div class="drag-handle"></div>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('address-picker-modal')">✕</button>
+
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 1.4rem;">📍</span>
+        <h3 class="font-serif" style="font-size: 1.25rem;">¿Dónde quieres recibir tu pedido?</h3>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
+        Elige tu barrio de Buenos Aires para coordinar el despacho directo con el cadete del local.
+      </p>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label class="form-label" for="custom-address-modal-input">O ingresa tu dirección exacta:</label>
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="custom-address-modal-input" class="form-control" placeholder="Ej: Humboldt 1950, Palermo" style="font-size: 0.85rem;" onkeydown="if(event.key==='Enter'){event.preventDefault(); const val=this.value.trim(); if(val) window.app.selectNeighborhood(val);}">
+          <button type="button" class="btn-primary" style="width: auto; padding: 0 16px; font-size: 0.82rem; white-space: nowrap;" onclick="const val = document.getElementById('custom-address-modal-input')?.value.trim(); if(val) window.app.selectNeighborhood(val);">
+            Guardar
+          </button>
+        </div>
+      </div>
+
+      <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">
+        Zonas con Envío Propio por Vendedor
+      </div>
+      <div class="neighborhoods-grid">
+        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Palermo')">
+          <span>📍 Palermo</span>
+          <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">30-45 min</span>
+        </button>
+        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Recoleta')">
+          <span>📍 Recoleta</span>
+          <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">30-45 min</span>
+        </button>
+        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Belgrano')">
+          <span>📍 Belgrano</span>
+          <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">25-40 min</span>
+        </button>
+        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('San Telmo')">
+          <span>📍 San Telmo</span>
+          <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">30-45 min</span>
+        </button>
+        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Villa Urquiza')">
+          <span>📍 Villa Urquiza</span>
+          <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">35-50 min</span>
+        </button>
+        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Caballito')">
+          <span>📍 Caballito</span>
+          <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">30-40 min</span>
+        </button>
+      </div>
+
+      <div style="background: #F0F9F5; border: 1px dashed #2A9D8F; padding: 10px 12px; border-radius: var(--radius-sm); font-size: 0.74rem; color: #1E6B61; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.1rem;">🛵</span>
+        <span><strong>Logística del Vendedor:</strong> El reparto lo realiza el cadete del local en moto con caja térmica.</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Leaflet Map JS Engine -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
