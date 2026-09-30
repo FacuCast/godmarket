@@ -42,6 +42,10 @@
   <!-- Leaflet Maps CSS -->
   <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" onload="this.onload=null;this.rel='stylesheet'">
 
+  <!-- Modern Libraries (Lucide Icons & Canvas Confetti) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
   <!-- Stylesheets (Pure CSS) -->
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
@@ -59,6 +63,23 @@
 
     <!-- Header Sticky -->
     <header class="app-header">
+      <!-- PedidosYa Top Location Bar -->
+      <div class="top-location-bar" onclick="window.app.openAddressModal()" title="Cambiar dirección de entrega">
+        <div class="location-info-group">
+          <span class="location-pin-icon">📍</span>
+          <div class="location-text-col">
+            <span class="location-label">Enviar a</span>
+            <span class="location-current-address">
+              <span id="current-delivery-address">Palermo Hollywood, CABA</span>
+              <span class="location-chevron">▼</span>
+            </span>
+          </div>
+        </div>
+        <div style="font-size: 0.72rem; color: var(--accent-mint); font-weight: 700; background: var(--accent-mint-light); padding: 3px 8px; border-radius: 50px;">
+          🛵 Envío local
+        </div>
+      </div>
+
       <div class="header-top">
         <div class="brand-wrapper" onclick="window.app.setBusiness('todos'); window.app.setCategory('todos');" style="cursor: pointer;">
           <div class="brand-logo" style="background: var(--primary-gradient); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 14px rgba(217, 83, 111, 0.28);">
@@ -66,7 +87,7 @@
           </div>
           <div class="brand-info">
             <h1 style="font-size: 1.2rem; line-height: 1.1;">Dulce Market</h1>
-            <span style="font-size: 0.7rem; color: var(--primary); font-weight: 700;">Desayunos & Meriendas</span>
+            <span style="font-size: 0.7rem; color: var(--primary); font-weight: 700;">Marketplace de Pastelerías</span>
           </div>
         </div>
 
@@ -96,17 +117,17 @@
         <div id="store-status-indicator" style="display: flex; align-items: center; gap: 6px;">
           <span id="store-status-dot"
             style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2A9D8F; animation: pulseGlow 2s infinite;"></span>
-          <span id="store-status-info"><strong id="store-status-text" style="color: #2A9D8F;">7 Pastelerías Activas</strong> • Envíos 08:30 a 20:00 hs</span>
+          <span id="store-status-info"><strong id="store-status-text" style="color: #2A9D8F;">7 Pastelerías Activas</strong> • 08:30 a 20:00 hs</span>
         </div>
         <div id="store-delivery-tag" style="color: var(--primary); font-weight: 700;">
-          🛵 Envíos en el día
+          🛵 Envío por el vendedor
         </div>
       </div>
 
       <!-- Delivery / Pickup Switcher -->
       <div class="delivery-switcher">
         <button class="delivery-tab active" data-type="delivery">
-          🛵 Envío a Domicilio
+          🛵 Envío por el Vendedor
         </button>
         <button class="delivery-tab" data-type="pickup">
           🏪 Retiro en Negocio
@@ -122,6 +143,14 @@
       </div>
     </header>
 
+    <!-- Vendor Logistics Guarantee Banner -->
+    <div class="vendor-logistics-banner">
+      <span class="vendor-logistics-icon">🛵</span>
+      <div class="vendor-logistics-text">
+        <strong>Envíos a cargo del vendedor:</strong> Cada pastelería coordina su propio cadete en moto con caja térmica directo a tu puerta.
+      </div>
+    </div>
+
     <!-- PWA Install Banner Pill (Visible if installable) -->
     <div id="pwa-install-pill"
       style="display: none; margin: 10px 16px 0; background: var(--accent-mint-light); border: 1px solid var(--accent-mint); padding: 8px 14px; border-radius: var(--radius-sm); align-items: center; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #2B1E1A;">
@@ -132,11 +161,18 @@
       </button>
     </div>
 
+    <!-- PedidosYa Stories / Categorías Circulares -->
+    <section class="stories-section">
+      <div id="stories-slider" class="stories-slider">
+        <!-- Renderizado dinámicamente por JS -->
+      </div>
+    </section>
+
     <!-- Promo Banner Hero (Marketplace style) -->
     <section class="promo-banner">
       <span class="promo-badge">✨ Marketplace de Pastelerías</span>
       <h2>Desayunos & Meriendas de Autor</h2>
-      <p>Elegí entre <strong>7 pastelerías y cafeterías artesanales</strong> de Buenos Aires y recibí en tu puerta.</p>
+      <p>Elegí entre <strong>7 pastelerías artesanales</strong> de Buenos Aires. Envíos coordinados directamente por cada local.</p>
       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <button class="promo-btn" onclick="window.app.setCategory('desayunos')">
           ☀️ Ver Desayunos
@@ -147,28 +183,42 @@
       </div>
     </section>
 
-    <!-- 7 NEGOCIOS ASOCIADOS (Interactive Marketplace Slider) -->
-    <section class="businesses-section">
-      <div class="businesses-section-header">
+    <!-- PedidosYa Quick Filter Chips -->
+    <section class="filter-chips-section">
+      <div id="filter-chips-slider" class="filter-chips-slider">
+        <!-- Renderizado dinámicamente por JS -->
+      </div>
+    </section>
+
+    <!-- 7 PASTELERÍAS CON ENVÍO PROPIO (PedidosYa Cards) -->
+    <section class="stores-py-section">
+      <div class="stores-py-header">
         <div style="display: flex; align-items: center; gap: 6px;">
-          <span style="font-size: 1.15rem;">🏪</span>
-          <h3 class="font-serif" style="font-size: 1.05rem;">Nuestras 7 Pastelerías</h3>
+          <span style="font-size: 1.2rem;">🏪</span>
+          <h3 class="font-serif" style="font-size: 1.15rem;">Pastelerías con Envío Propio</h3>
           <span class="badge-count" style="font-size: 0.65rem; padding: 1px 6px;">7 Activas</span>
         </div>
         <button class="btn-publish-pill" onclick="window.app.openAdminModalWithPin()" title="Portal para Pastelerías">
           <span>➕</span> Publicar
         </button>
       </div>
-      <div id="businesses-slider" class="businesses-slider">
+      
+      <!-- Mini slider de selección rápida de negocio -->
+      <div id="businesses-slider" class="businesses-slider" style="margin-bottom: 12px;">
+        <!-- Renderizado dinámicamente por JS -->
+      </div>
+
+      <!-- Tarjetas completas de pastelerías estilo PedidosYa -->
+      <div id="stores-py-grid" class="stores-py-grid">
         <!-- Renderizado dinámicamente por JS -->
       </div>
     </section>
 
     <!-- Store Spotlight Banner (visible cuando se selecciona una pastelería) -->
-    <div id="store-spotlight-container" style="display: none;"></div>
+    <div id="store-spotlight-container" style="display: none; margin: 0 16px 16px;"></div>
 
-    <!-- Categorías / Filtros rápidos -->
-    <div id="categories-slider" class="categories-slider">
+    <!-- Categorías tradicionales / Filtros rápidos -->
+    <div id="categories-slider" class="categories-slider" style="display: none;">
       <!-- Generated by JS -->
     </div>
 
