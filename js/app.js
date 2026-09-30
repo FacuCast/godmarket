@@ -6,6 +6,8 @@ class DulceAtelierApp {
   constructor() {
     this.selectedBusiness = 'todos';
     this.currentCategory = 'todos';
+    this.currentFilter = 'all';
+    this.currentAddress = localStorage.getItem('dulce_user_address') || 'Palermo Hollywood, CABA';
     this.searchQuery = '';
     this.selectedProductForModal = null;
     this.favorites = this.loadFavorites();
@@ -19,6 +21,10 @@ class DulceAtelierApp {
   init() {
     this.setupPWA();
     this.setupEventListeners();
+    this.renderLocationBar();
+    this.renderStories();
+    this.renderFilterChips();
+    this.renderStoresCards();
     this.renderBusinessesSlider();
     this.renderBusinessSpotlight();
     this.renderCategories();
@@ -26,12 +32,16 @@ class DulceAtelierApp {
     this.updateCartUI();
     this.updateOrdersBadges();
     this.updateStoreStatusUI();
+    this.refreshIcons();
 
     // Actualizar estado del horario de la tienda cada minuto
     setInterval(() => this.updateStoreStatusUI(), 60000);
 
     // Suscribirse a cambios en el carrito
-    window.cartManager.subscribe(() => this.updateCartUI());
+    window.cartManager.subscribe(() => {
+      this.updateCartUI();
+      this.refreshIcons();
+    });
   }
 
   loadFavorites() {
