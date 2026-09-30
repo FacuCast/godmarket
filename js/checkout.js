@@ -79,8 +79,8 @@ class CheckoutHandler {
 
     const isDelivery = cart.deliveryType === 'delivery';
     const deliveryText = isDelivery 
-      ? `• *Envío a Domicilio:* ${cart.formatCurrency(cart.getEffectiveDeliveryFee())}\n• *Dirección:* ${formData.address}${formData.apartment ? ` (Piso/Depto: ${formData.apartment})` : ''}\n• *Zona/Barrio:* ${formData.zone || 'A coordinar'}`
-      : `• *Modalidad:* Retiro en Tienda (Gratis)`;
+      ? `• *Envío a Domicilio (A cargo del Vendedor):* ${cart.formatCurrency(cart.getEffectiveDeliveryFee())}\n• *Dirección:* ${formData.address}${formData.apartment ? ` (Piso/Depto: ${formData.apartment})` : ''}\n• *Zona/Barrio:* ${formData.zone || 'A coordinar'}\n• *Nota de Despacho:* Envío gestionado directamente por el cadete del local`
+      : `• *Modalidad:* Retiro en Tienda del Vendedor (Sin cargo)`;
 
     const scheduleText = formData.deliveryTime 
       ? `• *Fecha y Horario:* ${formData.deliveryTime}`
@@ -100,25 +100,26 @@ class CheckoutHandler {
     const message = 
 `¡Hola Dulce Market! ✦
 *NUEVO PEDIDO MARKETPLACE #${orderId}*
+🛵 *LOGÍSTICA: ENVÍO A CARGO DEL VENDEDOR*
 
-🏪 *PASTELERÍAS INCLUIDAS:* ${businessesListStr}
+🏪 *LOCALES / VENDEDORES:* ${businessesListStr}
 
 ━━━━━━━━━━━━━━━━━━━━
-◆ *RESUMEN DEL PEDIDO:*${itemsText}
+◆ *RESUMEN DE PRODUCTOS:*${itemsText}
 
 • *Subtotal:* ${cart.formatCurrency(cart.getSubtotal())}
 ${deliveryText}
 • *TOTAL A PAGAR:* ${cart.formatCurrency(cart.getTotal())}
 ━━━━━━━━━━━━━━━━━━━━
 
-► *DATOS DEL CLIENTE:*
-- *Nombre:* ${formData.fullName}
+► *DATOS PARA LA ENTREGA:*
+- *Cliente:* ${formData.fullName}
 - *Teléfono:* ${formData.phone}
 ${scheduleText}
 - *Forma de Pago:* ${paymentMethodName}${cashNote}
-${formData.comments ? `\n• *Comentarios adicionales:* ${formData.comments}` : ''}
+${formData.comments ? `\n• *Comentarios / Indicaciones:* ${formData.comments}` : ''}
 
-Por favor confírmenme la recepción del pedido para coordinar con las pastelerías. ¡Muchas gracias! ✦`;
+Por favor confírmenme el pedido para que el vendedor comience la preparación y coordine su cadete. ¡Muchas gracias! ✦`;
 
     return message;
   }
@@ -222,6 +223,17 @@ Por favor confírmenme la recepción del pedido para coordinar con las pasteler�
 
     localStorage.setItem('dulce_last_order', JSON.stringify(this.lastOrder));
     this.saveOrderToHistory(this.lastOrder);
+
+    // Celebración con confetti si está disponible la librería
+    if (typeof confetti === 'function') {
+      try {
+        confetti({
+          particleCount: 90,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+      } catch (err) {}
+    }
 
     // Abrir WhatsApp con el pedido inicial
     window.open(whatsappUrl, '_blank');
