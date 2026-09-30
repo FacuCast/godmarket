@@ -16,10 +16,18 @@ const INITIAL_BUSINESSES = [
     reviews: 184,
     deliveryTime: "35-50 min",
     deliveryFee: 1500,
+    freeShippingFrom: 45000,
+    shippingType: "Envío propio del vendedor",
+    shippingNote: "Cadete propio del local con caja térmica",
+    distance: "1.1 km",
+    isOpen: true,
+    schedule: "08:30 - 20:00 hs",
     avatar: "🍰",
     badge: "⭐ Destacado",
+    cover: "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=800&q=80",
     phone: "5491156192616",
     address: "Humboldt 1950, Palermo",
+    verified: true,
     description: "Especialistas en pastelería fina, tortas húmedas, desayunos gourmet sorpresa y packaging de lujo."
   },
   {
@@ -31,10 +39,18 @@ const INITIAL_BUSINESSES = [
     reviews: 215,
     deliveryTime: "30-45 min",
     deliveryFee: 1500,
+    freeShippingFrom: 45000,
+    shippingType: "Envío propio del vendedor",
+    shippingNote: "Reparto inmediato en moto del local",
+    distance: "1.4 km",
+    isOpen: true,
+    schedule: "08:00 - 19:30 hs",
     avatar: "🥐",
     badge: "🇫🇷 Tradición Francesa",
+    cover: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=80",
     phone: "5491156192616",
     address: "Av. Alvear 1750, Recoleta",
+    verified: true,
     description: "Auténtica manteca francesa, hojaldres crujientes horneados al amanecer, pain au chocolat y café de especialidad."
   },
   {
@@ -46,10 +62,18 @@ const INITIAL_BUSINESSES = [
     reviews: 142,
     deliveryTime: "25-40 min",
     deliveryFee: 1400,
+    freeShippingFrom: 40000,
+    shippingType: "Envío propio del vendedor",
+    shippingNote: "Reparto ecológico en bici/moto rápida",
+    distance: "2.3 km",
+    isOpen: true,
+    schedule: "09:00 - 20:00 hs",
     avatar: "🥑",
     badge: "🌿 Opciones Saludables",
+    cover: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80",
     phone: "5491156192616",
     address: "Echeverría 3120, Belgrano",
+    verified: true,
     description: "Ingredientes orgánicos, panes de masa madre, tostones con palta, huevos de campo y meriendas llenas de energía."
   },
   {
@@ -61,10 +85,18 @@ const INITIAL_BUSINESSES = [
     reviews: 268,
     deliveryTime: "30-45 min",
     deliveryFee: 1600,
+    freeShippingFrom: 45000,
+    shippingType: "Envío propio del vendedor",
+    shippingNote: "Cadete exclusivo de Antojos del Sur",
+    distance: "3.5 km",
+    isOpen: true,
+    schedule: "07:30 - 19:30 hs",
     avatar: "🧉",
     badge: "👑 Clásico Criollo",
+    cover: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80",
     phone: "5491156192616",
     address: "Defensa 840, San Telmo",
+    verified: true,
     description: "El sabor porteño de siempre: medialunas de manteca bien almibaradas, chipás calientes, alfajores y submarino."
   },
   {
@@ -76,10 +108,18 @@ const INITIAL_BUSINESSES = [
     reviews: 176,
     deliveryTime: "35-50 min",
     deliveryFee: 1500,
+    freeShippingFrom: 50000,
+    shippingType: "Envío propio del vendedor",
+    shippingNote: "Despacho directo desde Urquiza",
+    distance: "2.8 km",
+    isOpen: true,
+    schedule: "10:00 - 20:30 hs",
     avatar: "🍪",
     badge: "🗽 Estilo New York",
+    cover: "https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?auto=format&fit=crop&w=800&q=80",
     phone: "5491156192616",
     address: "Av. Olazábal 4920, Urquiza",
+    verified: true,
     description: "Estilo americano moderno: cookies gigantes con centros fundidos, cheesecake New York y torres de waffles dorados."
   },
   {
@@ -91,10 +131,18 @@ const INITIAL_BUSINESSES = [
     reviews: 119,
     deliveryTime: "40-55 min",
     deliveryFee: 1600,
+    freeShippingFrom: 50000,
+    shippingType: "Envío propio del vendedor",
+    shippingNote: "Cadetería protegida para pasteles delicados",
+    distance: "1.7 km",
+    isOpen: true,
+    schedule: "09:30 - 19:30 hs",
     avatar: "🍵",
     badge: "✨ Especialidad & Fusión",
+    cover: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80",
     phone: "5491156192616",
     address: "Conde 1250, Colegiales",
+    verified: true,
     description: "Experiencias sutiles con té matcha japonés ceremonial, scones ingleses con mermeladas de autor y roll cakes soufflé."
   },
   {
@@ -106,10 +154,18 @@ const INITIAL_BUSINESSES = [
     reviews: 310,
     deliveryTime: "30-40 min",
     deliveryFee: 1400,
+    freeShippingFrom: 40000,
+    shippingType: "Envío propio del vendedor",
+    shippingNote: "Entrega puerta a puerta por personal del local",
+    distance: "2.9 km",
+    isOpen: true,
+    schedule: "08:30 - 20:00 hs",
     avatar: "👵",
     badge: "❤️ 100% Casero",
+    cover: "https://images.unsplash.com/photo-1509365465985-25d11c17e812?auto=format&fit=crop&w=800&q=80",
     phone: "5491156192616",
     address: "Av. Rivadavia 5430, Caballito",
+    verified: true,
     description: "Recetas familiares transmitidas por generaciones: tarta de ricota suave, pastafrolas de membrillo y budines esponjosos."
   }
 ];
@@ -528,8 +584,8 @@ const INITIAL_PRODUCTS = [
 // ============================================================================
 // 3. STORAGE & GESTOR DEL MARKETPLACE
 // ============================================================================
-const STORAGE_KEY_PRODUCTS = 'dulce_marketplace_products_v5';
-const STORAGE_KEY_BUSINESSES = 'dulce_marketplace_businesses_v5';
+const STORAGE_KEY_PRODUCTS = 'dulce_marketplace_products_v6';
+const STORAGE_KEY_BUSINESSES = 'dulce_marketplace_businesses_v6';
 
 class ProductManager {
   constructor() {
@@ -542,7 +598,7 @@ class ProductManager {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= INITIAL_BUSINESSES.length) {
+        if (Array.isArray(parsed) && parsed.length >= INITIAL_BUSINESSES.length && parsed[0].cover) {
           return parsed;
         }
       } catch (e) {
@@ -559,6 +615,22 @@ class ProductManager {
   }
 
   getAllBusinesses() {
+    return this.businesses;
+  }
+
+  getBusinessesFiltered(filter = 'all') {
+    if (filter === 'open') {
+      return this.businesses.filter(b => b.isOpen !== false);
+    }
+    if (filter === 'freeShipping') {
+      return this.businesses.filter(b => b.freeShippingFrom && b.freeShippingFrom <= 45000);
+    }
+    if (filter === 'topRated') {
+      return this.businesses.filter(b => b.rating >= 4.9);
+    }
+    if (filter === 'near') {
+      return [...this.businesses].sort((a, b) => parseFloat(a.distance || 99) - parseFloat(b.distance || 99));
+    }
     return this.businesses;
   }
 

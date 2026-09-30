@@ -94,11 +94,41 @@ class CartManager {
     return this.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   }
 
+  getVendorsInCart() {
+    const map = new Map();
+    this.items.forEach(item => {
+      const bId = item.product.businessId || 'dulce-atelier';
+      if (!map.has(bId)) {
+        map.set(bId, {
+          id: bId,
+          name: item.product.businessName || 'Pastelería Asociada',
+          avatar: item.product.businessAvatar || '🏪',
+          neighborhood: item.product.businessNeighborhood || '',
+          count: 0,
+          subtotal: 0
+        });
+      }
+      const v = map.get(bId);
+      v.count += item.quantity;
+      v.subtotal += (item.product.price * item.quantity);
+    });
+    return Array.from(map.values());
+  }
+
+  isMultiVendor() {
+    return this.getVendorsInCart().length > 1;
+  }
+
   getEffectiveDeliveryFee() {
     if (this.deliveryType === 'pickup' || this.items.length === 0) return 0;
-    // Envío gratis si supera $50.000
-    if (this.getSubtotal() >= 50000) return 0;
+    // Envío gratis si el subtotal supera $45.000
+    if (this.getSubtotal() >= 45000) return 0;
     return this.deliveryFee;
+  }
+
+  getFreeShippingRemaining() {
+    const sub = this.getSubtotal();
+    return Math.max(0, 45000 - sub);
   }
 
   getTotal() {
