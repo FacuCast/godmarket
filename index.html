@@ -279,30 +279,32 @@
       </div>
     </div>
 
-    <!-- Bottom Navigation Bar -->
+    <!-- Bottom Navigation Bar (PedidosYa Mobile App Style) -->
     <nav class="bottom-nav">
       <button class="nav-item active"
         onclick="window.app.setBusiness('todos'); window.app.setCategory('todos'); window.scrollTo({top:0, behavior:'smooth'});">
-        <span class="nav-icon">🏠</span>
+        <span class="nav-icon"><i data-lucide="home"></i></span>
         <span>Inicio</span>
       </button>
-      <button class="nav-item" onclick="document.querySelector('.businesses-section')?.scrollIntoView({behavior: 'smooth'});">
-        <span class="nav-icon">🏪</span>
-        <span>Pastelerías</span>
+      <button class="nav-item" onclick="document.querySelector('.stores-py-section')?.scrollIntoView({behavior: 'smooth'});">
+        <span class="nav-icon"><i data-lucide="store"></i></span>
+        <span>Locales</span>
       </button>
-      <button class="nav-item" onclick="window.app.setCategory('desayunos')">
-        <span class="nav-icon">☀️</span>
-        <span>Desayunos</span>
+      <button class="nav-item" onclick="document.getElementById('main-search-input')?.focus(); window.scrollTo({top:0, behavior:'smooth'});">
+        <span class="nav-icon"><i data-lucide="search"></i></span>
+        <span>Buscar</span>
       </button>
-      <button class="nav-item" onclick="window.app.setCategory('meriendas')">
-        <span class="nav-icon">☕</span>
-        <span>Meriendas</span>
+      <button class="nav-item" style="position: relative;" onclick="window.app.openOrdersHistoryModal()">
+        <span class="nav-icon"><i data-lucide="package"></i></span>
+        <span>Pedidos</span>
+        <span id="nav-orders-badge" class="badge-count"
+          style="display: none; position: absolute; top: 2px; right: 10px; font-size: 0.65rem; padding: 1px 5px; background: var(--accent-mint); color: #fff;">0</span>
       </button>
       <button class="nav-item" style="position: relative;" onclick="window.app.openModal('cart-drawer-modal')">
-        <span class="nav-icon">🛍️</span>
+        <span class="nav-icon"><i data-lucide="shopping-bag"></i></span>
         <span>Carrito</span>
         <span id="nav-cart-badge" class="badge-count"
-          style="display: none; position: absolute; top: 2px; right: 12px; font-size: 0.65rem; padding: 1px 5px;">0</span>
+          style="display: none; position: absolute; top: 2px; right: 10px; font-size: 0.65rem; padding: 1px 5px;">0</span>
       </button>
     </nav>
 
