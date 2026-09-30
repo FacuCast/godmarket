@@ -418,9 +418,17 @@
       <div class="drag-handle"></div>
       <button class="sheet-close-btn" onclick="window.app.closeModal('cart-drawer-modal')">✕</button>
 
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
-        <span style="font-size: 1.4rem;">🛍️</span>
-        <h3 class="font-serif" style="font-size: 1.25rem;">Tu Carrito de Delicias</h3>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.4rem;">🛍️</span>
+          <h3 class="font-serif" style="font-size: 1.25rem;">Tu Carrito de Delicias</h3>
+        </div>
+      </div>
+
+      <!-- Aviso de Logística del Vendedor -->
+      <div style="background: #F0F9F5; border: 1px dashed #2A9D8F; border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 12px; font-size: 0.74rem; color: #1E6B61; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.1rem;">🛵</span>
+        <span><strong>Envío a cargo del vendedor:</strong> Cada pastelería coordina su propio cadete para llevar tu pedido directo a tu puerta.</span>
       </div>
 
       <div id="cart-drawer-items" class="cart-items-list">
@@ -433,7 +441,7 @@
           <span id="cart-drawer-subtotal" class="cart-calc-subtotal">$0</span>
         </div>
         <div class="cart-summary-row" id="cart-delivery-fee-row">
-          <span>Envío a Domicilio:</span>
+          <span>Envío por el Vendedor:</span>
           <span id="cart-drawer-shipping" class="cart-calc-delivery">$1.500</span>
         </div>
         <div class="cart-summary-row total">
@@ -442,8 +450,8 @@
         </div>
 
         <div
-          style="font-size: 0.72rem; color: var(--accent-mint); font-weight: 600; text-align: center; margin: 6px 0;">
-          🛵 Envío gratis a partir de $50.000
+          style="font-size: 0.72rem; color: var(--accent-mint); font-weight: 700; text-align: center; margin: 6px 0;">
+          🛵 Envío gratis por vendedor a partir de $45.000
         </div>
 
         <button id="btn-proceed-checkout" class="btn-primary" style="margin-top: 10px;">
