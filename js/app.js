@@ -361,6 +361,147 @@ class DulceAtelierApp {
     }
   }
 
+  refreshIcons() {
+    if (window.lucide && typeof lucide.createIcons === 'function') {
+      setTimeout(() => {
+        try { lucide.createIcons(); } catch (e) {}
+      }, 10);
+    }
+  }
+
+  renderLocationBar() {
+    const el = document.getElementById('current-delivery-address');
+    if (el) {
+      el.textContent = this.currentAddress;
+    }
+  }
+
+  openAddressModal() {
+    this.openModal('address-picker-modal');
+  }
+
+  selectNeighborhood(neighborhood) {
+    this.currentAddress = `${neighborhood}, CABA`;
+    localStorage.setItem('dulce_user_address', this.currentAddress);
+    this.renderLocationBar();
+    this.closeModal('address-picker-modal');
+    this.showToast(`📍 Dirección actualizada a ${this.currentAddress}`);
+    // Actualizar también campo de dirección en checkout si está vacío
+    const addressInput = document.getElementById('cust-address');
+    if (addressInput && !addressInput.value) {
+      addressInput.value = this.currentAddress;
+    }
+  }
+
+  renderStories() {
+    const container = document.getElementById('stories-slider');
+    if (!container) return;
+
+    const stories = [
+      { id: 'todos', name: 'Todo', icon: '✨', badge: '' },
+      { id: 'desayunos', name: 'Desayunos', icon: '☀️', badge: 'TOP' },
+      { id: 'meriendas', name: 'Meriendas', icon: '☕', badge: '' },
+      { id: 'brunch', name: 'Brunch', icon: '🥐', badge: '' },
+      { id: 'boxes', name: 'Boxes Regalo', icon: '🎁', badge: '⭐' },
+      { id: 'ofertas', name: 'Ofertas', icon: '🏷️', badge: '-15%' },
+      { id: 'dulce-atelier', name: 'D. Atelier', icon: '🍰', isStore: true },
+      { id: 'la-petite-croissant', name: 'La Petite', icon: '🥐', isStore: true },
+      { id: 'cafe-botanica', name: 'Botánica', icon: '🥑', isStore: true },
+      { id: 'antojos-del-sur', name: 'Antojos', icon: '🧉', isStore: true }
+    ];
+
+    container.innerHTML = stories.map(s => {
+      const isActive = s.isStore ? (this.selectedBusiness === s.id) : (this.currentCategory === s.id && this.selectedBusiness === 'todos');
+      return `
+        <div class="story-bubble ${isActive ? 'active' : ''}" 
+             onclick="${s.isStore ? `window.app.setBusiness('${s.id}')` : `window.app.setCategory('${s.id}')`}">
+          <div class="story-ring">
+            <div class="story-avatar-inner">${s.icon}</div>
+          </div>
+          <span class="story-label">${s.name}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderFilterChips() {
+    const container = document.getElementById('filter-chips-slider');
+    if (!container) return;
+
+    const filters = [
+      { id: 'all', label: 'Todos los Locales', icon: '✨' },
+      { id: 'open', label: '⚡ Abiertos Ahora', icon: '' },
+      { id: 'freeShipping', label: '🛵 Envío Gratis por vendedor', icon: '' },
+      { id: 'topRated', label: '⭐ Calificación 4.9+', icon: '' },
+      { id: 'near', label: '📍 Más Cercanos', icon: '' }
+    ];
+
+    container.innerHTML = filters.map(f => `
+      <button type="button" class="filter-chip-py ${this.currentFilter === f.id ? 'active' : ''}" 
+              onclick="window.app.setFilter('${f.id}')">
+        <span>${f.label}</span>
+      </button>
+    `).join('');
+  }
+
+  setFilter(filterId) {
+    this.currentFilter = filterId;
+    this.renderFilterChips();
+    this.renderStoresCards();
+    this.renderProducts();
+  }
+
+  renderStoresCards() {
+    const container = document.getElementById('stores-py-grid');
+    if (!container) return;
+
+    const businesses = window.productManager.getBusinessesFiltered(this.currentFilter);
+
+    if (businesses.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: var(--text-muted);">
+          <p>No se encontraron pastelerías con este filtro.</p>
+          <button class="btn-primary" onclick="window.app.setFilter('all')" style="margin: 10px auto 0; max-width: 180px; padding: 6px 14px; font-size: 0.8rem;">
+            Ver todas las pastelerías
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = businesses.map(b => `
+      <div class="store-card-py animate-fade" onclick="window.app.setBusiness('${b.id}')">
+        <div class="store-card-cover-wrap">
+          <img class="store-card-cover-img" src="${b.cover || 'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=800&q=80'}" alt="${this.escapeHTML(b.name)}" loading="lazy">
+          <span class="store-card-badge-open">🟢 Abierto</span>
+          ${b.badge ? `<span class="store-card-badge-promo">${this.escapeHTML(b.badge)}</span>` : ''}
+          <div class="store-card-avatar-floating">${b.avatar}</div>
+        </div>
+        <div class="store-card-body">
+          <div class="store-card-name-row">
+            <h4 class="store-card-name">
+              ${this.escapeHTML(b.name)}
+              <span class="store-card-verified" title="Pastelería Oficial Verificada">✔</span>
+            </h4>
+            <span class="store-card-rating">⭐ ${b.rating} (${b.reviews})</span>
+          </div>
+          <p class="store-card-tagline">${this.escapeHTML(b.tagline)}</p>
+          
+          <div class="store-vendor-shipping-badge">
+            <span>🛵</span>
+            <span>Envío por el vendedor: <strong>${window.cartManager.formatCurrency(b.deliveryFee)}</strong> • ${b.deliveryTime}</span>
+          </div>
+
+          <div class="store-card-meta-row">
+            <span>📍 ${this.escapeHTML(b.neighborhood)} (${b.distance})</span>
+            <span>•</span>
+            <span style="color: var(--primary); font-weight: 700;">Ver menú completo →</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
   renderBusinessesSlider() {
     const container = document.getElementById('businesses-slider');
     if (!container) return;
@@ -400,7 +541,15 @@ class DulceAtelierApp {
     this.selectedBusiness = businessId;
     this.renderBusinessesSlider();
     this.renderBusinessSpotlight();
+    this.renderStories();
     this.renderProducts();
+    this.refreshIcons();
+
+    // Scroll suave hacia los productos de la tienda
+    const spotlight = document.getElementById('store-spotlight-container');
+    if (spotlight && businessId !== 'todos') {
+      spotlight.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   renderBusinessSpotlight() {
@@ -421,26 +570,50 @@ class DulceAtelierApp {
 
     container.style.display = 'block';
     container.innerHTML = `
-      <div class="store-spotlight-card animate-fade">
-        <div class="store-spotlight-header">
-          <div class="store-spotlight-avatar">${business.avatar}</div>
-          <div class="store-spotlight-info">
-            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <h3 class="store-spotlight-title font-serif">${this.escapeHTML(business.name)}</h3>
+      <div class="store-profile-hero animate-fade">
+        <img class="store-profile-cover" src="${business.cover || 'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=800&q=80'}" alt="${this.escapeHTML(business.name)}">
+        <div class="store-profile-content">
+          <div class="store-profile-avatar-wrap">${business.avatar}</div>
+          
+          <div class="store-profile-header-actions">
+            <a href="https://wa.me/${business.phone || '5491156192616'}?text=${encodeURIComponent(`¡Hola ${business.name}! Los contacto desde Dulce Market por sus desayunos y meriendas.`)}" 
+               target="_blank" class="btn-chat-seller">
+              <span>💬</span>
+              <span>Hablar con el Vendedor</span>
+            </a>
+            <button class="btn-close-store-view" onclick="window.app.setBusiness('todos')" title="Ver todas las pastelerías">
+              ✕ Ver todas
+            </button>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <h3 class="font-serif" style="font-size: 1.35rem; margin-bottom: 2px;">
+                ${this.escapeHTML(business.name)}
+                <span style="color: #009EE3; font-size: 0.95rem;">✔</span>
+              </h3>
               <span class="store-spotlight-badge">${this.escapeHTML(business.badge || '⭐ Destacado')}</span>
             </div>
-            <p class="store-spotlight-tagline">${this.escapeHTML(business.tagline)}</p>
-            <div class="store-spotlight-meta">
-              <span>📍 ${this.escapeHTML(business.neighborhood)}</span>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.35;">
+              ${this.escapeHTML(business.tagline)}
+            </p>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.74rem; color: var(--text-muted); flex-wrap: wrap;">
+              <span>📍 ${this.escapeHTML(business.address || business.neighborhood)}</span>
               <span>•</span>
               <span>⭐ ${business.rating} (${business.reviews} opiniones)</span>
               <span>•</span>
-              <span>🛵 ${business.deliveryTime}</span>
+              <span>🕒 ${this.escapeHTML(business.schedule || '08:30 a 20:00 hs')}</span>
             </div>
           </div>
-          <button class="store-spotlight-close" onclick="window.app.setBusiness('todos')" title="Ver todas las pastelerías">
-            ✕ Ver todas
-          </button>
+
+          <!-- Política de Envío a cargo del vendedor destacada -->
+          <div class="store-profile-policy-box">
+            <span style="font-size: 1.2rem;">🛵</span>
+            <div>
+              <strong>Logística a cargo de ${this.escapeHTML(business.name)}:</strong>
+              <div>Cadetería propia con caja térmica especial para pastelería y desayunos. Entrega estimada: <strong>${business.deliveryTime}</strong> (Costo: ${window.cartManager.formatCurrency(business.deliveryFee)}). ¡Envío gratis a partir de ${window.cartManager.formatCurrency(business.freeShippingFrom || 45000)}!</div>
+            </div>
+          </div>
         </div>
       </div>
     `;
