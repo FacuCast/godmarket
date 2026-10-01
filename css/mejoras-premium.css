@@ -145,8 +145,11 @@
 
 /* ── Sección hero: degradado background mejorado ─────────── */
 .app-header {
-  background: var(--bg-surface) !important;
-  box-shadow: 0 1px 0 var(--border-light), 0 4px 16px rgba(43, 30, 26, 0.05) !important;
+  background: rgba(5, 22, 16, 0.94) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15) !important;
 }
 
 /* ── Delivery switcher: transición premium ───────────────── */
@@ -155,9 +158,10 @@
 }
 
 .delivery-tab.active {
-  background: var(--bg-surface) !important;
-  box-shadow: 0 2px 8px rgba(43, 30, 26, 0.1) !important;
-  color: var(--primary) !important;
+  background: var(--primary-gradient) !important;
+  box-shadow: 0 2px 12px rgba(212, 175, 55, 0.3) !important;
+  color: #051610 !important;
+  font-weight: 700 !important;
 }
 
 /* ── Section titles: shimmer rosado ──────────────────────── */
