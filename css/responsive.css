@@ -1,6 +1,6 @@
 /* ==========================================================================
-   DULCE ATELIER - RESPONSIVE & DESKTOP LUXURY EXPERIENCE
-   Transforma la app móvil en un e-commerce gourmet expansivo para PC
+   GOD MARKET — RESPONSIVE & DESKTOP / TV LUXURY EXPERIENCE
+   Mantiene 100% la identidad visual exclusiva: verde esmeralda profundo y oro.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -8,8 +8,30 @@
    -------------------------------------------------------------------------- */
 @media (min-width: 768px) {
   .app-container {
-    max-width: 760px;
-    padding-bottom: 100px;
+    max-width: 768px;
+    padding-bottom: 90px;
+  }
+
+  .hero-banner-god {
+    min-height: 320px;
+    padding: 34px 28px 26px;
+  }
+
+  .hero-god-title {
+    font-size: 2.3rem;
+  }
+
+  .hero-god-sub {
+    font-size: 0.95rem;
+  }
+
+  .cafeterias-slider {
+    gap: 18px;
+  }
+
+  .cafeteria-god-card {
+    min-width: 230px;
+    max-width: 230px;
   }
 
   .products-grid {
@@ -17,23 +39,6 @@
     gap: 16px;
   }
 
-  .product-image-container {
-    padding-top: 80%;
-  }
-
-  .promo-banner {
-    padding: 24px 28px;
-  }
-
-  .promo-banner h2 {
-    font-size: 1.4rem;
-  }
-
-  .promo-banner p {
-    font-size: 0.9rem;
-  }
-
-  /* Modal centrado en Tablet */
   .modal-overlay {
     align-items: center;
     padding: 24px;
@@ -51,11 +56,11 @@
    -------------------------------------------------------------------------- */
 @media (min-width: 1024px) {
   body {
-    background: #F8F5F0;
-    color: var(--text-main);
+    background-color: #051610;
+    color: var(--cream);
   }
 
-  /* Contenedor amplio y centrado estilo Tienda E-commerce */
+  /* Contenedor amplio y centrado estilo Marketplace Gourmet */
   .app-container {
     max-width: 1240px;
     padding: 0 24px 80px;
@@ -65,181 +70,169 @@
 
   /* Header Desktop: Barra horizontal completa y elegante */
   .app-header {
-    background: #FFFFFF;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
+    background: rgba(8, 30, 22, 0.94);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
     margin: 16px 0 24px;
-    padding: 16px 28px;
-    border: 1px solid var(--border-light);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-  }
-
-  .header-top {
-    margin-bottom: 0;
-    flex: 1;
+    padding: 14px 28px;
+    border: 1px solid rgba(212, 175, 55, 0.25);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 24px;
   }
 
-  .brand-wrapper {
-    gap: 14px;
+  /* Hamburger oculta en Desktop */
+  .hamburger-menu-btn {
+    display: none !important;
   }
 
-  .brand-logo-img {
-    width: 52px !important;
-    height: 52px !important;
+  /* Navegación Desktop central */
+  .desktop-nav-links {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
   }
 
-  .brand-info h1 {
-    font-size: 1.45rem;
+  .desktop-nav-link {
+    color: #CBD8D1;
+    font-size: 0.86rem;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 9999px;
+    transition: all 0.2s ease;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
   }
 
-  .brand-info span {
-    font-size: 0.8rem;
-    letter-spacing: 1px;
+  .desktop-nav-link:hover,
+  .desktop-nav-link.active {
+    color: #D4AF37;
+    background: rgba(212, 175, 55, 0.12);
+    font-weight: 600;
   }
 
-  /* Buscador en Desktop (Prominente en el centro) */
-  .search-wrapper {
-    max-width: 440px;
-    margin: 0;
+  /* Acciones Desktop: Dirección, pedidos y portal */
+  .desktop-header-actions {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
   }
 
-  .search-input {
-    padding: 12px 18px 12px 42px;
-    font-size: 0.92rem;
-    border-radius: var(--radius-full);
+  .desktop-location-pill {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 9999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--cream);
+    cursor: pointer;
+    transition: all 0.2s ease;
   }
 
-  .search-icon {
-    left: 16px;
-    font-size: 1.1rem;
+  .desktop-location-pill:hover {
+    background: rgba(212, 175, 55, 0.16);
+    border-color: #D4AF37;
   }
 
-  /* Switcher de Entrega en Desktop */
-  .delivery-switcher {
-    margin-bottom: 0;
-    min-width: 280px;
+  /* Hero Expansivo Gourmet */
+  .hero-banner-god {
+    margin: 0 0 28px 0;
+    min-height: 380px;
+    padding: 48px 44px 38px;
+    border-radius: 28px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
   }
 
-  .delivery-tab {
-    padding: 8px 16px;
-    font-size: 0.85rem;
+  .hero-god-title {
+    font-size: 3.1rem;
+    line-height: 1.1;
+    margin-bottom: 12px;
   }
 
-  /* Banner Promocional Expansivo */
-  .promo-banner {
-    margin: 0 0 32px 0;
-    padding: 36px 44px;
-    border-radius: var(--radius-lg);
-    background: linear-gradient(135deg, #2B1E1A 0%, #4A332C 60%, #E07A5F 130%);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .promo-banner h2 {
-    font-size: 1.85rem;
-    margin-bottom: 8px;
-  }
-
-  .promo-banner p {
+  .hero-god-sub {
     font-size: 1.05rem;
-    max-width: 60%;
-    margin-bottom: 16px;
+    max-width: 620px;
   }
 
-  .promo-btn {
-    font-size: 0.92rem;
-    padding: 10px 22px;
+  /* Buscador en Desktop */
+  .search-god-wrapper {
+    padding: 0;
+    max-width: 580px;
+    margin: 0 auto 28px;
   }
 
-  /* Categorías en Desktop */
-  .categories-slider {
-    padding: 0 0 16px 0;
-    gap: 20px;
-    margin-bottom: 28px;
-    justify-content: flex-start;
+  /* Categorías en Desktop: Centradas con más espacio */
+  .stories-section {
+    margin-bottom: 32px;
   }
 
-  .category-item {
-    min-width: 105px;
-    padding: 10px 14px;
-    background: #FFFFFF;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition-fast);
+  .stories-slider {
+    justify-content: center;
+    gap: 24px;
+    padding: 8px 0;
   }
 
-  .category-item:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary);
+  .story-ring {
+    width: 66px;
+    height: 66px;
   }
 
-  .category-avatar {
-    width: 64px;
-    height: 64px;
-    font-size: 1.85rem;
+  .story-avatar-inner svg {
+    width: 28px;
+    height: 28px;
   }
 
-  .category-name {
+  .story-label {
     font-size: 0.82rem;
-    font-weight: 700;
   }
 
-  /* Grilla de 4 Productos por Pantalla en PC (4 Columnas) */
+  /* Cafeterías destacadas en Desktop (Grilla de 4 Columnas) */
+  .cafeterias-god-section {
+    padding: 0;
+    margin-bottom: 36px;
+  }
+
+  .section-title-god {
+    font-size: 1.6rem;
+  }
+
+  .cafeterias-slider {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+
+  .cafeteria-god-card {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .cafeteria-card-img-wrap {
+    height: 145px;
+  }
+
+  /* Grilla de 4 Productos por Fila en PC */
   .section-container {
     padding: 0;
     margin-bottom: 36px;
   }
 
-  .section-title {
-    font-size: 1.55rem;
-  }
-
-  .section-subtitle {
-    font-size: 0.9rem;
-  }
-
   .products-grid {
-    grid-template-columns: repeat(4, 1fr); /* 4 productos por fila en PC */
-    gap: 20px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
   }
 
   .product-card {
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    transition: all 0.25s ease;
-  }
-
-  .product-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 36px rgba(43, 30, 26, 0.12);
-  }
-
-  .product-content {
-    padding: 14px 16px 16px;
-  }
-
-  .product-title {
-    font-size: 0.98rem;
-    height: 2.5em;
-  }
-
-  .product-price {
-    font-size: 1.15rem;
-  }
-
-  .add-to-cart-btn {
-    width: 38px;
-    height: 38px;
-    font-size: 1.3rem;
   }
 
   /* Ocultar Barra Inferior Móvil en PC */
@@ -247,15 +240,15 @@
     display: none !important;
   }
 
-  /* Barra Flotante de Carrito en PC (Fijada abajo a la derecha de forma elegante) */
+  /* Barra Flotante de Carrito en PC (Abajo a la derecha) */
   .floating-cart-bar {
     bottom: 30px;
     left: auto;
     right: 40px;
     transform: translateY(30px);
     width: 380px;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 20px 45px rgba(217, 83, 111, 0.4);
+    border-radius: 24px;
+    box-shadow: 0 16px 40px rgba(212, 175, 55, 0.35);
   }
 
   .floating-cart-bar.visible {
@@ -271,13 +264,13 @@
   .bottom-sheet {
     max-width: 780px;
     max-height: 88vh;
-    border-radius: var(--radius-lg);
+    border-radius: 28px;
     padding: 32px;
   }
 
   .modal-desktop-layout {
     display: grid;
-    grid-template-columns: 1fr 1.1fr;
+    grid-template-columns: 1fr 1.15fr;
     gap: 28px;
     align-items: start;
   }
@@ -291,7 +284,8 @@
   /* Modales de Checkout y Carrito en PC */
   #cart-drawer-modal .bottom-sheet,
   #checkout-modal .bottom-sheet,
-  #admin-product-modal .bottom-sheet {
+  #admin-product-modal .bottom-sheet,
+  #profile-modal .bottom-sheet {
     max-width: 600px;
     padding: 32px;
   }
@@ -304,14 +298,35 @@
 }
 
 /* --------------------------------------------------------------------------
-   3. Pantallas Ultra-Wide / Monitores Grandes (min-width: 1400px)
+   3. Smart TV / Ultra-Wide 4K Screens (min-width: 1440px)
    -------------------------------------------------------------------------- */
-@media (min-width: 1400px) {
+@media (min-width: 1440px) {
   .app-container {
-    max-width: 1320px;
+    max-width: 1440px;
+  }
+
+  .hero-banner-god {
+    min-height: 420px;
+    padding: 56px 52px 44px;
+  }
+
+  .hero-god-title {
+    font-size: 3.5rem;
+  }
+
+  .hero-god-sub {
+    font-size: 1.15rem;
+  }
+
+  .cafeterias-slider {
+    gap: 24px;
+  }
+
+  .cafeteria-card-img-wrap {
+    height: 165px;
   }
 
   .products-grid {
-    gap: 24px;
+    gap: 26px;
   }
 }
