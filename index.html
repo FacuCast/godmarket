@@ -46,6 +46,11 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
+  <!-- Google Fonts: Cinzel + Cormorant Garamond + Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
   <!-- Stylesheets (Pure CSS) -->
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
@@ -62,180 +67,183 @@
   <div class="app-container">
 
     <!-- Header Sticky -->
+    <!-- Header Sticky (GOD MARKET Luxury Dark Emerald & Gold) -->
     <header class="app-header">
-      <!-- PedidosYa Top Location Bar -->
-      <div class="top-location-bar" onclick="window.app.openAddressModal()" title="Cambiar dirección de entrega">
-        <div class="location-info-group">
+      <!-- Mobile: Minimalist Hamburger Menu -->
+      <button class="hamburger-menu-btn" onclick="window.app.toggleSideMenu()" aria-label="Abrir menú" title="Menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <!-- Center Brand Logo: GOD MARKET -->
+      <div class="brand-godmarket" onclick="window.app.goHome()" style="cursor: pointer;" title="GOD MARKET - Inicio">
+        <span class="brand-god">GOD</span>
+        <span class="brand-market">MARKET</span>
+      </div>
+
+      <!-- Desktop Navigation Links (Hidden on mobile, visible on PC & TV) -->
+      <nav class="desktop-nav-links">
+        <button class="desktop-nav-link active" onclick="window.app.goHome()">Inicio</button>
+        <button class="desktop-nav-link" onclick="window.app.filterCafeterias()">Cafeterías</button>
+        <button class="desktop-nav-link" onclick="window.app.setCategory('desayunos')">Desayunos</button>
+        <button class="desktop-nav-link" onclick="window.app.setCategory('brunch')">Healthy</button>
+        <button class="desktop-nav-link" onclick="window.app.setCategory('meriendas')">Bebidas & Café</button>
+        <button class="desktop-nav-link" onclick="window.app.setCategory('boxes')">Boxes Regalo</button>
+      </nav>
+
+      <!-- Desktop Actions: Location & Portals (Hidden on mobile) -->
+      <div class="desktop-header-actions">
+        <div class="desktop-location-pill" onclick="window.app.openAddressModal()" title="Cambiar dirección de entrega">
           <span class="location-pin-icon">📍</span>
-          <div class="location-text-col">
-            <span class="location-label">Enviar a</span>
-            <span class="location-current-address">
-              <span id="current-delivery-address">Palermo Hollywood, CABA</span>
-              <span class="location-chevron">▼</span>
-            </span>
-          </div>
+          <span id="desktop-delivery-address">Palermo Hollywood, CABA</span>
         </div>
-        <div style="font-size: 0.72rem; color: var(--accent-mint); font-weight: 700; background: var(--accent-mint-light); padding: 3px 8px; border-radius: 50px;">
-          🛵 Envío local
-        </div>
-      </div>
-
-      <div class="header-top">
-        <div class="brand-wrapper" onclick="window.app.setBusiness('todos'); window.app.setCategory('todos');" style="cursor: pointer;">
-          <!-- GOD MARKET Logo -->
-          <div class="brand-logo">
-            <svg viewBox="0 0 44 44" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
-              <!-- Sun rays -->
-              <g stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round">
-                <line x1="22" y1="3" x2="22" y2="7"/>
-                <line x1="29" y1="5" x2="27" y2="8.5"/>
-                <line x1="15" y1="5" x2="17" y2="8.5"/>
-                <line x1="33" y1="10" x2="30" y2="12.5"/>
-                <line x1="11" y1="10" x2="14" y2="12.5"/>
-              </g>
-              <!-- G letter -->
-              <text x="4" y="34" font-family="Georgia, serif" font-size="22" font-weight="bold" fill="url(#goldGrad)">G</text>
-              <!-- O with leaf -->
-              <circle cx="22" cy="26" r="8" fill="none" stroke="url(#goldGrad)" stroke-width="2"/>
-              <!-- Leaf inside O -->
-              <path d="M22 20 C25 23 25 29 22 32 C19 29 19 23 22 20Z" fill="#3A7A4A"/>
-              <line x1="22" y1="20" x2="22" y2="32" stroke="#5A9B5A" stroke-width="0.8"/>
-              <!-- D letter -->
-              <text x="29" y="34" font-family="Georgia, serif" font-size="22" font-weight="bold" fill="url(#goldGrad)">D</text>
-              <defs>
-                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#D4B86A"/>
-                  <stop offset="50%" stop-color="#C9A84C"/>
-                  <stop offset="100%" stop-color="#A8893A"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <div class="brand-info">
-            <h1 style="font-size: 1.15rem; line-height: 1; letter-spacing: 0.12em;">GOD MARKET</h1>
-            <span style="font-size: 0.58rem; letter-spacing: 0.2em;">FOOD · COFFEE · HEALTHY</span>
-          </div>
-        </div>
-
-        <div class="header-actions">
-          <button class="icon-btn" onclick="window.app.openOrdersHistoryModal()" title="Mis Pedidos" style="position: relative;">
-            <i data-lucide="package" style="width:18px;height:18px;"></i>
-            <span id="header-orders-badge" class="badge-count" style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.6rem; padding: 1px 5px; background: var(--primary); color: var(--green-deep);">0</span>
-          </button>
-          <button class="icon-btn" onclick="window.app.openAdminModalWithPin()" title="Portal Negocios">
-            <i data-lucide="store" style="width:18px;height:18px;"></i>
-          </button>
-          <button class="icon-btn desktop-cart-btn" style="position: relative;"
-            onclick="window.app.openModal('cart-drawer-modal')" title="Ver Carrito">
-            <i data-lucide="shopping-bag" style="width:18px;height:18px;"></i>
-            <span id="header-cart-badge" class="badge-count"
-              style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.6rem; padding: 1px 5px; background: var(--primary); color: var(--green-deep);">0</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Info bar: Status & Hours -->
-      <div id="store-status-bar"
-        style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 10px; padding: 5px 10px; background: var(--bg-surface-secondary); border-radius: var(--radius-xs); border: 1px solid var(--border-light);">
-        <div id="store-status-indicator" style="display: flex; align-items: center; gap: 6px;">
-          <span id="store-status-dot"
-            style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2A9D8F; animation: pulseGlow 2s infinite;"></span>
-          <span id="store-status-info"><strong id="store-status-text" style="color: #2A9D8F;">7 Pastelerías Activas</strong> • 08:30 a 20:00 hs</span>
-        </div>
-        <div id="store-delivery-tag" style="color: var(--primary); font-weight: 700;">
-          🛵 Envío por el vendedor
-        </div>
-      </div>
-
-      <!-- Delivery / Pickup Switcher -->
-      <div class="delivery-switcher">
-        <button class="delivery-tab active" data-type="delivery">
-          🛵 Envío por el Vendedor
+        <button class="icon-btn" onclick="window.app.openOrdersHistoryModal()" title="Mis Pedidos" style="position: relative;">
+          <i data-lucide="package" style="width:18px;height:18px;"></i>
+          <span id="header-orders-badge" class="badge-count" style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.6rem; padding: 1px 5px; background: var(--primary); color: var(--green-deep);">0</span>
         </button>
-        <button class="delivery-tab" data-type="pickup">
-          🏪 Retiro en Negocio
+        <button class="icon-btn" onclick="window.app.openAdminModalWithPin()" title="Portal Negocios">
+          <i data-lucide="store" style="width:18px;height:18px;"></i>
         </button>
       </div>
 
-      <!-- Realtime Search Bar -->
-      <div class="search-wrapper">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="main-search-input" class="search-input"
-          placeholder="Buscar desayunos, croissants, meriendas, pastelerías..." autocomplete="off">
-        <span id="search-clear-btn" class="search-clear">✖</span>
-      </div>
+      <!-- Right: Minimalist Shopping Bag Button with Badge -->
+      <button class="header-bag-btn" onclick="window.app.openModal('cart-drawer-modal')" aria-label="Ver Carrito de Compras" title="Ver Carrito">
+        <svg class="bag-icon" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <span id="header-bag-badge" class="bag-badge">1</span>
+      </button>
     </header>
 
-    <!-- Vendor Logistics Guarantee Banner -->
-    <div class="vendor-logistics-banner">
-      <span class="vendor-logistics-icon">🛵</span>
-      <div class="vendor-logistics-text">
-        <strong>Envíos a cargo del vendedor:</strong> Cada pastelería coordina su propio cadete en moto con caja térmica directo a tu puerta.
+    <!-- Side Menu Drawer (Opened by Hamburger button) -->
+    <div id="side-menu-drawer" class="side-drawer-overlay" onclick="if(event.target === this) window.app.toggleSideMenu()">
+      <div class="side-drawer">
+        <div class="side-drawer-header">
+          <div class="brand-godmarket">
+            <span class="brand-god">GOD</span>
+            <span class="brand-market">MARKET</span>
+          </div>
+          <button class="side-drawer-close" onclick="window.app.toggleSideMenu()" aria-label="Cerrar">✕</button>
+        </div>
+
+        <!-- Address in Drawer -->
+        <div class="side-drawer-location" onclick="window.app.openAddressModal(); window.app.toggleSideMenu();">
+          <span class="location-pin-icon" style="font-size: 1.1rem;">📍</span>
+          <div class="side-drawer-loc-text">
+            <span class="side-drawer-loc-sub">Dirección de entrega</span>
+            <span id="side-menu-address" class="side-drawer-loc-val">Palermo Hollywood, CABA</span>
+          </div>
+          <span class="side-chevron">→</span>
+        </div>
+
+        <!-- Delivery Mode in Drawer -->
+        <div class="side-delivery-switcher">
+          <button class="side-delivery-tab active" data-type="delivery" onclick="window.app.switchDeliveryType('delivery')">
+            🛵 Envío a Domicilio
+          </button>
+          <button class="side-delivery-tab" data-type="pickup" onclick="window.app.switchDeliveryType('pickup')">
+            🏪 Retiro en Negocio
+          </button>
+        </div>
+
+        <nav class="side-drawer-nav">
+          <button class="side-nav-item active" onclick="window.app.setBusiness('todos'); window.app.setCategory('todos'); window.app.toggleSideMenu(); window.scrollTo({top:0, behavior:'smooth'});">
+            <i data-lucide="home"></i>
+            <span>Inicio</span>
+          </button>
+          <button class="side-nav-item" onclick="window.app.filterCafeterias(); window.app.toggleSideMenu();">
+            <i data-lucide="coffee"></i>
+            <span>Cafeterías de Especialidad</span>
+          </button>
+          <button class="side-nav-item" onclick="window.app.setCategory('desayunos'); window.app.toggleSideMenu();">
+            <i data-lucide="croissant"></i>
+            <span>Desayunos & Brunch</span>
+          </button>
+          <button class="side-nav-item" onclick="window.app.setCategory('brunch'); window.app.toggleSideMenu();">
+            <i data-lucide="leaf"></i>
+            <span>Propuestas Saludables</span>
+          </button>
+          <button class="side-nav-item" onclick="window.app.setCategory('meriendas'); window.app.toggleSideMenu();">
+            <i data-lucide="cup-soda"></i>
+            <span>Bebidas & Cafés</span>
+          </button>
+          <button class="side-nav-item" onclick="window.app.setCategory('boxes'); window.app.toggleSideMenu();">
+            <i data-lucide="gift"></i>
+            <span>Boxes Regalo Gourmet</span>
+          </button>
+        </nav>
+
+        <div class="side-drawer-divider"></div>
+
+        <div class="side-drawer-actions">
+          <button class="side-action-btn" onclick="window.app.openOrdersHistoryModal(); window.app.toggleSideMenu();">
+            <i data-lucide="package"></i>
+            <span>Mis Pedidos</span>
+          </button>
+          <button class="side-action-btn" onclick="window.app.openAdminModalWithPin(); window.app.toggleSideMenu();">
+            <i data-lucide="store"></i>
+            <span>Portal Negocios</span>
+          </button>
+          <a href="https://wa.me/5491156192616" target="_blank" class="side-action-btn whatsapp-highlight">
+            <i data-lucide="message-circle"></i>
+            <span>Atención WhatsApp</span>
+          </a>
+        </div>
+
+        <div class="side-drawer-footer">
+          <span>© 2026 GOD MARKET</span>
+          <span style="opacity: 0.6; font-size: 0.65rem;">Buenos Aires · Desayunos de Autor</span>
+        </div>
       </div>
     </div>
 
-    <!-- PWA Install Banner Pill (Visible if installable) -->
-    <div id="pwa-install-pill"
-      style="display: none; margin: 10px 16px 0; background: var(--accent-mint-light); border: 1px solid var(--accent-mint); padding: 8px 14px; border-radius: var(--radius-sm); align-items: center; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #2B1E1A;">
-      <span>📲 ¡Instala Dulce Market en tu celular!</span>
-      <button onclick="window.app.installPWA()"
-        style="background: var(--accent-mint); color: #fff; padding: 4px 10px; border-radius: var(--radius-full); font-weight: 700; font-size: 0.75rem;">
-        Instalar
-      </button>
+    <!-- 1. Hero Featured Card ("Desayunos premium, cerca tuyo.") -->
+    <section class="hero-banner-god" id="hero-banner">
+      <h1 class="hero-god-title">Desayunos<br>premium, cerca<br>tuyo.</h1>
+      <p class="hero-god-sub">Cafeterías de especialidad,<br>propuestas saludables y mucho más.</p>
+    </section>
+
+    <!-- 2. Realtime Search Bar Capsule -->
+    <div class="search-god-wrapper">
+      <div class="search-god-capsule">
+        <span class="search-god-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+        </span>
+        <input type="text" id="main-search-input" class="search-god-input"
+          placeholder="Buscar cafeterías, productos..." autocomplete="off">
+        <button type="button" class="search-god-btn" id="search-action-btn" aria-label="Buscar" onclick="window.app.focusSearch()">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
-    <!-- PedidosYa Stories / Categorías Circulares -->
+    <!-- 3. Category Circles Row (Cafeterías, Desayunos, Healthy, Bebidas, etc.) -->
     <section class="stories-section">
       <div id="stories-slider" class="stories-slider">
+        <!-- Renderizado dinámicamente con iconos dorados por JS -->
+      </div>
+    </section>
+
+    <!-- 4. Cafeterías destacadas (Lumière Café, Brew & Co., etc.) -->
+    <section class="cafeterias-god-section" id="cafeterias-section">
+      <div class="cafeterias-header-row">
+        <h2 class="section-title-god">Cafeterías destacadas</h2>
+        <button type="button" class="see-all-god" onclick="window.app.showAllStores()">Ver todas →</button>
+      </div>
+
+      <!-- Tarjetas de cafeterías destacadas con swipe horizontal en móvil y grilla en desktop -->
+      <div id="stores-py-grid" class="cafeterias-slider">
         <!-- Renderizado dinámicamente por JS -->
       </div>
     </section>
 
-    <!-- Promo Banner Hero (Marketplace style) -->
-    <section class="promo-banner">
-      <span class="promo-badge">✨ Marketplace de Pastelerías</span>
-      <h2>Desayunos & Meriendas de Autor</h2>
-      <p>Elegí entre <strong>7 pastelerías artesanales</strong> de Buenos Aires. Envíos coordinados directamente por cada local.</p>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button class="promo-btn" onclick="window.app.setCategory('desayunos')">
-          ☀️ Ver Desayunos
-        </button>
-        <button class="promo-btn" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);" onclick="window.app.openAdminModalWithPin()">
-          🏪 Sumar mi Negocio
-        </button>
-      </div>
-    </section>
-
-    <!-- PedidosYa Quick Filter Chips -->
-    <section class="filter-chips-section">
-      <div id="filter-chips-slider" class="filter-chips-slider">
-        <!-- Renderizado dinámicamente por JS -->
-      </div>
-    </section>
-
-    <!-- 7 PASTELERÍAS CON ENVÍO PROPIO (PedidosYa Cards) -->
-    <section class="stores-py-section">
-      <div class="stores-py-header">
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <span style="font-size: 1.2rem;">🏪</span>
-          <h3 class="font-serif" style="font-size: 1.15rem;">Pastelerías con Envío Propio</h3>
-          <span class="badge-count" style="font-size: 0.65rem; padding: 1px 6px;">7 Activas</span>
-        </div>
-        <button class="btn-publish-pill" onclick="window.app.openAdminModalWithPin()" title="Portal para Pastelerías">
-          <span>➕</span> Publicar
-        </button>
-      </div>
-      
-      <!-- Mini slider de selección rápida de negocio -->
-      <div id="businesses-slider" class="businesses-slider" style="margin-bottom: 12px;">
-        <!-- Renderizado dinámicamente por JS -->
-      </div>
-
-      <!-- Tarjetas completas de pastelerías estilo PedidosYa -->
-      <div id="stores-py-grid" class="stores-py-grid">
-        <!-- Renderizado dinámicamente por JS -->
-      </div>
-    </section>
+    <!-- Mini slider de selección rápida de negocio (opcional cuando se filtra) -->
+    <div id="businesses-slider" class="businesses-slider" style="display: none; margin-bottom: 12px;"></div>
 
     <!-- Store Spotlight Banner (visible cuando se selecciona una pastelería) -->
     <div id="store-spotlight-container" style="display: none; margin: 0 16px 16px;"></div>
