@@ -398,30 +398,146 @@ class DulceAtelierApp {
     if (!container) return;
 
     const stories = [
-      { id: 'todos', name: 'Todo', icon: '✨', badge: '' },
-      { id: 'desayunos', name: 'Desayunos', icon: '☀️', badge: 'TOP' },
-      { id: 'meriendas', name: 'Meriendas', icon: '☕', badge: '' },
-      { id: 'brunch', name: 'Brunch', icon: '🥐', badge: '' },
-      { id: 'boxes', name: 'Boxes Regalo', icon: '🎁', badge: '⭐' },
-      { id: 'ofertas', name: 'Ofertas', icon: '🏷️', badge: '-15%' },
-      { id: 'dulce-atelier', name: 'D. Atelier', icon: '🍰', isStore: true },
-      { id: 'la-petite-croissant', name: 'La Petite', icon: '🥐', isStore: true },
-      { id: 'cafe-botanica', name: 'Botánica', icon: '🥑', isStore: true },
-      { id: 'antojos-del-sur', name: 'Antojos', icon: '🧉', isStore: true }
+      {
+        id: 'cafeterias',
+        name: 'Cafeterías',
+        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>`
+      },
+      {
+        id: 'desayunos',
+        name: 'Desayunos',
+        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 16.5-1.5 1.5 2 2 1.5-1.5"/><path d="m19.5 7.5 1.5-1.5-2-2-1.5 1.5"/><path d="M14.5 4.5 10 9l5 5 4.5-4.5a3.5 3.5 0 0 0-5-5Z"/><path d="m8 11-3.5 3.5a3.5 3.5 0 0 0 5 5L13 16"/></svg>`
+      },
+      {
+        id: 'healthy',
+        name: 'Healthy',
+        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`
+      },
+      {
+        id: 'bebidas',
+        name: 'Bebidas',
+        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m19 8-1.5 12a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2L5 8"/><path d="M4 8h16"/><path d="m14 2-2 6"/><line x1="8" y1="13" x2="8.01" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+      },
+      {
+        id: 'pasteleria',
+        name: 'Pastelería',
+        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="m20 21-16-1v-4l16-3v8Z"/><path d="M4 16c2 1 4-1 6 0s4-1 6 0 4-1 4-1"/></svg>`
+      },
+      {
+        id: 'boxes',
+        name: 'Boxes',
+        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect width="20" height="5" x="2" y="7" rx="1"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>`
+      }
     ];
 
     container.innerHTML = stories.map(s => {
-      const isActive = s.isStore ? (this.selectedBusiness === s.id) : (this.currentCategory === s.id && this.selectedBusiness === 'todos');
+      const isActive = (s.id === 'cafeterias' && this.selectedBusiness === 'todos' && this.currentCategory === 'todos') || (this.currentCategory === s.id);
       return `
         <div class="story-bubble ${isActive ? 'active' : ''}" 
-             onclick="${s.isStore ? `window.app.setBusiness('${s.id}')` : `window.app.setCategory('${s.id}')`}">
+             onclick="window.app.handleCategoryClick('${s.id}')"
+             title="${s.name}">
           <div class="story-ring">
-            <div class="story-avatar-inner">${s.icon}</div>
+            <div class="story-avatar-inner">${s.svg}</div>
           </div>
           <span class="story-label">${s.name}</span>
         </div>
       `;
     }).join('');
+  }
+
+  handleCategoryClick(id) {
+    if (id === 'cafeterias') {
+      this.selectedBusiness = 'todos';
+      this.currentCategory = 'todos';
+      this.renderStories();
+      const cafSec = document.getElementById('cafeterias-section') || document.querySelector('.cafeterias-god-section') || document.querySelector('.stores-py-section');
+      if (cafSec) cafSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (id === 'healthy') {
+      this.selectedBusiness = 'todos';
+      this.currentCategory = 'brunch';
+      this.renderStories();
+      this.renderProducts();
+      const prodSec = document.getElementById('products-section-container');
+      if (prodSec) prodSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (id === 'bebidas') {
+      this.selectedBusiness = 'todos';
+      this.currentCategory = 'meriendas';
+      this.renderStories();
+      this.renderProducts();
+      const prodSec = document.getElementById('products-section-container');
+      if (prodSec) prodSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (id === 'pasteleria') {
+      this.selectedBusiness = 'todos';
+      this.currentCategory = 'todos';
+      this.renderStories();
+      this.renderProducts();
+      const prodSec = document.getElementById('products-section-container');
+      if (prodSec) prodSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      this.selectedBusiness = 'todos';
+      this.currentCategory = id;
+      this.renderStories();
+      this.renderProducts();
+      const prodSec = document.getElementById('products-section-container');
+      if (prodSec) prodSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  toggleSideMenu() {
+    const drawer = document.getElementById('side-menu-drawer');
+    if (drawer) {
+      drawer.classList.toggle('active');
+    }
+  }
+
+  openProfileModal() {
+    this.openModal('profile-modal');
+  }
+
+  openFavorites() {
+    if (this.favorites && this.favorites.length > 0) {
+      this.currentCategory = 'favoritos';
+      this.selectedBusiness = 'todos';
+      this.renderProducts();
+      this.showToast(`Mostrando tus ${this.favorites.length} favoritos ❤️`, 'gold');
+    } else {
+      this.showToast('¡Toca el corazón en cualquier delicia para guardarla en Favoritos! 🔖', 'gold');
+    }
+  }
+
+  focusSearch() {
+    const searchInput = document.getElementById('main-search-input');
+    if (searchInput) {
+      searchInput.focus();
+      searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  goHome() {
+    this.setBusiness('todos');
+    this.setCategory('todos');
+    this.searchQuery = '';
+    const input = document.getElementById('main-search-input');
+    if (input) input.value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  showAllStores() {
+    this.setBusiness('todos');
+    const cafSec = document.getElementById('cafeterias-section') || document.querySelector('.cafeterias-god-section');
+    if (cafSec) cafSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  filterCafeterias() {
+    this.showAllStores();
+  }
+
+  switchDeliveryType(type) {
+    window.cartManager.setDeliveryType(type);
+    document.querySelectorAll('.side-delivery-tab, .delivery-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.type === type);
+    });
+    this.showToast(type === 'delivery' ? '🛵 Modo: Envío a domicilio por vendedor' : '🏪 Modo: Retiro en local', 'gold');
   }
 
   renderFilterChips() {
@@ -459,10 +575,10 @@ class DulceAtelierApp {
 
     if (businesses.length === 0) {
       container.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: var(--text-muted);">
-          <p>No se encontraron pastelerías con este filtro.</p>
+        <div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: var(--cream-muted);">
+          <p>No se encontraron cafeterías con este filtro.</p>
           <button class="btn-primary" onclick="window.app.setFilter('all')" style="margin: 10px auto 0; max-width: 180px; padding: 6px 14px; font-size: 0.8rem;">
-            Ver todas las pastelerías
+            Ver todas las cafeterías
           </button>
         </div>
       `;
@@ -470,32 +586,17 @@ class DulceAtelierApp {
     }
 
     container.innerHTML = businesses.map(b => `
-      <div class="store-card-py animate-fade" onclick="window.app.setBusiness('${b.id}')">
-        <div class="store-card-cover-wrap">
-          <img class="store-card-cover-img" src="${b.cover || 'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=800&q=80'}" alt="${this.escapeHTML(b.name)}" loading="lazy">
-          <span class="store-card-badge-open">🟢 Abierto</span>
-          ${b.badge ? `<span class="store-card-badge-promo">${this.escapeHTML(b.badge)}</span>` : ''}
-          <div class="store-card-avatar-floating">${b.avatar}</div>
+      <div class="cafeteria-god-card" onclick="window.app.setBusiness('${b.id}')" title="Ver menú de ${this.escapeHTML(b.name)}">
+        <div class="cafeteria-card-img-wrap">
+          <img class="cafeteria-card-img" src="${b.cover || 'assets/images/lumiere_cafe.jpg'}" alt="${this.escapeHTML(b.name)}" loading="lazy">
         </div>
-        <div class="store-card-body">
-          <div class="store-card-name-row">
-            <h4 class="store-card-name">
-              ${this.escapeHTML(b.name)}
-              <span class="store-card-verified" title="Pastelería Oficial Verificada">✔</span>
-            </h4>
-            <span class="store-card-rating">⭐ ${b.rating} (${b.reviews})</span>
-          </div>
-          <p class="store-card-tagline">${this.escapeHTML(b.tagline)}</p>
-          
-          <div class="store-vendor-shipping-badge">
-            <span>🛵</span>
-            <span>Envío por el vendedor: <strong>${window.cartManager.formatCurrency(b.deliveryFee)}</strong> • ${b.deliveryTime}</span>
-          </div>
-
-          <div class="store-card-meta-row">
-            <span>📍 ${this.escapeHTML(b.neighborhood)} (${b.distance})</span>
-            <span>•</span>
-            <span style="color: var(--primary); font-weight: 700;">Ver menú completo →</span>
+        <div class="cafeteria-card-body">
+          <h4 class="cafeteria-card-title">${this.escapeHTML(b.name)}</h4>
+          <p class="cafeteria-card-sub">${this.escapeHTML(b.tagline)}</p>
+          <div class="cafeteria-card-meta">
+            <span class="star-gold">★ ${b.rating}</span>
+            <span>·</span>
+            <span>${b.distance}</span>
           </div>
         </div>
       </div>
@@ -928,6 +1029,12 @@ class DulceAtelierApp {
     if (headerBadge) {
       headerBadge.textContent = count;
       headerBadge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+
+    const headerBagBadge = document.getElementById('header-bag-badge');
+    if (headerBagBadge) {
+      headerBagBadge.textContent = count;
+      headerBagBadge.style.display = count > 0 ? 'flex' : 'none';
     }
 
     // Drawer de Carrito
