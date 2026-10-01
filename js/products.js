@@ -333,7 +333,7 @@ const INITIAL_PRODUCTS = [
     rating: 5.0,
     reviews: 148,
     description: "Bandeja artesanal con mini tarta de frutos rojos, sándwich de jamón crudo y queso brie en pan brioche, 2 medialunas de manteca, jugo de naranja recién exprimido, alfajor de almendras y taza de cerámica de regalo.",
-    image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80",
+    image: "assets/images/dulce_atelier.jpg",
     portion: "Para 1 o 2 personas",
     featured: true
   },
@@ -391,7 +391,7 @@ const INITIAL_PRODUCTS = [
     rating: 5.0,
     reviews: 210,
     description: "2 Croissants de pura manteca francesa recién horneados, 1 pain au chocolat relleno con chocolate semiamargo, manteca de campo, mermelada artesanal de damasco y café flat white espumoso.",
-    image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=80",
+    image: "assets/images/la_petite_croissant.jpg",
     portion: "Para 1 o 2 personas",
     featured: true
   },
@@ -449,7 +449,7 @@ const INITIAL_PRODUCTS = [
     rating: 4.9,
     reviews: 167,
     description: "Tostón de masa madre de centeno con palta pisada al limón, huevo poché y lluvia de semillas tostadas, bowl de yogur natural cremoso con granola horneada y frutas de estación + cold brew infusionado 18hs.",
-    image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80",
+    image: "assets/images/cafe_botanica.jpg",
     portion: "Brunch abundante (1 a 2 pers.)",
     featured: true
   },
@@ -565,7 +565,7 @@ const INITIAL_PRODUCTS = [
     rating: 4.9,
     reviews: 140,
     description: "Mini bundt cake Red Velvet con frosting de queso crema Philadelphia, 1 cookie XL recién horneada con centro fundido de Nutella, sándwich tostado de queso gouda y café mocha con cacao.",
-    image: "https://images.unsplash.com/photo-1586788680434-30d324b2d46f?auto=format&fit=crop&w=800&q=80",
+    image: "assets/images/velvet_bakery.jpg",
     portion: "Para 1 o 2 personas",
     featured: true
   },
@@ -726,8 +726,8 @@ const INITIAL_PRODUCTS = [
 // ============================================================================
 // 3. STORAGE & GESTOR DEL MARKETPLACE
 // ============================================================================
-const STORAGE_KEY_PRODUCTS = 'godmarket_products_v9';
-const STORAGE_KEY_BUSINESSES = 'godmarket_businesses_v9';
+const STORAGE_KEY_PRODUCTS = 'godmarket_products_v10';
+const STORAGE_KEY_BUSINESSES = 'godmarket_businesses_v10';
 
 class ProductManager {
   constructor() {
