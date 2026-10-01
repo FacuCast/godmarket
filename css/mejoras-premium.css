@@ -1057,18 +1057,18 @@ img {
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   height: 64px;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid var(--border-light);
+  background: rgba(5, 22, 16, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
   display: flex;
   align-items: center;
   justify-content: space-around;
   z-index: 1000;
   padding: 4px 6px max(6px, env(safe-area-inset-bottom));
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.55);
 }
 
 .nav-item {
@@ -1079,7 +1079,7 @@ img {
   gap: 3px;
   background: none;
   border: none;
-  color: var(--text-secondary);
+  color: #7D978C;
   font-size: 0.68rem;
   font-weight: 600;
   cursor: pointer;
@@ -1095,7 +1095,7 @@ img {
 }
 
 .nav-item.active {
-  color: var(--primary);
+  color: #D4AF37;
   font-weight: 700;
 }
 
@@ -1110,6 +1110,7 @@ img {
 .nav-item.active .nav-icon {
   transform: translateY(-2px);
   transition: transform 0.2s ease;
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.4));
 }
 
 /* ── Sticky Floating Cart Bar (Above Bottom Nav) ───────────── */
@@ -1120,14 +1121,16 @@ img {
   transform: translateX(-50%);
   width: calc(100% - 32px);
   max-width: 448px;
-  background: var(--primary-gradient);
-  color: #fff;
+  background: linear-gradient(135deg, #D4AF37 0%, #AA822A 100%);
+  color: #051610;
+  font-weight: 700;
   border-radius: var(--radius-md);
   padding: 12px 18px;
   display: none;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 8px 24px rgba(217, 83, 111, 0.38);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 16px rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   z-index: 999;
   cursor: pointer;
   animation: cartFloatBounce 0.35s cubic-bezier(0.16, 1, 0.3, 1);
