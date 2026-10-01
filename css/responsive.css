@@ -298,7 +298,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   3. Smart TV / Ultra-Wide 4K Screens (min-width: 1440px)
+   3. Smart TV / Ultra-Wide Displays (min-width: 1440px)
    -------------------------------------------------------------------------- */
 @media (min-width: 1440px) {
   .app-container {
@@ -328,5 +328,143 @@
 
   .products-grid {
     gap: 26px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Ultra-Wide & 4K Smart TVs (min-width: 1920px)
+   - Optimizado para visualización a distancia (living room / TV remotes)
+   - Targets de clic amplios y legibilidad cinematográfica
+   -------------------------------------------------------------------------- */
+@media (min-width: 1920px) {
+  .app-container {
+    max-width: 1680px;
+    padding: 0 40px 100px;
+  }
+
+  .app-header {
+    padding: 18px 36px;
+    margin: 20px 0 32px;
+    border-radius: 24px;
+  }
+
+  .brand-god {
+    font-size: 1.85rem;
+  }
+
+  .brand-market {
+    font-size: 0.68rem;
+  }
+
+  .desktop-nav-link {
+    font-size: 0.98rem;
+    padding: 10px 18px;
+  }
+
+  .desktop-location-pill {
+    font-size: 0.9rem;
+    padding: 10px 18px;
+  }
+
+  .hero-banner-god {
+    min-height: 480px;
+    padding: 68px 60px 52px;
+    border-radius: 34px;
+  }
+
+  .hero-god-title {
+    font-size: 4.2rem;
+    line-height: 1.08;
+    margin-bottom: 16px;
+  }
+
+  .hero-god-sub {
+    font-size: 1.35rem;
+    max-width: 720px;
+  }
+
+  .search-god-wrapper {
+    max-width: 680px;
+    margin-bottom: 36px;
+  }
+
+  .search-god-capsule {
+    padding: 10px 14px 10px 22px;
+  }
+
+  .search-god-input {
+    font-size: 1rem;
+  }
+
+  .stories-section {
+    margin-bottom: 40px;
+  }
+
+  .stories-slider {
+    gap: 32px;
+  }
+
+  .story-ring {
+    width: 78px;
+    height: 78px;
+  }
+
+  .story-avatar-inner svg {
+    width: 34px;
+    height: 34px;
+  }
+
+  .story-label {
+    font-size: 0.92rem;
+  }
+
+  .section-title-god {
+    font-size: 1.95rem;
+  }
+
+  .cafeterias-slider {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+  }
+
+  .cafeteria-card-img-wrap {
+    height: 185px;
+  }
+
+  .cafeteria-card-title {
+    font-size: 1.15rem;
+  }
+
+  .cafeteria-card-sub {
+    font-size: 0.88rem;
+  }
+
+  .cafeteria-card-meta {
+    font-size: 0.85rem;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+  }
+
+  .product-title {
+    font-size: 1.1rem;
+  }
+
+  .product-price {
+    font-size: 1.35rem;
+  }
+
+  /* Remote Control / Keyboard Focus Ring for Smart TVs */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  .cafeteria-god-card:focus-visible,
+  .product-card:focus-visible,
+  .story-bubble:focus-visible {
+    outline: 3px solid #D4AF37 !important;
+    outline-offset: 4px !important;
+    box-shadow: 0 0 24px rgba(212, 175, 55, 0.6) !important;
   }
 }

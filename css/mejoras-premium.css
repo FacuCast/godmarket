@@ -344,12 +344,13 @@ img {
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: #fff;
+  background: #0A2219;
+  border: 1.5px solid rgba(212, 175, 55, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.7rem;
-  box-shadow: 0 4px 12px rgba(217, 83, 111, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   flex-shrink: 0;
 }
 
@@ -693,37 +694,49 @@ img {
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  padding: 2.5px;
-  background: linear-gradient(45deg, #F4A261, #D9536F, #81B29A);
+  padding: 0;
+  background: #0A2219;
+  border: 1.5px solid rgba(212, 175, 55, 0.38);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(217, 83, 111, 0.18);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.story-bubble.active .story-ring {
-  background: var(--primary);
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--primary);
+.story-bubble.active .story-ring,
+.story-bubble:hover .story-ring {
+  border-color: #D4AF37;
+  background: rgba(212, 175, 55, 0.18);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2), 0 6px 18px rgba(212, 175, 55, 0.25);
+  transform: translateY(-2px);
 }
 
 .story-avatar-inner {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #fff;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.6rem;
-  border: 2px solid #fff;
+  font-size: 1.4rem;
+  border: none;
   overflow: hidden;
+  color: #D4AF37;
+}
+
+.story-avatar-inner svg {
+  width: 24px;
+  height: 24px;
+  stroke: #D4AF37;
+  stroke-width: 1.6;
 }
 
 .story-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--text-main);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #CBD8D1;
   line-height: 1.15;
   white-space: nowrap;
   overflow: hidden;
@@ -732,7 +745,8 @@ img {
 }
 
 .story-bubble.active .story-label {
-  color: var(--primary);
+  color: #D4AF37;
+  font-weight: 700;
 }
 
 /* ── PedidosYa Quick Filter Chips ──────────────────────────── */
@@ -877,13 +891,13 @@ img {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: #fff;
-  border: 2px solid #fff;
+  background: #0A2219;
+  border: 1.5px solid rgba(212, 175, 55, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.14);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
   z-index: 2;
 }
 
@@ -989,13 +1003,13 @@ img {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: #fff;
-  border: 3px solid #fff;
+  background: #0A2219;
+  border: 2px solid rgba(212, 175, 55, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2rem;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.14);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
 }
 
 .store-profile-header-actions {
