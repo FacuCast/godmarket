@@ -6,348 +6,679 @@
 /* --------------------------------------------------------------------------
    1. Header & Location Bar — GOD MARKET Dark Luxury
    -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
+   1. Header — GOD MARKET Mobile & Desktop Luxury Bar
+   -------------------------------------------------------------------------- */
 .app-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(10, 25, 16, 0.92);
+  background: rgba(5, 22, 16, 0.94);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--green-border);
-  padding: 10px 16px;
-  transition: all var(--transition-fast);
-}
-
-.header-top {
+  border-bottom: 1px solid rgba(212, 175, 55, 0.14);
+  padding: 12px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
-}
-
-/* Logo GOD MARKET */
-.brand-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.brand-logo {
-  width: 44px;
-  height: 44px;
-  background: transparent;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6rem;
-}
-
-.brand-logo img {
-  width: 44px;
-  height: 44px;
-  object-fit: contain;
-  border-radius: var(--radius-sm);
-}
-
-.brand-info h1 {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.3rem;
-  line-height: 1;
-  letter-spacing: 0.08em;
-  color: var(--primary);
-  text-transform: uppercase;
-}
-
-.brand-info span {
-  font-size: 0.6rem;
-  color: var(--cream-muted);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.icon-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-full);
-  background: var(--white-glass);
-  color: var(--cream-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.05rem;
   transition: all var(--transition-fast);
-  border: 1px solid var(--green-border);
 }
 
-.icon-btn:active { transform: scale(0.92); }
-
-.icon-btn:hover {
-  background: var(--primary-light);
-  border-color: var(--primary);
-  color: var(--primary);
+/* Hamburger button (Mobile) */
+.hamburger-menu-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  padding: 8px 6px;
+  cursor: pointer;
+  z-index: 10;
 }
 
-/* Location Bar */
-.top-location-bar {
+.hamburger-menu-btn span {
+  display: block;
+  height: 2px;
+  background: #D4AF37;
+  border-radius: 2px;
+  transition: all 0.25s ease;
+}
+
+.hamburger-menu-btn span:nth-child(1) { width: 22px; }
+.hamburger-menu-btn span:nth-child(2) { width: 17px; }
+.hamburger-menu-btn span:nth-child(3) { width: 22px; }
+
+.hamburger-menu-btn:hover span {
+  background: #F5DFAC;
+}
+
+/* Brand GOD MARKET */
+.brand-godmarket {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+
+.brand-godmarket:active {
+  transform: scale(0.96);
+}
+
+.brand-god {
+  font-family: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  color: #D4AF37;
+  background: linear-gradient(180deg, #F8E5B8 0%, #D4AF37 55%, #A8812E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: block;
+}
+
+.brand-market {
+  font-family: 'Outfit', -apple-system, sans-serif;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  line-height: 1;
+  color: #C8A663;
+  display: block;
+  margin-top: 2px;
+  text-indent: 0.42em;
+}
+
+/* Header Shopping Bag Button with Badge */
+.header-bag-btn {
+  width: 40px;
+  height: 40px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  background: transparent;
+  border: none;
+  color: #D4AF37;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.header-bag-btn:hover {
+  transform: scale(1.08);
+}
+
+.bag-badge {
+  position: absolute;
+  top: 1px;
+  right: -2px;
+  min-width: 17px;
+  height: 17px;
+  background: #D4AF37;
+  color: #051610;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  line-height: 1;
+}
+
+/* Desktop nav links & actions (hidden by default on mobile) */
+.desktop-nav-links,
+.desktop-header-actions {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Side Menu Drawer (Opened by Hamburger)
+   -------------------------------------------------------------------------- */
+.side-drawer-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(3, 12, 9, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.side-drawer-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.side-drawer {
+  position: absolute;
+  top: 0; left: 0;
+  width: 82%;
+  max-width: 340px;
+  height: 100%;
+  background: #081E16;
+  border-right: 1px solid rgba(212, 175, 55, 0.22);
+  box-shadow: 16px 0 48px rgba(0,0,0,0.7);
+  transform: translateX(-100%);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 24px 20px;
+}
+
+.side-drawer-overlay.active .side-drawer {
+  transform: translateX(0);
+}
+
+.side-drawer-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 7px 10px;
-  background: rgba(201,168,76,0.07);
-  border: 1px solid var(--green-border);
-  border-radius: var(--radius-sm);
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
+  margin-bottom: 22px;
 }
 
-.top-location-bar:hover {
-  background: rgba(201,168,76,0.12);
-}
-
-.location-info-group {
+.side-drawer-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  color: var(--cream-muted);
   display: flex;
   align-items: center;
-  gap: 7px;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.location-pin-icon { font-size: 0.9rem; }
+.side-drawer-close:hover {
+  background: rgba(212, 175, 55, 0.15);
+  color: #D4AF37;
+}
 
-.location-text-col {
+.side-drawer-location {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: var(--radius-sm);
+  margin-bottom: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.side-drawer-location:hover {
+  background: rgba(212, 175, 55, 0.14);
+  border-color: #D4AF37;
+}
+
+.side-drawer-loc-text {
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.location-label {
-  font-size: 0.6rem;
-  color: var(--text-muted);
+.side-drawer-loc-sub {
+  font-size: 0.62rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #8FA89D;
 }
 
-.location-current-address {
-  font-size: 0.8rem;
+.side-drawer-loc-val {
+  font-size: 0.84rem;
   font-weight: 700;
   color: var(--cream);
+}
+
+.side-chevron {
+  color: #D4AF37;
+  font-size: 0.95rem;
+}
+
+.side-delivery-switcher {
   display: flex;
-  align-items: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 9999px;
+  padding: 3px;
+  margin-bottom: 20px;
+}
+
+.side-delivery-tab {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cream-muted);
+  border-radius: 9999px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.side-delivery-tab.active {
+  background: var(--primary-gradient);
+  color: #051610;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.side-drawer-nav {
+  display: flex;
+  flex-direction: column;
   gap: 4px;
 }
 
-.location-chevron {
-  font-size: 0.65rem;
-  color: var(--primary);
-}
-
-/* Delivery Switcher */
-.delivery-switcher {
-  display: flex;
-  background: rgba(255,255,255,0.04);
-  padding: 3px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--green-border);
-  margin-bottom: 10px;
-}
-
-.delivery-tab {
-  flex: 1;
-  text-align: center;
-  padding: 6px 10px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  border-radius: var(--radius-full);
-  transition: all var(--transition-fast);
+.side-nav-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--cream);
+  font-size: 0.88rem;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
 }
 
-.delivery-tab.active {
-  background: var(--primary-gradient);
-  color: var(--green-deep);
-  box-shadow: 0 2px 12px rgba(201,168,76,0.3);
+.side-nav-item i,
+.side-nav-item svg {
+  width: 18px;
+  height: 18px;
+  color: #D4AF37;
+}
+
+.side-nav-item:hover,
+.side-nav-item.active {
+  background: rgba(212, 175, 55, 0.12);
+  color: #D4AF37;
   font-weight: 700;
 }
 
-/* Search Bar */
-.search-wrapper {
-  position: relative;
-  width: 100%;
+.side-drawer-divider {
+  height: 1px;
+  background: rgba(212, 175, 55, 0.15);
+  margin: 18px 0;
 }
 
-.search-input {
-  width: 100%;
-  padding: 11px 14px 11px 40px;
-  background: rgba(255,255,255,0.06);
-  border-radius: var(--radius-full);
-  border: 1px solid var(--green-border);
-  font-size: 0.85rem;
+.side-drawer-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.side-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(212, 175, 55, 0.15);
   color: var(--cream);
-  transition: all var(--transition-fast);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.side-action-btn:hover {
+  background: rgba(212, 175, 55, 0.14);
+  border-color: #D4AF37;
+  color: #D4AF37;
+}
+
+.side-action-btn.whatsapp-highlight {
+  background: rgba(37, 211, 102, 0.12);
+  border-color: rgba(37, 211, 102, 0.3);
+  color: #4ADE80;
+}
+
+.side-drawer-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  font-size: 0.72rem;
+  color: #7D978C;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Hero Featured Card ("Desayunos premium, cerca tuyo.")
+   -------------------------------------------------------------------------- */
+.hero-banner-god {
+  margin: 10px 16px 18px;
+  border-radius: 22px;
+  min-height: 275px;
+  background:
+    linear-gradient(180deg, rgba(5, 22, 16, 0.52) 0%, rgba(5, 22, 16, 0.15) 35%, rgba(5, 22, 16, 0.92) 100%),
+    url('../assets/images/hero_breakfast.jpg') center/cover no-repeat;
+  position: relative;
+  overflow: hidden;
+  padding: 24px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(212, 175, 55, 0.18);
+}
+
+.hero-god-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.95rem;
+  font-weight: 700;
+  color: #FAF6F0;
+  line-height: 1.15;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.75);
+}
+
+.hero-god-sub {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
+  color: #CBD8D1;
+  line-height: 1.35;
+  max-width: 90%;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
+}
+
+/* --------------------------------------------------------------------------
+   3. Search Bar Capsule (Directly below hero)
+   -------------------------------------------------------------------------- */
+.search-god-wrapper {
+  padding: 0 16px;
+  margin-bottom: 22px;
+}
+
+.search-god-capsule {
+  display: flex;
+  align-items: center;
+  background: rgba(10, 34, 25, 0.92);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 9999px;
+  padding: 7px 10px 7px 18px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  transition: all 0.25s ease;
+}
+
+.search-god-capsule:focus-within {
+  border-color: #D4AF37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18), 0 8px 24px rgba(0, 0, 0, 0.35);
+  background: rgba(13, 42, 31, 0.96);
+}
+
+.search-god-icon {
+  color: #8FA89D;
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+}
+
+.search-god-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.88rem;
+  color: #FAF6F0;
   font-family: 'Outfit', sans-serif;
 }
 
-.search-input::placeholder {
-  color: rgba(212,201,176,0.4);
+.search-god-input::placeholder {
+  color: #7D978C;
 }
 
-.search-input:focus {
-  background: rgba(201,168,76,0.07);
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
-}
-
-.search-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  pointer-events: none;
-}
-
-.search-clear {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  padding: 4px;
-  display: none;
+.search-god-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: #D4AF37;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-god-btn:hover {
+  background: rgba(212, 175, 55, 0.15);
+  transform: translateX(2px);
 }
 
 /* --------------------------------------------------------------------------
-   2. Promo Banner — Gold on Dark
-   -------------------------------------------------------------------------- */
-.promo-banner {
-  margin: 14px 16px 20px;
-  background:
-    linear-gradient(135deg, rgba(201,168,76,0.14) 0%, rgba(27,58,45,0.9) 60%),
-    linear-gradient(180deg, var(--green-dark) 0%, var(--green-deep) 100%);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--green-border);
-  padding: 20px 18px 18px;
-  color: var(--cream);
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(201,168,76,0.15);
-}
-
-.promo-banner::before {
-  content: '';
-  position: absolute;
-  top: -40%;
-  right: -10%;
-  width: 220px;
-  height: 220px;
-  background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.promo-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--primary-gradient);
-  color: var(--green-deep);
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 10px;
-}
-
-.promo-banner h2 {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.5rem;
-  color: var(--cream);
-  margin-bottom: 6px;
-  line-height: 1.2;
-}
-
-.promo-banner p {
-  font-size: 0.8rem;
-  color: var(--cream-muted);
-  margin-bottom: 14px;
-  max-width: 85%;
-  line-height: 1.45;
-}
-
-.promo-btn {
-  background: var(--primary-gradient);
-  color: var(--green-deep);
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 8px 18px;
-  border-radius: var(--radius-full);
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  transition: all var(--transition-fast);
-  box-shadow: 0 4px 16px rgba(201,168,76,0.25);
-}
-
-.promo-btn:hover {
-  box-shadow: 0 6px 24px rgba(201,168,76,0.35);
-  transform: translateY(-1px);
-}
-
-/* --------------------------------------------------------------------------
-   3. Stories / Category Circles
+   4. Category Circles Row (Horizontal scroll)
    -------------------------------------------------------------------------- */
 .stories-section {
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 24px;
 }
 
 .stories-slider {
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  padding: 10px 16px 14px;
+  padding: 4px 16px 8px;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
 .stories-slider::-webkit-scrollbar { display: none; }
 
-.categories-slider {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding: 0 16px 8px;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  margin-bottom: 18px;
-}
-
-.categories-slider::-webkit-scrollbar { display: none; }
-
-.category-item {
+.story-bubble {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
-  min-width: 68px;
+  gap: 8px;
+  min-width: 66px;
   cursor: pointer;
-  transition: transform var(--transition-fast);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.story-bubble:active {
+  transform: scale(0.92);
+}
+
+.story-ring {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #0A2219;
+  border: 1.5px solid rgba(212, 175, 55, 0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  transition: all 0.25s ease;
+}
+
+.story-bubble:hover .story-ring,
+.story-bubble.active .story-ring {
+  border-color: #D4AF37;
+  background: rgba(212, 175, 55, 0.18);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2), 0 6px 18px rgba(212, 175, 55, 0.25);
+  transform: translateY(-2px);
+}
+
+.story-avatar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #D4AF37;
+}
+
+.story-avatar-inner svg {
+  width: 24px;
+  height: 24px;
+  stroke: #D4AF37;
+  stroke-width: 1.6;
+}
+
+.story-label {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: #CBD8D1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.story-bubble.active .story-label {
+  color: #D4AF37;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   5. Cafeterías Destacadas (Cards with swipe / grid)
+   -------------------------------------------------------------------------- */
+.cafeterias-god-section {
+  padding: 0 16px;
+  margin-bottom: 28px;
+}
+
+.cafeterias-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.section-title-god {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #FAF6F0;
+  letter-spacing: 0.01em;
+}
+
+.see-all-god {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #9DB4A9;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.see-all-god:hover {
+  color: #D4AF37;
+}
+
+.cafeterias-slider {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x mandatory;
+}
+
+.cafeterias-slider::-webkit-scrollbar { display: none; }
+
+.cafeteria-god-card {
+  min-width: 215px;
+  max-width: 215px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  background: #0A2219;
+  border-radius: 18px;
+  border: 1px solid rgba(212, 175, 55, 0.16);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.cafeteria-god-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(212, 175, 55, 0.45);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(212, 175, 55, 0.2);
+}
+
+.cafeteria-card-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  overflow: hidden;
+  background: #102B21;
+}
+
+.cafeteria-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.cafeteria-god-card:hover .cafeteria-card-img {
+  transform: scale(1.06);
+}
+
+.cafeteria-card-body {
+  padding: 12px 14px 14px;
+}
+
+.cafeteria-card-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FAF6F0;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cafeteria-card-sub {
+  font-size: 0.76rem;
+  color: #8FA89D;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cafeteria-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  color: #CBD8D1;
+}
+
+.star-gold {
+  color: #D4AF37;
+  font-weight: 700;
+}
 }
 
 .category-item:active { transform: scale(0.92); }
