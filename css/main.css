@@ -4,28 +4,28 @@
    Colores profundos, detalles dorados y fotografía de alta calidad.
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* ── Brand Palette GOD MARKET ── */
-  --primary: #C9A84C;               /* Gold principal */
-  --primary-hover: #B8963C;
-  --primary-light: rgba(201,168,76,0.12);
-  --primary-gradient: linear-gradient(135deg, #D4B86A 0%, #C9A84C 50%, #A8893A 100%);
-  --gold-shine: linear-gradient(90deg, #C9A84C, #F0D080, #C9A84C);
+  /* ── Brand Palette GOD MARKET (Luxury Dark Forest Emerald & Pure Gold) ── */
+  --primary: #D4AF37;               /* Classic Roman Gold */
+  --primary-hover: #E5C365;
+  --primary-light: rgba(212, 175, 55, 0.12);
+  --primary-gradient: linear-gradient(135deg, #F5DFAC 0%, #D4AF37 50%, #9F7624 100%);
+  --gold-shine: linear-gradient(90deg, #D4AF37, #FFF0BE, #D4AF37);
 
-  --green-deep: #0F2318;            /* Fondo oscuro principal */
-  --green-dark: #152B1E;
-  --green-mid: #1B3A2D;
-  --green-card: #1E3D2F;
-  --green-surface: #243B2E;
-  --green-border: rgba(201,168,76,0.18);
-  --green-border-subtle: rgba(255,255,255,0.06);
+  --green-deep: #051610;            /* Background canvas */
+  --green-dark: #081E16;            /* Header / navigation */
+  --green-mid: #0D271E;             /* Surfaces */
+  --green-card: #0A2219;            /* Cards surface */
+  --green-surface: #102C21;
+  --green-border: rgba(212, 175, 55, 0.20);
+  --green-border-subtle: rgba(255, 255, 255, 0.08);
 
-  --cream: #F5F0E8;
-  --cream-muted: #D4C9B0;
-  --cream-subtle: rgba(245,240,232,0.65);
-  --white-glass: rgba(255,255,255,0.05);
+  --cream: #FAF6F0;                 /* Ivory White */
+  --cream-muted: #CBD8D1;           /* Soft Sage */
+  --cream-subtle: rgba(250, 246, 240, 0.65);
+  --white-glass: rgba(255, 255, 255, 0.05);
 
   /* ── Legacy aliases (keep JS compatibility) ── */
   --bg-app: var(--green-deep);

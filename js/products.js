@@ -8,6 +8,52 @@
 // ============================================================================
 const INITIAL_BUSINESSES = [
   {
+    id: "lumiere-cafe",
+    name: "Lumière Café",
+    tagline: "Desayunos premium",
+    neighborhood: "Palermo Soho",
+    rating: 4.8,
+    reviews: 240,
+    deliveryTime: "25-40 min",
+    deliveryFee: 1400,
+    freeShippingFrom: 42000,
+    shippingType: "Envío propio del vendedor",
+    shippingNote: "Cadete exclusivo en moto térmica",
+    distance: "1.2 km",
+    isOpen: true,
+    schedule: "08:00 - 20:00 hs",
+    avatar: "☕",
+    badge: "⭐ Destacado",
+    cover: "assets/images/lumiere_cafe.jpg",
+    phone: "5491156192616",
+    address: "Gorriti 4870, Palermo",
+    verified: true,
+    description: "Cafetería de especialidad, tostadas de masa madre con palta y huevo poché, lattes de autor y desayunos premium."
+  },
+  {
+    id: "brew-and-co",
+    name: "Brew & Co.",
+    tagline: "Especialidad en café",
+    neighborhood: "Recoleta",
+    rating: 4.7,
+    reviews: 198,
+    deliveryTime: "30-45 min",
+    deliveryFee: 1500,
+    freeShippingFrom: 45000,
+    shippingType: "Envío propio del vendedor",
+    shippingNote: "Despacho exprés con packaging térmico",
+    distance: "2.4 km",
+    isOpen: true,
+    schedule: "08:30 - 20:30 hs",
+    avatar: "☕",
+    badge: "🔥 Roastery",
+    cover: "assets/images/brew_and_co.jpg",
+    phone: "5491156192616",
+    address: "Junín 1420, Recoleta",
+    verified: true,
+    description: "Tostadores de café de origen, flat white, filtrados V60 y meriendas artesanales con pastelería recién horneada."
+  },
+  {
     id: "dulce-atelier",
     name: "Dulce Atelier",
     tagline: "Pastelería de Autor & Boxes Románticos",
@@ -171,11 +217,107 @@ const INITIAL_BUSINESSES = [
 ];
 
 // ============================================================================
-// 2. CATÁLOGO INICIAL DE DESAYUNOS Y MERIENDAS DE LOS 7 NEGOCIOS
+// 2. CATÁLOGO INICIAL DE DESAYUNOS Y MERIENDAS DE LOS NEGOCIOS
 // ============================================================================
 const INITIAL_PRODUCTS = [
   // --------------------------------------------------------------------------
-  // NEGOCIO 1: DULCE ATELIER (Palermo)
+  // NEGOCIO 1: LUMIÈRE CAFÉ (Palermo Soho)
+  // --------------------------------------------------------------------------
+  {
+    id: "lc-toston-palta-huevo",
+    businessId: "lumiere-cafe",
+    businessName: "Lumière Café",
+    businessNeighborhood: "Palermo Soho",
+    businessAvatar: "🥑",
+    name: "Tostón de Masa Madre con Palta & Huevo Poché",
+    category: "desayunos",
+    categoryName: "Desayunos Premium",
+    price: 12500,
+    tag: "🥑 Firma Lumière",
+    rating: 5.0,
+    reviews: 164,
+    description: "Rebanada gruesa de pan de masa madre tostado, crema de palta hass macerada con lima, huevo poché de campo con yema cremosa, tomates cherry confitados y mix de semillas tostadas.",
+    image: "assets/images/hero_breakfast.jpg",
+    portion: "Para 1 persona",
+    featured: true
+  },
+  {
+    id: "lc-brunch-completo",
+    businessId: "lumiere-cafe",
+    businessName: "Lumière Café",
+    businessNeighborhood: "Palermo Soho",
+    businessAvatar: "☕",
+    name: "Brunch Completo Lumière (Tostón + Flat White + Jugo)",
+    category: "brunch",
+    categoryName: "Brunch & Especiales",
+    price: 24800,
+    tag: "⭐ Experiencia Completa",
+    rating: 4.9,
+    reviews: 132,
+    description: "Tostón de palta y huevo poché, croissant tibio con almendras, café Flat White doble shot de origen Colombia y jugo natural exprimido de naranja.",
+    image: "assets/images/hero_breakfast.jpg",
+    portion: "Para 1 o 2 personas",
+    featured: true
+  },
+  {
+    id: "lc-flat-white-arte",
+    businessId: "lumiere-cafe",
+    businessName: "Lumière Café",
+    businessNeighborhood: "Palermo Soho",
+    businessAvatar: "☕",
+    name: "Flat White Doble Shot con Arte Latte",
+    category: "meriendas",
+    categoryName: "Cafetería de Especialidad",
+    price: 5200,
+    tag: "☕ Especialidad",
+    rating: 5.0,
+    reviews: 210,
+    description: "Doble espresso extraído con granos de especialidad tostados artesanalmente, leche texturizada sedosa y arte barista.",
+    image: "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=800&q=80",
+    portion: "Taza de cerámica",
+    featured: true
+  },
+  // --------------------------------------------------------------------------
+  // NEGOCIO 2: BREW & CO. (Recoleta)
+  // --------------------------------------------------------------------------
+  {
+    id: "bc-combo-roastery",
+    businessId: "brew-and-co",
+    businessName: "Brew & Co.",
+    businessNeighborhood: "Recoleta",
+    businessAvatar: "☕",
+    name: "Combo Roastery: Capuchino & Cookie XL Fundida",
+    category: "meriendas",
+    categoryName: "Café & Bakery",
+    price: 9200,
+    tag: "🔥 Lo más pedido",
+    rating: 4.8,
+    reviews: 97,
+    description: "Capuchino cremoso con canela en polvo acompañado de nuestra cookie artesanal de chocolate belga con centro suave fundido.",
+    image: "assets/images/brew_and_co.jpg",
+    portion: "Para 1 persona",
+    featured: true
+  },
+  {
+    id: "bc-cold-brew-toast",
+    businessId: "brew-and-co",
+    businessName: "Brew & Co.",
+    businessNeighborhood: "Recoleta",
+    businessAvatar: "🥪",
+    name: "Cold Brew de Origen & Tostón con Salmón Ahumado",
+    category: "desayunos",
+    categoryName: "Desayunos Gourmet",
+    price: 22000,
+    tag: "🌿 Healthy Gourmet",
+    rating: 4.9,
+    reviews: 84,
+    description: "Café infusionado en frío durante 18 horas, servido con tostón de centeno, queso brie, finas láminas de salmón ahumado y eneldo fresco.",
+    image: "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=800&q=80",
+    portion: "Para 1 persona",
+    featured: true
+  },
+  // --------------------------------------------------------------------------
+  // NEGOCIO 3: DULCE ATELIER (Palermo)
   // --------------------------------------------------------------------------
   {
     id: "da-desayuno-amour-deluxe",
@@ -584,8 +726,8 @@ const INITIAL_PRODUCTS = [
 // ============================================================================
 // 3. STORAGE & GESTOR DEL MARKETPLACE
 // ============================================================================
-const STORAGE_KEY_PRODUCTS = 'dulce_marketplace_products_v6';
-const STORAGE_KEY_BUSINESSES = 'dulce_marketplace_businesses_v6';
+const STORAGE_KEY_PRODUCTS = 'godmarket_products_v9';
+const STORAGE_KEY_BUSINESSES = 'godmarket_businesses_v9';
 
 class ProductManager {
   constructor() {
