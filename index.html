@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Dulce Market | Marketplace de Desayunos & Meriendas de 7 Pastelerías</title>
+  <title>GOD MARKET | Food · Coffee · Healthy — Lo mejor de cada cafetería</title>
   <meta name="description"
-    content="El Marketplace de las mejores pastelerías y cafeterías de autor de Buenos Aires. Elige entre 7 negocios, desayunos sorpresa, brunch y meriendas con envío directo o retiro.">
-  <meta name="theme-color" content="#D9536F">
+    content="GOD MARKET: el marketplace premium de las mejores pastelerías y cafeterías artesanales de Buenos Aires. Desayunos sorpresa, brunch y meriendas con envío directo o retiro.">
+  <meta name="theme-color" content="#0F2318">
 
   <!-- Open Graph / WhatsApp / Facebook Link Preview Card -->
   <meta property="og:type" content="website">
@@ -82,31 +82,54 @@
 
       <div class="header-top">
         <div class="brand-wrapper" onclick="window.app.setBusiness('todos'); window.app.setCategory('todos');" style="cursor: pointer;">
-          <div class="brand-logo" style="background: var(--primary-gradient); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 14px rgba(217, 83, 111, 0.28);">
-            🥐
+          <!-- GOD MARKET Logo -->
+          <div class="brand-logo">
+            <svg viewBox="0 0 44 44" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
+              <!-- Sun rays -->
+              <g stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round">
+                <line x1="22" y1="3" x2="22" y2="7"/>
+                <line x1="29" y1="5" x2="27" y2="8.5"/>
+                <line x1="15" y1="5" x2="17" y2="8.5"/>
+                <line x1="33" y1="10" x2="30" y2="12.5"/>
+                <line x1="11" y1="10" x2="14" y2="12.5"/>
+              </g>
+              <!-- G letter -->
+              <text x="4" y="34" font-family="Georgia, serif" font-size="22" font-weight="bold" fill="url(#goldGrad)">G</text>
+              <!-- O with leaf -->
+              <circle cx="22" cy="26" r="8" fill="none" stroke="url(#goldGrad)" stroke-width="2"/>
+              <!-- Leaf inside O -->
+              <path d="M22 20 C25 23 25 29 22 32 C19 29 19 23 22 20Z" fill="#3A7A4A"/>
+              <line x1="22" y1="20" x2="22" y2="32" stroke="#5A9B5A" stroke-width="0.8"/>
+              <!-- D letter -->
+              <text x="29" y="34" font-family="Georgia, serif" font-size="22" font-weight="bold" fill="url(#goldGrad)">D</text>
+              <defs>
+                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#D4B86A"/>
+                  <stop offset="50%" stop-color="#C9A84C"/>
+                  <stop offset="100%" stop-color="#A8893A"/>
+                </linearGradient>
+              </defs>
+            </svg>
           </div>
           <div class="brand-info">
-            <h1 style="font-size: 1.2rem; line-height: 1.1;">Dulce Market</h1>
-            <span style="font-size: 0.7rem; color: var(--primary); font-weight: 700;">Marketplace de Pastelerías</span>
+            <h1 style="font-size: 1.15rem; line-height: 1; letter-spacing: 0.12em;">GOD MARKET</h1>
+            <span style="font-size: 0.58rem; letter-spacing: 0.2em;">FOOD · COFFEE · HEALTHY</span>
           </div>
         </div>
 
         <div class="header-actions">
-          <button class="icon-btn" onclick="window.app.openOrdersHistoryModal()" title="Mis Pedidos y Seguimiento" style="position: relative;">
-            📦
-            <span id="header-orders-badge" class="badge-count" style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.65rem; padding: 1px 6px; background: var(--accent-mint); color: #fff;">0</span>
+          <button class="icon-btn" onclick="window.app.openOrdersHistoryModal()" title="Mis Pedidos" style="position: relative;">
+            <i data-lucide="package" style="width:18px;height:18px;"></i>
+            <span id="header-orders-badge" class="badge-count" style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.6rem; padding: 1px 5px; background: var(--primary); color: var(--green-deep);">0</span>
           </button>
-          <button class="icon-btn" onclick="window.app.openAdminModalWithPin()" title="Portal Negocios: Publicar Desayuno">
-            🏪
+          <button class="icon-btn" onclick="window.app.openAdminModalWithPin()" title="Portal Negocios">
+            <i data-lucide="store" style="width:18px;height:18px;"></i>
           </button>
-          <a href="flyer.html" target="_blank" class="icon-btn" title="Imprimir Flyer con QR para la calle" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
-            📄
-          </a>
           <button class="icon-btn desktop-cart-btn" style="position: relative;"
             onclick="window.app.openModal('cart-drawer-modal')" title="Ver Carrito">
-            🛍️
+            <i data-lucide="shopping-bag" style="width:18px;height:18px;"></i>
             <span id="header-cart-badge" class="badge-count"
-              style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.65rem; padding: 1px 6px;">0</span>
+              style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.6rem; padding: 1px 5px; background: var(--primary); color: var(--green-deep);">0</span>
           </button>
         </div>
       </div>
@@ -228,39 +251,36 @@
     </main>
 
     <!-- Business Info & Guarantee Footer -->
-    <footer
-      style="margin: 30px 16px 20px; padding: 22px 18px; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-light); text-align: center;">
-      <div style="font-size: 2.2rem; margin-bottom: 6px;">🥐</div>
-      <h4 class="font-serif" style="font-size: 1.15rem; margin-bottom: 2px;">Dulce Market</h4>
-      <p style="font-size: 0.78rem; color: var(--primary); font-weight: 700; margin-bottom: 6px;">
-        Marketplace de Desayunos & Meriendas Artesanales
-      </p>
-      <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.45;">
-        Conectamos a 7 pastelerías y cafeterías artesanales de autor con tu mesa y ocasiones especiales.<br>
-        📍 Entregas en Palermo, Recoleta, Belgrano, San Telmo, Urquiza, Colegiales y Caballito.
+    <footer style="margin: 30px 16px 20px; padding: 28px 18px; background: var(--green-card); border-radius: var(--radius-md); border: 1px solid var(--green-border); text-align: center; position: relative; overflow: hidden;">
+      <!-- Gold glow top -->
+      <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 200px; height: 1px; background: linear-gradient(90deg, transparent, var(--primary), transparent);"></div>
+
+      <!-- Logo text -->
+      <div style="margin-bottom: 10px;">
+        <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.6rem; font-weight: 700; letter-spacing: 0.12em; color: var(--primary); line-height: 1;">GOD MARKET</div>
+        <div style="font-size: 0.6rem; letter-spacing: 0.2em; color: var(--cream-muted); margin-top: 3px;">FOOD · COFFEE · HEALTHY</div>
+      </div>
+
+      <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+        Conectamos las mejores pastelerías y cafeterías artesanales de Buenos Aires<br>
+        con tu mesa y ocasiones especiales.<br>
+        <span style="color: var(--primary); font-weight: 600;">📍 Palermo · Recoleta · Belgrano · San Telmo · Colegiales</span>
       </p>
 
-      <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+      <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;">
         <a href="https://wa.me/5491156192616" target="_blank"
-          style="display: inline-flex; align-items: center; gap: 6px; background: var(--whatsapp-green); color: #fff; padding: 7px 16px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700;">
-          <span>💬 Coordinación WhatsApp: 11 5619-2616</span>
+          style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: #fff; padding: 9px 18px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 700; box-shadow: 0 4px 16px rgba(37,211,102,0.3);">
+          💬 WhatsApp: 11 5619-2616
         </a>
         <button type="button" onclick="window.app.openAdminModalWithPin()"
-          style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-surface-secondary); color: var(--text-main); border: 1px solid var(--border-light); padding: 7px 14px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 600;">
-          <span>🏪</span> Sumar mi Pastelería
+          style="display: inline-flex; align-items: center; gap: 6px; background: var(--primary-light); color: var(--primary); border: 1px solid var(--green-border); padding: 9px 16px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 700;">
+          🏪 Sumar mi Negocio
         </button>
       </div>
 
-      <div
-        style="font-size: 0.72rem; color: var(--text-muted); border-top: 1px dashed var(--border-light); padding-top: 12px;">
-        💳 Pagos coordinados vía Transferencia Bancaria, Mercado Pago o Efectivo.<br>
-        © 2026 Dulce Market. La red de pastelerías artesanales.
-        <div style="margin-top: 12px;">
-          <a href="flyer.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(217, 83, 111, 0.08); color: var(--primary); padding: 5px 12px; border-radius: 50px; text-decoration: none; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(217, 83, 111, 0.2);">
-            <span>📄</span>
-            <span>Cartel / Flyer Imprimible del Marketplace</span>
-          </a>
-        </div>
+      <div style="font-size: 0.7rem; color: var(--text-muted); border-top: 1px solid var(--green-border-subtle); padding-top: 14px; line-height: 1.6;">
+        💳 Transferencia Bancaria · Mercado Pago · Efectivo<br>
+        <span style="color: rgba(212,201,176,0.4);">© 2026 GOD MARKET — La red premium de pastelerías artesanales</span>
       </div>
     </footer>
 
