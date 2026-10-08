@@ -2,7 +2,7 @@
  * DULCE ATELIER - GESTOR DEL CARRITO DE COMPRAS
  */
 
-const CART_STORAGE_KEY = 'dulce_atelier_cart_v1';
+const CART_STORAGE_KEY = 'godmarket_cart_v2';
 
 class CartManager {
   constructor() {
@@ -14,38 +14,21 @@ class CartManager {
   }
 
   loadCart() {
+    // Limpiar almacenamiento legacy si existiera
+    try {
+      localStorage.removeItem('dulce_atelier_cart_v1');
+    } catch (e) {}
+
     const saved = localStorage.getItem(CART_STORAGE_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
       } catch (e) {
         console.error("Error al cargar carrito:", e);
       }
     }
-    return [
-      {
-        product: {
-          id: "lc-toston-palta-huevo",
-          businessId: "lumiere-cafe",
-          businessName: "Lumière Café",
-          businessNeighborhood: "Palermo Soho",
-          businessAvatar: "🥑",
-          name: "Tostón de Masa Madre con Palta & Huevo Poché",
-          category: "desayunos",
-          categoryName: "Desayunos Premium",
-          price: 12500,
-          tag: "🥑 Firma Lumière",
-          rating: 5.0,
-          reviews: 164,
-          description: "Rebanada gruesa de pan de masa madre tostado, crema de palta hass macerada con lima, huevo poché de campo con yema cremosa, tomates cherry confitados y mix de semillas tostadas.",
-          image: "assets/images/hero_breakfast.jpg",
-          portion: "Para 1 persona"
-        },
-        quantity: 1,
-        customization: {},
-        addedAt: new Date().toISOString()
-      }
-    ];
+    return []; // Iniciar siempre vacío sin productos precargados
   }
 
   saveCart() {
