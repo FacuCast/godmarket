@@ -30,6 +30,22 @@
    0.1. Móviles y Smartphones (max-width: 767px)
    -------------------------------------------------------------------------- */
 @media (max-width: 767px) {
+  .form-control,
+  .time-chip,
+  .neighborhood-btn,
+  .btn-gps-detect,
+  #btn-toggle-map,
+  #address-picker-modal .form-group .btn-primary {
+    min-height: 44px;
+  }
+
+  .preset-img-chip {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+  }
+
   /* Contenedor fluido en móviles con padding seguro */
   .app-container {
     width: 100%;

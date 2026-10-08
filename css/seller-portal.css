@@ -493,6 +493,20 @@
   .seller-tab-btn:last-child {
     grid-column: 1 / -1;
   }
+
+  .seller-topbar .seller-action-pill,
+  .onboarding-input,
+  .btn-map-gps,
+  .radius-chip,
+  #tab-pane-coverage .seller-actions-bar > button {
+    min-height: 44px;
+  }
+
+  .radius-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 /* Contenido Principal de Pestañas */
