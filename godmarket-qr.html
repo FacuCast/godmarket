@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GOD MARKET - Menú Digital QR Oficial (Flyer A4)</title>
+  <title>GOD MARKET - Menú Digital QR Oficial</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600&display=swap" rel="stylesheet">
-  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
   <style>
     @page {
       size: A4 portrait;
@@ -24,69 +23,15 @@
 
     body {
       font-family: 'Outfit', sans-serif;
-      background: #060E0A;
+      background: #0A140F;
       color: #FFFFFF;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 12px;
+      justify-content: center;
       min-height: 100vh;
       margin: 0;
-    }
-
-    /* Barra Superior para Navegador (No se imprime) */
-    .screen-controls {
-      width: 100%;
-      max-width: 210mm;
-      background: #11241A;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      border-radius: 12px;
-      padding: 14px 20px;
-      margin-bottom: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    }
-
-    .screen-controls .info {
-      font-size: 0.95rem;
-      color: #A3C9B0;
-    }
-    .screen-controls .info strong {
-      color: #D4AF37;
-    }
-
-    .btn-action {
-      background: linear-gradient(135deg, #E6CA65 0%, #D4AF37 50%, #B88E14 100%);
-      color: #0A1610;
-      border: none;
-      padding: 10px 22px;
-      font-size: 0.95rem;
-      font-weight: 800;
-      border-radius: 50px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-      box-shadow: 0 4px 14px rgba(212,175,55,0.3);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .btn-action:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(212,175,55,0.5);
-    }
-
-    .btn-secondary {
-      background: rgba(255,255,255,0.1);
-      color: #FFFFFF;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.18);
+      padding: 0;
     }
 
     /* Hoja A4 Exacta (210mm x 297mm) */
@@ -105,7 +50,7 @@
       box-shadow: 0 20px 50px rgba(0,0,0,0.6);
     }
 
-    /* Marcos decorativos dorados */
+    /* Marco perimetral decorativo dorado */
     .border-outer {
       position: absolute;
       top: 6mm;
@@ -219,6 +164,7 @@
       font-weight: 400;
     }
 
+    /* Marco blanco de alto contraste para el QR */
     .qr-wrapper {
       background: #FFFFFF;
       padding: 16px;
@@ -250,7 +196,7 @@
       letter-spacing: 1px;
     }
 
-    /* 3. Tres Columnas */
+    /* 3. Tres Beneficios en Columnas */
     .features-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -313,35 +259,9 @@
     .footer-sub strong {
       color: #D4AF37;
     }
-
-    /* Ocultar barra superior al imprimir */
-    @media print {
-      body {
-        background: none;
-        padding: 0;
-      }
-      .screen-controls {
-        display: none !important;
-      }
-      .a4-sheet {
-        box-shadow: none;
-        margin: 0;
-      }
-    }
   </style>
 </head>
 <body>
-  <!-- Controles en pantalla -->
-  <div class="screen-controls">
-    <div class="info">
-      📄 <strong>Póster / Cartel A4 con Código QR</strong> · Optimizado para mostrador o vitrina
-    </div>
-    <div style="display: flex; gap: 10px;">
-      <a href="/" class="btn-action btn-secondary">🛍️ Ir a la Tienda</a>
-      <button onclick="window.print()" class="btn-action">🖨️ Imprimir / Guardar PDF</button>
-    </div>
-  </div>
-
   <div class="a4-sheet">
     <!-- Marcos decorativos -->
     <div class="border-outer"></div>
@@ -368,6 +288,7 @@
       <p class="scan-desc">Apuntá tu cámara para descubrir las mejores propuestas y hacer tu pedido online</p>
 
       <div class="qr-wrapper">
+        <!-- QR Vectorial SVG embebido para máxima definición de impresión -->
         <img class="qr-image" src="assets/images/qr-somosgodmarket.svg" alt="Código QR somosgodmarket.com">
       </div>
 
