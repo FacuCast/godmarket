@@ -379,7 +379,7 @@ class SellerPortalManager {
 
   configureGis() {
     if (!this.gisLoaded || !window.google) return;
-    const clientId = this.googleClientId || 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+    const clientId = this.googleClientId || '655641723431-75t0f8f4kc91bjr4o67nhouj7b123ndv.apps.googleusercontent.com';
 
     try {
       window.google.accounts.id.initialize({
