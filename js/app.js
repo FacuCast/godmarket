@@ -10,7 +10,12 @@ class DulceAtelierApp {
     try {
       localStorage.removeItem('dulce_user_address');
     } catch(e) {}
-    this.currentAddress = localStorage.getItem('godmarket_user_address') || '';
+    let storedAddr = localStorage.getItem('godmarket_user_address') || '';
+    if (storedAddr === 'Palermo Hollywood, CABA' || storedAddr === 'Palermo Hollywood' || storedAddr === 'Palermo') {
+      localStorage.removeItem('godmarket_user_address');
+      storedAddr = '';
+    }
+    this.currentAddress = storedAddr;
     this.userCoords = this.loadUserCoords();
     this.onlyInRange = localStorage.getItem('godmarket_only_in_range') === 'true';
     this.searchQuery = '';
@@ -439,7 +444,12 @@ class DulceAtelierApp {
   }
 
   promptRealLocationOnEntry() {
-    const saved = localStorage.getItem('godmarket_user_address');
+    let saved = localStorage.getItem('godmarket_user_address');
+    if (saved === 'Palermo Hollywood, CABA' || saved === 'Palermo Hollywood' || saved === 'Palermo') {
+      localStorage.removeItem('godmarket_user_address');
+      saved = null;
+    }
+
     if (saved) {
       this.currentAddress = saved;
       this.renderLocationBar();
@@ -1349,10 +1359,14 @@ class DulceAtelierApp {
     if (floatingBar) {
       if (count > 0) {
         floatingBar.classList.add('visible');
-        document.getElementById('cart-floating-count').textContent = count;
-        document.getElementById('cart-floating-total').textContent = window.cartManager.formatCurrency(total);
+        floatingBar.style.display = 'flex';
+        const floatingCountEl = document.getElementById('cart-floating-count');
+        const floatingTotalEl = document.getElementById('cart-floating-total');
+        if (floatingCountEl) floatingCountEl.textContent = count;
+        if (floatingTotalEl) floatingTotalEl.textContent = window.cartManager.formatCurrency(total);
       } else {
         floatingBar.classList.remove('visible');
+        floatingBar.style.display = 'none';
       }
     }
 

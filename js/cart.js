@@ -14,16 +14,26 @@ class CartManager {
   }
 
   loadCart() {
-    // Limpiar almacenamiento legacy si existiera
+    // Limpiar almacenamiento legacy o mocks de pruebas anteriores
     try {
       localStorage.removeItem('dulce_atelier_cart_v1');
+      localStorage.removeItem('godmarket_cart_v1');
     } catch (e) {}
 
     const saved = localStorage.getItem(CART_STORAGE_KEY);
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        let parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          // Filtrar items mock previos para garantizar carrito limpio al usuario
+          parsed = parsed.filter(item => 
+            item && 
+            item.product && 
+            item.product.id !== 'lc-toston-palta-huevo' && 
+            item.product.id !== 'mock-item'
+          );
+          return parsed;
+        }
       } catch (e) {
         console.error("Error al cargar carrito:", e);
       }
