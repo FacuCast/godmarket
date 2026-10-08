@@ -55,7 +55,7 @@
   <!-- Stylesheets (Pure CSS) -->
   <link rel="stylesheet" href="css/main.css?v=19.0">
   <link rel="stylesheet" href="css/components.css?v=19.0">
-  <link rel="stylesheet" href="css/responsive.css?v=19.0">
+  <link rel="stylesheet" href="css/responsive.css?v=21.0">
   <link rel="stylesheet" href="css/mejoras-premium.css?v=19.0">
   <link rel="stylesheet" href="css/seller-portal.css?v=19.0">
 
@@ -457,12 +457,12 @@
 
       <!-- Desktop Navigation Links (Hidden on mobile, visible on PC & TV) -->
       <nav class="desktop-nav-links">
-        <button class="desktop-nav-link active" onclick="window.app.goHome()">Inicio</button>
-        <button class="desktop-nav-link" onclick="window.app.filterCafeterias()">Cafeterías</button>
-        <button class="desktop-nav-link" onclick="window.app.setCategory('desayunos')">Desayunos</button>
-        <button class="desktop-nav-link" onclick="window.app.setCategory('brunch')">Healthy</button>
-        <button class="desktop-nav-link" onclick="window.app.setCategory('meriendas')">Bebidas & Café</button>
-        <button class="desktop-nav-link" onclick="window.app.setCategory('boxes')">Boxes Regalo</button>
+        <button class="desktop-nav-link active" data-desktop-nav="home" onclick="window.app.goHome()">Inicio</button>
+        <button class="desktop-nav-link" data-desktop-nav="cafeterias" onclick="window.app.filterCafeterias()">Cafeterías</button>
+        <button class="desktop-nav-link" data-desktop-nav="desayunos" onclick="window.app.setCategory('desayunos')">Desayunos</button>
+        <button class="desktop-nav-link" data-desktop-nav="healthy" onclick="window.app.setCategory('brunch')">Healthy</button>
+        <button class="desktop-nav-link" data-desktop-nav="bebidas" onclick="window.app.setCategory('meriendas')">Bebidas & Café</button>
+        <button class="desktop-nav-link" data-desktop-nav="boxes" onclick="window.app.setCategory('boxes')">Boxes Regalo</button>
       </nav>
 
       <!-- Desktop Actions: Location & Portals (Hidden on mobile) -->
@@ -1580,7 +1580,7 @@
   <script charset="UTF-8" src="js/cloudinary.js?v=19.0"></script>
   <script charset="UTF-8" src="js/seller.js?v=19.0"></script>
   <script charset="UTF-8" src="js/admin.js?v=19.0"></script>
-  <script charset="UTF-8" src="js/app.js?v=19.0"></script>
+  <script charset="UTF-8" src="js/app.js?v=21.0"></script>
 </body>
 
 </html>

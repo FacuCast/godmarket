@@ -741,6 +741,7 @@ class DulceAtelierApp {
   }
 
   goHome() {
+    this.setDesktopNavActive('home');
     this.setBusiness('todos');
     this.setCategory('todos');
     this.searchQuery = '';
@@ -756,7 +757,14 @@ class DulceAtelierApp {
   }
 
   filterCafeterias() {
+    this.setDesktopNavActive('cafeterias');
     this.showAllStores();
+  }
+
+  setDesktopNavActive(navKey) {
+    document.querySelectorAll('.desktop-nav-link').forEach(link => {
+      link.classList.toggle('active', link.dataset.desktopNav === navKey);
+    });
   }
 
   switchDeliveryType(type) {
@@ -803,7 +811,7 @@ class DulceAtelierApp {
     // Si aún no hay comercios registrados en el marketplace
     if (totalAll === 0) {
       container.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 48px 24px; color: #CBD8D1; background: rgba(0,0,0,0.3); border-radius: 20px; border: 1.5px dashed rgba(212,175,55,0.3); margin: 12px 0;">
+        <div class="marketplace-empty-state" style="grid-column: 1 / -1; text-align: center; padding: 48px 24px; color: #CBD8D1; background: rgba(0,0,0,0.3); border-radius: 20px; border: 1.5px dashed rgba(212,175,55,0.3); margin: 12px 0;">
           <div style="font-size: 3.2rem; margin-bottom: 12px;">🏪</div>
           <h3 style="color: #FFF; font-size: 1.3rem; font-family: 'Cinzel', serif; margin-bottom: 8px;">Marketplace Listo para Inaugurar</h3>
           <p style="font-size: 0.88rem; max-width: 480px; margin: 0 auto 18px auto; line-height: 1.5; color: #A3B8AC;">
@@ -1047,6 +1055,14 @@ class DulceAtelierApp {
 
   setCategory(catId) {
     this.currentCategory = catId;
+    const navKeyByCategory = {
+      todos: 'home',
+      desayunos: 'desayunos',
+      brunch: 'healthy',
+      meriendas: 'bebidas',
+      boxes: 'boxes'
+    };
+    this.setDesktopNavActive(navKeyByCategory[catId] || '');
     this.renderCategories();
     this.renderProducts();
   }
@@ -1061,7 +1077,7 @@ class DulceAtelierApp {
       const totalInMarket = window.productManager.getAllProducts().length;
       if (totalInMarket === 0) {
         container.innerHTML = `
-          <div style="text-align: center; padding: 48px 24px; color: #CBD8D1; background: rgba(0,0,0,0.3); border-radius: 20px; border: 1.5px dashed rgba(212,175,55,0.3); margin: 20px 0;">
+          <div class="catalog-empty-state" style="text-align: center; padding: 48px 24px; color: #CBD8D1; background: rgba(0,0,0,0.3); border-radius: 20px; border: 1.5px dashed rgba(212,175,55,0.3); margin: 20px 0;">
             <div style="font-size: 3.2rem; margin-bottom: 12px;">🥐</div>
             <h3 style="color: #FFF; font-size: 1.3rem; font-family: 'Cinzel', serif; margin-bottom: 8px;">Catálogo Listo para Cargar</h3>
             <p style="font-size: 0.88rem; max-width: 480px; margin: 0 auto 18px auto; line-height: 1.5; color: #A3B8AC;">
