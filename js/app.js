@@ -7,7 +7,10 @@ class DulceAtelierApp {
     this.selectedBusiness = 'todos';
     this.currentCategory = 'todos';
     this.currentFilter = 'all';
-    this.currentAddress = localStorage.getItem('dulce_user_address') || 'Palermo Hollywood, CABA';
+    try {
+      localStorage.removeItem('dulce_user_address');
+    } catch(e) {}
+    this.currentAddress = localStorage.getItem('godmarket_user_address') || '';
     this.userCoords = this.loadUserCoords();
     this.onlyInRange = localStorage.getItem('godmarket_only_in_range') === 'true';
     this.searchQuery = '';
@@ -30,7 +33,7 @@ class DulceAtelierApp {
         }
       }
     } catch (e) {}
-    return { lat: -34.5885, lng: -58.4285 }; // Coordenadas Palermo Hollywood por defecto
+    return { lat: -34.5885, lng: -58.4285 }; // Coordenadas de referencia
   }
 
   saveUserCoords(coords) {
@@ -53,6 +56,9 @@ class DulceAtelierApp {
     this.updateOrdersBadges();
     this.updateStoreStatusUI();
     this.refreshIcons();
+
+    // Solicitar ubicación real automáticamente al ingresar
+    this.promptRealLocationOnEntry();
 
     // Actualizar estado del horario de la tienda cada minuto
     setInterval(() => this.updateStoreStatusUI(), 60000);
@@ -419,6 +425,7 @@ class DulceAtelierApp {
   }
 
   renderLocationBar() {
+    const displayAddress = this.currentAddress || 'Seleccionar ubicación';
     const ids = [
       'current-delivery-address',
       'desktop-delivery-address',
@@ -427,8 +434,75 @@ class DulceAtelierApp {
     ];
     ids.forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.textContent = this.currentAddress;
+      if (el) el.textContent = displayAddress;
     });
+  }
+
+  promptRealLocationOnEntry() {
+    const saved = localStorage.getItem('godmarket_user_address');
+    if (saved) {
+      this.currentAddress = saved;
+      this.renderLocationBar();
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      this.currentAddress = 'Seleccionar ubicación';
+      this.renderLocationBar();
+      return;
+    }
+
+    // Solicitar permiso de geolocalización real del navegador al ingresar
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = parseFloat(pos.coords.latitude.toFixed(5));
+        const lng = parseFloat(pos.coords.longitude.toFixed(5));
+        this.saveUserCoords({ lat, lng });
+
+        let resolvedAddress = 'Tu ubicación actual';
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+            headers: { 'Accept-Language': 'es' }
+          });
+          const data = await res.json();
+          if (data && data.address) {
+            const addr = data.address;
+            const street = addr.road || addr.pedestrian || addr.street || addr.footway || '';
+            const number = addr.house_number || '';
+            const zone = addr.suburb || addr.neighbourhood || addr.city_district || addr.quarter || addr.city || addr.town || '';
+            if (street && number) {
+              resolvedAddress = `${street} ${number}${zone ? `, ${zone}` : ''}`;
+            } else if (street) {
+              resolvedAddress = `${street}${zone ? `, ${zone}` : ''}`;
+            } else if (zone) {
+              resolvedAddress = zone;
+            } else if (data.display_name) {
+              resolvedAddress = data.display_name.split(',')[0];
+            }
+          }
+        } catch (e) {
+          console.warn('Error al geocodificar dirección:', e);
+        }
+
+        this.currentAddress = resolvedAddress;
+        localStorage.setItem('godmarket_user_address', this.currentAddress);
+        this.renderLocationBar();
+        this.renderStoresCards();
+        this.renderBusinessesSlider();
+        this.renderProducts();
+        this.showToast(`📍 Ubicación detectada: ${this.currentAddress}`, 'gold');
+      },
+      (err) => {
+        console.warn('Geolocalización declinada o no disponible:', err);
+        this.currentAddress = 'Seleccionar ubicación';
+        this.renderLocationBar();
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
   }
 
   openAddressModal() {
@@ -436,8 +510,8 @@ class DulceAtelierApp {
   }
 
   selectNeighborhood(neighborhood, lat = null, lng = null) {
-    this.currentAddress = `${neighborhood}, CABA`;
-    localStorage.setItem('dulce_user_address', this.currentAddress);
+    this.currentAddress = `${neighborhood}`;
+    localStorage.setItem('godmarket_user_address', this.currentAddress);
 
     // Si se pasan coordenadas fijas del barrio, guardarlas
     if (lat !== null && lng !== null) {
@@ -468,30 +542,59 @@ class DulceAtelierApp {
 
     this.showToast('📡 Detectando tu ubicación GPS...', 'gold');
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const lat = parseFloat(pos.coords.latitude.toFixed(5));
         const lng = parseFloat(pos.coords.longitude.toFixed(5));
         this.saveUserCoords({ lat, lng });
-        this.currentAddress = '📍 Ubicación GPS Actual';
-        localStorage.setItem('dulce_user_address', this.currentAddress);
+
+        let resolvedAddress = 'Tu ubicación actual';
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+            headers: { 'Accept-Language': 'es' }
+          });
+          const data = await res.json();
+          if (data && data.address) {
+            const addr = data.address;
+            const street = addr.road || addr.pedestrian || addr.street || addr.footway || '';
+            const number = addr.house_number || '';
+            const zone = addr.suburb || addr.neighbourhood || addr.city_district || addr.quarter || addr.city || addr.town || '';
+            if (street && number) {
+              resolvedAddress = `${street} ${number}${zone ? `, ${zone}` : ''}`;
+            } else if (street) {
+              resolvedAddress = `${street}${zone ? `, ${zone}` : ''}`;
+            } else if (zone) {
+              resolvedAddress = zone;
+            } else if (data.display_name) {
+              resolvedAddress = data.display_name.split(',')[0];
+            }
+          }
+        } catch (e) {
+          console.warn('Error al geocodificar:', e);
+        }
+
+        this.currentAddress = resolvedAddress;
+        localStorage.setItem('godmarket_user_address', this.currentAddress);
 
         this.renderLocationBar();
         this.renderStoresCards();
         this.renderBusinessesSlider();
         this.renderProducts();
         this.closeModal('address-picker-modal');
-        this.showToast('✅ Ubicación GPS detectada. Locales actualizados según tu distancia.', 'gold');
+        this.showToast(`✅ Ubicación detectada: ${this.currentAddress}`, 'gold');
 
         const addressInput = document.getElementById('cust-address');
-        if (addressInput && !addressInput.value) {
+        if (addressInput) {
           addressInput.value = this.currentAddress;
         }
       },
       (err) => {
-        console.warn('GPS error:', err);
-        this.showToast('⚠️ No se pudo acceder a tu GPS. Por favor selecciona tu barrio.');
+        this.showToast('⚠️ No se pudo obtener tu ubicación GPS. Selecciona tu barrio en la lista.');
       },
-      { timeout: 10000, enableHighAccuracy: true }
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
     );
   }
 
