@@ -84,6 +84,12 @@
     gap: 12px;
     padding: 4px 6px 10px 6px;
     -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .story-bubble {
+    min-width: 68px;
+    scroll-snap-align: start;
   }
 
   .story-ring {
@@ -99,6 +105,61 @@
   .story-label {
     font-size: 0.7rem;
     max-width: 64px;
+  }
+
+  /* Estados vacíos: contenidos, legibles y accionables sin mucho scroll */
+  #stores-py-grid > .marketplace-empty-state,
+  #products-section-container > .catalog-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-height: 0;
+    margin: 12px 0 !important;
+    padding: 24px 18px !important;
+    border: 1px solid rgba(212, 175, 55, 0.24) !important;
+    border-radius: 18px !important;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.08), transparent 65%),
+      linear-gradient(145deg, rgba(13, 39, 30, 0.96), rgba(5, 22, 16, 0.94)) !important;
+  }
+
+  #stores-py-grid > .marketplace-empty-state > div:first-child,
+  #products-section-container > .catalog-empty-state > div:first-child {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    margin: 0 !important;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.1);
+    font-size: 2rem !important;
+  }
+
+  #stores-py-grid > .marketplace-empty-state > h3,
+  #products-section-container > .catalog-empty-state > h3 {
+    margin: 0 !important;
+    font-size: 1.08rem !important;
+    line-height: 1.25;
+  }
+
+  #stores-py-grid > .marketplace-empty-state > p,
+  #products-section-container > .catalog-empty-state > p {
+    max-width: 34rem !important;
+    margin: 0 !important;
+    font-size: 0.82rem !important;
+    line-height: 1.5 !important;
+  }
+
+  #stores-py-grid > .marketplace-empty-state > button,
+  #products-section-container > .catalog-empty-state > button {
+    width: 100% !important;
+    max-width: 320px;
+    min-height: 44px;
+    margin: 2px 0 0 !important;
+    padding: 11px 16px !important;
+    white-space: normal;
   }
 
   /* Cafeterías Slider Móvil */

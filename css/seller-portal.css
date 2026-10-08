@@ -209,6 +209,60 @@
   color: #7D9285;
 }
 
+@media (max-width: 767px) {
+  .role-modal-overlay {
+    align-items: flex-start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: max(12px, env(safe-area-inset-top, 0px)) 12px max(12px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .role-modal-card {
+    flex: 0 0 auto;
+    max-height: none;
+    margin: auto 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .role-modal-card {
+    padding: 20px 18px;
+  }
+
+  .role-modal-badge {
+    margin-bottom: 10px;
+    font-size: 0.68rem;
+  }
+
+  .role-modal-title {
+    font-size: 1.45rem;
+  }
+
+  .role-modal-subtitle {
+    margin-bottom: 16px;
+  }
+
+  .role-choices-grid {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .role-choice-card {
+    padding: 16px 14px;
+  }
+
+  .role-icon-box {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 8px;
+    font-size: 1.65rem;
+  }
+
+  .role-choice-card p {
+    margin-bottom: 10px;
+  }
+}
+
 /* ============================================================================
    2. PORTAL DE VENDEDOR (VISTA COMPLETA / DASHBOARD)
    ============================================================================ */
@@ -1083,4 +1137,3 @@
   border: 1px solid rgba(239, 68, 68, 0.35);
   color: #F87171;
 }
-
