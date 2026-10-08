@@ -474,6 +474,27 @@
   box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
 }
 
+@media (max-width: 767px) {
+  .seller-nav-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+
+  .seller-tab-btn {
+    min-height: 44px;
+    justify-content: center;
+    padding: 10px 8px;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .seller-tab-btn:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
 /* Contenido Principal de Pestañas */
 .seller-content-container {
   max-width: 900px;
