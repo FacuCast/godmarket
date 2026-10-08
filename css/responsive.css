@@ -4,6 +4,366 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
+   0. Clases Auxiliares Responsivas Universales
+   -------------------------------------------------------------------------- */
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-row-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 580px) {
+  .form-row-2col,
+  .form-row-3col {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   0.1. Móviles y Smartphones (max-width: 767px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+  /* Contenedor fluido en móviles con padding seguro */
+  .app-container {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-bottom: calc(85px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Header Móvil */
+  .app-header {
+    padding: 10px 14px;
+    margin-bottom: 12px;
+  }
+
+  .brand-godmarket {
+    font-size: 1.25rem;
+  }
+
+  /* Hero Móvil */
+  .hero-banner-god {
+    min-height: 220px;
+    padding: 24px 18px 20px;
+    border-radius: 20px;
+    margin-bottom: 18px;
+  }
+
+  .hero-god-title {
+    font-size: 1.65rem;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+
+  .hero-god-sub {
+    font-size: 0.8rem;
+    line-height: 1.35;
+    margin-bottom: 14px;
+  }
+
+  /* Buscador en Móvil */
+  .search-god-wrapper {
+    margin-bottom: 18px;
+    padding: 0 4px;
+  }
+
+  /* Categorías en Móvil: scroll horizontal táctil suave */
+  .stories-section {
+    margin-bottom: 20px;
+  }
+
+  .stories-slider {
+    gap: 12px;
+    padding: 4px 6px 10px 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .story-ring {
+    width: 52px;
+    height: 52px;
+  }
+
+  .story-avatar-inner svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .story-label {
+    font-size: 0.7rem;
+    max-width: 64px;
+  }
+
+  /* Cafeterías Slider Móvil */
+  .cafeterias-god-section {
+    margin-bottom: 22px;
+  }
+
+  .cafeterias-slider {
+    gap: 12px;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .cafeteria-god-card {
+    min-width: 195px;
+    max-width: 195px;
+    scroll-snap-align: start;
+  }
+
+  .cafeteria-card-img-wrap {
+    height: 120px;
+  }
+
+  .cafeteria-card-body {
+    padding: 10px 12px;
+  }
+
+  .cafeteria-card-title {
+    font-size: 0.88rem;
+  }
+
+  /* Grilla de Productos en Móvil (2 Columnas táctiles) */
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .product-card {
+    border-radius: 14px;
+  }
+
+  .product-image-container {
+    height: 130px;
+  }
+
+  .product-content {
+    padding: 10px 8px;
+  }
+
+  .product-title {
+    font-size: 0.82rem;
+    line-height: 1.25;
+    margin-bottom: 3px;
+  }
+
+  .product-desc-short {
+    font-size: 0.7rem;
+    line-height: 1.25;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .product-portion-tag {
+    font-size: 0.64rem;
+    padding: 2px 6px;
+  }
+
+  .product-price {
+    font-size: 0.95rem;
+  }
+
+  .add-to-cart-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+  }
+
+  /* Barra Flotante de Carrito en Móvil */
+  .floating-cart-bar {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    padding: 10px 16px;
+    border-radius: 16px;
+  }
+
+  /* Modales y Bottom Sheets en Móviles */
+  .bottom-sheet {
+    border-radius: 20px 20px 0 0;
+    max-height: 90vh;
+    padding: 20px 16px calc(24px + env(safe-area-inset-bottom, 0px)) 16px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .neighborhoods-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .neighborhood-btn {
+    padding: 10px 8px;
+    font-size: 0.78rem;
+  }
+
+  /* Modal Selector de Rol en Móvil */
+  .role-modal-card {
+    padding: 24px 16px;
+    border-radius: 20px;
+    max-width: 95%;
+  }
+
+  .role-modal-title {
+    font-size: 1.45rem;
+  }
+
+  .role-choices-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .role-choice-card {
+    padding: 16px 14px;
+  }
+
+  /* Pantalla de Onboarding en Móvil */
+  .seller-onboarding-screen {
+    padding: 16px 12px 60px 12px;
+  }
+
+  .onboarding-card {
+    padding: 20px 14px;
+    border-radius: 16px;
+  }
+
+  .onboarding-top-nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .btn-onboarding-back {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .onboarding-submit-btn {
+    font-size: 0.88rem;
+    padding: 12px 14px;
+  }
+
+  /* Dashboard del Vendedor en Móvil */
+  .seller-topbar {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .seller-topbar-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .seller-biz-hero {
+    padding: 18px 14px;
+  }
+
+  .seller-biz-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .seller-biz-identity {
+    gap: 12px;
+  }
+
+  .seller-biz-avatar-box {
+    width: 56px;
+    height: 56px;
+    font-size: 1.8rem;
+  }
+
+  .seller-biz-info h2 {
+    font-size: 1.2rem;
+  }
+
+  .seller-biz-stats-strip {
+    width: 100%;
+    justify-content: space-around;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .seller-stat-val {
+    font-size: 1.1rem;
+  }
+
+  .seller-content-container {
+    padding: 0 12px;
+    margin: 16px auto;
+  }
+
+  .seller-actions-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .btn-add-prod {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .seller-products-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Mapas interactivos en Móvil */
+  .seller-map-container {
+    height: 210px !important;
+  }
+
+  .radius-presets-row {
+    gap: 6px;
+  }
+
+  .radius-chip {
+    padding: 5px 8px;
+    font-size: 0.7rem;
+    flex: 1 1 auto;
+    text-align: center;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   0.2. Pantallas Ultra-Pequeñas (max-width: 360px, ej: Galaxy Fold cerrado, iPhone SE)
+   -------------------------------------------------------------------------- */
+@media (max-width: 360px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .neighborhoods-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-god-title {
+    font-size: 1.4rem;
+  }
+
+  .cafeteria-god-card {
+    min-width: 175px;
+    max-width: 175px;
+  }
+}
+
+/* --------------------------------------------------------------------------
    1. Tablet / Pantallas Medianas (min-width: 768px)
    -------------------------------------------------------------------------- */
 @media (min-width: 768px) {
@@ -48,6 +408,31 @@
     border-radius: var(--radius-lg);
     max-width: 580px;
     max-height: 85vh;
+  }
+
+  /* Seller Portal en Tablets */
+  .seller-products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .seller-biz-header-card {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .seller-actions-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .btn-add-prod {
+    width: auto;
+  }
+
+  .seller-topbar-actions {
+    width: auto;
   }
 }
 
@@ -295,6 +680,23 @@
     margin: 40px 0 20px 0 !important;
     padding: 36px 40px !important;
   }
+
+  /* Seller Portal en Desktop */
+  .seller-products-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .seller-biz-hero,
+  .seller-content-container {
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .seller-topbar {
+    padding: 16px 40px;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -328,6 +730,16 @@
 
   .products-grid {
     gap: 26px;
+  }
+
+  .seller-products-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  .seller-biz-hero,
+  .seller-content-container {
+    max-width: 1300px;
   }
 }
 

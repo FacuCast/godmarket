@@ -14,16 +14,45 @@
   50%       { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(201,168,76,0); }
 }
 
-/* ── Icon buttons: hover premium dorado ──────────────────── */
+/* ── Icon buttons: estilo luxury dorado visible ──────────────────── */
 .icon-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: rgba(212, 175, 55, 0.1) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  color: #E5C07B !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  position: relative !important;
+  padding: 0 !important;
+}
+
+.icon-btn svg,
+.icon-btn i {
+  stroke: #E5C07B !important;
+  color: #E5C07B !important;
+  width: 18px !important;
+  height: 18px !important;
+  display: block !important;
+  transition: stroke 0.2s ease, transform 0.2s ease !important;
 }
 
 .icon-btn:hover {
-  background: var(--primary-light) !important;
-  border-color: rgba(201,168,76,0.3) !important;
+  background: rgba(212, 175, 55, 0.22) !important;
+  border-color: #D4AF37 !important;
+  transform: translateY(-2px) scale(1.06) !important;
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.35) !important;
+}
+
+.icon-btn:hover svg,
+.icon-btn:hover i {
+  stroke: #FFFFFF !important;
+  color: #FFFFFF !important;
   transform: scale(1.08) !important;
-  box-shadow: 0 4px 14px rgba(201,168,76,0.2) !important;
 }
 
 /* ── Status dot: glow más visible ────────────────────────── */
@@ -219,7 +248,7 @@ img {
 .btn-publish-pill {
   background: var(--primary-light);
   color: var(--primary);
-  border: 1.5px solid rgba(217, 83, 111, 0.35);
+  border: 1.5px solid rgba(212, 175, 55, 0.35);
   border-radius: var(--radius-full);
   padding: 5px 12px;
   font-size: 0.74rem;
@@ -233,9 +262,9 @@ img {
 
 .btn-publish-pill:hover {
   background: var(--primary);
-  color: #fff;
+  color: #051610;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(217, 83, 111, 0.25);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.35);
 }
 
 .businesses-slider {
@@ -269,13 +298,13 @@ img {
 .business-chip:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-md);
-  border-color: rgba(217, 83, 111, 0.4);
+  border-color: rgba(212, 175, 55, 0.45);
 }
 
 .business-chip.active {
   border-color: var(--primary);
   background: var(--primary-light);
-  box-shadow: 0 4px 14px rgba(217, 83, 111, 0.2);
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.25);
 }
 
 .business-chip-avatar {
@@ -319,19 +348,19 @@ img {
 .business-chip-rating {
   font-size: 0.68rem;
   font-weight: 800;
-  color: #E76F51;
+  color: #F5D77F;
   margin-left: 4px;
   white-space: nowrap;
 }
 
 /* ── Store Spotlight Card (cuando se selecciona una pastelería) ── */
 .store-spotlight-card {
-  background: linear-gradient(135deg, #FFF9F9 0%, #FFF0F3 100%);
-  border: 1.5px solid rgba(217, 83, 111, 0.28);
+  background: linear-gradient(135deg, #0A2219 0%, #071C13 100%);
+  border: 1.5px solid rgba(212, 175, 55, 0.35);
   border-radius: var(--radius-md);
   padding: 14px 16px;
   margin-bottom: 16px;
-  box-shadow: 0 6px 20px rgba(217, 83, 111, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 .store-spotlight-header {
@@ -361,23 +390,24 @@ img {
 
 .store-spotlight-title {
   font-size: 1.15rem;
-  color: var(--text-main);
+  color: #FFFFFF;
   margin-bottom: 2px;
   line-height: 1.2;
+  font-weight: 700;
 }
 
 .store-spotlight-badge {
-  background: var(--primary);
-  color: #fff;
+  background: var(--primary-gradient);
+  color: #051610;
   font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 7px;
+  font-weight: 800;
+  padding: 2px 8px;
   border-radius: 50px;
 }
 
 .store-spotlight-tagline {
   font-size: 0.78rem;
-  color: var(--text-secondary);
+  color: #CBD8D1;
   margin-bottom: 6px;
   line-height: 1.35;
 }
@@ -387,17 +417,17 @@ img {
   align-items: center;
   gap: 6px;
   font-size: 0.72rem;
-  color: var(--text-muted);
+  color: #8CA093;
   font-weight: 600;
   flex-wrap: wrap;
 }
 
 .store-spotlight-close {
-  background: #fff;
-  border: 1px solid rgba(217, 83, 111, 0.25);
-  color: var(--primary);
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: #F5D77F;
   border-radius: 50px;
-  padding: 4px 10px;
+  padding: 4px 12px;
   font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
@@ -406,8 +436,8 @@ img {
 }
 
 .store-spotlight-close:hover {
-  background: var(--primary);
-  color: #fff;
+  background: #D4AF37;
+  color: #051610;
 }
 
 /* ── Encabezado de Sección de Negocio en Menú Completo ──── */
@@ -454,21 +484,27 @@ img {
 }
 
 .btn-view-store {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  color: var(--primary);
-  background: var(--primary-light);
-  padding: 5px 12px;
+  color: #E5C07B;
+  background: rgba(212, 175, 55, 0.12);
+  padding: 6px 14px;
   border-radius: 50px;
-  border: 1px solid rgba(217, 83, 111, 0.22);
+  border: 1px solid rgba(212, 175, 55, 0.35);
   transition: all 0.2s ease;
   white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .btn-view-store:hover {
-  background: var(--primary);
-  color: #fff;
+  background: #D4AF37;
+  color: #0A1810;
+  border-color: #D4AF37;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.35);
 }
 
 /* ── Product Card Marketplace Elements ──────────────────── */
@@ -512,7 +548,7 @@ img {
   align-items: center;
   gap: 6px;
   background: var(--primary-light);
-  border: 1px solid rgba(217, 83, 111, 0.25);
+  border: 1px solid rgba(212, 175, 55, 0.35);
   color: var(--primary);
   padding: 4px 10px;
   border-radius: var(--radius-full);
@@ -548,7 +584,7 @@ img {
 }
 
 .preset-img-chip:hover {
-  border-color: rgba(217, 83, 111, 0.4);
+  border-color: rgba(212, 175, 55, 0.5);
 }
 
 .preset-img-chip.active {
@@ -633,17 +669,17 @@ img {
 
 /* ── Vendor Logistics Guarantee Banner ─────────────────────── */
 .vendor-logistics-banner {
-  background: linear-gradient(135deg, #FFF5F7 0%, #FFF9F0 100%);
-  border: 1px solid rgba(217, 83, 111, 0.22);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(10, 34, 25, 0.8) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.35);
   border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  margin: 0 16px 12px;
+  padding: 10px 14px;
+  margin: 0 16px 14px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.75rem;
-  color: var(--text-main);
-  box-shadow: 0 2px 8px rgba(217, 83, 111, 0.05);
+  gap: 10px;
+  font-size: 0.78rem;
+  color: #FAF6F0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .vendor-logistics-icon {
@@ -785,15 +821,16 @@ img {
 }
 
 .filter-chip-py:hover {
-  border-color: rgba(217, 83, 111, 0.4);
+  border-color: rgba(212, 175, 55, 0.45);
   color: var(--text-main);
 }
 
 .filter-chip-py.active {
-  background: var(--primary);
-  color: #fff;
+  background: var(--primary-gradient);
+  color: #051610;
   border-color: var(--primary);
-  box-shadow: 0 3px 10px rgba(217, 83, 111, 0.28);
+  font-weight: 800;
+  box-shadow: 0 3px 10px rgba(212, 175, 55, 0.35);
 }
 
 /* ── PedidosYa Store Cards (Pastelerías con Envío Propio) ── */
@@ -835,7 +872,7 @@ img {
 .store-card-py:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
-  border-color: rgba(217, 83, 111, 0.3);
+  border-color: rgba(212, 175, 55, 0.45);
 }
 
 .store-card-cover-wrap {
@@ -875,13 +912,13 @@ img {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: var(--primary);
-  color: #fff;
+  background: var(--primary-gradient);
+  color: #051610;
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 800;
   padding: 3px 8px;
   border-radius: var(--radius-full);
-  box-shadow: 0 2px 8px rgba(217, 83, 111, 0.35);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.35);
 }
 
 .store-card-avatar-floating {
@@ -932,9 +969,10 @@ img {
 .store-card-rating {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #E76F51;
-  background: #FEF3EE;
-  padding: 2px 6px;
+  color: #F5D77F;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 2px 7px;
   border-radius: 6px;
   white-space: nowrap;
 }
@@ -954,9 +992,9 @@ img {
   display: flex;
   align-items: center;
   gap: 5px;
-  background: #F0F9F5;
-  border: 1px solid rgba(42, 157, 143, 0.3);
-  color: #1E6B61;
+  background: rgba(42, 157, 143, 0.15);
+  border: 1px solid rgba(42, 157, 143, 0.4);
+  color: #4ADE80;
   padding: 4px 8px;
   border-radius: var(--radius-xs);
   font-size: 0.72rem;
@@ -1051,17 +1089,17 @@ img {
 }
 
 .store-profile-policy-box {
-  background: #F0F9F5;
-  border: 1px dashed #2A9D8F;
+  background: rgba(42, 157, 143, 0.12);
+  border: 1px dashed rgba(42, 157, 143, 0.45);
   border-radius: var(--radius-sm);
-  padding: 10px 12px;
+  padding: 12px 14px;
   margin-top: 10px;
-  font-size: 0.76rem;
-  color: #1E6B61;
-  line-height: 1.4;
+  font-size: 0.78rem;
+  color: #CBD8D1;
+  line-height: 1.45;
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
 }
 
 /* ── Modern Bottom Navigation Bar (App Bar) ───────────────── */
@@ -1135,28 +1173,53 @@ img {
   transform: translateX(-50%);
   width: calc(100% - 32px);
   max-width: 448px;
-  background: linear-gradient(135deg, #D4AF37 0%, #AA822A 100%);
-  color: #051610;
+  background: linear-gradient(135deg, #E5C07B 0%, #D4AF37 50%, #B8860B 100%);
+  color: #0A1C12;
   font-weight: 700;
-  border-radius: var(--radius-md);
+  border-radius: 18px;
   padding: 12px 18px;
   display: none;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 16px rgba(212, 175, 55, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 22px rgba(212, 175, 55, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   z-index: 999;
   cursor: pointer;
   animation: cartFloatBounce 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-@keyframes cartFloatBounce {
-  0% { transform: translate(-50%, 20px) scale(0.95); opacity: 0; }
-  100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+.floating-cart-bar:hover {
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7), 0 0 28px rgba(212, 175, 55, 0.55);
 }
 
 .floating-cart-bar:active {
   transform: translateX(-50%) scale(0.98);
+}
+
+@media (min-width: 1024px) {
+  .floating-cart-bar {
+    bottom: 28px !important;
+    right: 32px !important;
+    left: auto !important;
+    transform: none !important;
+    width: 360px !important;
+    max-width: 360px !important;
+    border-radius: 20px !important;
+  }
+
+  .floating-cart-bar.visible {
+    transform: none !important;
+  }
+
+  .floating-cart-bar:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.75), 0 0 28px rgba(212, 175, 55, 0.6) !important;
+  }
+
+  .floating-cart-bar:active {
+    transform: translateY(-1px) scale(0.99) !important;
+  }
 }
 
 .cart-bar-left {
@@ -1166,15 +1229,18 @@ img {
 }
 
 .cart-badge-circle {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
+  background: #071710;
+  color: #F5D77F;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  font-size: 0.85rem;
+  font-weight: 900;
+  font-size: 0.9rem;
+  border: 1.5px solid rgba(245, 215, 127, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .cart-bar-info {
@@ -1183,25 +1249,55 @@ img {
 }
 
 .cart-bar-info span:first-child {
-  font-size: 0.72rem;
-  opacity: 0.9;
-  font-weight: 600;
+  font-size: 0.74rem;
+  color: #071710;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
 }
 
 .cart-bar-total {
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #071710;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.3px;
 }
 
 .cart-bar-cta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 6px 12px;
-  border-radius: var(--radius-full);
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+  background: #071710 !important;
+  color: #FFFFFF !important;
+  padding: 8px 18px !important;
+  border-radius: 50px !important;
+  border: 1px solid rgba(212, 175, 55, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+  transition: all 0.2s ease !important;
+}
+
+.cart-bar-cta span {
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+  font-size: 0.88rem !important;
+}
+
+.cart-bar-cta span:last-child {
+  color: #F5D77F !important;
+  font-size: 1.05rem !important;
+  transition: transform 0.2s ease !important;
+}
+
+.floating-cart-bar:hover .cart-bar-cta {
+  background: #112B1D !important;
+  border-color: #F5D77F !important;
+}
+
+.floating-cart-bar:hover .cart-bar-cta span:last-child {
+  transform: translateX(3px) !important;
 }
 
 /* ── Address Selector Bottom Sheet Modal ──────────────────── */
@@ -1234,5 +1330,638 @@ img {
   background: var(--primary-light);
   color: var(--primary);
 }
+
+/* ============================================================================
+   CHECKOUT LUXURY PALETTE & CONTRAST FIXES
+   Harmonizes forms, time chips, payment cards, Mercado Pago & Bank boxes
+   ============================================================================ */
+
+/* ── 1. Map Toggle Button ("Marcar en el Mapa") ── */
+.btn-map-toggle {
+  background: rgba(212, 175, 55, 0.12) !important;
+  color: #F5D77F !important;
+  border: 1px solid rgba(212, 175, 55, 0.35) !important;
+  border-radius: 20px !important;
+  padding: 5px 12px !important;
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: all 0.2s ease !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+.btn-map-toggle:hover {
+  background: rgba(212, 175, 55, 0.25) !important;
+  border-color: #D4AF37 !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25) !important;
+}
+
+/* ── 2. Time Chips ("Ahora", "Hoy por la tarde", "Mañana") ── */
+.time-quick-chips {
+  display: flex !important;
+  gap: 8px !important;
+  margin-bottom: 10px !important;
+  flex-wrap: wrap !important;
+}
+
+.time-chip {
+  background: #081E16 !important;
+  color: #CBD8D1 !important;
+  border: 1.5px solid rgba(212, 175, 55, 0.22) !important;
+  border-radius: 12px !important;
+  padding: 9px 15px !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-family: 'Outfit', sans-serif !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.time-chip:hover {
+  background: #0E2E21 !important;
+  color: #FFFFFF !important;
+  border-color: rgba(212, 175, 55, 0.55) !important;
+  transform: translateY(-1px) !important;
+}
+
+.time-chip.active {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(184, 134, 11, 0.3) 100%) !important;
+  color: #F5D77F !important;
+  border-color: #D4AF37 !important;
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.3) !important;
+  font-weight: 800 !important;
+}
+
+/* ── 3. Checkout Form Controls & Labels ── */
+#checkout-form .form-label {
+  color: #E5C365 !important;
+  font-size: 0.74rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.6px !important;
+  text-transform: uppercase !important;
+  margin-bottom: 6px !important;
+}
+
+#checkout-form .form-control {
+  background: #081E16 !important;
+  border: 1.5px solid rgba(212, 175, 55, 0.25) !important;
+  color: #FAF6F0 !important;
+  border-radius: 12px !important;
+  padding: 11px 14px !important;
+  font-size: 0.88rem !important;
+  transition: all 0.2s ease !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+#checkout-form .form-control::placeholder {
+  color: #728A7D !important;
+  font-weight: 400 !important;
+}
+
+#checkout-form .form-control:focus {
+  background: #0D2C20 !important;
+  border-color: #D4AF37 !important;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.22) !important;
+  outline: none !important;
+  color: #FFFFFF !important;
+}
+
+/* ── 4. Payment Cards Selection ── */
+.payment-options {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 10px !important;
+  margin-bottom: 14px !important;
+}
+
+.payment-card {
+  background: #081E16 !important;
+  border: 1.5px solid rgba(212, 175, 55, 0.22) !important;
+  border-radius: 14px !important;
+  padding: 12px 6px !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+.payment-card .payment-icon {
+  font-size: 1.5rem !important;
+  line-height: 1 !important;
+}
+
+.payment-card .payment-name {
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  color: #A3B8AC !important;
+  transition: color 0.2s ease !important;
+}
+
+.payment-card:hover {
+  background: #0E2E21 !important;
+  border-color: rgba(212, 175, 55, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+.payment-card.active {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.18) 0%, rgba(184, 134, 11, 0.14) 100%) !important;
+  border-color: #D4AF37 !important;
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.25) !important;
+}
+
+.payment-card.active .payment-name {
+  color: #F5D77F !important;
+  font-weight: 800 !important;
+}
+
+/* ── 5. Payment Details Box (Bank & Mercado Pago) ── */
+.bank-details-box {
+  background: #071C13 !important;
+  border-radius: 16px !important;
+  padding: 16px 18px !important;
+  margin: 14px 0 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+  border: 1.5px solid rgba(212, 175, 55, 0.35) !important;
+  color: #FAF6F0 !important;
+}
+
+.bank-transfer-theme {
+  border-color: rgba(212, 175, 55, 0.45) !important;
+  background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.12) 0%, #071C13 70%) !important;
+}
+
+.bank-mp-theme {
+  border-color: rgba(0, 158, 227, 0.55) !important;
+  background: radial-gradient(circle at top right, rgba(0, 158, 227, 0.14) 0%, #071C13 70%) !important;
+}
+
+.bank-title {
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+  color: #F5D77F !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 6px !important;
+}
+
+.bank-title.mp-title {
+  color: #00B1EA !important;
+}
+
+.bank-subtitle {
+  font-size: 0.76rem !important;
+  color: #A3B8AC !important;
+  margin-bottom: 12px !important;
+  line-height: 1.4 !important;
+}
+
+.bank-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+  margin-bottom: 8px !important;
+  gap: 8px !important;
+}
+
+.bank-label {
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  color: #8CA093 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  white-space: nowrap !important;
+}
+
+.bank-code {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  letter-spacing: 0.6px !important;
+}
+
+.bank-code.mp-code {
+  color: #00B1EA !important;
+}
+
+.bank-code.mp-cvu {
+  font-size: 0.82rem !important;
+  color: #E2E8F0 !important;
+}
+
+.bank-value {
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  color: #FAF6F0 !important;
+}
+
+.copy-btn {
+  background: rgba(212, 175, 55, 0.15) !important;
+  color: #F5D77F !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
+  border-radius: 8px !important;
+  padding: 4px 12px !important;
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+}
+
+.copy-btn:hover {
+  background: #D4AF37 !important;
+  color: #0A1C12 !important;
+  border-color: #D4AF37 !important;
+}
+
+.copy-btn.copy-btn-mp {
+  background: rgba(0, 158, 227, 0.18) !important;
+  color: #00B1EA !important;
+  border-color: rgba(0, 158, 227, 0.5) !important;
+}
+
+.copy-btn.copy-btn-mp:hover {
+  background: #009EE3 !important;
+  color: #FFFFFF !important;
+  border-color: #009EE3 !important;
+}
+
+.mp-footer-note {
+  font-size: 0.73rem !important;
+  color: #38BDF8 !important;
+  font-weight: 600 !important;
+  margin-top: 10px !important;
+  line-height: 1.35 !important;
+}
+
+/* ── 6. Confirmation Ticket Boxes ── */
+.ticket-alias-box {
+  background: #071C13 !important;
+  border-radius: 16px !important;
+  padding: 16px !important;
+  margin-bottom: 14px !important;
+  text-align: left !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+  border: 1.5px solid rgba(212, 175, 55, 0.35) !important;
+}
+
+.ticket-alias-box.ticket-mp-theme {
+  border-color: rgba(0, 158, 227, 0.55) !important;
+  background: radial-gradient(circle at top right, rgba(0, 158, 227, 0.14) 0%, #071C13 70%) !important;
+}
+
+.ticket-alias-box.ticket-cash-theme {
+  border-color: rgba(90, 155, 118, 0.5) !important;
+  background: radial-gradient(circle at top right, rgba(90, 155, 118, 0.14) 0%, #071C13 70%) !important;
+}
+
+.ticket-alias-header {
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+  color: #F5D77F !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-bottom: 6px !important;
+}
+
+.ticket-alias-header.mp-title {
+  color: #00B1EA !important;
+}
+
+.ticket-alias-header.cash-title {
+  color: #5A9B76 !important;
+}
+
+.ticket-subtitle {
+  font-size: 0.78rem !important;
+  color: #CBD8D1 !important;
+  margin-bottom: 10px !important;
+}
+
+.ticket-alias-value-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+  margin-bottom: 8px !important;
+  gap: 8px !important;
+}
+
+.ticket-label {
+  font-size: 0.68rem !important;
+  color: #8CA093 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+}
+
+.ticket-alias-code {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  letter-spacing: 0.5px !important;
+}
+
+.ticket-alias-code.mp-code {
+  color: #00B1EA !important;
+}
+
+.btn-copy-sm {
+  background: rgba(212, 175, 55, 0.15) !important;
+  color: #F5D77F !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
+  border-radius: 8px !important;
+  padding: 5px 12px !important;
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-copy-sm:hover {
+  background: #D4AF37 !important;
+  color: #0A1C12 !important;
+}
+
+.btn-copy-sm.btn-copy-mp {
+  background: rgba(0, 158, 227, 0.18) !important;
+  color: #00B1EA !important;
+  border-color: rgba(0, 158, 227, 0.5) !important;
+}
+
+.btn-copy-sm.btn-copy-mp:hover {
+  background: #009EE3 !important;
+  color: #FFFFFF !important;
+}
+
+.ticket-amount-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  border-top: 1px dashed rgba(212, 175, 55, 0.25) !important;
+  padding-top: 10px !important;
+  margin-top: 8px !important;
+}
+
+.ticket-amount-row span {
+  font-weight: 700 !important;
+  color: #CBD8D1 !important;
+  font-size: 0.85rem !important;
+}
+
+.ticket-amount-row strong {
+  color: #F5D77F !important;
+  font-size: 1.15rem !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+.ticket-amount-row.mp-amount-row {
+  border-top-color: rgba(0, 158, 227, 0.3) !important;
+}
+
+.ticket-amount-row.mp-amount-row strong {
+  color: #00B1EA !important;
+}
+
+.ticket-cash-text {
+  color: #CBD8D1 !important;
+  margin: 0 !important;
+  font-size: 0.84rem !important;
+  line-height: 1.4 !important;
+}
+
+.ticket-cash-text strong {
+  color: #5A9B76 !important;
+}
+
+/* ── 7. Store Closed Notice Banner ── */
+#checkout-store-closed-banner {
+  background: rgba(201, 168, 76, 0.12) !important;
+  border: 1px solid rgba(201, 168, 76, 0.4) !important;
+  color: #F5D77F !important;
+  padding: 10px 14px !important;
+  border-radius: 12px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+  line-height: 1.4 !important;
+}
+
+/* ── 8. Global Secondary & Outline Buttons ── */
+.btn-secondary {
+  width: 100%;
+  padding: 11px 18px;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1.5px solid rgba(212, 175, 55, 0.3) !important;
+  border-radius: var(--radius-sm);
+  color: #FAF6F0 !important;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.btn-secondary:hover {
+  background: rgba(212, 175, 55, 0.15) !important;
+  border-color: #D4AF37 !important;
+  color: #F5D77F !important;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  width: 100%;
+  padding: 10px 18px;
+  background: transparent;
+  border: 1.5px solid rgba(212, 175, 55, 0.4);
+  border-radius: var(--radius-sm);
+  color: #F5D77F;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: #D4AF37;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* ── 9. Order History Cards & Actions ── */
+.orders-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.order-history-card {
+  background: #081E16;
+  border: 1.5px solid rgba(212, 175, 55, 0.25);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: all 0.2s ease;
+}
+
+.order-history-card:hover {
+  border-color: rgba(212, 175, 55, 0.45);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+.order-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.order-history-id {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #F5D77F;
+}
+
+.order-history-date {
+  font-size: 0.72rem;
+  color: #8CA093;
+  margin-top: 2px;
+}
+
+.btn-order-delete {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #FAF6F0;
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.btn-order-delete:hover {
+  background: rgba(192, 57, 43, 0.2);
+  border-color: #C0392B;
+}
+
+.order-history-items-summary {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  color: #CBD8D1;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.order-history-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(212, 175, 55, 0.2);
+}
+
+.order-history-total {
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+}
+
+.order-history-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-order-action {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Outfit', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.btn-order-ticket {
+  background: rgba(212, 175, 55, 0.15);
+  color: #F5D77F;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.btn-order-ticket:hover {
+  background: #D4AF37;
+  color: #0A1C12;
+}
+
+.btn-order-whatsapp {
+  background: rgba(37, 211, 102, 0.15);
+  color: #25D366;
+  border: 1px solid rgba(37, 211, 102, 0.4);
+}
+
+.btn-order-whatsapp:hover {
+  background: #25D366;
+  color: #FFFFFF;
+}
+
+.orders-empty-state {
+  text-align: center;
+  padding: 36px 16px;
+}
+
+.orders-empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+
 
 

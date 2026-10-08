@@ -209,6 +209,24 @@ class AdminManager {
       };
 
       window.productManager.addProduct(newProduct);
+
+      // Sincronizar con el backend persistente
+      try {
+        const authHeaders = (window.sellerPortal && typeof window.sellerPortal.getAuthHeaders === 'function')
+          ? window.sellerPortal.getAuthHeaders()
+          : { 'Content-Type': 'application/json' };
+
+        fetch('/api/seller/products', {
+          method: 'POST',
+          headers: authHeaders,
+          body: JSON.stringify(newProduct)
+        }).then(r => r.json()).then(() => {
+          if (window.sellerPortal && typeof window.sellerPortal.renderSellerProducts === 'function') {
+            window.sellerPortal.renderSellerProducts();
+          }
+        }).catch(e => console.warn('Aviso backend:', e));
+      } catch (err) {}
+
       window.app.showToast(`✅ "${name}" publicado por ${targetBusinessName}`);
       window.app.renderBusinessesSlider();
       window.app.renderProducts();

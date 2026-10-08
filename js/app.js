@@ -8,6 +8,8 @@ class DulceAtelierApp {
     this.currentCategory = 'todos';
     this.currentFilter = 'all';
     this.currentAddress = localStorage.getItem('dulce_user_address') || 'Palermo Hollywood, CABA';
+    this.userCoords = this.loadUserCoords();
+    this.onlyInRange = localStorage.getItem('godmarket_only_in_range') === 'true';
     this.searchQuery = '';
     this.selectedProductForModal = null;
     this.favorites = this.loadFavorites();
@@ -16,6 +18,24 @@ class DulceAtelierApp {
     this.deliveryMarker = null;
 
     document.addEventListener('DOMContentLoaded', () => this.init());
+  }
+
+  loadUserCoords() {
+    try {
+      const saved = localStorage.getItem('godmarket_user_coords');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed.lat === 'number' && typeof parsed.lng === 'number') {
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return { lat: -34.5885, lng: -58.4285 }; // Coordenadas Palermo Hollywood por defecto
+  }
+
+  saveUserCoords(coords) {
+    this.userCoords = coords;
+    localStorage.setItem('godmarket_user_coords', JSON.stringify(coords));
   }
 
   init() {
@@ -290,6 +310,35 @@ class DulceAtelierApp {
           } else {
             if (addressInput) addressInput.classList.remove('is-invalid');
           }
+
+          // Validación de Radio de Entrega del Vendedor
+          const outOfRange = [];
+          window.cartManager.items.forEach(item => {
+            const b = window.productManager.getBusinessById(item.product.businessId);
+            if (b) {
+              const bLat = b.lat !== undefined ? b.lat : -34.5885;
+              const bLng = b.lng !== undefined ? b.lng : -58.4285;
+              const dist = calculateDistanceKm(this.userCoords.lat, this.userCoords.lng, bLat, bLng);
+              const maxRadius = b.deliveryRadiusKm || 5.0;
+              if (dist > maxRadius) {
+                if (!outOfRange.some(o => o.name === b.name)) {
+                  outOfRange.push({ name: b.name, dist, maxRadius });
+                }
+              }
+            }
+          });
+
+          if (outOfRange.length > 0) {
+            const listStr = outOfRange.map(o => `• ${o.name}: estás a ${o.dist} km (su radio máximo de envío es ${o.maxRadius} km)`).join('\n');
+            const switchPickup = confirm(`⚠️ Atención de Cobertura:\nTu dirección está fuera del radio de entrega a domicilio para:\n${listStr}\n\n¿Deseas cambiar tu pedido a 'Retiro en Local' para coordinar el retiro sin cargo?`);
+            if (switchPickup) {
+              window.cartManager.setDeliveryType('pickup');
+              this.switchDeliveryType('pickup');
+            } else {
+              this.showToast("⚠️ Por favor cambia tu dirección o selecciona Retiro en Local");
+              return;
+            }
+          }
         }
 
         // Validación de Horario / Fecha preferida
@@ -370,26 +419,91 @@ class DulceAtelierApp {
   }
 
   renderLocationBar() {
-    const el = document.getElementById('current-delivery-address');
-    if (el) {
-      el.textContent = this.currentAddress;
-    }
+    const ids = [
+      'current-delivery-address',
+      'desktop-delivery-address',
+      'side-menu-address',
+      'profile-current-address-label'
+    ];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = this.currentAddress;
+    });
   }
 
   openAddressModal() {
     this.openModal('address-picker-modal');
   }
 
-  selectNeighborhood(neighborhood) {
+  selectNeighborhood(neighborhood, lat = null, lng = null) {
     this.currentAddress = `${neighborhood}, CABA`;
     localStorage.setItem('dulce_user_address', this.currentAddress);
+
+    // Si se pasan coordenadas fijas del barrio, guardarlas
+    if (lat !== null && lng !== null) {
+      this.saveUserCoords({ lat, lng });
+    }
+
     this.renderLocationBar();
     this.closeModal('address-picker-modal');
-    this.showToast(`📍 Dirección actualizada a ${this.currentAddress}`);
+    this.showToast(`📍 Ubicación actualizada a ${this.currentAddress}`, 'gold');
+
+    // Re-renderizar locales y catálogo con las nuevas distancias
+    this.renderStoresCards();
+    this.renderBusinessesSlider();
+    this.renderProducts();
+
     // Actualizar también campo de dirección en checkout si está vacío
     const addressInput = document.getElementById('cust-address');
     if (addressInput && !addressInput.value) {
       addressInput.value = this.currentAddress;
+    }
+  }
+
+  detectUserGPS() {
+    if (!navigator.geolocation) {
+      this.showToast('⚠️ Tu navegador no soporta geolocalización GPS.');
+      return;
+    }
+
+    this.showToast('📡 Detectando tu ubicación GPS...', 'gold');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = parseFloat(pos.coords.latitude.toFixed(5));
+        const lng = parseFloat(pos.coords.longitude.toFixed(5));
+        this.saveUserCoords({ lat, lng });
+        this.currentAddress = '📍 Ubicación GPS Actual';
+        localStorage.setItem('dulce_user_address', this.currentAddress);
+
+        this.renderLocationBar();
+        this.renderStoresCards();
+        this.renderBusinessesSlider();
+        this.renderProducts();
+        this.closeModal('address-picker-modal');
+        this.showToast('✅ Ubicación GPS detectada. Locales actualizados según tu distancia.', 'gold');
+
+        const addressInput = document.getElementById('cust-address');
+        if (addressInput && !addressInput.value) {
+          addressInput.value = this.currentAddress;
+        }
+      },
+      (err) => {
+        console.warn('GPS error:', err);
+        this.showToast('⚠️ No se pudo acceder a tu GPS. Por favor selecciona tu barrio.');
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  }
+
+  setOnlyInRange(checked) {
+    this.onlyInRange = checked;
+    localStorage.setItem('godmarket_only_in_range', checked ? 'true' : 'false');
+    this.renderStoresCards();
+    this.renderProducts();
+    if (checked) {
+      this.showToast('🛵 Mostrando solo locales con envío a tu zona');
+    } else {
+      this.showToast('✨ Mostrando todos los locales del marketplace');
     }
   }
 
@@ -406,7 +520,7 @@ class DulceAtelierApp {
       {
         id: 'desayunos',
         name: 'Desayunos',
-        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 16.5-1.5 1.5 2 2 1.5-1.5"/><path d="m19.5 7.5 1.5-1.5-2-2-1.5 1.5"/><path d="M14.5 4.5 10 9l5 5 4.5-4.5a3.5 3.5 0 0 0-5-5Z"/><path d="m8 11-3.5 3.5a3.5 3.5 0 0 0 5 5L13 16"/></svg>`
+        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`
       },
       {
         id: 'healthy',
@@ -571,36 +685,76 @@ class DulceAtelierApp {
     const container = document.getElementById('stores-py-grid');
     if (!container) return;
 
-    const businesses = window.productManager.getBusinessesFiltered(this.currentFilter);
+    const totalAll = window.productManager.getAllBusinesses().length;
 
-    if (businesses.length === 0) {
+    // Si aún no hay comercios registrados en el marketplace
+    if (totalAll === 0) {
       container.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: var(--cream-muted);">
-          <p>No se encontraron cafeterías con este filtro.</p>
-          <button class="btn-primary" onclick="window.app.setFilter('all')" style="margin: 10px auto 0; max-width: 180px; padding: 6px 14px; font-size: 0.8rem;">
-            Ver todas las cafeterías
+        <div style="grid-column: 1 / -1; text-align: center; padding: 48px 24px; color: #CBD8D1; background: rgba(0,0,0,0.3); border-radius: 20px; border: 1.5px dashed rgba(212,175,55,0.3); margin: 12px 0;">
+          <div style="font-size: 3.2rem; margin-bottom: 12px;">🏪</div>
+          <h3 style="color: #FFF; font-size: 1.3rem; font-family: 'Cinzel', serif; margin-bottom: 8px;">Marketplace Listo para Inaugurar</h3>
+          <p style="font-size: 0.88rem; max-width: 480px; margin: 0 auto 18px auto; line-height: 1.5; color: #A3B8AC;">
+            ¡Sé el primer comercio en formar parte de GOD MARKET! Registra tu pastelería o cafetería, define tu radio circular de entrega en el mapa y comienza a recibir pedidos.
+          </p>
+          <button class="btn-primary" onclick="window.sellerPortal.chooseRole('vendedor')" style="width: auto; padding: 12px 28px; font-size: 0.92rem; font-weight: 700; margin: 0 auto; box-shadow: 0 4px 15px rgba(212,175,55,0.25); cursor: pointer;">
+            🚀 Registrar Mi Local & Vender
           </button>
         </div>
       `;
       return;
     }
 
-    container.innerHTML = businesses.map(b => `
-      <div class="cafeteria-god-card" onclick="window.app.setBusiness('${b.id}')" title="Ver menú de ${this.escapeHTML(b.name)}">
-        <div class="cafeteria-card-img-wrap">
-          <img class="cafeteria-card-img" src="${b.cover || 'assets/images/lumiere_cafe.jpg'}" alt="${this.escapeHTML(b.name)}" loading="lazy">
-        </div>
-        <div class="cafeteria-card-body">
-          <h4 class="cafeteria-card-title">${this.escapeHTML(b.name)}</h4>
-          <p class="cafeteria-card-sub">${this.escapeHTML(b.tagline)}</p>
-          <div class="cafeteria-card-meta">
-            <span class="star-gold">★ ${b.rating}</span>
-            <span>·</span>
-            <span>${b.distance}</span>
+    const businesses = window.productManager.getBusinessesFiltered(this.currentFilter, this.userCoords, this.onlyInRange);
+
+    // Si hay locales pero ninguno llega con delivery a la ubicación actual del cliente
+    if (businesses.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 32px 20px; color: var(--cream-muted); background: rgba(0,0,0,0.25); border-radius: 16px; border: 1px dashed rgba(212,175,55,0.25);">
+          <div style="font-size: 2.5rem; margin-bottom: 8px;">🛵</div>
+          <h4 style="color: #FFF; font-size: 1.05rem; margin-bottom: 6px;">No hay cafeterías disponibles en tu radio de entrega</h4>
+          <p style="font-size: 0.82rem; max-width: 360px; margin: 0 auto 14px auto; line-height: 1.4;">
+            Actualmente ningún local con este filtro llega a tu dirección (${this.escapeHTML(this.currentAddress)}). Puedes desactivar el filtro de cobertura o cambiar tu barrio.
+          </p>
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn-primary" onclick="window.app.setOnlyInRange(false); window.app.setFilter('all');" style="width: auto; padding: 8px 18px; font-size: 0.82rem;">
+              Ver todos los locales (Modo Retiro)
+            </button>
+            <button class="btn-secondary" onclick="window.app.openAddressModal()" style="width: auto; padding: 8px 18px; font-size: 0.82rem; background: rgba(255,255,255,0.1); color: #FFF; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer;">
+              📍 Cambiar mi ubicación
+            </button>
           </div>
         </div>
-      </div>
-    `).join('');
+      `;
+      return;
+    }
+
+    container.innerHTML = businesses.map(b => {
+      const reachBadge = b.inDeliveryRange
+        ? `<span class="coverage-badge in-range">🛵 En tu zona</span>`
+        : `<span class="coverage-badge out-range">⚠️ Fuera de radio</span>`;
+
+      return `
+        <div class="cafeteria-god-card" onclick="window.app.setBusiness('${b.id}')" title="Ver menú de ${this.escapeHTML(b.name)}">
+          <div class="cafeteria-card-img-wrap">
+            <img class="cafeteria-card-img" src="${b.cover || 'assets/images/lumiere_cafe.jpg'}" alt="${this.escapeHTML(b.name)}" loading="lazy">
+          </div>
+          <div class="cafeteria-card-body">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-bottom: 4px;">
+              <h4 class="cafeteria-card-title">${this.escapeHTML(b.name)}</h4>
+              ${reachBadge}
+            </div>
+            <p class="cafeteria-card-sub">${this.escapeHTML(b.tagline)}</p>
+            <div class="cafeteria-card-meta">
+              <span class="star-gold">★ ${b.rating}</span>
+              <span>·</span>
+              <span title="Distancia estimada">${b.distance}</span>
+              <span>·</span>
+              <span style="font-size: 0.72rem; color: #8CA093;" title="Radio de entrega a domicilio">Radio: ${b.deliveryRadiusKm || 5} km</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   renderBusinessesSlider() {
@@ -609,12 +763,25 @@ class DulceAtelierApp {
 
     const businesses = window.productManager.getAllBusinesses();
 
+    if (businesses.length === 0) {
+      container.innerHTML = `
+        <div class="business-chip active" onclick="window.sellerPortal.chooseRole('vendedor')">
+          <div class="business-chip-avatar">🏪</div>
+          <div class="business-chip-info">
+            <span class="business-chip-name">Publicar Mi Local</span>
+            <span class="business-chip-zone">Únete a GOD MARKET</span>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
     let html = `
       <div class="business-chip ${this.selectedBusiness === 'todos' ? 'active' : ''}" 
            onclick="window.app.setBusiness('todos')">
         <div class="business-chip-avatar">✨</div>
         <div class="business-chip-info">
-          <span class="business-chip-name">Todas (7)</span>
+          <span class="business-chip-name">Todas (${businesses.length})</span>
           <span class="business-chip-zone">Marketplace</span>
         </div>
       </div>
@@ -625,12 +792,12 @@ class DulceAtelierApp {
       html += `
         <div class="business-chip ${isActive ? 'active' : ''}" 
              onclick="window.app.setBusiness('${b.id}')">
-          <div class="business-chip-avatar">${b.avatar}</div>
+          <div class="business-chip-avatar">${b.avatar || '🍰'}</div>
           <div class="business-chip-info">
             <span class="business-chip-name">${this.escapeHTML(b.name)}</span>
-            <span class="business-chip-zone">📍 ${this.escapeHTML(b.neighborhood)}</span>
+            <span class="business-chip-zone">📍 ${this.escapeHTML(b.neighborhood || 'Buenos Aires')}</span>
           </div>
-          <div class="business-chip-rating">⭐ ${b.rating}</div>
+          <div class="business-chip-rating">⭐ ${b.rating || 5.0}</div>
         </div>
       `;
     });
@@ -677,7 +844,7 @@ class DulceAtelierApp {
           <div class="store-profile-avatar-wrap">${business.avatar}</div>
           
           <div class="store-profile-header-actions">
-            <a href="https://wa.me/${business.phone || '5491156192616'}?text=${encodeURIComponent(`¡Hola ${business.name}! Los contacto desde Dulce Market por sus desayunos y meriendas.`)}" 
+            <a href="https://wa.me/${business.phone || '5491156192616'}?text=${encodeURIComponent(`¡Hola ${business.name}! Los contacto desde GOD MARKET por sus propuestas.`)}" 
                target="_blank" class="btn-chat-seller">
               <span>💬</span>
               <span>Hablar con el Vendedor</span>
@@ -705,6 +872,20 @@ class DulceAtelierApp {
               <span>•</span>
               <span>🕒 ${this.escapeHTML(business.schedule || '08:30 a 20:00 hs')}</span>
             </div>
+
+            <!-- Badge dinámico de Cobertura según la ubicación del cliente -->
+            <div style="margin-top: 8px;">
+              ${(() => {
+                const bLat = business.lat !== undefined ? business.lat : -34.5885;
+                const bLng = business.lng !== undefined ? business.lng : -58.4285;
+                const dist = calculateDistanceKm(this.userCoords.lat, this.userCoords.lng, bLat, bLng);
+                const radius = business.deliveryRadiusKm || 5.0;
+                const inRange = dist <= radius;
+                return inRange
+                  ? `<span class="coverage-badge in-range">🛵 En tu zona (${dist} km de tu ubicación • Radio hasta ${radius} km)</span>`
+                  : `<span class="coverage-badge out-range">⚠️ Fuera de radio (${dist} km de tu ubicación • Radio máx: ${radius} km — Solo Retiro)</span>`;
+              })()}
+            </div>
           </div>
 
           <!-- Política de Envío a cargo del vendedor destacada -->
@@ -713,6 +894,16 @@ class DulceAtelierApp {
             <div>
               <strong>Logística a cargo de ${this.escapeHTML(business.name)}:</strong>
               <div>Cadetería propia con caja térmica especial para pastelería y desayunos. Entrega estimada: <strong>${business.deliveryTime}</strong> (Costo: ${window.cartManager.formatCurrency(business.deliveryFee)}). ¡Envío gratis a partir de ${window.cartManager.formatCurrency(business.freeShippingFrom || 45000)}!</div>
+              ${(() => {
+                const bLat = business.lat !== undefined ? business.lat : -34.5885;
+                const bLng = business.lng !== undefined ? business.lng : -58.4285;
+                const dist = calculateDistanceKm(this.userCoords.lat, this.userCoords.lng, bLat, bLng);
+                const radius = business.deliveryRadiusKm || 5.0;
+                const inRange = dist <= radius;
+                return `<div style="margin-top: 5px; font-size: 0.73rem; font-weight: 600; color: ${inRange ? '#38D9A9' : '#F87171'};">
+                  ${inRange ? `✅ Tu dirección está dentro del radio de entrega (${dist} km / ${radius} km máx).` : `⚠️ Tu dirección está fuera del radio de entrega (${dist} km / ${radius} km máx). Tu pedido será preparado para retiro en local.`}
+                </div>`;
+              })()}
             </div>
           </div>
         </div>
@@ -754,6 +945,23 @@ class DulceAtelierApp {
     let products = window.productManager.search(this.searchQuery, this.selectedBusiness, this.currentCategory);
 
     if (products.length === 0) {
+      const totalInMarket = window.productManager.getAllProducts().length;
+      if (totalInMarket === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 48px 24px; color: #CBD8D1; background: rgba(0,0,0,0.3); border-radius: 20px; border: 1.5px dashed rgba(212,175,55,0.3); margin: 20px 0;">
+            <div style="font-size: 3.2rem; margin-bottom: 12px;">🥐</div>
+            <h3 style="color: #FFF; font-size: 1.3rem; font-family: 'Cinzel', serif; margin-bottom: 8px;">Catálogo Listo para Cargar</h3>
+            <p style="font-size: 0.88rem; max-width: 480px; margin: 0 auto 18px auto; line-height: 1.5; color: #A3B8AC;">
+              Aún no hay productos publicados en el marketplace. Como comercio o pastelero, puedes registrarte y publicar tus creaciones gourmet con foto en minutos.
+            </p>
+            <button class="btn-primary" onclick="window.sellerPortal.chooseRole('vendedor')" style="width: auto; padding: 12px 28px; font-size: 0.92rem; font-weight: 700; margin: 0 auto; box-shadow: 0 4px 15px rgba(212,175,55,0.25); cursor: pointer;">
+              ✨ Acceso Vendedores / Publicar Producto
+            </button>
+          </div>
+        `;
+        return;
+      }
+
       container.innerHTML = `
         <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
           <div style="font-size: 3rem; margin-bottom: 10px;">🥐</div>
@@ -840,6 +1048,18 @@ class DulceAtelierApp {
 
   renderProductCard(product) {
     const isFav = this.favorites.includes(product.id);
+    const b = window.productManager.getBusinessById(product.businessId);
+    let reachInfo = '';
+    if (b) {
+      const bLat = b.lat !== undefined ? b.lat : -34.5885;
+      const bLng = b.lng !== undefined ? b.lng : -58.4285;
+      const dist = calculateDistanceKm(this.userCoords.lat, this.userCoords.lng, bLat, bLng);
+      const inRange = dist <= (b.deliveryRadiusKm || 5.0);
+      reachInfo = inRange
+        ? `<span style="font-size: 0.68rem; color: #38D9A9; font-weight: 700; background: rgba(56,217,169,0.12); padding: 2px 6px; border-radius: 4px;">🛵 En tu zona (${dist} km)</span>`
+        : `<span style="font-size: 0.68rem; color: #F87171; font-weight: 700; background: rgba(248,113,113,0.12); padding: 2px 6px; border-radius: 4px;">🏪 Retiro (${dist} km)</span>`;
+    }
+
     return `
       <div class="product-card" onclick="window.app.openProductModal('${product.id}')">
         <div class="product-image-container">
@@ -853,10 +1073,13 @@ class DulceAtelierApp {
           </button>
         </div>
         <div class="product-content">
-          <div class="product-store-badge">
-            <span class="store-badge-avatar">${product.businessAvatar || '🏪'}</span>
-            <span class="store-badge-name">${this.escapeHTML(product.businessName || 'Pastelería')}</span>
-            <span class="store-badge-zone">• ${this.escapeHTML(product.businessNeighborhood || '')}</span>
+          <div class="product-store-badge" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span class="store-badge-avatar">${product.businessAvatar || '🏪'}</span>
+              <span class="store-badge-name">${this.escapeHTML(product.businessName || 'Pastelería')}</span>
+              <span class="store-badge-zone">• ${this.escapeHTML(product.businessNeighborhood || '')}</span>
+            </div>
+            ${reachInfo}
           </div>
           <h4 class="product-title">${this.escapeHTML(product.name)}</h4>
           <p class="product-desc-short">${this.escapeHTML(product.description)}</p>
@@ -892,7 +1115,19 @@ class DulceAtelierApp {
     const storeZone = document.getElementById('modal-store-zone');
     if (storeAvatar) storeAvatar.textContent = product.businessAvatar || '🏪';
     if (storeName) storeName.textContent = product.businessName || 'Pastelería Asociada';
-    if (storeZone) storeZone.textContent = product.businessNeighborhood ? `• 📍 ${product.businessNeighborhood}` : '';
+
+    const b = window.productManager.getBusinessById(product.businessId);
+    if (storeZone) {
+      if (b) {
+        const bLat = b.lat !== undefined ? b.lat : -34.5885;
+        const bLng = b.lng !== undefined ? b.lng : -58.4285;
+        const dist = calculateDistanceKm(this.userCoords.lat, this.userCoords.lng, bLat, bLng);
+        const inRange = dist <= (b.deliveryRadiusKm || 5.0);
+        storeZone.innerHTML = `• 📍 ${product.businessNeighborhood || ''} <span style="margin-left: 6px; color: ${inRange ? '#38D9A9' : '#F87171'}; font-weight: 700;">(${inRange ? `🛵 En tu zona a ${dist} km` : `🏪 Solo retiro • ${dist} km`})</span>`;
+      } else {
+        storeZone.textContent = product.businessNeighborhood ? `• 📍 ${product.businessNeighborhood}` : '';
+      }
+    }
 
     // Reset inputs
     document.getElementById('modal-qty-val').textContent = '1';
@@ -1246,7 +1481,7 @@ class DulceAtelierApp {
   }
 
   copyAlias() {
-    const alias = "DULCE.ATELIER.BA";
+    const alias = "GODMARKET.BA";
     navigator.clipboard.writeText(alias).then(() => {
       const btnTicket = document.getElementById('btn-copy-alias-ticket');
       if (btnTicket) {
@@ -1258,7 +1493,7 @@ class DulceAtelierApp {
   }
 
   copyMPAlias() {
-    const alias = "DULCE.ATELIER.MP";
+    const alias = "GODMARKET.MP";
     navigator.clipboard.writeText(alias).then(() => {
       const btnTicket = document.getElementById('btn-copy-mp-alias-ticket');
       const btnForm = document.getElementById('btn-copy-mp-alias');
@@ -1415,7 +1650,7 @@ class DulceAtelierApp {
           <div class="orders-empty-icon">🧁</div>
           <h4 class="font-serif" style="font-size: 1.15rem; margin-bottom: 6px;">No tienes pedidos registrados</h4>
           <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.4;">
-            Cuando realices un pedido en Dulce Atelier, quedará guardado automáticamente en tu celular para ver tu historial y comprobantes.
+            Cuando realices un pedido en GOD MARKET, quedará guardado automáticamente en tu celular para ver tu historial y comprobantes.
           </p>
           <button type="button" class="btn-primary" onclick="window.app.closeModal('orders-history-modal')" style="width: auto; padding: 8px 20px; margin: 0 auto; font-size: 0.85rem;">
             Ver Menú y Elegir Delicias
@@ -1495,7 +1730,7 @@ class DulceAtelierApp {
     if (!order) return;
 
     const name = order.formData?.fullName || '';
-    const text = `¡Hola Dulce Atelier! ✦ Me comunico por mi pedido #${order.orderId}${name ? ` a nombre de ${name}` : ''}. ¡Muchas gracias!`;
+    const text = `¡Hola GOD MARKET! ✦ Me comunico por mi pedido #${order.orderId}${name ? ` a nombre de ${name}` : ''}. ¡Muchas gracias!`;
     const url = window.checkoutHandler.buildWhatsAppUrl(text);
     window.open(url, '_blank');
   }

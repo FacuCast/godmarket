@@ -23,7 +23,11 @@ yarn-error.log*
 Thumbs.db
 Desktop.ini
 
-# Editores e IDEs
+# Base de datos y datos locales de ejecución
+data/
+
+# Editores, IDEs y temporales
+scratch/
 .vscode/
 .idea/
 *.suo

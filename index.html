@@ -11,9 +11,9 @@
 
   <!-- Open Graph / WhatsApp / Facebook Link Preview Card -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="🧁 Dulce Market | Marketplace de Desayunos & Meriendas">
+  <meta property="og:title" content="GOD MARKET | Marketplace de Cafeterías & Desayunos Premium">
   <meta property="og:description"
-    content="Descubre y pide desayunos sorpresa, meriendas y delicias de 7 pastelerías artesanales. ¡Envío rápido a domicilio o retiro!">
+    content="Descubre y pide desayunos sorpresa, cafeterías de especialidad y delicias de autor. ¡Envío rápido a domicilio o retiro!">
   <meta property="og:image"
     content="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80">
   <meta property="og:image:secure_url"
@@ -24,9 +24,9 @@
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="🧁 Dulce Market | Marketplace de Desayunos & Meriendas">
+  <meta name="twitter:title" content="GOD MARKET | Marketplace de Cafeterías & Desayunos Premium">
   <meta name="twitter:description"
-    content="Descubre y pide desayunos sorpresa, meriendas y delicias de 7 pastelerías artesanales. ¡Envío rápido a domicilio!">
+    content="Descubre y pide desayunos sorpresa, cafeterías de especialidad y delicias de autor. ¡Envío rápido a domicilio o retiro!">
   <meta name="twitter:image"
     content="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80">
 
@@ -36,7 +36,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Dulce Market">
+  <meta name="apple-mobile-web-app-title" content="GOD MARKET">
   <link rel="apple-touch-icon" href="assets/icons/icon.svg">
 
   <!-- Leaflet Maps CSS -->
@@ -52,16 +52,388 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets (Pure CSS) -->
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/responsive.css">
-  <link rel="stylesheet" href="css/mejoras-premium.css">
+  <link rel="stylesheet" href="css/main.css?v=19.0">
+  <link rel="stylesheet" href="css/components.css?v=19.0">
+  <link rel="stylesheet" href="css/responsive.css?v=19.0">
+  <link rel="stylesheet" href="css/mejoras-premium.css?v=19.0">
+  <link rel="stylesheet" href="css/seller-portal.css?v=19.0">
+
+  <!-- Google Identity Services (GIS SDK oficial) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
 
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
+
+  <!-- ============================================================================
+       1. MODAL SELECTOR DE ROL AL INGRESAR (Cliente vs Vendedor)
+       ============================================================================ -->
+  <div id="role-selector-modal" class="role-modal-overlay">
+    <div class="role-modal-card">
+      <button type="button" class="sheet-close-btn" style="position: absolute; top: 16px; right: 16px; color: #FFF; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="window.sellerPortal.chooseRole('cliente')" title="Cerrar y continuar como cliente">✕</button>
+      <div class="role-modal-badge">
+        <span>✨ Experiencia Gastronómica</span>
+      </div>
+      <h2 class="role-modal-title">Bienvenido a <span>GOD MARKET</span></h2>
+      <p class="role-modal-subtitle">¿Cómo deseas ingresar a la plataforma hoy?</p>
+
+      <div class="role-choices-grid">
+        <!-- Opción 1: Cliente -->
+        <div class="role-choice-card" onclick="window.sellerPortal.chooseRole('cliente')">
+          <div class="role-icon-box">🛍️</div>
+          <h4>Soy Cliente</h4>
+          <p>Explorar pastelerías, comprar desayunos gourmet, tortas y meriendas de autor.</p>
+          <button type="button" class="role-btn-action role-btn-client">
+            <span>Ingresar a Comprar →</span>
+          </button>
+        </div>
+
+        <!-- Opción 2: Vendedor -->
+        <div class="role-choice-card highlight" onclick="window.sellerPortal.chooseRole('vendedor')">
+          <div class="role-icon-box">🏪</div>
+          <h4>Soy Vendedor</h4>
+          <p>Gestionar mi pastelería o cafetería, publicar delicias y recibir pedidos.</p>
+          <button type="button" class="role-btn-action role-btn-seller">
+            <span>Acceso Negocios →</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="role-footer-note">
+        Podrás alternar entre modo Cliente y Vendedor en cualquier momento desde el menú.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================================
+       2. PANTALLA DE INICIO DE SESIÓN CON GOOGLE PARA VENDEDORES
+       ============================================================================ -->
+  <div id="seller-auth-screen" class="seller-auth-screen">
+    <div class="seller-auth-box">
+      <button type="button" class="sheet-close-btn" style="position: absolute; top: 16px; right: 16px; color: #FFF; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="window.sellerPortal.chooseRole('cliente')" title="Cerrar y volver a la tienda">✕</button>
+      <div class="role-modal-badge" style="margin-bottom: 12px;">
+        <span>🏪 Portal Negocios & Cafeterías</span>
+      </div>
+      <h2 class="role-modal-title" style="font-size: 1.65rem; margin-bottom: 8px;">
+        Acceso para <span>Vendedores</span>
+      </h2>
+      <p style="font-size: 0.85rem; color: #A3B8AC; margin-bottom: 22px; line-height: 1.45;">
+        Inicia sesión con tu cuenta de Google para gestionar tu pastelería, publicar tus propuestas y recibir pedidos en tu WhatsApp.
+      </p>
+
+      <!-- Botón Oficial de Google Identity Services -->
+      <div id="google-signin-btn-container" class="google-btn-wrapper"></div>
+
+      <!-- Acceso Rápido / Demo para pruebas inmediatas -->
+      <button type="button" class="demo-login-btn" onclick="window.sellerPortal.handleDemoLogin()">
+        <span>⚡ Iniciar sesión rápida (Modo Prueba / Demo)</span>
+      </button>
+
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08);">
+        <button type="button" onclick="window.sellerPortal.chooseRole('cliente')" style="background: transparent; border: none; color: #8FA295; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+          ← Volver a la Tienda como Cliente
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================================
+       3. PANTALLA DE ONBOARDING: LLENAR DATOS POR PRIMERA VEZ
+       ============================================================================ -->
+  <div id="seller-onboarding-screen" class="seller-onboarding-screen">
+    <div class="onboarding-card">
+      <!-- Barra superior de navegación para volver atrás -->
+      <div class="onboarding-top-nav">
+        <button type="button" class="btn-onboarding-back" onclick="window.sellerPortal.goBackToAuth()" title="Volver a la pantalla de login con Google">
+          <span>← Volver al Login</span>
+        </button>
+        <button type="button" class="btn-onboarding-back client-mode" onclick="window.sellerPortal.cancelOnboardingAndGoBack()" title="Volver al Marketplace como cliente">
+          <span>🛍️ Cancelar e ir a la Tienda</span>
+        </button>
+      </div>
+
+      <div class="role-modal-badge" style="margin-bottom: 10px;">
+        <span>🎉 Primera vez en GOD MARKET</span>
+      </div>
+      <h2 class="role-modal-title" style="font-size: 1.55rem; margin-bottom: 6px;">
+        Configura tu <span>Pastelería</span>
+      </h2>
+      <p style="font-size: 0.85rem; color: #A3B8AC; margin-bottom: 22px; line-height: 1.4;">
+        ¡Hola <strong id="onboarding-welcome-name" style="color: #E5C07B;">pastelero/a</strong>! Completa la información de tu negocio para activar tu local en el marketplace.
+      </p>
+
+      <form id="seller-onboarding-form">
+        <div class="onboarding-field-group">
+          <label class="onboarding-label" for="onboard-biz-name">Nombre de tu Pastelería / Negocio *</label>
+          <input type="text" id="onboard-biz-name" class="onboarding-input" placeholder="Ej: Café de Especialidad & Bistro" required>
+        </div>
+
+        <div class="form-row-2col">
+          <div class="onboarding-field-group">
+            <label class="onboarding-label" for="onboard-neighborhood">Barrio / Zona *</label>
+            <input type="text" id="onboard-neighborhood" class="onboarding-input" placeholder="Ej: Palermo Hollywood, CABA" required>
+          </div>
+          <div class="onboarding-field-group">
+            <label class="onboarding-label" for="onboard-phone">WhatsApp para Recibir Pedidos *</label>
+            <input type="tel" id="onboard-phone" class="onboarding-input" placeholder="Ej: 5491156192616" required>
+          </div>
+        </div>
+
+        <div class="onboarding-field-group">
+          <label class="onboarding-label" for="onboard-address">Dirección física o punto de retiro</label>
+          <input type="text" id="onboard-address" class="onboarding-input" placeholder="Ej: Humboldt 1950, Palermo">
+        </div>
+
+        <!-- Selector interactivo de Ubicación y Radio Circular de Envíos -->
+        <div class="onboarding-field-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="onboarding-label" style="margin-bottom: 0;">📍 Ubicación en el Mapa y Radio de Entrega</label>
+            <button type="button" class="btn-map-gps" onclick="window.sellerPortal.detectOnboardingLocationGPS()" title="Ubicar con GPS del dispositivo">
+              <span>📡 Mi GPS</span>
+            </button>
+          </div>
+          <p style="font-size: 0.76rem; color: #8FA295; margin-bottom: 8px;">
+            Haz clic en el mapa o arrastra el marcador para ubicar tu local. Los clientes verán si llegan tus envíos según este círculo de cobertura.
+          </p>
+
+          <!-- Contenedor del Mapa Leaflet para Vendedor -->
+          <div id="onboard-radius-map" class="seller-map-container" style="height: 220px; border-radius: 12px; border: 1px solid rgba(212,175,55,0.3); margin-bottom: 12px; z-index: 1;"></div>
+
+          <!-- Control de Radio Circular -->
+          <div class="radius-control-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.82rem; color: #E5EBE7; font-weight: 600;">Radio de alcance para envíos propios:</span>
+              <span id="onboard-radius-val" class="radius-val-badge">5.0 km</span>
+            </div>
+            <input type="range" id="onboard-radius-slider" min="1" max="15" step="0.5" value="5.0" class="gold-range-slider" oninput="window.sellerPortal.updateOnboardingRadius(parseFloat(this.value))">
+            
+            <div class="radius-presets-row">
+              <button type="button" class="radius-chip" onclick="window.sellerPortal.updateOnboardingRadius(3.0)">3 km (Zona)</button>
+              <button type="button" class="radius-chip active" onclick="window.sellerPortal.updateOnboardingRadius(5.0)">5 km (Estándar)</button>
+              <button type="button" class="radius-chip" onclick="window.sellerPortal.updateOnboardingRadius(8.0)">8 km (Media)</button>
+              <button type="button" class="radius-chip" onclick="window.sellerPortal.updateOnboardingRadius(12.0)">12 km (Amplia)</button>
+            </div>
+          </div>
+
+          <input type="hidden" id="onboard-lat" value="-34.5885">
+          <input type="hidden" id="onboard-lng" value="-58.4285">
+          <input type="hidden" id="onboard-radius" value="5.0">
+        </div>
+
+        <div class="onboarding-field-group">
+          <label class="onboarding-label" for="onboard-tagline">Especialidad o Eslogan del Local</label>
+          <input type="text" id="onboard-tagline" class="onboarding-input" placeholder="Ej: Especialistas en tortas húmedas, desayunos y boxes de té">
+        </div>
+
+        <div class="form-row-3col">
+          <div class="onboarding-field-group">
+            <label class="onboarding-label" for="onboard-schedule">Horario</label>
+            <input type="text" id="onboard-schedule" class="onboarding-input" value="08:30 - 20:00 hs">
+          </div>
+          <div class="onboarding-field-group">
+            <label class="onboarding-label" for="onboard-delivery-fee">Envío Base ($)</label>
+            <input type="number" id="onboard-delivery-fee" class="onboarding-input" value="1500">
+          </div>
+          <div class="onboarding-field-group">
+            <label class="onboarding-label" for="onboard-delivery-time">Tiempo</label>
+            <input type="text" id="onboard-delivery-time" class="onboarding-input" value="30-45 min">
+          </div>
+        </div>
+
+        <div class="onboarding-field-group">
+          <label class="onboarding-label" for="onboard-avatar">Ícono / Emoji representativo del Local</label>
+          <select id="onboard-avatar" class="onboarding-select">
+            <option value="🍰">🍰 Pastelería Fina & Tortas</option>
+            <option value="☕">☕ Cafetería de Especialidad</option>
+            <option value="🥐">🥐 Boulangerie & Croissants</option>
+            <option value="🥑">🥑 Brunch Saludable & Healthy</option>
+            <option value="🎁">🎁 Boxes de Regalo & Sorpresa</option>
+            <option value="🍪">🍪 Cookies XL & Sweet Treats</option>
+          </select>
+        </div>
+
+        <div class="onboarding-field-group">
+          <label class="onboarding-label" for="onboard-desc">Descripción del Negocio</label>
+          <textarea id="onboard-desc" class="onboarding-textarea" rows="2" placeholder="Describe brevemente tus mejores propuestas culinarias..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+          <button type="button" onclick="window.sellerPortal.cancelOnboardingAndGoBack()" class="btn-onboarding-cancel" style="flex: 1; min-width: 180px; text-align: center;">
+            ← Volver a la Tienda
+          </button>
+          <button type="submit" id="btn-submit-onboard" class="onboarding-submit-btn" style="flex: 2; min-width: 220px; margin-top: 0;">
+            🚀 Crear Mi Perfil de Vendedor
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================================
+       4. DASHBOARD COMPLETO DEL VENDEDOR (PERFIL CREADO)
+       ============================================================================ -->
+  <div id="seller-portal-view" class="seller-full-portal">
+    <!-- Topbar del Vendedor -->
+    <header class="seller-topbar">
+      <div class="seller-topbar-brand">
+        <div class="brand-godmarket" style="cursor: default;">
+          <span class="brand-god">GOD</span>
+          <span class="brand-market">MARKET</span>
+        </div>
+        <span class="seller-badge-tag">Panel Vendedor</span>
+      </div>
+
+      <div class="seller-topbar-actions">
+        <button class="seller-action-pill" onclick="window.sellerPortal.viewStoreAsCustomer()" title="Ver tienda como cliente">
+          <span>👁️ Ver como Cliente</span>
+        </button>
+        <button class="seller-action-pill btn-logout" onclick="window.sellerPortal.logout()" title="Cerrar sesión">
+          <span>🚪 Salir</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero / Info del Negocio -->
+    <div class="seller-biz-hero">
+      <div class="seller-biz-header-card">
+        <div class="seller-biz-identity">
+          <div class="seller-biz-avatar-box">
+            <span id="dash-biz-avatar">🍰</span>
+          </div>
+          <div class="seller-biz-info">
+            <h2 id="dash-biz-name">Mi Pastelería</h2>
+            <p>
+              <span id="dash-biz-zone">📍 CABA</span>
+              <span>•</span>
+              <span id="dash-biz-phone">📱 WhatsApp</span>
+              <span>•</span>
+              <span style="color: #4ADE80; font-weight: 700;">🟢 Local Activo</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="seller-biz-stats-strip">
+          <div class="seller-stat-item">
+            <div id="stat-total-products" class="seller-stat-val">0</div>
+            <div class="seller-stat-lbl">Productos</div>
+          </div>
+          <div class="seller-stat-item" style="border-left: 1px solid rgba(255,255,255,0.08); border-right: 1px solid rgba(255,255,255,0.08);">
+            <div id="stat-total-orders" class="seller-stat-val">0</div>
+            <div class="seller-stat-lbl">Pedidos</div>
+          </div>
+          <div class="seller-stat-item">
+            <div class="seller-stat-val">5.0 ⭐</div>
+            <div class="seller-stat-lbl">Calificación</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navegación de Pestañas -->
+      <nav class="seller-nav-tabs">
+        <button class="seller-tab-btn active" data-tab="products" onclick="window.sellerPortal.switchTab('products')">
+          <span>🍰 Mis Productos</span>
+        </button>
+        <button class="seller-tab-btn" data-tab="orders" onclick="window.sellerPortal.switchTab('orders')">
+          <span>📦 Pedidos Recibidos</span>
+        </button>
+        <button class="seller-tab-btn" data-tab="coverage" onclick="window.sellerPortal.switchTab('coverage')">
+          <span>📍 Cobertura y Envíos</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Contenido de Pestañas -->
+    <main class="seller-content-container">
+      <!-- Pestaña 1: Productos -->
+      <section id="tab-pane-products" class="seller-tab-pane active">
+        <div class="seller-actions-bar">
+          <div>
+            <h3 style="color: #FFF; font-size: 1.15rem; margin-bottom: 2px;">Catálogo de tu Negocio</h3>
+            <span style="font-size: 0.8rem; color: #8CA093;">Tus delicias disponibles para los clientes en el Marketplace</span>
+          </div>
+          <button class="btn-add-prod" onclick="window.sellerPortal.openAddProductModal()">
+            <span>+ Publicar Nuevo Producto</span>
+          </button>
+        </div>
+
+        <div id="seller-products-list" class="seller-products-grid">
+          <!-- Renderizado dinámico desde JS -->
+        </div>
+      </section>
+
+      <!-- Pestaña 2: Pedidos -->
+      <section id="tab-pane-orders" class="seller-tab-pane">
+        <div class="seller-actions-bar">
+          <div>
+            <h3 style="color: #FFF; font-size: 1.15rem; margin-bottom: 2px;">Pedidos de tu Local</h3>
+            <span style="font-size: 0.8rem; color: #8CA093;">Gestiona las órdenes entrantes y contacta a los compradores por WhatsApp</span>
+          </div>
+        </div>
+
+        <div id="seller-orders-list" class="seller-orders-list">
+          <!-- Renderizado dinámico desde JS -->
+        </div>
+      </section>
+
+      <!-- Pestaña 3: Cobertura & Radio de Envíos -->
+      <section id="tab-pane-coverage" class="seller-tab-pane">
+        <div class="seller-actions-bar">
+          <div>
+            <h3 style="color: #FFF; font-size: 1.15rem; margin-bottom: 2px;">📍 Cobertura y Radio de Entrega</h3>
+            <span style="font-size: 0.8rem; color: #8CA093;">Define el punto de tu local y el radio de despacho directo para tus clientes</span>
+          </div>
+          <button type="button" class="onboarding-submit-btn" style="width: auto; padding: 9px 18px; margin-top: 0; font-size: 0.84rem;" onclick="window.sellerPortal.saveCoverageSettings()">
+            💾 Guardar Cobertura
+          </button>
+        </div>
+
+        <div class="coverage-dashboard-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.25); border-radius: 16px; padding: 20px; margin-top: 14px;">
+          <div class="form-row-2col" style="margin-bottom: 16px;">
+            <div>
+              <label class="onboarding-label" for="dash-coverage-address">Dirección del Local / Punto de Despacho</label>
+              <input type="text" id="dash-coverage-address" class="onboarding-input" placeholder="Ej: Humboldt 1950, Palermo">
+            </div>
+            <div>
+              <label class="onboarding-label" for="dash-coverage-neighborhood">Barrio / Zona Principal</label>
+              <input type="text" id="dash-coverage-neighborhood" class="onboarding-input" placeholder="Ej: Palermo Hollywood">
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong style="color: #FFF; font-size: 0.88rem;">Ubicación en Mapa y Radio Circular</strong>
+            <button type="button" class="btn-map-gps" onclick="window.sellerPortal.detectDashboardLocationGPS()">
+              <span>📡 Centrar con mi GPS</span>
+            </button>
+          </div>
+
+          <div id="dash-radius-map" class="seller-map-container" style="height: 320px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15); margin-bottom: 16px; z-index: 1;"></div>
+
+          <div class="radius-control-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.85rem; color: #E5EBE7; font-weight: 600;">Radio circular de envíos directos:</span>
+              <span id="dash-radius-val" class="radius-val-badge">5.0 km</span>
+            </div>
+            <input type="range" id="dash-radius-slider" min="1" max="15" step="0.5" value="5.0" class="gold-range-slider" oninput="window.sellerPortal.updateDashboardRadius(parseFloat(this.value))">
+            
+            <div class="radius-presets-row">
+              <button type="button" class="radius-chip" onclick="window.sellerPortal.updateDashboardRadius(3.0)">3 km (Zona cercana)</button>
+              <button type="button" class="radius-chip" onclick="window.sellerPortal.updateDashboardRadius(5.0)">5 km (Estándar)</button>
+              <button type="button" class="radius-chip" onclick="window.sellerPortal.updateDashboardRadius(8.0)">8 km (Intermedia)</button>
+              <button type="button" class="radius-chip" onclick="window.sellerPortal.updateDashboardRadius(12.0)">12 km (Amplia CABA)</button>
+            </div>
+          </div>
+
+          <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+            <button type="button" id="btn-save-dash-coverage" class="onboarding-submit-btn" style="max-width: 280px;" onclick="window.sellerPortal.saveCoverageSettings()">
+              💾 Guardar Cobertura de Envíos
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <!-- App Wrapper (Mobile-first centered frame) -->
   <div class="app-container">
@@ -102,7 +474,7 @@
           <i data-lucide="package" style="width:18px;height:18px;"></i>
           <span id="header-orders-badge" class="badge-count" style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.6rem; padding: 1px 5px; background: var(--primary); color: var(--green-deep);">0</span>
         </button>
-        <button class="icon-btn" onclick="window.app.openAdminModalWithPin()" title="Portal Negocios">
+        <button class="icon-btn" onclick="window.sellerPortal.chooseRole('vendedor')" title="Portal Negocios & Vendedores">
           <i data-lucide="store" style="width:18px;height:18px;"></i>
         </button>
       </div>
@@ -181,9 +553,13 @@
             <i data-lucide="package"></i>
             <span>Mis Pedidos</span>
           </button>
-          <button class="side-action-btn" onclick="window.app.openAdminModalWithPin(); window.app.toggleSideMenu();">
+          <button class="side-action-btn" onclick="window.sellerPortal.chooseRole('vendedor'); window.app.toggleSideMenu();">
             <i data-lucide="store"></i>
-            <span>Portal Negocios</span>
+            <span>Portal Vendedores</span>
+          </button>
+          <button class="side-action-btn" onclick="window.sellerPortal.openRoleModal(); window.app.toggleSideMenu();">
+            <i data-lucide="users"></i>
+            <span>Cambiar Rol (Cliente / Vendedor)</span>
           </button>
           <a href="https://wa.me/5491156192616" target="_blank" class="side-action-btn whatsapp-highlight">
             <i data-lucide="message-circle"></i>
@@ -386,7 +762,7 @@
           <span class="profile-opt-arrow">→</span>
         </div>
 
-        <div class="profile-option-card" onclick="window.app.closeModal('profile-modal'); window.app.openAdminModalWithPin();">
+        <div class="profile-option-card" onclick="window.app.closeModal('profile-modal'); window.sellerPortal.chooseRole('vendedor');">
           <span class="profile-opt-icon">🏪</span>
           <div class="profile-opt-info">
             <strong>Portal Negocios & Cafeterías</strong>
@@ -518,9 +894,9 @@
       </div>
 
       <!-- Aviso de Logística del Vendedor -->
-      <div style="background: #F0F9F5; border: 1px dashed #2A9D8F; border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 12px; font-size: 0.74rem; color: #1E6B61; display: flex; align-items: center; gap: 8px;">
+      <div style="background: rgba(42, 157, 143, 0.12); border: 1px dashed rgba(42, 157, 143, 0.45); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 12px; font-size: 0.74rem; color: #CBD8D1; display: flex; align-items: center; gap: 8px;">
         <span style="font-size: 1.1rem;">🛵</span>
-        <span><strong>Envío a cargo del vendedor:</strong> Cada pastelería coordina su propio cadete para llevar tu pedido directo a tu puerta.</span>
+        <span><strong style="color: #4ADE80;">Envío a cargo del vendedor:</strong> Cada local coordina su propio cadete para llevar tu pedido directo a tu puerta.</span>
       </div>
 
       <div id="cart-drawer-items" class="cart-items-list">
@@ -604,7 +980,7 @@
           <div id="checkout-map-container" style="display: none; margin-bottom: 14px; background: var(--bg-surface-secondary); padding: 12px; border-radius: var(--radius-md); border: 1.5px solid var(--border-light);">
             <!-- Buscador directo en el mapa -->
             <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-              <input type="text" id="map-search-input" class="form-control" placeholder="Escribe tu calle (Ej: Cilento 81)..." style="font-size: 0.82rem; padding: 7px 10px; background: #fff;" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.app.searchAddressOnMap();}">
+              <input type="text" id="map-search-input" class="form-control" placeholder="Escribe tu calle (Ej: Cilento 81)..." style="font-size: 0.82rem; padding: 7px 10px;" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.app.searchAddressOnMap();}">
               <button type="button" class="btn-primary" onclick="window.app.searchAddressOnMap()" style="width: auto; padding: 6px 14px; font-size: 0.8rem; white-space: nowrap;">
                 🔍 Buscar
               </button>
@@ -640,7 +1016,7 @@
           <label class="form-label" for="cust-time">Fecha y Horario preferido de entrega *</label>
           
           <!-- Aviso si el local está cerrado (Horario 08:30 a 20:00 hs) -->
-          <div id="checkout-store-closed-banner" style="display: none; background: #FFF3E0; border: 1px solid #FFE082; color: #B78103; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600; margin-bottom: 10px; line-height: 1.35;">
+          <div id="checkout-store-closed-banner" style="display: none;">
             🌙 <strong>Local Cerrado en este momento</strong> (Horario de atención: 08:30 a 20:00 hs Argentina).<br>
             Tu pedido quedará agendado para la próxima franja horaria o la fecha que elijas.
           </div>
@@ -682,43 +1058,48 @@
         </div>
 
         <!-- Bank details summary box -->
-        <div id="bank-transfer-info" class="bank-details-box">
-          <div class="bank-title">Datos para Transferencia Bancaria:</div>
+        <div id="bank-transfer-info" class="bank-details-box bank-transfer-theme">
+          <div class="bank-title">
+            <span>🏦</span> Datos para Transferencia Bancaria:
+          </div>
+          <p class="bank-subtitle">
+            Transfiere desde cualquier Home Banking o billetera virtual:
+          </p>
           <div class="bank-row">
-            <span>Alias:</span>
-            <strong id="bank-alias" style="letter-spacing: 0.5px;">DULCE.ATELIER.BA</strong>
+            <span class="bank-label">Alias:</span>
+            <strong id="bank-alias" class="bank-code">GODMARKET.BA</strong>
             <button type="button" class="copy-btn" onclick="window.app.copyAlias()">Copiar</button>
           </div>
           <div class="bank-row">
-            <span>Titular:</span>
-            <span>Dulce Atelier Pastelería</span>
+            <span class="bank-label">Titular:</span>
+            <span class="bank-value">GOD MARKET Oficial</span>
           </div>
         </div>
 
         <!-- Mercado Pago details summary box -->
-        <div id="mercadopago-info" class="bank-details-box" style="display: none; background: #F0F9FF; border-color: #009EE3;">
-          <div class="bank-title" style="color: #009EE3; display: flex; align-items: center; gap: 6px;">
+        <div id="mercadopago-info" class="bank-details-box bank-mp-theme" style="display: none;">
+          <div class="bank-title mp-title">
             <span>💳</span> Datos para Pagar con Mercado Pago:
           </div>
-          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.4;">
+          <p class="bank-subtitle">
             Transfiere desde tu app de Mercado Pago o cualquier banco / billetera virtual:
+          </p>
+          <div class="bank-row">
+            <span class="bank-label">Alias MP:</span>
+            <strong id="mp-alias" class="bank-code mp-code">GODMARKET.MP</strong>
+            <button type="button" class="copy-btn copy-btn-mp" onclick="window.app.copyMPAlias()" id="btn-copy-mp-alias">Copiar</button>
           </div>
           <div class="bank-row">
-            <span>Alias MP:</span>
-            <strong id="mp-alias" style="letter-spacing: 0.5px; color: #009EE3;">DULCE.ATELIER.MP</strong>
-            <button type="button" class="copy-btn" onclick="window.app.copyMPAlias()" id="btn-copy-mp-alias">Copiar</button>
+            <span class="bank-label">CVU MP:</span>
+            <strong class="bank-code mp-cvu">0000003100012345678901</strong>
+            <button type="button" class="copy-btn copy-btn-mp" onclick="window.app.copyCVU()">Copiar</button>
           </div>
           <div class="bank-row">
-            <span>CVU MP:</span>
-            <strong style="font-size: 0.78rem;">0000003100012345678901</strong>
-            <button type="button" class="copy-btn" onclick="window.app.copyCVU()">Copiar</button>
+            <span class="bank-label">Titular:</span>
+            <span class="bank-value">GOD MARKET (Mercado Pago Oficial)</span>
           </div>
-          <div class="bank-row">
-            <span>Titular:</span>
-            <span>Dulce Atelier (Mercado Pago Oficial)</span>
-          </div>
-          <div style="font-size: 0.72rem; color: #009EE3; font-weight: 600; margin-top: 6px;">
-            ✨ También puedes solicitar el Link de Pago con tarjeta de crédito/débito al confirmar por WhatsApp.
+          <div class="mp-footer-note">
+            ✨ También puedes solicitar el Link de Pago con tarjeta al confirmar por WhatsApp.
           </div>
         </div>
 
@@ -793,21 +1174,21 @@
           <span style="color: var(--primary);" id="ticket-order-total">$0</span>
         </div>
 
-        <!-- Datos de Transferencia (Estilo Exacto ByronCode / Perlato) -->
-        <div id="ticket-transfer-details" class="ticket-alias-box">
+        <!-- Datos de Transferencia -->
+        <div id="ticket-transfer-details" class="ticket-alias-box bank-transfer-theme">
           <div class="ticket-alias-header">
             <span>🏦</span> Para completar el pago, realiza la transferencia:
           </div>
 
-          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 8px;">
-            <strong>Titular:</strong> Dulce Atelier Pastelería Artesanal
+          <div class="ticket-subtitle">
+            <strong>Titular:</strong> GOD MARKET Oficial
           </div>
 
           <!-- Fila Alias con botón copiar -->
           <div class="ticket-alias-value-row">
             <div>
-              <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700;">ALIAS:</div>
-              <div class="ticket-alias-code" id="ticket-alias-code">DULCE.ATELIER.BA</div>
+              <div class="ticket-label">ALIAS:</div>
+              <div class="ticket-alias-code" id="ticket-alias-code">GODMARKET.BA</div>
             </div>
             <button type="button" class="btn-copy-sm" onclick="window.app.copyAlias()" id="btn-copy-alias-ticket">
               <span>📋</span> Copiar
@@ -817,9 +1198,8 @@
           <!-- Fila CVU con botón copiar -->
           <div class="ticket-alias-value-row">
             <div>
-              <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700;">CVU:</div>
-              <div class="ticket-alias-code" style="font-size: 0.85rem;" id="ticket-cvu-code">0000003100012345678901
-              </div>
+              <div class="ticket-label">CVU:</div>
+              <div class="ticket-alias-code" style="font-size: 0.85rem;" id="ticket-cvu-code">0000003100012345678901</div>
             </div>
             <button type="button" class="btn-copy-sm" onclick="window.app.copyCVU()" id="btn-copy-cvu-ticket">
               <span>📋</span> Copiar
@@ -827,53 +1207,52 @@
           </div>
 
           <div class="ticket-amount-row">
-            <span style="font-weight: 700; color: var(--text-main);">Monto exacto a transferir:</span>
-            <strong style="color: var(--primary); font-size: 1.15rem;" id="ticket-transfer-amount">$0</strong>
+            <span>Monto exacto a transferir:</span>
+            <strong id="ticket-transfer-amount">$0</strong>
           </div>
         </div>
 
-        <!-- Mercado Pago Ticket Box (Estilo ByronCode) -->
-        <div id="ticket-mp-details"
-          style="display: none; background: #F0F9FF; border: 1.5px dashed #009EE3; border-radius: var(--radius-md); padding: 14px; margin-bottom: 14px; text-align: left; font-size: 0.85rem;">
-          <div style="font-weight: 800; color: #009EE3; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+        <!-- Mercado Pago Ticket Box -->
+        <div id="ticket-mp-details" class="ticket-alias-box ticket-mp-theme" style="display: none;">
+          <div class="ticket-alias-header mp-title">
             <span>💳</span> Para completar el pago con Mercado Pago:
           </div>
-          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 8px;">
-            <strong>Titular:</strong> Dulce Atelier (Mercado Pago Oficial)
+          <div class="ticket-subtitle">
+            <strong>Titular:</strong> GOD MARKET (Mercado Pago Oficial)
           </div>
 
-          <div class="ticket-alias-value-row" style="margin-bottom: 6px;">
+          <div class="ticket-alias-value-row">
             <div>
-              <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700;">ALIAS MERCADO PAGO:</div>
-              <div class="ticket-alias-code" style="color: #009EE3;" id="ticket-mp-alias-code">DULCE.ATELIER.MP</div>
+              <div class="ticket-label">ALIAS MERCADO PAGO:</div>
+              <div class="ticket-alias-code mp-code" id="ticket-mp-alias-code">GODMARKET.MP</div>
             </div>
-            <button type="button" class="btn-copy-sm" onclick="window.app.copyMPAlias()" id="btn-copy-mp-alias-ticket">
+            <button type="button" class="btn-copy-sm btn-copy-mp" onclick="window.app.copyMPAlias()" id="btn-copy-mp-alias-ticket">
               <span>📋</span> Copiar
             </button>
           </div>
 
-          <div class="ticket-alias-value-row" style="margin-bottom: 8px;">
+          <div class="ticket-alias-value-row">
             <div>
-              <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700;">CVU MERCADO PAGO:</div>
+              <div class="ticket-label">CVU MERCADO PAGO:</div>
               <div class="ticket-alias-code" style="font-size: 0.85rem;">0000003100012345678901</div>
             </div>
-            <button type="button" class="btn-copy-sm" onclick="window.app.copyCVU()" id="btn-copy-mp-cvu-ticket">
+            <button type="button" class="btn-copy-sm btn-copy-mp" onclick="window.app.copyCVU()" id="btn-copy-mp-cvu-ticket">
               <span>📋</span> Copiar
             </button>
           </div>
 
-          <div class="ticket-amount-row" style="border-top: 1px dashed rgba(0, 158, 227, 0.3); padding-top: 6px;">
-            <span style="font-weight: 700; color: var(--text-main);">Monto a transferir / abonar:</span>
-            <strong style="color: #009EE3; font-size: 1.15rem;" id="ticket-mp-amount">$0</strong>
+          <div class="ticket-amount-row mp-amount-row">
+            <span>Monto a transferir / abonar:</span>
+            <strong id="ticket-mp-amount">$0</strong>
           </div>
         </div>
 
         <!-- Efectivo -->
-        <div id="ticket-cash-details"
-          style="display: none; background: #F4FBF7; border: 1.5px dashed #2A9D8F; border-radius: var(--radius-md); padding: 14px; margin-bottom: 14px; text-align: left; font-size: 0.85rem;">
-          <div style="font-weight: 800; color: #2A9D8F; margin-bottom: 4px;">💵 Pago en Efectivo al recibir o retirar:
+        <div id="ticket-cash-details" class="ticket-alias-box ticket-cash-theme" style="display: none;">
+          <div class="ticket-alias-header cash-title">
+            <span>💵</span> Pago en Efectivo al recibir o retirar:
           </div>
-          <p style="color: var(--text-secondary); margin: 0;">
+          <p class="ticket-cash-text">
             Abonarás el total de <strong id="ticket-cash-amount">$0</strong> en mano. ¡Por favor ten el cambio listo!
           </p>
         </div>
@@ -887,21 +1266,21 @@
 
         <!-- Botón Reabrir Pedido en WhatsApp (App / Móvil) -->
         <a id="ticket-reopen-whatsapp-btn" href="#" target="_blank" class="btn-outline"
-          style="display: none; width: 100%; margin-bottom: 8px; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.84rem; padding: 9px 12px; border-radius: var(--radius-sm); border: 1.5px solid #25D366; color: #128C7E; font-weight: 700;">
+          style="display: none; width: 100%; margin-bottom: 8px; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.84rem; padding: 10px 14px; border-radius: var(--radius-sm); border: 1.5px solid #25D366; color: #25D366; background: rgba(37, 211, 102, 0.1); font-weight: 700;">
           <span style="font-size: 1.1rem;">💬</span>
           <span>Abrir en WhatsApp (App)</span>
         </a>
 
         <!-- Botón Abrir en WhatsApp Web (Directo para navegador de PC) -->
         <a id="ticket-web-whatsapp-btn" href="#" target="_blank" class="btn-outline"
-          style="display: none; width: 100%; margin-bottom: 8px; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.84rem; padding: 9px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--border-light); color: var(--text-main); font-weight: 600; background: #fff;">
+          style="display: none; width: 100%; margin-bottom: 8px; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.84rem; padding: 10px 14px; border-radius: var(--radius-sm); border: 1.5px solid rgba(212, 175, 55, 0.4); color: #F5D77F; font-weight: 700; background: rgba(212, 175, 55, 0.1);">
           <span style="font-size: 1.1rem;">💻</span>
           <span>Abrir en WhatsApp Web</span>
         </a>
 
         <!-- Botón Copiar Mensaje Completo del Pedido -->
         <button type="button" class="btn-secondary" id="btn-copy-full-order" onclick="window.app.copyOrderMessage()"
-          style="width: 100%; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.82rem; padding: 8px 12px;">
+          style="width: 100%; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.84rem; padding: 10px 14px;">
           <span>📋</span>
           <span>Copiar Mensaje del Pedido</span>
         </button>
@@ -1068,7 +1447,7 @@
         </div>
 
         <button type="submit" id="btn-save-product" class="btn-primary" style="margin-top: 10px;">
-          <span>Publicar en Dulce Market →</span>
+          <span>Publicar en GOD MARKET →</span>
         </button>
       </form>
     </div>
@@ -1125,6 +1504,12 @@
         Elige tu barrio de Buenos Aires para coordinar el despacho directo con el cadete del local.
       </p>
 
+      <div style="margin-bottom: 14px;">
+        <button type="button" class="btn-gps-detect" onclick="window.app.detectUserGPS()">
+          <span>📡 Usar mi ubicación actual por GPS</span>
+        </button>
+      </div>
+
       <div class="form-group" style="margin-bottom: 12px;">
         <label class="form-label" for="custom-address-modal-input">O ingresa tu dirección exacta:</label>
         <div style="display: flex; gap: 6px;">
@@ -1139,35 +1524,47 @@
         Zonas con Envío Propio por Vendedor
       </div>
       <div class="neighborhoods-grid">
-        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Palermo')">
+        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Palermo', -34.5885, -58.4285)">
           <span>📍 Palermo</span>
           <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">30-45 min</span>
         </button>
-        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Recoleta')">
+        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Recoleta', -34.5925, -58.3970)">
           <span>📍 Recoleta</span>
           <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">30-45 min</span>
         </button>
-        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Belgrano')">
+        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Belgrano', -34.5620, -58.4560)">
           <span>📍 Belgrano</span>
           <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">25-40 min</span>
         </button>
-        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('San Telmo')">
+        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('San Telmo', -34.6190, -58.3720)">
           <span>📍 San Telmo</span>
           <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">30-45 min</span>
         </button>
-        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Villa Urquiza')">
+        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Villa Urquiza', -34.5730, -58.4860)">
           <span>📍 Villa Urquiza</span>
           <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">35-50 min</span>
         </button>
-        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Caballito')">
+        <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Caballito', -34.6220, -58.4420)">
           <span>📍 Caballito</span>
           <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">30-40 min</span>
         </button>
       </div>
 
-      <div style="background: #F0F9F5; border: 1px dashed #2A9D8F; padding: 10px 12px; border-radius: var(--radius-sm); font-size: 0.74rem; color: #1E6B61; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+      <!-- Filtro exclusivo por radio de cobertura -->
+      <div class="range-filter-box">
+        <div style="flex: 1;">
+          <strong style="color: #FFF; font-size: 0.82rem; display: block; margin-bottom: 2px;">🛵 Filtrar locales por alcance</strong>
+          <span style="font-size: 0.72rem; color: #A3B8AC; line-height: 1.3; display: block;">Mostrar únicamente las pastelerías y cafeterías que llegan con delivery a mi ubicación actual</span>
+        </div>
+        <label class="switch-luxury">
+          <input type="checkbox" id="toggle-filter-in-range" onchange="window.app.setOnlyInRange(this.checked)">
+          <span class="slider-round"></span>
+        </label>
+      </div>
+
+      <div style="background: rgba(42, 157, 143, 0.12); border: 1px dashed rgba(42, 157, 143, 0.45); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 0.74rem; color: #CBD8D1; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
         <span style="font-size: 1.1rem;">🛵</span>
-        <span><strong>Logística del Vendedor:</strong> El reparto lo realiza el cadete del local en moto con caja térmica.</span>
+        <span><strong style="color: #4ADE80;">Logística del Vendedor:</strong> El reparto lo realiza el cadete del local en moto con caja térmica.</span>
       </div>
     </div>
   </div>
@@ -1176,12 +1573,13 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Pure Standard JavaScript Scripts -->
-  <script charset="UTF-8" src="js/products.js?v=12.0"></script>
-  <script charset="UTF-8" src="js/cart.js?v=12.0"></script>
-  <script charset="UTF-8" src="js/checkout.js?v=12.0"></script>
-  <script charset="UTF-8" src="js/cloudinary.js?v=12.0"></script>
-  <script charset="UTF-8" src="js/admin.js?v=12.0"></script>
-  <script charset="UTF-8" src="js/app.js?v=12.0"></script>
+  <script charset="UTF-8" src="js/products.js?v=19.0"></script>
+  <script charset="UTF-8" src="js/cart.js?v=19.0"></script>
+  <script charset="UTF-8" src="js/checkout.js?v=19.0"></script>
+  <script charset="UTF-8" src="js/cloudinary.js?v=19.0"></script>
+  <script charset="UTF-8" src="js/seller.js?v=19.0"></script>
+  <script charset="UTF-8" src="js/admin.js?v=19.0"></script>
+  <script charset="UTF-8" src="js/app.js?v=19.0"></script>
 </body>
 
 </html>

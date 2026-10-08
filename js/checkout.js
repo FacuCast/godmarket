@@ -20,9 +20,9 @@ const ICONS = {
 class CheckoutHandler {
   constructor() {
     this.bankDetails = {
-      alias: "DULCE.ATELIER.BA",
+      alias: "GODMARKET.BA",
       cbu: "0000003100012345678901",
-      holder: "Dulce Atelier Pastelería Artesanal",
+      holder: "GOD MARKET Oficial",
       bank: "Mercado Pago / Banco Galicia"
     };
     this.lastOrder = null;
@@ -88,9 +88,9 @@ class CheckoutHandler {
 
     let paymentMethodName = "Efectivo";
     if (formData.paymentMethod === 'transfer') {
-      paymentMethodName = "Transferencia Bancaria (Alias: DULCE.ATELIER.BA)";
+      paymentMethodName = "Transferencia Bancaria (Alias: GODMARKET.BA)";
     } else if (formData.paymentMethod === 'mercadopago') {
-      paymentMethodName = "Mercado Pago (Alias: DULCE.ATELIER.MP)";
+      paymentMethodName = "Mercado Pago (Alias: GODMARKET.MP)";
     }
 
     const cashNote = (formData.paymentMethod === 'cash' && formData.cashAmount) 
@@ -98,7 +98,7 @@ class CheckoutHandler {
       : '';
 
     const message = 
-`¡Hola Dulce Market! ✦
+`¡Hola GOD MARKET! ✦
 *NUEVO PEDIDO MARKETPLACE #${orderId}*
 🛵 *LOGÍSTICA: ENVÍO A CARGO DEL VENDEDOR*
 
@@ -139,8 +139,8 @@ Por favor confírmenme el pedido para que el vendedor comience la preparación y
   generateReceiptProofUrl(orderId, totalFormatted, paymentMethod = 'transfer') {
     const isMP = paymentMethod === 'mercadopago';
     const text = isMP
-      ? `¡Hola Dulce Atelier! ✦ Adjunto el comprobante de pago de Mercado Pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`
-      : `¡Hola Dulce Atelier! ✦ Adjunto el comprobante de pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`;
+      ? `¡Hola GOD MARKET! ✦ Adjunto el comprobante de pago de Mercado Pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`
+      : `¡Hola GOD MARKET! ✦ Adjunto el comprobante de pago de mi pedido #${orderId} por un total de ${totalFormatted}. ¡Muchas gracias!`;
     return this.buildWhatsAppUrl(text);
   }
 
@@ -165,6 +165,24 @@ Por favor confírmenme el pedido para que el vendedor comience la preparación y
       }
       const trimmed = history.slice(0, 25);
       localStorage.setItem('dulce_orders_history', JSON.stringify(trimmed));
+
+      // Sincronizar con el backend para que aparezca en el panel de los vendedores
+      try {
+        fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: order.orderId,
+            customerName: order.customerName || (order.formData && order.formData.fullName),
+            customerPhone: order.customerPhone || (order.formData && order.formData.phone),
+            deliveryType: order.deliveryType,
+            address: order.deliveryAddress || (order.formData && order.formData.address),
+            total: order.total,
+            items: order.items,
+            businessId: (order.items && order.items[0] && order.items[0].product && order.items[0].product.businessId) || null
+          })
+        }).catch(err => console.warn('Aviso backend /api/orders:', err));
+      } catch (err) {}
     } catch (e) {
       console.error("Error al guardar pedido en historial:", e);
     }
