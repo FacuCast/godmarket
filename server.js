@@ -176,8 +176,8 @@ function verifySellerAuth(req, res, next) {
 // 1. Configuración pública del cliente
 app.get('/api/config', (req, res) => {
   res.json({
-    googleClientId: process.env.GOOGLE_CLIENT_ID || '655641723431-75t0f8f4kc91bjr4o67nhouj7b123ndv.apps.googleusercontent.com',
-    cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || 'dz6apjevd'
+    googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+    cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || ''
   });
 });
 
