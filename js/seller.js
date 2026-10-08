@@ -386,7 +386,8 @@ class SellerPortalManager {
         client_id: clientId,
         callback: (response) => this.handleGoogleCredentialResponse(response),
         auto_select: false,
-        cancel_on_tap_outside: true
+        cancel_on_tap_outside: true,
+        itp_support: true
       });
       this.renderGoogleSignInButton();
     } catch (e) {

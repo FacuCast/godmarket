@@ -20,8 +20,15 @@ const JWT_SECRET = process.env.JWT_SECRET || 'godmarket_prod_secret_token_secure
 app.use(helmet({
   contentSecurityPolicy: false, // Habilita recursos externos (Leaflet, OpenStreetMap, Google Fonts, Unsplash)
   crossOriginEmbedderPolicy: false,
-  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" } // Permite comunicación con el popup de Google Sign-In
+  crossOriginOpenerPolicy: false, // No bloquear comunicación con popup de Google
+  crossOriginResourcePolicy: false,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' } // Requerido por Google Identity Services
 }));
+
+app.use((req, res, next) => {
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
 
 app.use(cors());
 
