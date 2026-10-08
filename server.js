@@ -19,7 +19,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'godmarket_prod_secret_token_secure
 // ============================================================================
 app.use(helmet({
   contentSecurityPolicy: false, // Habilita recursos externos (Leaflet, OpenStreetMap, Google Fonts, Unsplash)
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" } // Permite comunicación con el popup de Google Sign-In
 }));
 
 app.use(cors());
