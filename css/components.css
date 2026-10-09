@@ -1730,3 +1730,108 @@
   background: rgba(37,211,102,0.16);
   border-color: #25D366;
 }
+
+/* ============================================================================
+   PWA FLOATING INSTALL BANNER & MODAL (Mobile First)
+   ============================================================================ */
+.pwa-install-pill {
+  position: fixed;
+  bottom: 78px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  max-width: 440px;
+  background: rgba(15, 35, 24, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(212, 175, 55, 0.45);
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 16px rgba(212, 175, 55, 0.2);
+  z-index: 999;
+  animation: pwaSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pwaSlideUp {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.pwa-pill-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(212, 175, 55, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.pwa-pill-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pwa-pill-body strong {
+  font-size: 0.88rem;
+  color: #FFF;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.pwa-pill-body span {
+  font-size: 0.73rem;
+  color: #A3B8AC;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pwa-pill-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-pwa-install-action {
+  background: linear-gradient(135deg, #D4AF37 0%, #AA820A 100%);
+  color: #051610;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(212, 175, 55, 0.35);
+  transition: transform 0.15s ease;
+}
+
+.btn-pwa-install-action:active {
+  transform: scale(0.96);
+}
+
+.btn-pwa-close-action {
+  background: transparent;
+  border: none;
+  color: #8FA295;
+  font-size: 1rem;
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.profile-option-card.highlight-pwa {
+  background: rgba(212, 175, 55, 0.08);
+  border-color: rgba(212, 175, 55, 0.35);
+}

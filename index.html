@@ -54,7 +54,7 @@
 
   <!-- Stylesheets (Pure CSS) -->
   <link rel="stylesheet" href="css/main.css?v=19.0">
-  <link rel="stylesheet" href="css/components.css?v=19.0">
+  <link rel="stylesheet" href="css/components.css?v=24.0">
   <link rel="stylesheet" href="css/responsive.css?v=23.0">
   <link rel="stylesheet" href="css/mejoras-premium.css?v=19.0">
   <link rel="stylesheet" href="css/seller-portal.css?v=21.0">
@@ -550,7 +550,11 @@
         <div class="side-drawer-divider"></div>
 
         <div class="side-drawer-actions">
-          <button class="side-action-btn" onclick="window.app.openOrdersHistoryModal(); window.app.toggleSideMenu();">
+                    <button class="side-action-btn" onclick="window.app.installPWA(); window.app.toggleSideMenu();">
+            <i data-lucide="smartphone"></i>
+            <span>Instalar App en el Celular</span>
+          </button>
+<button class="side-action-btn" onclick="window.app.openOrdersHistoryModal(); window.app.toggleSideMenu();">
             <i data-lucide="package"></i>
             <span>Mis Pedidos</span>
           </button>
@@ -680,6 +684,21 @@
       </div>
     </div>
 
+        <!-- PWA Install Banner (Floating on mobile) -->
+    <div id="pwa-install-pill" class="pwa-install-pill" style="display: none;">
+      <div class="pwa-pill-icon">📲</div>
+      <div class="pwa-pill-body">
+        <strong>Instalar GOD MARKET App</strong>
+        <span>Acceso directo y pedidos más rápidos en 1 toque</span>
+      </div>
+      <div class="pwa-pill-buttons">
+        <button type="button" class="btn-pwa-install-action" onclick="window.app.installPWA()">
+          Instalar
+        </button>
+        <button type="button" class="btn-pwa-close-action" onclick="window.app.dismissPWA()" aria-label="Cerrar">✕</button>
+      </div>
+    </div>
+
     <!-- Bottom Navigation Bar (GOD MARKET Mobile App Navigation) -->
     <nav class="bottom-nav">
       <button class="nav-item active" id="nav-item-home"
@@ -732,7 +751,15 @@
       </div>
 
       <div class="profile-options-list">
-        <div class="profile-option-card" onclick="window.app.closeModal('profile-modal'); window.app.openOrdersHistoryModal();">
+                <div class="profile-option-card highlight-pwa" onclick="window.app.closeModal('profile-modal'); window.app.installPWA();">
+          <span class="profile-opt-icon">📲</span>
+          <div class="profile-opt-info">
+            <strong>Instalar GOD MARKET en tu Celular</strong>
+            <span>Acceso directo como app sin ocupar memoria</span>
+          </div>
+          <span class="profile-opt-arrow">⬇️</span>
+        </div>
+<div class="profile-option-card" onclick="window.app.closeModal('profile-modal'); window.app.openOrdersHistoryModal();">
           <span class="profile-opt-icon">📦</span>
           <div class="profile-opt-info">
             <strong>Mis Pedidos Realizados</strong>
@@ -1576,7 +1603,38 @@
   <script charset="UTF-8" src="js/cloudinary.js?v=20.0"></script>
   <script charset="UTF-8" src="js/seller.js?v=21.0"></script>
   <script charset="UTF-8" src="js/admin.js?v=19.0"></script>
-  <script charset="UTF-8" src="js/app.js?v=22.0"></script>
+  <script charset="UTF-8" src="js/app.js?v=24.0"></script>
+
+  <!-- Modal de Guía para Instalar en iPhone / iPad (iOS) -->
+  <div id="ios-install-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('ios-install-modal')">
+    <div class="bottom-sheet" style="max-width: 440px;">
+      <div class="drag-handle"></div>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('ios-install-modal')">✕</button>
+      <div style="text-align: center; margin-bottom: 18px;">
+        <div style="font-size: 2.4rem; margin-bottom: 6px;">📲</div>
+        <h3 class="font-serif" style="font-size: 1.35rem; color: #FFF; margin-bottom: 4px;">Instalar GOD MARKET en iPhone</h3>
+        <p style="font-size: 0.8rem; color: #A3B8AC;">Agrégalo a tu pantalla de inicio en 2 toques:</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px;">
+        <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.25); border-radius: 14px; padding: 12px 14px;">
+          <span style="font-size: 1.5rem;">1️⃣</span>
+          <div style="font-size: 0.84rem; color: #E5EBE7; line-height: 1.35;">
+            Toca el botón <strong>Compartir</strong> <span style="display: inline-block; font-size: 1.1rem; vertical-align: middle;">📤</span> (el cuadrado con la flecha hacia arriba) en la barra de Safari.
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.25); border-radius: 14px; padding: 12px 14px;">
+          <span style="font-size: 1.5rem;">2️⃣</span>
+          <div style="font-size: 0.84rem; color: #E5EBE7; line-height: 1.35;">
+            Desliza hacia abajo en las opciones y presiona <strong>"Agregar a pantalla de inicio"</strong> ➕.
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn-primary" onclick="window.app.closeModal('ios-install-modal')" style="width: 100%; padding: 12px; font-size: 0.9rem; border-radius: 999px;">
+        ¡Listo, entendido! 👍
+      </button>
+    </div>
+  </div>
+
 </body>
 
 </html>

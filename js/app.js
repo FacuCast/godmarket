@@ -126,23 +126,62 @@ class DulceAtelierApp {
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       this.deferredPrompt = e;
-      const installBanner = document.getElementById('pwa-install-pill');
-      if (installBanner) installBanner.style.display = 'flex';
+      if (!sessionStorage.getItem('godmarket_pwa_dismissed')) {
+        const installBanner = document.getElementById('pwa-install-pill');
+        if (installBanner) installBanner.style.display = 'flex';
+      }
     });
+
+    window.addEventListener('appinstalled', () => {
+      this.deferredPrompt = null;
+      const installBanner = document.getElementById('pwa-install-pill');
+      if (installBanner) installBanner.style.display = 'none';
+      this.showToast("🎉 ¡App instalada con éxito en tu pantalla de inicio!", 'gold');
+    });
+
+    // En celulares, si no se ha instalado ni cerrado el banner, mostrar sugerencia tras unos segundos
+    setTimeout(() => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      if (!isStandalone && !sessionStorage.getItem('godmarket_pwa_dismissed')) {
+        const installBanner = document.getElementById('pwa-install-pill');
+        if (installBanner) installBanner.style.display = 'flex';
+      }
+    }, 2800);
   }
 
   installPWA() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (isStandalone) {
+      this.showToast("✅ Ya estás navegando desde la App de GOD MARKET", 'gold');
+      return;
+    }
+
     if (this.deferredPrompt) {
       this.deferredPrompt.prompt();
       this.deferredPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === 'accepted') {
-          this.showToast("🎉 ¡App instalada con éxito!");
+          this.showToast("🎉 ¡App instalada con éxito!", 'gold');
         }
         this.deferredPrompt = null;
         const installBanner = document.getElementById('pwa-install-pill');
         if (installBanner) installBanner.style.display = 'none';
       });
+      return;
     }
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+      this.openModal('ios-install-modal');
+      return;
+    }
+
+    this.showToast("📲 Para instalar: abre el menú (⋮) de tu navegador y selecciona 'Instalar aplicación' o 'Agregar a inicio'.", 'gold');
+  }
+
+  dismissPWA() {
+    const installBanner = document.getElementById('pwa-install-pill');
+    if (installBanner) installBanner.style.display = 'none';
+    sessionStorage.setItem('godmarket_pwa_dismissed', 'true');
   }
 
   setupEventListeners() {
@@ -401,6 +440,17 @@ class DulceAtelierApp {
           cashAmount: cashAmountInput?.value.trim() || '',
           comments: document.getElementById('cust-comments')?.value.trim() || ''
         };
+
+        // Guardar automáticamente datos del cliente en su teléfono para futuras compras
+        try {
+          if (nameVal) localStorage.setItem('godmarket_user_name', nameVal);
+          if (phoneVal) localStorage.setItem('godmarket_user_phone', phoneVal);
+          if (formData.apartment) localStorage.setItem('godmarket_user_apt', formData.apartment);
+          if (formData.zone) localStorage.setItem('godmarket_user_zone', formData.zone);
+          if (isDelivery && addressInput && addressInput.value.trim()) {
+            localStorage.setItem('godmarket_user_address', addressInput.value.trim());
+          }
+        } catch (e) {}
 
         // Procesar orden generando Número de Orden único y enviando a WhatsApp
         const order = window.checkoutHandler.processOrder(formData, window.cartManager);
@@ -1896,6 +1946,30 @@ class DulceAtelierApp {
       }
       if (modalId === 'checkout-modal') {
         this.setupCheckoutStoreHours();
+        // Pre-cargar datos del cliente guardados en el teléfono
+        try {
+          const nameInput = document.getElementById('cust-name');
+          const phoneInput = document.getElementById('cust-phone');
+          const addressInput = document.getElementById('cust-address');
+          const aptInput = document.getElementById('cust-apt');
+          const zoneInput = document.getElementById('cust-zone');
+
+          if (nameInput && !nameInput.value) {
+            nameInput.value = localStorage.getItem('godmarket_user_name') || '';
+          }
+          if (phoneInput && !phoneInput.value) {
+            phoneInput.value = localStorage.getItem('godmarket_user_phone') || '';
+          }
+          if (addressInput && !addressInput.value) {
+            addressInput.value = localStorage.getItem('godmarket_user_address') || '';
+          }
+          if (aptInput && !aptInput.value) {
+            aptInput.value = localStorage.getItem('godmarket_user_apt') || '';
+          }
+          if (zoneInput && !zoneInput.value) {
+            zoneInput.value = localStorage.getItem('godmarket_user_zone') || '';
+          }
+        } catch (e) {}
       }
       modal.classList.add('active');
     }
