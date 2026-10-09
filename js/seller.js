@@ -52,6 +52,8 @@ class SellerPortalManager {
       if (res.ok) {
         const data = await res.json();
         this.googleClientId = data.googleClientId || '';
+        const demoButton = document.querySelector('.demo-login-btn');
+        if (demoButton) demoButton.hidden = !data.demoLoginEnabled;
       }
     } catch (err) {
       console.warn('No se pudo conectar al backend para /api/config:', err.message);
@@ -76,10 +78,15 @@ class SellerPortalManager {
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    if (this.currentSeller?.id) {
-      headers['x-seller-id'] = this.currentSeller.id;
-    }
     return headers;
+  }
+
+  escapeJSAttribute(value) {
+    const encoded = JSON.stringify(String(value))
+      .replace(/</g, '\\u003c')
+      .replace(/\u2028/g, '\\u2028')
+      .replace(/\u2029/g, '\\u2029');
+    return window.app.escapeHTML(encoded);
   }
 
   evaluateRolePresentation() {
@@ -542,7 +549,7 @@ class SellerPortalManager {
     try {
       const res = await fetch('/api/seller/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify(payload)
       });
 
@@ -582,7 +589,7 @@ class SellerPortalManager {
   async refreshSellerData() {
     if (!this.currentSeller) return;
     try {
-      const res = await fetch(`/api/seller/me?sellerId=${this.currentSeller.id}&googleId=${this.currentSeller.googleId}`, {
+      const res = await fetch('/api/seller/me', {
         headers: this.getAuthHeaders()
       });
       if (res.ok) {
@@ -638,21 +645,21 @@ class SellerPortalManager {
       }
 
       container.innerHTML = products.map(p => `
-        <div class="seller-prod-card" id="seller-card-${p.id}">
+        <div class="seller-prod-card" id="seller-card-${window.app.escapeHTML(String(p.id))}">
           <div class="seller-prod-img-box">
-            <img src="${p.image}" alt="${p.name}" loading="lazy">
-            <span class="seller-prod-category-badge">${p.categoryName || p.category}</span>
+            <img src="${window.app.escapeHTML(window.app.safeImageUrl(p.image))}" alt="${window.app.escapeHTML(p.name)}" loading="lazy">
+            <span class="seller-prod-category-badge">${window.app.escapeHTML(p.categoryName || p.category)}</span>
           </div>
           <div class="seller-prod-body">
-            <h4>${p.name}</h4>
-            <p>${p.description || 'Sin descripción'}</p>
+            <h4>${window.app.escapeHTML(p.name)}</h4>
+            <p>${window.app.escapeHTML(p.description || 'Sin descripción')}</p>
             <div class="seller-prod-meta">
               <span class="seller-prod-price">$${Number(p.price).toLocaleString('es-AR')}</span>
-              <span class="seller-prod-portion">${p.portion || '1-2 personas'}</span>
+              <span class="seller-prod-portion">${window.app.escapeHTML(p.portion || '1-2 personas')}</span>
             </div>
             <div class="seller-prod-actions">
-              <button class="btn-card-edit" onclick="window.sellerPortal.editProductPrompt('${p.id}', ${p.price})">✏️ Cambiar Precio</button>
-              <button class="btn-card-delete" onclick="window.sellerPortal.deleteProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}')">🗑️ Eliminar</button>
+              <button class="btn-card-edit" onclick="window.sellerPortal.editProductPrompt(${this.escapeJSAttribute(p.id)}, ${Number(p.price)})">✏️ Cambiar Precio</button>
+              <button class="btn-card-delete" onclick="window.sellerPortal.deleteProduct(${this.escapeJSAttribute(p.id)}, ${this.escapeJSAttribute(p.name)})">🗑️ Eliminar</button>
             </div>
           </div>
         </div>
@@ -687,38 +694,46 @@ class SellerPortalManager {
         return;
       }
 
-      container.innerHTML = orders.map(o => `
+      container.innerHTML = orders.map(o => {
+        const safeOrderId = /^[A-Za-z0-9_-]{1,80}$/.test(String(o.id)) ? String(o.id) : '';
+        const status = ['pendiente', 'en_preparacion', 'despachado', 'entregado'].includes(o.status)
+          ? o.status
+          : 'pendiente';
+        return `
         <div class="seller-order-card">
           <div class="seller-order-header">
             <div>
-              <strong style="color: #FFF; font-size: 0.95rem;">Pedido #${o.id}</strong>
-              <div style="font-size: 0.76rem; color: #8CA093;">${new Date(o.createdAt).toLocaleString('es-AR')}</div>
+              <strong style="color: #FFF; font-size: 0.95rem;">Pedido #${window.app.escapeHTML(String(o.id))}</strong>
+              <div style="font-size: 0.76rem; color: #8CA093;">${window.app.escapeHTML(new Date(o.createdAt).toLocaleString('es-AR'))}</div>
             </div>
-            <span class="status-badge status-${o.status || 'pendiente'}">${o.status || 'Pendiente'}</span>
+            <span class="status-badge status-${status}">${window.app.escapeHTML(status)}</span>
           </div>
 
           <div style="font-size: 0.85rem; color: #E5EBE7; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px;">
-            <strong>Cliente:</strong> ${o.customerName || 'Cliente'} (${o.customerPhone || 'Sin tel'})<br>
-            <strong>Entrega:</strong> ${o.deliveryType || 'Envío a domicilio'} — ${o.address || 'Buenos Aires'}<br>
+            <strong>Cliente:</strong> ${window.app.escapeHTML(o.customerName || 'Cliente')} (${window.app.escapeHTML(o.customerPhone || 'Sin tel')})<br>
+            <strong>Entrega:</strong> ${window.app.escapeHTML(o.deliveryType || 'delivery')} — ${window.app.escapeHTML(o.address || 'Buenos Aires')}<br>
             <strong>Total a cobrar:</strong> <span style="color: #D4AF37; font-weight: 700;">$${Number(o.total || 0).toLocaleString('es-AR')}</span>
           </div>
 
           <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
             ${o.customerPhone ? `
-              <a href="https://wa.me/${o.customerPhone.replace(/\D/g, '')}?text=Hola%20${encodeURIComponent(o.customerName || '')},%20somos%20${encodeURIComponent(this.currentBusiness.name)}%20de%20GOD%20MARKET%20por%20tu%20pedido%20%23${o.id}" target="_blank" class="seller-action-pill" style="background: rgba(37, 211, 102, 0.15); border-color: rgba(37, 211, 102, 0.4); color: #25D366;">
+              <a href="https://wa.me/${String(o.customerPhone).replace(/\D/g, '')}?text=Hola%20${encodeURIComponent(o.customerName || '')},%20somos%20${encodeURIComponent(this.currentBusiness.name)}%20de%20GOD%20MARKET%20por%20tu%20pedido%20%23${encodeURIComponent(safeOrderId)}" target="_blank" rel="noopener noreferrer" class="seller-action-pill" style="background: rgba(37, 211, 102, 0.15); border-color: rgba(37, 211, 102, 0.4); color: #25D366;">
                 💬 Escribir por WhatsApp
               </a>
             ` : ''}
 
-            <select onchange="window.sellerPortal.updateOrderStatus('${o.id}', this.value)" style="background: rgba(0,0,0,0.4); color: #FFF; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 6px 10px; font-size: 0.78rem;">
-              <option value="pendiente" ${o.status === 'pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
-              <option value="en_preparacion" ${o.status === 'en_preparacion' ? 'selected' : ''}>👨‍🍳 En Preparación</option>
-              <option value="despachado" ${o.status === 'despachado' ? 'selected' : ''}>🛵 Despachado</option>
-              <option value="entregado" ${o.status === 'entregado' ? 'selected' : ''}>✅ Entregado</option>
-            </select>
+            ${safeOrderId ? `
+              <select onchange="window.sellerPortal.updateOrderStatus(${this.escapeJSAttribute(safeOrderId)}, this.value)" style="background: rgba(0,0,0,0.4); color: #FFF; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 6px 10px; font-size: 0.78rem;">
+                <option value="pendiente" ${status === 'pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
+                <option value="en_preparacion" ${status === 'en_preparacion' ? 'selected' : ''}>👨‍🍳 En Preparación</option>
+                <option value="despachado" ${status === 'despachado' ? 'selected' : ''}>🛵 Despachado</option>
+                <option value="entregado" ${status === 'entregado' ? 'selected' : ''}>✅ Entregado</option>
+              </select>
+            ` : '<span>Pedido sin identificador válido</span>'}
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
 
     } catch (e) {
       console.warn('Error cargando pedidos:', e);
@@ -843,7 +858,7 @@ class SellerPortalManager {
       const avatarEmoji = this.currentBusiness.avatar || '🍰';
       const customIcon = L.divIcon({
         className: 'custom-seller-map-pin',
-        html: `<div class="custom-seller-pin"><span>${avatarEmoji}</span></div>`,
+        html: `<div class="custom-seller-pin"><span>${window.app.escapeHTML(avatarEmoji)}</span></div>`,
         iconSize: [38, 38],
         iconAnchor: [19, 38]
       });

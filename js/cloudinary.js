@@ -54,7 +54,7 @@ class CloudinaryService {
     try {
       const response = await fetch('/api/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: window.sellerPortal.getAuthHeaders(),
         body: JSON.stringify({
           image: base64Data,
           cloudName: cloudName

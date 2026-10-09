@@ -857,7 +857,7 @@ class DulceAtelierApp {
       return `
         <div class="cafeteria-god-card" onclick="window.app.setBusiness('${b.id}')" title="Ver menú de ${this.escapeHTML(b.name)}">
           <div class="cafeteria-card-img-wrap">
-            <img class="cafeteria-card-img" src="${b.cover || 'assets/images/lumiere_cafe.jpg'}" alt="${this.escapeHTML(b.name)}" loading="lazy">
+            <img class="cafeteria-card-img" src="${this.escapeHTML(this.safeImageUrl(b.cover, 'assets/images/lumiere_cafe.jpg'))}" alt="${this.escapeHTML(b.name)}" loading="lazy">
           </div>
           <div class="cafeteria-card-body">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-bottom: 4px;">
@@ -913,7 +913,7 @@ class DulceAtelierApp {
       html += `
         <div class="business-chip ${isActive ? 'active' : ''}" 
              onclick="window.app.setBusiness('${b.id}')">
-          <div class="business-chip-avatar">${b.avatar || '🍰'}</div>
+          <div class="business-chip-avatar">${this.escapeHTML(b.avatar || '🍰')}</div>
           <div class="business-chip-info">
             <span class="business-chip-name">${this.escapeHTML(b.name)}</span>
             <span class="business-chip-zone">📍 ${this.escapeHTML(b.neighborhood || 'Buenos Aires')}</span>
@@ -960,9 +960,9 @@ class DulceAtelierApp {
     container.style.display = 'block';
     container.innerHTML = `
       <div class="store-profile-hero animate-fade">
-        <img class="store-profile-cover" src="${business.cover || 'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=800&q=80'}" alt="${this.escapeHTML(business.name)}">
+        <img class="store-profile-cover" src="${this.escapeHTML(this.safeImageUrl(business.cover, 'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=800&q=80'))}" alt="${this.escapeHTML(business.name)}">
         <div class="store-profile-content">
-          <div class="store-profile-avatar-wrap">${business.avatar}</div>
+          <div class="store-profile-avatar-wrap">${this.escapeHTML(business.avatar || '🍰')}</div>
           
           <div class="store-profile-header-actions">
             <a href="https://wa.me/${business.phone || '5491156192616'}?text=${encodeURIComponent(`¡Hola ${business.name}! Los contacto desde GOD MARKET por sus propuestas.`)}" 
@@ -1116,7 +1116,7 @@ class DulceAtelierApp {
             <div class="section-container animate-fade store-section-block">
               <div class="section-header store-section-header">
                 <div class="store-section-title-wrap">
-                  <div class="store-section-icon">${b.avatar}</div>
+                  <div class="store-section-icon">${this.escapeHTML(b.avatar || '🍰')}</div>
                   <div>
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <h3 class="section-title">${this.escapeHTML(b.name)}</h3>
@@ -1192,7 +1192,7 @@ class DulceAtelierApp {
     return `
       <div class="product-card" onclick="window.app.openProductModal('${product.id}')">
         <div class="product-image-container">
-          <img class="product-image" src="${product.image}" alt="${this.escapeHTML(product.name)}" loading="lazy" 
+          <img class="product-image" src="${this.escapeHTML(this.safeImageUrl(product.image, 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80'))}" alt="${this.escapeHTML(product.name)}" loading="lazy"
                onerror="this.src='https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80'">
           ${product.tag ? `<div class="product-tag">${this.escapeHTML(product.tag)}</div>` : ''}
           <button class="favorite-btn ${isFav ? 'active' : ''}" 
@@ -1204,7 +1204,7 @@ class DulceAtelierApp {
         <div class="product-content">
           <div class="product-store-badge" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
             <div style="display: flex; align-items: center; gap: 4px;">
-              <span class="store-badge-avatar">${product.businessAvatar || '🏪'}</span>
+              <span class="store-badge-avatar">${this.escapeHTML(product.businessAvatar || '🏪')}</span>
               <span class="store-badge-name">${this.escapeHTML(product.businessName || 'Pastelería')}</span>
               <span class="store-badge-zone">• ${this.escapeHTML(product.businessNeighborhood || '')}</span>
             </div>
@@ -1233,7 +1233,7 @@ class DulceAtelierApp {
     if (!product) return;
 
     this.selectedProductForModal = product;
-    document.getElementById('modal-product-img').src = product.image;
+    document.getElementById('modal-product-img').src = this.safeImageUrl(product.image);
     document.getElementById('modal-product-title').textContent = product.name;
     document.getElementById('modal-product-price').textContent = window.cartManager.formatCurrency(product.price);
     document.getElementById('modal-product-desc').textContent = product.description;
@@ -1466,7 +1466,7 @@ class DulceAtelierApp {
 
     list.innerHTML = items.map((item, idx) => `
       <div class="cart-item">
-        <img class="cart-item-img" src="${item.product.image}" alt="${this.escapeHTML(item.product.name)}">
+        <img class="cart-item-img" src="${this.escapeHTML(this.safeImageUrl(item.product.image))}" alt="${this.escapeHTML(item.product.name)}">
         <div class="cart-item-info">
           <div class="cart-item-store-tag">🏪 ${this.escapeHTML(item.product.businessName || 'Pastelería')}${item.product.businessNeighborhood ? ' • ' + this.escapeHTML(item.product.businessNeighborhood) : ''}</div>
           <div class="cart-item-title">${this.escapeHTML(item.product.name)}</div>
@@ -1916,6 +1916,18 @@ class DulceAtelierApp {
       this.openModal('admin-product-modal');
     } else if (entered !== null) {
       this.showToast('❌ PIN incorrecto');
+    }
+  }
+
+  safeImageUrl(value, fallback = 'assets/images/lumiere_cafe.jpg') {
+    if (typeof value !== 'string') return fallback;
+    if (/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/i.test(value)) return value;
+    try {
+      const url = new URL(value, window.location.origin);
+      if (url.protocol !== 'https:' && url.origin !== window.location.origin) return fallback;
+      return url.href;
+    } catch {
+      return fallback;
     }
   }
 

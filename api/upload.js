@@ -1,4 +1,6 @@
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const db = require('../db');
 
 /**
  * Serverless Function para Vercel (/api/upload)
@@ -6,13 +8,26 @@ const crypto = require('crypto');
  * Las credenciales se obtienen EXCLUSIVAMENTE de las variables de entorno de Vercel (process.env)
  */
 module.exports = async (req, res) => {
-  // CORS Headers restringidos y seguros
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  const allowedOrigins = new Set(
+    (process.env.APP_ORIGINS || 'https://somosgodmarket.com,https://www.somosgodmarket.com')
+      .split(',')
+      .map(value => value.trim())
+      .filter(Boolean)
+  );
+  if (process.env.NODE_ENV !== 'production') {
+    allowedOrigins.add('http://localhost:3000');
+    allowedOrigins.add('http://localhost:3001');
+  }
+  if (origin && allowedOrigins.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Admin-Token');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return res.status(origin && !allowedOrigins.has(origin) ? 403 : 204).end();
   }
 
   if (req.method !== 'POST') {
@@ -20,6 +35,26 @@ module.exports = async (req, res) => {
   }
 
   try {
+    const secret = process.env.JWT_SECRET;
+    if (!secret || secret.length < 32) {
+      return res.status(503).json({ error: 'La autenticación del servidor no está configurada.' });
+    }
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Debes iniciar sesión como vendedor para subir imágenes.' });
+    }
+
+    let claims;
+    try {
+      claims = jwt.verify(authHeader.slice(7).trim(), secret, { algorithms: ['HS256'] });
+    } catch {
+      return res.status(401).json({ error: 'La sesión de vendedor no es válida o expiró.' });
+    }
+    const seller = db.getSellerById(claims.sellerId);
+    if (!seller || !seller.hasCompletedProfile || !seller.businessId) {
+      return res.status(403).json({ error: 'Solo un vendedor con negocio registrado puede subir imágenes.' });
+    }
+
     const finalCloudName = process.env.CLOUDINARY_CLOUD_NAME;
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
@@ -38,7 +73,7 @@ module.exports = async (req, res) => {
     }
 
     // Validación de seguridad: solo formatos de imagen permitidos
-    if (!image.startsWith('data:image/')) {
+    if (!/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/i.test(image)) {
       return res.status(400).json({ error: 'El archivo enviado no es una imagen válida (debe ser JPEG, PNG o WebP).' });
     }
 
@@ -69,8 +104,10 @@ module.exports = async (req, res) => {
 
     const data = await uploadRes.json();
 
-    if (data.error) {
-      throw new Error(data.error.message || 'Error en Cloudinary');
+    if (!uploadRes.ok || data.error || typeof data.secure_url !== 'string' ||
+        !data.secure_url.startsWith('https://res.cloudinary.com/')) {
+      console.error('Cloudinary rechazó una subida autenticada:', data.error?.message || uploadRes.status);
+      return res.status(502).json({ error: 'No se pudo completar la subida de la imagen.' });
     }
 
     return res.status(200).json({ 
@@ -81,6 +118,6 @@ module.exports = async (req, res) => {
 
   } catch (error) {
     console.error('Error en /api/upload:', error);
-    return res.status(500).json({ error: error.message || 'Error interno del servidor' });
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
