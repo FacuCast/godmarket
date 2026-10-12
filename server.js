@@ -711,7 +711,7 @@ app.patch('/api/seller/orders/:id', verifySellerAuth, (req, res) => {
 app.get('/api/products', (req, res) => {
   try {
     const { category, businessId } = req.query;
-    let products = db.getProducts();
+    let products = db.getProducts().filter(product => product.isAvailable !== false);
 
     if (category && category !== 'todos') {
       products = products.filter(p => p.category === category);
@@ -751,6 +751,7 @@ app.post('/api/orders', orderLimiter, (req, res) => {
       const product = typeof productId === 'string' ? db.getProductById(productId) : null;
       if (!product || !Number.isInteger(quantity) || quantity < 1 || quantity > 25 ||
           !Number.isFinite(Number(product.price)) || Number(product.price) < 0 ||
+          product.isAvailable === false ||
           !product.businessId || !db.getBusinessById(product.businessId)) {
         return res.status(400).json({ error: 'El pedido contiene un producto o una cantidad no válida.' });
       }
@@ -779,6 +780,9 @@ app.post('/api/orders', orderLimiter, (req, res) => {
       });
     }
     const deliveryType = ['delivery', 'pickup'].includes(orderData.deliveryType) ? orderData.deliveryType : 'delivery';
+    const paymentMethod = ['cash', 'transfer', 'mercadopago'].includes(orderData.paymentMethod)
+      ? orderData.paymentMethod
+      : 'cash';
     const itemsByBusiness = new Map();
     for (const item of items) {
       const businessId = item.product.businessId;
@@ -801,7 +805,8 @@ app.post('/api/orders', orderLimiter, (req, res) => {
           ? orderData.customerPhone.replace(/\D/g, '').slice(0, 20)
           : '',
         deliveryType,
-        address: sanitizeInput(orderData.address, 200),
+        customerAddress: sanitizeInput(orderData.address, 200),
+        paymentMethod,
         total,
         items: businessItems,
         businessId

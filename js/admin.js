@@ -208,24 +208,24 @@ class AdminManager {
         image: imageUrl
       };
 
-      window.productManager.addProduct(newProduct);
+      const authHeaders = (window.sellerPortal && typeof window.sellerPortal.getAuthHeaders === 'function')
+        ? window.sellerPortal.getAuthHeaders()
+        : { 'Content-Type': 'application/json' };
+      const response = await fetch('/api/seller/products', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify(newProduct)
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || 'No se pudo publicar el producto.');
+      }
 
-      // Sincronizar con el backend persistente
-      try {
-        const authHeaders = (window.sellerPortal && typeof window.sellerPortal.getAuthHeaders === 'function')
-          ? window.sellerPortal.getAuthHeaders()
-          : { 'Content-Type': 'application/json' };
-
-        fetch('/api/seller/products', {
-          method: 'POST',
-          headers: authHeaders,
-          body: JSON.stringify(newProduct)
-        }).then(r => r.json()).then(() => {
-          if (window.sellerPortal && typeof window.sellerPortal.renderSellerProducts === 'function') {
-            window.sellerPortal.renderSellerProducts();
-          }
-        }).catch(e => console.warn('Aviso backend:', e));
-      } catch (err) {}
+      // Actualizar el catálogo local solo después de confirmar la persistencia.
+      window.productManager.addProduct(result.product);
+      if (window.sellerPortal && typeof window.sellerPortal.renderSellerProducts === 'function') {
+        window.sellerPortal.renderSellerProducts();
+      }
 
       window.app.showToast(`✅ "${name}" publicado por ${targetBusinessName}`);
       window.app.renderBusinessesSlider();

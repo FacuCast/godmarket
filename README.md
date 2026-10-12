@@ -39,6 +39,19 @@ Luego abre en tu navegador:
 
 ---
 
+## ✅ Requisitos para producción
+
+Antes de publicar el sitio:
+
+1. Configura una base MySQL/MariaDB persistente en el hosting y completa `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`.
+2. Define `JWT_SECRET` con un valor aleatorio de al menos 32 caracteres. Si se rota, se cierran las sesiones activas de vendedores.
+3. Completa `GOOGLE_CLIENT_ID` y agrega el dominio de producción en Google Identity Services.
+4. Completa `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` y `CLOUDINARY_API_SECRET`.
+5. Define `APP_ORIGINS` únicamente con los dominios HTTPS reales, separados por comas.
+6. Usa `NODE_ENV=production` y deja `ENABLE_DEMO_LOGIN=false`.
+
+La base MySQL es la persistencia de producción. El almacenamiento JSON en `./data` solo sirve como fallback local y no debe utilizarse para publicar el sitio en un entorno con múltiples instancias.
+
 ## ☁️ Cómo Conectar Cloudinary
 
 1. Abre la tienda web.
@@ -48,10 +61,14 @@ Luego abre en tu navegador:
 
 ---
 
+## 🌐 Cómo Subir a un hosting Node.js
+
+El backend debe ejecutarse como proceso Node.js persistente (`npm start`). En Hostinger, configura el directorio del proyecto, el archivo de entrada `server.js`, el puerto asignado por el panel y todas las variables de entorno anteriores. Importa [database.sql](./database.sql) si el usuario de base de datos no tiene permisos para crear tablas automáticamente.
+
 ## 🌐 Cómo Subir a Vercel
 
 1. Sube este proyecto a tu repositorio de **GitHub**.
 2. Ve a [vercel.com](https://vercel.com/) y haz clic en **"Add New Project"**.
 3. Selecciona tu repositorio `Pasteleria`.
-4. Deja la configuración por defecto (Vercel detectará el archivo `vercel.json` e `index.html`).
+4. Deja la configuración por defecto (Vercel detectará el archivo `vercel.json` e `index.html`) y configura las variables de entorno en el panel.
 5. Haz clic en **Deploy** y tu pastelería estará online en pocos segundos.
