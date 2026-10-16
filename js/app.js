@@ -907,7 +907,7 @@ class DulceAtelierApp {
       return `
         <div class="cafeteria-god-card" onclick="window.app.setBusiness('${b.id}')" title="Ver menú de ${this.escapeHTML(b.name)}">
           <div class="cafeteria-card-img-wrap">
-            <img class="cafeteria-card-img" src="${this.escapeHTML(this.safeImageUrl(b.cover, 'assets/images/lumiere_cafe.jpg'))}" alt="${this.escapeHTML(b.name)}" loading="lazy">
+            <img class="cafeteria-card-img" src="${this.escapeHTML(this.safeImageUrl(b.cover, 'assets/images/lumiere_cafe.webp'))}" alt="${this.escapeHTML(b.name)}" loading="lazy">
           </div>
           <div class="cafeteria-card-body">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-bottom: 4px;">
@@ -1993,7 +1993,7 @@ class DulceAtelierApp {
     }
   }
 
-  safeImageUrl(value, fallback = 'assets/images/lumiere_cafe.jpg') {
+  safeImageUrl(value, fallback = 'assets/images/lumiere_cafe.webp') {
     if (typeof value !== 'string') return fallback;
     if (/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/i.test(value)) return value;
     try {
