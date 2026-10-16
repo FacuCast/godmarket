@@ -1,11 +1,11 @@
 {
-  "name": "Dulce Atelier - Pastelería & Desayunos",
-  "short_name": "Dulce Atelier",
-  "description": "Pastelería artesanal, desayunos y meriendas directo a tu puerta.",
+  "name": "GOD MARKET | Food · Coffee · Healthy",
+  "short_name": "GOD MARKET",
+  "description": "Marketplace premium de cafeterías de especialidad, pastelería artesanal y desayunos sorpresa en Buenos Aires.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#FDFBF7",
-  "theme_color": "#D9536F",
+  "background_color": "#051610",
+  "theme_color": "#0F2318",
   "orientation": "portrait-primary",
   "icons": [
     {

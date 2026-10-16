@@ -2,9 +2,8 @@
    GOD MARKET — Premium / Luxury Design System
    Concepto A: Elegancia, exclusividad y sofisticación.
    Colores profundos, detalles dorados y fotografía de alta calidad.
+   (Fuentes cargadas eficientemente vía preconnect en index.html)
    ========================================================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
   /* ── Brand Palette GOD MARKET (Luxury Dark Forest Emerald & Pure Gold) ── */
@@ -212,4 +211,17 @@ img { max-width: 100%; height: auto; display: block; }
   background: linear-gradient(90deg, transparent, var(--primary), transparent);
   margin: 0 16px;
   opacity: 0.4;
+}
+
+/* ── SEO & Accessibility Helper ── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

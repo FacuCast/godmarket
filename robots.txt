@@ -1,0 +1,11 @@
+# robots.txt para GOD MARKET (https://somosgodmarket.com)
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /data/
+Disallow: /scratch/
+Disallow: /flyer.html
+Disallow: /godmarket-qr.html
+
+# Sitemap oficial
+Sitemap: https://somosgodmarket.com/sitemap.xml

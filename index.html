@@ -5,31 +5,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>GOD MARKET | Food · Coffee · Healthy — Lo mejor de cada cafetería</title>
+  <title>GOD MARKET | Cafeterías de Especialidad y Desayunos en Buenos Aires</title>
   <meta name="description"
-    content="GOD MARKET: el marketplace premium de las mejores pastelerías y cafeterías artesanales de Buenos Aires. Desayunos sorpresa, brunch y meriendas con envío directo o retiro.">
+    content="GOD MARKET: el marketplace premium de cafeterías de especialidad y pastelerías artesanales en Buenos Aires. Desayunos sorpresa, brunch y delicias de autor con envío o retiro.">
+  <meta name="keywords"
+    content="cafeteria de especialidad, desayunos sorpresa, pasteleria artesanal, brunch buenos aires, marketplace gastronomico, cafe de autor, tortas gourmet">
   <meta name="theme-color" content="#0F2318">
 
-  <!-- Open Graph / WhatsApp / Facebook Link Preview Card -->
+  <!-- Indexabilidad y Rastreo Canónico -->
+  <link rel="canonical" href="https://somosgodmarket.com/">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+
+  <!-- SEO Local (Buenos Aires, Argentina) -->
+  <meta name="geo.region" content="AR-C">
+  <meta name="geo.placename" content="Buenos Aires">
+  <meta name="geo.position" content="-34.6037;-58.3816">
+  <meta name="ICBM" content="-34.6037, -58.3816">
+
+  <!-- Open Graph / Redes Sociales / WhatsApp Link Preview Card -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="GOD MARKET | Marketplace de Cafeterías & Desayunos Premium">
+  <meta property="og:site_name" content="GOD MARKET">
+  <meta property="og:url" content="https://somosgodmarket.com/">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:title" content="GOD MARKET | Cafeterías de Especialidad & Desayunos Premium">
   <meta property="og:description"
-    content="Descubre y pide desayunos sorpresa, cafeterías de especialidad y delicias de autor. ¡Envío rápido a domicilio o retiro!">
-  <meta property="og:image"
-    content="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80">
-  <meta property="og:image:secure_url"
-    content="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80">
-  <meta property="og:image:type" content="image/jpeg">
-  <meta property="og:image:width" content="800">
-  <meta property="og:image:height" content="800">
+    content="Descubre y pide desayunos sorpresa, cafeterías de especialidad y delicias de autor en Buenos Aires. ¡Envío rápido a domicilio o retiro!">
+  <meta property="og:image" content="https://somosgodmarket.com/assets/images/og_banner.svg">
+  <meta property="og:image:secure_url" content="https://somosgodmarket.com/assets/images/og_banner.svg">
+  <meta property="og:image:type" content="image/svg+xml">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="GOD MARKET - Marketplace Gastronómico en Buenos Aires">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="GOD MARKET | Marketplace de Cafeterías & Desayunos Premium">
+  <meta name="twitter:url" content="https://somosgodmarket.com/">
+  <meta name="twitter:title" content="GOD MARKET | Cafeterías de Especialidad & Desayunos Premium">
   <meta name="twitter:description"
-    content="Descubre y pide desayunos sorpresa, cafeterías de especialidad y delicias de autor. ¡Envío rápido a domicilio o retiro!">
-  <meta name="twitter:image"
-    content="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80">
+    content="Descubre y pide desayunos sorpresa, cafeterías de especialidad y delicias de autor en Buenos Aires. ¡Envío rápido a domicilio o retiro!">
+  <meta name="twitter:image" content="https://somosgodmarket.com/assets/images/og_banner.svg">
 
   <!-- PWA & Mobile Web App Meta -->
   <link rel="manifest" href="manifest.json">
@@ -44,8 +58,8 @@
   <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" onload="this.onload=null;this.rel='stylesheet'">
 
   <!-- Modern Libraries (Lucide Icons & Canvas Confetti) -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
 
   <!-- Google Fonts: Cinzel + Cormorant Garamond + Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,7 +67,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets (Pure CSS) -->
-  <link rel="stylesheet" href="css/main.css?v=19.0">
+  <link rel="stylesheet" href="css/main.css?v=20.0">
   <link rel="stylesheet" href="css/components.css?v=24.0">
   <link rel="stylesheet" href="css/responsive.css?v=23.0">
   <link rel="stylesheet" href="css/mejoras-premium.css?v=19.0">
@@ -61,6 +75,60 @@
 
   <!-- Google Identity Services (GIS SDK oficial) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Datos Estructurados JSON-LD (Schema.org) para Google Rich Results -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://somosgodmarket.com/#website",
+        "url": "https://somosgodmarket.com/",
+        "name": "GOD MARKET",
+        "description": "Marketplace premium de cafeterías de especialidad, pastelería artesanal y desayunos sorpresa en Buenos Aires.",
+        "inLanguage": "es",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://somosgodmarket.com/?s={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "FoodEstablishment",
+        "@id": "https://somosgodmarket.com/#organization",
+        "name": "GOD MARKET",
+        "url": "https://somosgodmarket.com/",
+        "logo": "https://somosgodmarket.com/assets/icons/icon.svg",
+        "image": "https://somosgodmarket.com/assets/images/og_banner.svg",
+        "telephone": "+5491156192616",
+        "priceRange": "$$",
+        "servesCuisine": ["Cafetería de Especialidad", "Pastelería", "Desayunos Gourmet", "Brunch", "Healthy Food"],
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Buenos Aires",
+          "addressRegion": "Ciudad Autónoma de Buenos Aires",
+          "addressCountry": "AR"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": -34.6037,
+          "longitude": -58.3816
+        },
+        "areaServed": [
+          {
+            "@type": "AdministrativeArea",
+            "name": "Buenos Aires"
+          },
+          {
+            "@type": "AdministrativeArea",
+            "name": "CABA"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body>
@@ -77,7 +145,7 @@
       <div class="role-modal-badge">
         <span>✨ Experiencia Gastronómica</span>
       </div>
-      <h2 class="role-modal-title">Bienvenido a <span>GOD MARKET</span></h2>
+      <div class="role-modal-title" role="heading" aria-level="2">Bienvenido a <span>GOD MARKET</span></div>
       <p class="role-modal-subtitle">¿Cómo deseas ingresar a la plataforma hoy?</p>
 
       <div class="role-choices-grid">
@@ -117,9 +185,9 @@
       <div class="role-modal-badge" style="margin-bottom: 12px;">
         <span>🏪 Portal Negocios & Cafeterías</span>
       </div>
-      <h2 class="role-modal-title" style="font-size: 1.65rem; margin-bottom: 8px;">
+      <div class="role-modal-title" role="heading" aria-level="2" style="font-size: 1.65rem; margin-bottom: 8px;">
         Acceso para <span>Vendedores</span>
-      </h2>
+      </div>
       <p style="font-size: 0.85rem; color: #A3B8AC; margin-bottom: 22px; line-height: 1.45;">
         Inicia sesión con tu cuenta de Google para gestionar tu pastelería, publicar tus propuestas y recibir pedidos en tu WhatsApp.
       </p>
@@ -158,9 +226,9 @@
       <div class="role-modal-badge" style="margin-bottom: 10px;">
         <span>🎉 Primera vez en GOD MARKET</span>
       </div>
-      <h2 class="role-modal-title" style="font-size: 1.55rem; margin-bottom: 6px;">
+      <div class="role-modal-title" role="heading" aria-level="2" style="font-size: 1.55rem; margin-bottom: 6px;">
         Configura tu <span>Pastelería</span>
-      </h2>
+      </div>
       <p style="font-size: 0.85rem; color: #A3B8AC; margin-bottom: 22px; line-height: 1.4;">
         ¡Hola <strong id="onboarding-welcome-name" style="color: #E5C07B;">pastelero/a</strong>! Completa la información de tu negocio para activar tu local en el marketplace.
       </p>
@@ -581,7 +649,10 @@
 
     <!-- 1. Hero Featured Card ("Desayunos premium, cerca tuyo.") -->
     <section class="hero-banner-god" id="hero-banner">
-      <h1 class="hero-god-title">Desayunos<br>premium, cerca<br>tuyo.</h1>
+      <h1 class="hero-god-title">
+        <span>Desayunos<br>premium, cerca<br>tuyo.</span>
+        <span class="sr-only"> — GOD MARKET | Cafeterías de especialidad y desayunos gourmet en Buenos Aires</span>
+      </h1>
       <p class="hero-god-sub">Cafeterías de especialidad,<br>propuestas saludables y mucho más.</p>
     </section>
 
