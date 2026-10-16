@@ -862,11 +862,11 @@ app.use('/css', express.static(path.join(__dirname, 'css'), { dotfiles: 'ignore'
 app.use('/js', express.static(path.join(__dirname, 'js'), { dotfiles: 'ignore', maxAge: '1d' }));
 app.use('/assets', express.static(path.join(__dirname, 'assets'), { dotfiles: 'ignore', maxAge: '1d' }));
 
-// C. Archivos estáticos puntuales del cliente web y SEO
+// C. Archivos estáticos puntuales del cliente web y SEO (soporta / y // accidentales)
 app.get('/manifest.json', (req, res) => res.sendFile(path.join(__dirname, 'manifest.json')));
-app.get('/robots.txt', (req, res) => res.type('text/plain').sendFile(path.join(__dirname, 'robots.txt')));
-app.get('/sitemap.xml', (req, res) => res.type('application/xml').sendFile(path.join(__dirname, 'sitemap.xml')));
-app.get('/google6a93c74b42453c48.html', (req, res) => res.sendFile(path.join(__dirname, 'google6a93c74b42453c48.html')));
+app.get(/^\/+robots\.txt$/, (req, res) => res.type('text/plain').sendFile(path.join(__dirname, 'robots.txt')));
+app.get(/^\/+sitemap\.xml$/, (req, res) => res.type('application/xml').sendFile(path.join(__dirname, 'sitemap.xml')));
+app.get(/^\/+google6a93c74b42453c48\.html$/, (req, res) => res.sendFile(path.join(__dirname, 'google6a93c74b42453c48.html')));
 app.get('/sw.js', (req, res) => res.sendFile(path.join(__dirname, 'sw.js')));
 app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'favicon.ico')));
 app.get('/flyer.html', (req, res) => res.sendFile(path.join(__dirname, 'flyer.html')));
