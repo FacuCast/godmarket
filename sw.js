@@ -1,5 +1,5 @@
-// Service Worker para GOD MARKET PWA (v13 - Auto Purge & Network First)
-const CACHE_NAME = 'godmarket-v13';
+// Service Worker para GOD MARKET PWA (v14 - New Luxury Brand Logo & Icons)
+const CACHE_NAME = 'godmarket-v14';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

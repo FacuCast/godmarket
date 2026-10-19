@@ -1,64 +1,219 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="logoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFF5F7"/>
-      <stop offset="100%" stop-color="#FDF0F2"/>
-    </linearGradient>
-    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#E07A5F"/>
-      <stop offset="100%" stop-color="#D9536F"/>
-    </linearGradient>
+    <!-- Background Canvas Gradients: Deep Luxury Forest Emerald -->
+    <radialGradient id="bgGlow" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#143F2E"/>
+      <stop offset="40%" stop-color="#0A291E"/>
+      <stop offset="75%" stop-color="#061A13"/>
+      <stop offset="100%" stop-color="#030E0A"/>
+    </radialGradient>
+
+    <!-- Warm Golden Ambient Halo -->
+    <radialGradient id="goldAura" cx="50%" cy="48%" r="48%">
+      <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.22"/>
+      <stop offset="45%" stop-color="#D4AF37" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#D4AF37" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Metallic Gold Linear Gradients -->
     <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#F4A261"/>
-      <stop offset="100%" stop-color="#E76F51"/>
+      <stop offset="0%" stop-color="#FFF8E0"/>
+      <stop offset="25%" stop-color="#F7E2A3"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="75%" stop-color="#A87F22"/>
+      <stop offset="100%" stop-color="#7A5913"/>
     </linearGradient>
-    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#D9536F" flood-opacity="0.18"/>
-    </filter>
+
+    <linearGradient id="goldLight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="35%" stop-color="#FCEABF"/>
+      <stop offset="70%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#A57E23"/>
+    </linearGradient>
+
+    <linearGradient id="goldDark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#D4AF37"/>
+      <stop offset="50%" stop-color="#A87F22"/>
+      <stop offset="100%" stop-color="#6F5010"/>
+    </linearGradient>
   </defs>
 
-  <!-- Background Circle -->
-  <circle cx="200" cy="200" r="185" fill="url(#logoBgGrad)" stroke="#EFE4E6" stroke-width="3" filter="url(#softShadow)"/>
+  <!-- Full-bleed deep emerald background (Android maskable compliant, fills all 512x512) -->
+  <rect width="512" height="512" fill="#081E16"/>
+  <rect width="512" height="512" fill="url(#bgGlow)"/>
+  <circle cx="256" cy="256" r="226" fill="#061811"/>
+  <circle cx="256" cy="256" r="160" fill="#0A2A1E" opacity="0.6"/>
+  <rect width="512" height="512" fill="url(#goldAura)"/>
 
-  <!-- Outer Decorative Ring -->
-  <circle cx="200" cy="200" r="165" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" stroke-dasharray="4,6" opacity="0.8"/>
+  <!-- ==========================================
+       OUTER LUXURY MEDALLION RINGS
+       ========================================== -->
+  <!-- Outer Solid Ring -->
+  <circle cx="256" cy="256" r="226" fill="none" stroke="#D4AF37" stroke-width="2.5" opacity="0.9"/>
+  <!-- Beaded / Dashed Ring -->
+  <circle cx="256" cy="256" r="215" fill="none" stroke="#F5DFAC" stroke-width="1.2" stroke-dasharray="3,5" opacity="0.75"/>
+  <!-- Inner Delicate Hairline -->
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#9E7624" stroke-width="0.8" opacity="0.5"/>
 
-  <!-- Cake Icon Group -->
-  <g transform="translate(100, 70)">
-    <!-- Sparkles -->
-    <path d="M100 8 L103 16 L111 19 L103 22 L100 30 L97 22 L89 19 L97 16 Z" fill="url(#goldGrad)"/>
-    <path d="M150 35 L152 40 L157 42 L152 44 L150 49 L148 44 L143 42 L148 40 Z" fill="url(#goldGrad)" opacity="0.9"/>
-    <path d="M45 40 L47 45 L52 47 L47 49 L45 54 L43 49 L38 47 L43 45 Z" fill="url(#goldGrad)" opacity="0.9"/>
-
-    <!-- Candle & Flame -->
-    <path d="M100 24 Q104 18 100 12 Q96 18 100 24 Z" fill="url(#goldGrad)"/>
-    <rect x="98" y="24" width="4" height="18" rx="2" fill="#D9536F"/>
-
-    <!-- Cake Top Tier (Frosting & Cake) -->
-    <rect x="58" y="42" width="84" height="34" rx="10" fill="url(#primaryGrad)"/>
-    <path d="M58 54 Q68 62 78 54 Q88 62 98 54 Q108 62 118 54 Q128 62 142 54 L142 42 L58 42 Z" fill="#FFF0F3" opacity="0.9"/>
-
-    <!-- Cake Middle Decorative Ribbon -->
-    <rect x="42" y="76" width="116" height="38" rx="12" fill="#2B1E1A"/>
-    <path d="M42 88 Q56 98 70 88 Q84 98 98 88 Q112 98 126 88 Q140 98 158 88 L158 76 L42 76 Z" fill="url(#goldGrad)" opacity="0.9"/>
-
-    <!-- Cake Bottom Tier -->
-    <rect x="26" y="114" width="148" height="42" rx="14" fill="url(#primaryGrad)"/>
-    <path d="M26 128 Q44 140 62 128 Q80 140 98 128 Q116 140 134 128 Q152 140 174 128 L174 114 L26 114 Z" fill="#FFF0F3" opacity="0.9"/>
-
-    <!-- Cake Stand -->
-    <path d="M16 156 Q100 162 184 156 L190 162 Q100 170 10 162 Z" fill="url(#goldGrad)"/>
-    <path d="M85 162 L80 176 Q100 180 120 176 L115 162 Z" fill="url(#goldGrad)"/>
-    <rect x="65" y="176" width="70" height="6" rx="3" fill="url(#goldGrad)"/>
+  <!-- Cardinal Gems / Diamond Studs on Ring -->
+  <g fill="#FFF5D6">
+    <!-- Top -->
+    <polygon points="256,25 261,30 256,35 251,30"/>
+    <circle cx="256" cy="30" r="1.5" fill="#B38722"/>
+    <!-- Bottom -->
+    <polygon points="256,477 261,482 256,487 251,482"/>
+    <circle cx="256" cy="482" r="1.5" fill="#B38722"/>
+    <!-- Left -->
+    <polygon points="25,256 30,261 35,256 30,251"/>
+    <circle cx="30" cy="256" r="1.5" fill="#B38722"/>
+    <!-- Right -->
+    <polygon points="477,256 482,261 487,256 482,251"/>
+    <circle cx="482" cy="256" r="1.5" fill="#B38722"/>
   </g>
 
-  <!-- Typography: DULCE ATELIER -->
-  <text x="200" y="295" font-family="'Playfair Display', Georgia, serif" font-size="30" font-weight="bold" fill="#2B1E1A" text-anchor="middle" letter-spacing="1">Dulce Atelier</text>
-  
-  <!-- Tagline -->
-  <text x="200" y="322" font-family="'Outfit', sans-serif" font-size="12.5" font-weight="700" fill="#D9536F" text-anchor="middle" letter-spacing="3.5">PASTELERÍA &amp; DESAYUNOS</text>
+  <!-- ==========================================
+       1. CREST TOP: 8-POINT FACETED CELESTIAL STAR
+       ========================================== -->
+  <g transform="translate(256, 120)">
+    <!-- Primary Cardinal Rays (52px length) -->
+    <!-- North -->
+    <polygon points="0,0 0,-52 9,-13" fill="#FFF7DE"/>
+    <polygon points="0,0 0,-52 -9,-13" fill="#B0831F"/>
+    <!-- South -->
+    <polygon points="0,0 0,52 -9,13" fill="#F4DD9E"/>
+    <polygon points="0,0 0,52 9,13" fill="#886212"/>
+    <!-- East -->
+    <polygon points="0,0 52,0 13,9" fill="#F8E6B4"/>
+    <polygon points="0,0 52,0 13,-9" fill="#997017"/>
+    <!-- West -->
+    <polygon points="0,0 -52,0 -13,-9" fill="#FEF5D4"/>
+    <polygon points="0,0 -52,0 -13,9" fill="#A87E1B"/>
 
-  <!-- Star accents -->
-  <circle cx="95" cy="318" r="2.5" fill="#F4A261"/>
-  <circle cx="305" cy="318" r="2.5" fill="#F4A261"/>
+    <!-- Diagonal Rays (32px length) -->
+    <!-- NE -->
+    <polygon points="0,0 32,-32 16,-4" fill="#FFF7DE"/>
+    <polygon points="0,0 32,-32 4,-16" fill="#886212"/>
+    <!-- NW -->
+    <polygon points="0,0 -32,-32 -4,-16" fill="#F8E6B4"/>
+    <polygon points="0,0 -32,-32 -16,-4" fill="#A87E1B"/>
+    <!-- SE -->
+    <polygon points="0,0 32,32 4,16" fill="#F4DD9E"/>
+    <polygon points="0,0 32,32 16,4" fill="#997017"/>
+    <!-- SW -->
+    <polygon points="0,0 -32,32 -16,4" fill="#FFF1C8"/>
+    <polygon points="0,0 -32,32 -4,16" fill="#B0831F"/>
+
+    <!-- Center Jewel -->
+    <circle cx="0" cy="0" r="5.5" fill="#FFFBEB"/>
+    <circle cx="0" cy="0" r="3.2" fill="#D4AF37"/>
+
+    <!-- Flanking Starburst Accents -->
+    <g transform="translate(-68, 0)">
+      <path d="M 0 -11 L 3 -3 L 11 0 L 3 3 L 0 11 L -3 3 L -11 0 L -3 -3 Z" fill="#F7E4AF" opacity="0.9"/>
+      <circle cx="0" cy="0" r="1.5" fill="#FFFBEB"/>
+    </g>
+    <g transform="translate(68, 0)">
+      <path d="M 0 -11 L 3 -3 L 11 0 L 3 3 L 0 11 L -3 3 L -11 0 L -3 -3 Z" fill="#F7E4AF" opacity="0.9"/>
+      <circle cx="0" cy="0" r="1.5" fill="#FFFBEB"/>
+    </g>
+  </g>
+
+  <!-- ==========================================
+       2. BRAND WORDMARK: "GOD"
+       ========================================== -->
+  <!-- Shadow offset -->
+  <text x="259" y="261"
+        font-family="'Cinzel', 'Playfair Display', 'Georgia', 'Times New Roman', serif"
+        font-size="98"
+        font-weight="900"
+        letter-spacing="12"
+        fill="#020805"
+        opacity="0.75"
+        text-anchor="middle">GOD</text>
+  <!-- Main Gilded Text -->
+  <text x="256" y="258"
+        font-family="'Cinzel', 'Playfair Display', 'Georgia', 'Times New Roman', serif"
+        font-size="98"
+        font-weight="900"
+        letter-spacing="12"
+        fill="#F6DE95"
+        text-anchor="middle">GOD</text>
+
+  <!-- ==========================================
+       3. DIVIDER: DIAMOND & TAPERED WINGS
+       ========================================== -->
+  <g transform="translate(256, 283)">
+    <!-- Central Diamond -->
+    <polygon points="0,-8 8,0 0,8 -8,0" fill="#FFF8DE"/>
+    <circle cx="0" cy="0" r="2.5" fill="#D4AF37"/>
+    <!-- Left Wing -->
+    <path d="M -16 0 L -35 -2.2 L -125 -0.6 L -140 0 L -125 0.6 L -35 2.2 Z" fill="#D4AF37"/>
+    <circle cx="-146" cy="0" r="2.5" fill="#FFF8DE"/>
+    <!-- Right Wing -->
+    <path d="M 16 0 L 35 -2.2 L 125 -0.6 L 140 0 L 125 0.6 L 35 2.2 Z" fill="#D4AF37"/>
+    <circle cx="146" cy="0" r="2.5" fill="#FFF8DE"/>
+  </g>
+
+  <!-- ==========================================
+       4. SUBTITLE: "M A R K E T" (Universal kerning)
+       ========================================== -->
+  <!-- Shadow offset -->
+  <text x="257" y="329"
+        font-family="'Outfit', 'Cinzel', 'Arial', sans-serif"
+        font-size="25"
+        font-weight="800"
+        letter-spacing="14"
+        fill="#020805"
+        opacity="0.6"
+        text-anchor="middle">M&#160;A&#160;R&#160;K&#160;E&#160;T</text>
+  <!-- Main Gold Text -->
+  <text x="256" y="328"
+        font-family="'Outfit', 'Cinzel', 'Arial', sans-serif"
+        font-size="25"
+        font-weight="800"
+        letter-spacing="14"
+        fill="#E5C365"
+        text-anchor="middle">M&#160;A&#160;R&#160;K&#160;E&#160;T</text>
+
+  <!-- ==========================================
+       5. BOTANICAL LAUREL / COFFEE LEAVES WREATH
+       ========================================== -->
+  <g transform="translate(256, 362)">
+    <!-- Center Ribbon Knot / Berries -->
+    <circle cx="0" cy="8" r="4" fill="#FFF6D8"/>
+    <circle cx="-7" cy="5" r="2.8" fill="#D4AF37"/>
+    <circle cx="7" cy="5" r="2.8" fill="#D4AF37"/>
+
+    <!-- Left Branch Curve -->
+    <path d="M -10 9 C -42 14 -82 6 -115 -14" fill="none" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Left Leaves -->
+    <path d="M -24 9 C -29 4 -37 3 -42 8 C -39 14 -32 14 -24 9 Z" fill="#F8E5B4"/>
+    <path d="M -48 8 C -55 1 -64 1 -69 7 C -66 13 -58 13 -48 8 Z" fill="#ECD388"/>
+    <path d="M -74 4 C -83 -4 -92 -3 -98 4 C -93 10 -84 10 -74 4 Z" fill="#D4AF37"/>
+    <path d="M -97 -3 C -107 -13 -116 -11 -121 -3 C -114 4 -105 4 -97 -3 Z" fill="#B38722"/>
+    <path d="M -115 -13 C -124 -23 -131 -18 -132 -11 C -126 -7 -119 -8 -115 -13 Z" fill="#9C731A"/>
+
+    <!-- Right Branch Curve -->
+    <path d="M 10 9 C 42 14 82 6 115 -14" fill="none" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Right Leaves -->
+    <path d="M 24 9 C 29 4 37 3 42 8 C 39 14 32 14 24 9 Z" fill="#F8E5B4"/>
+    <path d="M 48 8 C 55 1 64 1 69 7 C 66 13 58 13 48 8 Z" fill="#ECD388"/>
+    <path d="M 74 4 C 83 -4 92 -3 98 4 C 93 10 84 10 74 4 Z" fill="#D4AF37"/>
+    <path d="M 97 -3 C 107 -13 116 -11 121 -3 C 114 4 105 4 97 -3 Z" fill="#B38722"/>
+    <path d="M 115 -13 C 124 -23 131 -18 132 -11 C 126 -7 119 -8 115 -13 Z" fill="#9C731A"/>
+  </g>
+
+  <!-- ==========================================
+       6. TAGLINE PILL BADGE AT BASE
+       ========================================== -->
+  <g transform="translate(256, 418)">
+    <rect x="-135" y="-14" width="270" height="26" rx="13" fill="#061C14" stroke="#D4AF37" stroke-width="1" opacity="0.8"/>
+    <text x="0" y="4"
+          font-family="'Outfit', -apple-system, sans-serif"
+          font-size="10.5"
+          font-weight="700"
+          letter-spacing="3.5"
+          fill="#FAF6F0"
+          text-anchor="middle">FOOD · COFFEE · HEALTHY</text>
+  </g>
 </svg>
