@@ -1,5 +1,5 @@
-// Service Worker para Dulce Atelier PWA (v12 - Auto Purge & Network First)
-const CACHE_NAME = 'dulce-atelier-v12';
+// Service Worker para GOD MARKET PWA (v13 - Auto Purge & Network First)
+const CACHE_NAME = 'godmarket-v13';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
