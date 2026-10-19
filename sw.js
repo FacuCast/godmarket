@@ -1,5 +1,5 @@
-// Service Worker para GOD MARKET PWA (v14 - New Luxury Brand Logo & Icons)
-const CACHE_NAME = 'godmarket-v14';
+// Service Worker para GOD MARKET PWA (v15 - Fix PWA start_url & Route Fallback)
+const CACHE_NAME = 'godmarket-v15';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -26,7 +26,18 @@ self.addEventListener('fetch', (event) => {
   if (event.request.mode === 'navigate' || (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'))) {
     event.respondWith(
       fetch(event.request)
-        .catch(() => caches.match('./index.html'))
+        .then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+              cache.put('./index.html', responseToCache.clone());
+              cache.put('/', responseToCache.clone());
+            });
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((res) => res || caches.match('./index.html').then((r) => r || caches.match('/'))))
     );
     return;
   }

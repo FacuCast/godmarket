@@ -870,10 +870,14 @@ app.get(/^\/+google6a93c74b42453c48\.html$/, (req, res) => res.sendFile(path.joi
 app.get('/sw.js', (req, res) => res.sendFile(path.join(__dirname, 'sw.js')));
 app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'favicon.ico')));
 app.get('/flyer.html', (req, res) => res.sendFile(path.join(__dirname, 'flyer.html')));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/godmarket-qr.html', (req, res) => res.sendFile(path.join(__dirname, 'godmarket-qr.html')));
+app.get(['/', '/index.html'], (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-// D. SPA Fallback (solo para rutas web limpias, nunca para archivos que no existen)
+// D. SPA Fallback (solo para rutas web limpias o peticiones HTML, nunca para archivos inexistentes)
 app.get('*', (req, res) => {
+  if (req.path === '/index.html') {
+    return res.sendFile(path.join(__dirname, 'index.html'));
+  }
   if (req.path.includes('.')) {
     return res.status(404).json({ error: 'Recurso no encontrado.' });
   }
