@@ -57,26 +57,49 @@
   background: #F5DFAC;
 }
 
-/* Brand GOD MARKET */
+/* Brand GOD MARKET con Isotipo Emblema */
 .brand-godmarket {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
+  text-align: left;
+  display: inline-flex;
+  flex-direction: row;
   align-items: center;
+  gap: 9px;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  text-decoration: none;
+}
+
+.brand-godmarket:hover {
+  opacity: 0.95;
 }
 
 .brand-godmarket:active {
   transform: scale(0.96);
 }
 
+.brand-emblem-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: drop-shadow(0 2px 6px rgba(212, 175, 55, 0.4));
+  flex-shrink: 0;
+  display: block;
+}
+
+.brand-text-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1;
+}
+
 .brand-god {
   font-family: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.55rem;
+  font-size: 1.45rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   line-height: 1;
   color: #D4AF37;
   background: linear-gradient(180deg, #F8E5B8 0%, #D4AF37 55%, #A8812E 100%);
@@ -87,14 +110,14 @@
 
 .brand-market {
   font-family: 'Outfit', -apple-system, sans-serif;
-  font-size: 0.58rem;
+  font-size: 0.54rem;
   font-weight: 600;
-  letter-spacing: 0.42em;
+  letter-spacing: 0.38em;
   line-height: 1;
   color: #C8A663;
   display: block;
   margin-top: 2px;
-  text-indent: 0.42em;
+  text-indent: 0.38em;
 }
 
 /* Header Shopping Bag Button with Badge */

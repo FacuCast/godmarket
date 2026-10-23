@@ -1,5 +1,5 @@
-// Service Worker para GOD MARKET PWA (v15 - Fix PWA start_url & Route Fallback)
-const CACHE_NAME = 'godmarket-v15';
+// Service Worker para GOD MARKET PWA (v16 - New Logo Emblem in Navbar & PWA Icon Refresh)
+const CACHE_NAME = 'godmarket-v16';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
