@@ -1172,3 +1172,232 @@
   border: 1px solid rgba(239, 68, 68, 0.35);
   color: #F87171;
 }
+
+
+/* ==========================================================================
+   SISTEMA DE DISPUTAS — ESTILOS
+   ========================================================================== */
+
+/* ── Botón de disputa en historial del comprador ── */
+.order-dispute-section {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.btn-dispute {
+  width: 100%;
+  padding: 10px 16px;
+  background: rgba(255, 107, 53, 0.08);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  border-radius: 10px;
+  color: #FF6B35;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-dispute:hover {
+  background: rgba(255, 107, 53, 0.15);
+  border-color: rgba(255, 107, 53, 0.5);
+  transform: translateY(-1px);
+}
+
+/* ── Badge de estado de disputa ── */
+.dispute-badge {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.dispute-badge-abierta {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #EF4444;
+}
+
+.dispute-badge-en_revision {
+  background: rgba(255, 179, 0, 0.1);
+  border: 1px solid rgba(255, 179, 0, 0.3);
+  color: #FFB300;
+}
+
+.dispute-badge-reembolsada {
+  background: rgba(0, 200, 83, 0.1);
+  border: 1px solid rgba(0, 200, 83, 0.3);
+  color: #00C853;
+}
+
+.dispute-badge-rechazada {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ── Filtros de disputas (panel admin) ── */
+.dispute-filter-btn {
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.dispute-filter-btn.active {
+  background: rgba(255, 107, 53, 0.15);
+  border-color: rgba(255, 107, 53, 0.4);
+  color: #FF6B35;
+}
+
+.dispute-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Tarjeta de disputa (panel admin) ── */
+.dispute-card {
+  background: #141414;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+
+.dispute-card:hover {
+  border-color: rgba(255, 107, 53, 0.2);
+}
+
+.dispute-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dispute-id {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.dispute-order-ref {
+  font-size: 0.8rem;
+  color: #FF6B35;
+  font-weight: 600;
+}
+
+.dispute-status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dispute-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dispute-info-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dispute-info-label {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+.dispute-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.dispute-card-actions button {
+  padding: 9px 10px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.dispute-contact-btn {
+  background: rgba(37, 211, 102, 0.1);
+  border-color: rgba(37, 211, 102, 0.3) !important;
+  color: #25D366;
+  grid-column: span 2;
+}
+
+.dispute-contact-btn:hover {
+  background: rgba(37, 211, 102, 0.2);
+}
+
+.dispute-mark-btn {
+  background: rgba(255, 179, 0, 0.1);
+  border-color: rgba(255, 179, 0, 0.3) !important;
+  color: #FFB300;
+}
+
+.dispute-refund-btn {
+  background: rgba(0, 200, 83, 0.1);
+  border-color: rgba(0, 200, 83, 0.3) !important;
+  color: #00C853;
+}
+
+.dispute-reject-btn {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2) !important;
+  color: #EF4444;
+}
+
+.dispute-card-actions button:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+/* ── Badge en nav del seller ── */
+.disputes-nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #EF4444;
+  color: #FFF;
+  font-size: 0.6rem;
+  font-weight: 800;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  animation: pulseGlow 1.5s ease infinite;
+}

@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
@@ -693,7 +693,7 @@ app.patch('/api/seller/orders/:id', verifySellerAuth, (req, res) => {
       return res.status(403).json({ error: 'Acceso denegado: este pedido no pertenece a tu comercio.' });
     }
 
-    const validStatuses = ['pendiente', 'en_preparacion', 'despachado', 'entregado'];
+    const validStatuses = ['pendiente', 'en_preparacion', 'despachado', 'entregado', 'en_disputa', 'reembolsado', 'disputa_cerrada'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ error: 'Estado de pedido no válido.' });
     }
@@ -816,6 +816,102 @@ app.post('/api/orders', orderLimiter, (req, res) => {
   } catch (err) {
     console.error('Error al registrar pedido:', err);
     res.status(500).json({ error: 'Error al registrar pedido.' });
+  }
+});
+
+
+
+// ============================================================================
+// 10-B. SISTEMA DE DISPUTAS Y REEMBOLSOS
+// ============================================================================
+
+// Rate limiter especifico para disputas (5 por hora por IP)
+const disputeLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas disputas enviadas. Intenta en una hora.' }
+});
+
+// POST /api/orders/:id/dispute — El comprador reporta que el local no respondio
+app.post('/api/orders/:id/dispute', disputeLimiter, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { customerName, customerPhone, reason } = req.body;
+    const order = db.getOrderById(id);
+    if (!order) {
+      return res.status(404).json({ error: 'Pedido no encontrado.' });
+    }
+    const validReasons = ['no_response', 'wrong_order', 'quality_issue', 'other'];
+    const safeReason = validReasons.includes(reason) ? reason : 'no_response';
+    const existing = db.getDisputeByOrderId(id);
+    if (existing) {
+      return res.json({ success: true, dispute: existing, alreadyExists: true });
+    }
+    const dispute = db.createDispute({
+      orderId: id,
+      customerName: sanitizeInput(customerName || order.customerName, 80),
+      customerPhone: typeof (customerPhone || order.customerPhone) === 'string'
+        ? (customerPhone || order.customerPhone).replace(/\D/g, '').slice(0, 20)
+        : '',
+      businessId: order.businessId || '',
+      total: order.total || 0,
+      reason: safeReason
+    });
+    db.updateOrderStatus(id, 'en_disputa');
+    console.log('Disputa creada: ' + dispute.id + ' para pedido ' + id);
+    res.json({ success: true, dispute });
+  } catch (err) {
+    console.error('Error al crear disputa:', err);
+    res.status(500).json({ error: 'Error al procesar la disputa.' });
+  }
+});
+
+// GET /api/admin/disputes — Faku ve todas las disputas
+app.get('/api/admin/disputes', (req, res) => {
+  try {
+    const adminToken = req.headers['x-admin-token'];
+    const expectedToken = process.env.ADMIN_TOKEN;
+    if (!expectedToken || !adminToken || adminToken !== expectedToken) {
+      return res.status(403).json({ error: 'Acceso denegado.' });
+    }
+    const disputes = db.getDisputes();
+    res.json(disputes);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al obtener disputas.' });
+  }
+});
+
+// PATCH /api/admin/disputes/:id — Faku resuelve la disputa
+app.patch('/api/admin/disputes/:id', (req, res) => {
+  try {
+    const adminToken = req.headers['x-admin-token'];
+    const expectedToken = process.env.ADMIN_TOKEN;
+    if (!expectedToken || !adminToken || adminToken !== expectedToken) {
+      return res.status(403).json({ error: 'Acceso denegado.' });
+    }
+    const { id } = req.params;
+    const { resolution, resolutionNote } = req.body;
+    const validResolutions = ['reembolso', 'rechazo', 'en_revision'];
+    if (!validResolutions.includes(resolution)) {
+      return res.status(400).json({ error: 'Resolucion no valida.' });
+    }
+    const disputes = db.getDisputes();
+    const dispute = disputes.find(d => d.id === id);
+    if (!dispute) {
+      return res.status(404).json({ error: 'Disputa no encontrada.' });
+    }
+    const resolved = db.resolveDispute(id, resolution, sanitizeInput(resolutionNote, 300));
+    if (resolution === 'reembolso') {
+      db.updateOrderStatus(dispute.orderId, 'reembolsado');
+    } else if (resolution === 'rechazo') {
+      db.updateOrderStatus(dispute.orderId, 'disputa_cerrada');
+    }
+    res.json({ success: true, dispute: resolved });
+  } catch (err) {
+    console.error('Error al resolver disputa:', err);
+    res.status(500).json({ error: 'Error al resolver la disputa.' });
   }
 });
 

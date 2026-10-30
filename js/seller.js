@@ -1,4 +1,4 @@
-/**
+﻿/**
  * GOD MARKET - CONTROLADOR DEL PORTAL DE VENDEDORES & AUTENTICACIÓN GOOGLE
  * Maneja el Selector de Rol, Login con Google, Onboarding y Dashboard del Vendedor
  */
@@ -824,6 +824,7 @@ class SellerPortalManager {
     if (tabName === 'products') this.renderSellerProducts();
     if (tabName === 'orders') this.renderSellerOrders();
     if (tabName === 'coverage') this.initDashboardCoverageMap();
+    if (tabName === 'disputes') this.loadDisputes();
   }
 
   // ============================================================================
@@ -1028,6 +1029,207 @@ class SellerPortalManager {
     this.showCustomerMarketplace();
     if (window.app && typeof window.app.showToast === 'function') {
       window.app.showToast('👋 Sesión cerrada. Has vuelto a la tienda como cliente.');
+    }
+  }
+
+
+  // ────────────────────────────────────────────────────────────
+  // CENTRO DE AYUDA — PANEL DE DISPUTAS (SOLO ADMIN/FAKU)
+  // ────────────────────────────────────────────────────────────
+
+  getAdminToken() {
+    return localStorage.getItem('godmarket_admin_token') || '';
+  }
+
+  async loadDisputes() {
+    const disputesList = document.getElementById('disputes-list');
+    if (!disputesList) return;
+
+    const adminToken = this.getAdminToken();
+    if (!adminToken) {
+      // Pedir token de admin
+      const token = prompt('Ingresá el token de administrador de GOD MARKET:');
+      if (!token) return;
+      localStorage.setItem('godmarket_admin_token', token);
+    }
+
+    disputesList.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.4);">⏳ Cargando disputas...</div>';
+
+    try {
+      const res = await fetch('/api/admin/disputes', {
+        headers: {
+          'x-admin-token': localStorage.getItem('godmarket_admin_token') || ''
+        }
+      });
+
+      if (res.status === 403) {
+        localStorage.removeItem('godmarket_admin_token');
+        disputesList.innerHTML = '<div style="text-align:center;padding:30px;color:#EF4444;">❌ Token incorrecto. Intentá de nuevo.</div>';
+        return;
+      }
+
+      const disputes = await res.json();
+      this._allDisputes = disputes;
+      this.renderDisputesList(disputes);
+
+      // Actualizar badge en la pestaña
+      const openCount = disputes.filter(d => d.status === 'abierta' || d.status === 'en_revision').length;
+      const badge = document.getElementById('disputes-badge');
+      if (badge) {
+        badge.style.display = openCount > 0 ? 'inline-flex' : 'none';
+        badge.textContent = openCount > 9 ? '9+' : String(openCount);
+      }
+    } catch (err) {
+      disputesList.innerHTML = '<div style="text-align:center;padding:30px;color:#EF4444;">❌ Error al cargar. Verificá la conexión.</div>';
+    }
+  }
+
+  filterDisputes(filter, btn) {
+    document.querySelectorAll('.dispute-filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const all = this._allDisputes || [];
+    const filtered = filter === 'all' ? all : all.filter(d => d.status === filter);
+    this.renderDisputesList(filtered);
+  }
+
+  renderDisputesList(disputes) {
+    const disputesList = document.getElementById('disputes-list');
+    if (!disputesList) return;
+
+    if (!disputes || disputes.length === 0) {
+      disputesList.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);font-size:0.9rem;">No hay disputas en este estado. 🎉</div>';
+      return;
+    }
+
+    const statusLabel = {
+      abierta: { icon: '🔴', label: 'Abierta', color: '#EF4444' },
+      en_revision: { icon: '🟡', label: 'En revisión', color: '#FFB300' },
+      reembolsada: { icon: '✅', label: 'Reembolsada', color: '#00C853' },
+      rechazada: { icon: '❌', label: 'Rechazada', color: '#666' }
+    };
+
+    const reasonLabel = {
+      no_response: 'Local no respondió',
+      wrong_order: 'Pedido incorrecto',
+      quality_issue: 'Problema de calidad',
+      other: 'Otro motivo'
+    };
+
+    disputesList.innerHTML = disputes.map(d => {
+      const st = statusLabel[d.status] || { icon: '❓', label: d.status, color: '#888' };
+      const dateStr = d.createdAt ? new Date(d.createdAt).toLocaleDateString('es-AR', {
+        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+      }) : 'N/A';
+      const canResolve = d.status === 'abierta' || d.status === 'en_revision';
+
+      return `
+        <div class="dispute-card" id="dispute-${d.id}">
+          <div class="dispute-card-header">
+            <div>
+              <span class="dispute-id">${d.id}</span>
+              <span class="dispute-order-ref">→ Pedido #${d.orderId}</span>
+            </div>
+            <span class="dispute-status-badge" style="background: ${st.color}20; color: ${st.color}; border: 1px solid ${st.color}40;">${st.icon} ${st.label}</span>
+          </div>
+
+          <div class="dispute-card-body">
+            <div class="dispute-info-row">
+              <span class="dispute-info-label">👤 Comprador:</span>
+              <span>${d.customerName || 'N/A'}${d.customerPhone ? ' · +' + d.customerPhone : ''}</span>
+            </div>
+            <div class="dispute-info-row">
+              <span class="dispute-info-label">💰 Total:</span>
+              <span style="color: var(--primary); font-weight: 700;">${(d.total || 0).toLocaleString('es-AR')}</span>
+            </div>
+            <div class="dispute-info-row">
+              <span class="dispute-info-label">📋 Motivo:</span>
+              <span>${reasonLabel[d.reason] || d.reason}</span>
+            </div>
+            <div class="dispute-info-row">
+              <span class="dispute-info-label">📅 Fecha:</span>
+              <span>${dateStr}</span>
+            </div>
+            ${d.resolutionNote ? `<div class="dispute-info-row"><span class="dispute-info-label">📝 Nota:</span><span>${d.resolutionNote}</span></div>` : ''}
+          </div>
+
+          ${canResolve ? `
+          <div class="dispute-card-actions">
+            <button class="dispute-contact-btn" onclick="window.sellerPortal.contactDisputeCustomer('${d.customerPhone}', '${d.orderId}')">
+              💬 Contactar por WA
+            </button>
+            <button class="dispute-mark-btn" onclick="window.sellerPortal.openResolveDispute('${d.id}', 'en_revision')">
+              🔄 Marcar en revisión
+            </button>
+            <button class="dispute-refund-btn" onclick="window.sellerPortal.openResolveDispute('${d.id}', 'reembolso')">
+              ✅ Aprobar Reembolso
+            </button>
+            <button class="dispute-reject-btn" onclick="window.sellerPortal.openResolveDispute('${d.id}', 'rechazo')">
+              ❌ Rechazar
+            </button>
+          </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  contactDisputeCustomer(phone, orderId) {
+    if (!phone) {
+      window.app.showToast('⚠️ No hay número de WhatsApp para este comprador');
+      return;
+    }
+    const text = 'Hola! Te contactamos desde GOD MARKET respecto a tu disputa por el pedido #' + orderId + '. Estamos revisando tu caso. En breve te informamos la resolucion. Gracias por tu paciencia!';
+    const url = 'https://api.whatsapp.com/send?phone=54' + phone + '&text=' + encodeURIComponent(text);
+    window.open(url, '_blank');
+  }
+
+  async openResolveDispute(disputeId, resolution) {
+    let note = '';
+
+    if (resolution === 'reembolso') {
+      note = prompt('Aprobar reembolso — ingresá una nota (opcional, ej: "Reembolso aprobado, el local no confirmó"):') || '';
+    } else if (resolution === 'rechazo') {
+      note = prompt('Rechazar disputa — ingresá el motivo del rechazo:') || '';
+      if (!note) {
+        window.app.showToast('⚠️ Debes ingresar un motivo para rechazar la disputa');
+        return;
+      }
+    } else if (resolution === 'en_revision') {
+      note = 'En revisión por GOD MARKET';
+    }
+
+    const confirmMsg = resolution === 'reembolso'
+      ? '¿Confirmas que se aprueba el REEMBOLSO para esta disputa?'
+      : resolution === 'rechazo'
+        ? '¿Confirmas que se RECHAZA esta disputa?'
+        : '¿Marcar como "en revisión"?';
+
+    if (!confirm(confirmMsg)) return;
+
+    try {
+      const res = await fetch('/api/admin/disputes/' + encodeURIComponent(disputeId), {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-token': localStorage.getItem('godmarket_admin_token') || ''
+        },
+        body: JSON.stringify({ resolution, resolutionNote: note })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        const labels = {
+          reembolso: '✅ Reembolso aprobado',
+          rechazo: '❌ Disputa rechazada',
+          en_revision: '🟡 Marcada en revisión'
+        };
+        window.app.showToast(labels[resolution] || 'Disputa actualizada');
+        this.loadDisputes(); // Recargar
+      } else {
+        window.app.showToast('❌ ' + (data.error || 'Error al resolver la disputa'));
+      }
+    } catch (err) {
+      window.app.showToast('❌ Error de conexión al resolver la disputa');
     }
   }
 

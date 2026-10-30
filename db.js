@@ -465,7 +465,53 @@ const db = {
       return order;
     }
     return null;
+  },
+
+  // DISPUTES — Sistema de Disputas y Reembolsos
+  getDisputes() {
+    return readJsonFile('disputes.json', []);
+  },
+  getDisputeByOrderId(orderId) {
+    return this.getDisputes().find(d => d.orderId === orderId) || null;
+  },
+  createDispute(disputeData) {
+    const disputes = this.getDisputes();
+    const existing = disputes.find(d => d.orderId === disputeData.orderId);
+    if (existing) return existing; // Evitar duplicados
+
+    const newDispute = {
+      id: 'DISP-' + Math.floor(100000 + Math.random() * 900000),
+      orderId: disputeData.orderId,
+      customerName: disputeData.customerName || '',
+      customerPhone: disputeData.customerPhone || '',
+      businessId: disputeData.businessId || '',
+      businessName: disputeData.businessName || '',
+      total: disputeData.total || 0,
+      reason: disputeData.reason || 'no_response',
+      status: 'abierta', // abierta | en_revision | reembolsada | rechazada | cerrada
+      resolution: null,
+      resolutionNote: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    disputes.unshift(newDispute);
+    writeJsonFile('disputes.json', disputes);
+    return newDispute;
+  },
+  resolveDispute(disputeId, resolution, resolutionNote) {
+    const disputes = this.getDisputes();
+    const index = disputes.findIndex(d => d.id === disputeId);
+    if (index < 0) return null;
+
+    disputes[index].status = resolution === 'reembolso' ? 'reembolsada' : 'rechazada';
+    disputes[index].resolution = resolution;
+    disputes[index].resolutionNote = resolutionNote || '';
+    disputes[index].updatedAt = new Date().toISOString();
+    disputes[index].resolvedAt = new Date().toISOString();
+    writeJsonFile('disputes.json', disputes);
+    return disputes[index];
   }
 };
+
 
 module.exports = db;

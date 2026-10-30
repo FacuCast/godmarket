@@ -1891,6 +1891,20 @@ class DulceAtelierApp {
                 <span>💬</span> WhatsApp
               </button>
             </div>
+            <div class="order-dispute-section">
+              ${order.disputeStatus ? `
+                <div class="dispute-badge dispute-badge-${order.disputeStatus}">
+                  ${order.disputeStatus === 'abierta' ? '🔴 Disputa abierta — GOD MARKET está revisando tu caso' : ''}
+                  ${order.disputeStatus === 'en_revision' ? '🟡 En revisión por GOD MARKET' : ''}
+                  ${order.disputeStatus === 'reembolsada' ? '✅ Reembolso aprobado por GOD MARKET' : ''}
+                  ${order.disputeStatus === 'rechazada' ? '❌ Disputa cerrada' : ''}
+                </div>
+              ` : `
+                <button type="button" class="btn-dispute" onclick="window.app.openDisputeFlow('${window.app.escapeHTML ? window.app.escapeHTML(order.orderId) : order.orderId}')">
+                  ⚠️ El local no respondió
+                </button>
+              `}
+            </div>
           </div>
         </div>
       `;
@@ -1918,7 +1932,1229 @@ class DulceAtelierApp {
     window.open(url, '_blank');
   }
 
+  // ────────────────────────────────────────────────────────────
+  // SISTEMA DE DISPUTAS Y REEMBOLSOS
+  // ────────────────────────────────────────────────────────────
+
+  openDisputeFlow(orderId) {
+    const order = window.checkoutHandler?.getOrderById(orderId);
+    if (!order) {
+      this.showToast('⚠️ No se encontró el pedido');
+      return;
+    }
+
+    // Verificar si ya tiene disputa
+    if (order.disputeStatus) {
+      const statusMap = {
+        abierta: 'Tu disputa ya fue registrada. GOD MARKET está revisando tu caso.',
+        en_revision: 'Tu caso está en revisión por GOD MARKET.',
+        reembolsada: 'Tu reembolso ya fue aprobado.',
+        rechazada: 'Esta disputa ya fue cerrada.'
+      };
+      this.showToast('ℹ️ ' + (statusMap[order.disputeStatus] || 'Ya existe una disputa para este pedido.'));
+      return;
+    }
+
+    // Guardar el orderId en el modal y mostrarlo
+    const modal = document.getElementById('dispute-modal');
+    if (!modal) {
+      this.showToast('⚠️ Error interno: modal no encontrado');
+      return;
+    }
+    modal.dataset.orderId = orderId;
+    const orderIdEl = document.getElementById('dispute-order-id');
+    if (orderIdEl) orderIdEl.textContent = orderId;
+    const totalEl = document.getElementById('dispute-order-total');
+    if (totalEl) totalEl.textContent = order.totalFormatted || ('(`¿Deseas quitar la orden #${orderId} de tu celular?`)) {
+      window.checkoutHandler?.deleteOrderFromHistory(orderId);
+      this.renderOrdersHistoryList();
+      this.updateOrdersBadges();
+      this.showToast(`🗑️ Pedido #${orderId} eliminado del historial`);
+    }
+  }
+
+  selectQuickTime(btn) {
+    document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    const timeVal = btn.dataset.time;
+    const input = document.getElementById('cust-time');
+    if (input) {
+      input.value = timeVal;
+      input.classList.remove('is-invalid');
+    }
+  }
+
+  openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      if (modalId === 'cart-drawer-modal' || modalId === 'checkout-modal') {
+        this.updateCartUI();
+      }
+      if (modalId === 'checkout-modal') {
+        this.setupCheckoutStoreHours();
+        // Pre-cargar datos del cliente guardados en el teléfono
+        try {
+          const nameInput = document.getElementById('cust-name');
+          const phoneInput = document.getElementById('cust-phone');
+          const addressInput = document.getElementById('cust-address');
+          const aptInput = document.getElementById('cust-apt');
+          const zoneInput = document.getElementById('cust-zone');
+
+          if (nameInput && !nameInput.value) {
+            nameInput.value = localStorage.getItem('godmarket_user_name') || '';
+          }
+          if (phoneInput && !phoneInput.value) {
+            phoneInput.value = localStorage.getItem('godmarket_user_phone') || '';
+          }
+          if (addressInput && !addressInput.value) {
+            addressInput.value = localStorage.getItem('godmarket_user_address') || '';
+          }
+          if (aptInput && !aptInput.value) {
+            aptInput.value = localStorage.getItem('godmarket_user_apt') || '';
+          }
+          if (zoneInput && !zoneInput.value) {
+            zoneInput.value = localStorage.getItem('godmarket_user_zone') || '';
+          }
+        } catch (e) {}
+      }
+      modal.classList.add('active');
+    }
+  }
+
+  closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove('active');
+  }
+
+  openAdminModalWithPin() {
+    const savedPin = localStorage.getItem('dulce_admin_pin') || '1234';
+    const entered = prompt('🔐 Ingrese el PIN de Acceso para Negocios (por defecto: 1234):');
+    if (entered === savedPin) {
+      if (window.adminManager && typeof window.adminManager.populateBusinessSelect === 'function') {
+        window.adminManager.populateBusinessSelect();
+      }
+      this.openModal('admin-product-modal');
+    } else if (entered !== null) {
+      this.showToast('❌ PIN incorrecto');
+    }
+  }
+
+  safeImageUrl(value, fallback = 'assets/images/lumiere_cafe.webp') {
+    if (typeof value !== 'string') return fallback;
+    if (/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/i.test(value)) return value;
+    try {
+      const url = new URL(value, window.location.origin);
+      if (url.protocol !== 'https:' && url.origin !== window.location.origin) return fallback;
+      return url.href;
+    } catch {
+      return fallback;
+    }
+  }
+
+  escapeHTML(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  showToast(message) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<span>🍰</span> ${this.escapeHTML(message)}`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-10px)';
+      toast.style.transition = 'all 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, 2800);
+  }
+
+  /* =========================================================================
+     MAPA INTERACTIVO Y CAPTURA DE DIRECCIÓN POR PIN ROJO (LEAFLET / OSM)
+     ========================================================================= */
+  toggleMapPicker() {
+    const mapContainer = document.getElementById('checkout-map-container');
+    const toggleBtn = document.getElementById('btn-toggle-map');
+    if (!mapContainer) return;
+
+    const isVisible = mapContainer.style.display === 'block';
+    if (isVisible) {
+      mapContainer.style.display = 'none';
+      if (toggleBtn) toggleBtn.innerHTML = '🗺️ Marcar en el Mapa';
+    } else {
+      mapContainer.style.display = 'block';
+      if (toggleBtn) toggleBtn.innerHTML = '✕ Ocultar Mapa';
+
+      this.initDeliveryMap();
+      setTimeout(() => {
+        if (this.deliveryMap) {
+          this.deliveryMap.invalidateSize();
+        }
+      }, 200);
+
+      // Si el usuario ya escribió algo en Dirección (ej: "cilento 81"), buscarlo automáticamente
+      const currentAddress = document.getElementById('cust-address')?.value.trim();
+      const mapSearchInput = document.getElementById('map-search-input');
+      if (currentAddress) {
+        if (mapSearchInput) mapSearchInput.value = currentAddress;
+        setTimeout(() => this.searchAddressOnMap(currentAddress), 350);
+      }
+    }
+  }
+
+  async searchAddressOnMap(query) {
+    const input = document.getElementById('map-search-input');
+    const addressInput = document.getElementById('cust-address');
+    const searchQuery = (query || input?.value || addressInput?.value || '').trim();
+
+    if (!searchQuery) {
+      this.showToast('ℹ️ Escribe una calle o localidad para buscar en el mapa.');
+      return;
+    }
+
+    const statusEl = document.getElementById('map-address-status');
+    if (statusEl) statusEl.textContent = `🔍 Buscando "${searchQuery}" en el mapa...`;
+
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery + ', argentina')}&addressdetails=1&limit=3`;
+      const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+      const results = await res.json();
+
+      if (results && results.length > 0) {
+        const first = results[0];
+        const lat = parseFloat(first.lat);
+        const lng = parseFloat(first.lon);
+
+        if (this.deliveryMap && this.deliveryMarker) {
+          this.deliveryMap.flyTo([lat, lng], 16, { duration: 1.2 });
+          this.deliveryMarker.setLatLng([lat, lng]);
+          this.reverseGeocode(lat, lng);
+        }
+      } else {
+        if (statusEl) statusEl.textContent = `⚠️ No se ubicó "${searchQuery}". Puedes mover el pin rojo manualmente.`;
+        this.showToast(`⚠️ No se encontró "${searchQuery}". Mueve el pin rojo o añade la localidad.`);
+      }
+    } catch (err) {
+      console.error('Error al buscar dirección:', err);
+      if (statusEl) statusEl.textContent = '📍 Mueve el pin rojo manualmente sobre el mapa';
+    }
+  }
+
+  initDeliveryMap() {
+    if (this.deliveryMap) return;
+    const mapEl = document.getElementById('delivery-map');
+    if (!mapEl || typeof L === 'undefined') return;
+
+    // Coordenadas por defecto (Buenos Aires / Centro)
+    const defaultLat = -34.6037;
+    const defaultLng = -58.3816;
+
+    this.deliveryMap = L.map('delivery-map', {
+      center: [defaultLat, defaultLng],
+      zoom: 14,
+      zoomControl: true
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(this.deliveryMap);
+
+    const redPinSvg = `
+      <div class="map-red-pin-wrapper">
+        <svg viewBox="0 0 24 24" width="38" height="38" fill="#D9536F" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+      </div>
+    `;
+
+    const redIcon = L.divIcon({
+      className: 'custom-red-pin',
+      html: redPinSvg,
+      iconSize: [38, 38],
+      iconAnchor: [19, 36]
+    });
+
+    this.deliveryMarker = L.marker([defaultLat, defaultLng], {
+      draggable: true,
+      icon: redIcon
+    }).addTo(this.deliveryMap);
+
+    // Evento al arrastrar el pin rojo
+    this.deliveryMarker.on('dragend', () => {
+      const pos = this.deliveryMarker.getLatLng();
+      this.reverseGeocode(pos.lat, pos.lng);
+    });
+
+    // Evento al tocar en cualquier punto del mapa
+    this.deliveryMap.on('click', (e) => {
+      this.deliveryMarker.setLatLng(e.latlng);
+      this.reverseGeocode(e.latlng.lat, e.latlng.lng);
+    });
+  }
+
+  locateUserGPS() {
+    if (!navigator.geolocation) {
+      this.showToast('⚠️ Tu navegador no soporta geolocalización.');
+      return;
+    }
+
+    const statusEl = document.getElementById('map-address-status');
+    if (statusEl) statusEl.textContent = '📡 Conectando con tu ubicación...';
+
+    const onGeoSuccess = (pos) => {
+      const { latitude, longitude } = pos.coords;
+      if (this.deliveryMap && this.deliveryMarker) {
+        this.deliveryMap.flyTo([latitude, longitude], 17, { duration: 1.2 });
+        this.deliveryMarker.setLatLng([latitude, longitude]);
+        this.reverseGeocode(latitude, longitude);
+      }
+    };
+
+    const onGeoError = (err) => {
+      console.warn('Geolocation error:', err);
+      if (err.code === 1) {
+        this.showToast('ℹ️ Permiso de ubicación no otorgado. Puedes buscar tu calle escribiéndola arriba.');
+        if (statusEl) statusEl.textContent = 'ℹ️ Permiso denegado. Escribe tu calle o mueve el pin rojo.';
+      } else {
+        this.showToast('ℹ️ Ubicación GPS no detectada. Escribe tu calle en el buscador del mapa.');
+        if (statusEl) statusEl.textContent = '📍 Escribe tu calle arriba o arrastra el pin rojo.';
+      }
+    };
+
+    // Intentar con configuración estándar compatible con PC y celular
+    navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, {
+      enableHighAccuracy: false,
+      timeout: 9000,
+      maximumAge: 120000
+    });
+  }
+
+  async reverseGeocode(lat, lng) {
+    const statusEl = document.getElementById('map-address-status');
+    if (statusEl) statusEl.textContent = '⏳ Identificando calle y altura...';
+
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+        headers: { 'Accept-Language': 'es' }
+      });
+      const data = await res.json();
+
+      if (data && data.address) {
+        const addr = data.address;
+        const street = addr.road || addr.pedestrian || addr.street || addr.footway || '';
+        const number = addr.house_number || '';
+        const zone = addr.suburb || addr.neighbourhood || addr.city_district || addr.quarter || addr.city || '';
+
+        let fullAddress = street;
+        if (street && number) {
+          fullAddress = `${street} ${number}`;
+        } else if (!street) {
+          fullAddress = data.display_name.split(',')[0];
+        }
+
+        const addressInput = document.getElementById('cust-address');
+        const zoneInput = document.getElementById('cust-zone');
+
+        if (addressInput && fullAddress) {
+          addressInput.value = fullAddress;
+          addressInput.classList.remove('is-invalid');
+        }
+        if (zoneInput && zone) {
+          zoneInput.value = zone;
+        }
+
+        if (statusEl) {
+          statusEl.innerHTML = `✅ <strong>Dirección tomada:</strong> ${fullAddress} ${zone ? `(${zone})` : ''}`;
+        }
+        this.showToast(`📍 Dirección tomada: ${fullAddress}`);
+      } else {
+        if (statusEl) statusEl.textContent = '📍 Ubicación seleccionada en el mapa';
+      }
+    } catch (err) {
+      console.warn('Error en reverse geocoding:', err);
+      if (statusEl) statusEl.textContent = '📍 Coordenadas tomadas (Verifica la altura)';
+    }
+  }
+
+  copyToClipboard(text, successMsg) {
+    navigator.clipboard.writeText(text).then(() => {
+      this.showToast(successMsg || "¡Copiado al portapapeles!");
+    });
+  }
+}
+
+// Instancia global
+window.app = new DulceAtelierApp();
+ + (order.total || 0));
+    this.openModal('dispute-modal');
+  }
+
+  async submitDispute(reason) {
+    const modal = document.getElementById('dispute-modal');
+    if (!modal) return;
+    const orderId = modal.dataset.orderId;
+    if (!orderId) return;
+
+    const order = window.checkoutHandler?.getOrderById(orderId);
+    if (!order) return;
+
+    const btn = document.getElementById('btn-submit-dispute');
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+    try {
+      const res = await fetch('/api/orders/' + encodeURIComponent(orderId) + '/dispute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: order.formData?.fullName || order.customerName || '',
+          customerPhone: order.formData?.phone || order.customerPhone || '',
+          reason: reason || 'no_response'
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Guardar estado de disputa localmente
+        try {
+          const history = window.checkoutHandler.getOrderHistory();
+          const idx = history.findIndex(o => o.orderId === orderId);
+          if (idx >= 0) {
+            history[idx].disputeStatus = 'abierta';
+            history[idx].disputeId = data.dispute?.id;
+            localStorage.setItem('dulce_orders_history', JSON.stringify(history));
+          }
+        } catch (e) {}
+
+        this.closeModal('dispute-modal');
+        this.renderOrdersHistoryList();
+
+        // Abrir WhatsApp con el centro de ayuda
+        const name = order.formData?.fullName || '';
+        const waText = '¡Hola GOD MARKET! ⚠️ Necesito ayuda con mi pedido #' + orderId + (name ? ' a nombre de ' + name : '') + '. El local no respondió mi pedido. ID de disputa: ' + (data.dispute?.id || 'N/A') + '. Por favor contáctenme. ¡Gracias!';
+        const waUrl = window.checkoutHandler.buildWhatsAppUrl(waText);
+        window.open(waUrl, '_blank');
+
+        this.showToast('✅ Disputa registrada. GOD MARKET te contactará pronto.');
+      } else {
+        this.showToast('❌ ' + (data.error || 'No se pudo registrar la disputa.'));
+        if (btn) { btn.disabled = false; btn.textContent = 'Reportar problema'; }
+      }
+    } catch (err) {
+      console.error('Error al enviar disputa:', err);
+      // Fallback: abrir WhatsApp directamente si falla la API
+      const name = order.formData?.fullName || '';
+      const waText = '¡Hola GOD MARKET! ⚠️ Necesito ayuda con mi pedido #' + orderId + (name ? ' a nombre de ' + name : '') + '. El local no respondió mi pedido. Por favor contáctenme.';
+      const waUrl = window.checkoutHandler.buildWhatsAppUrl(waText);
+      window.open(waUrl, '_blank');
+      this.closeModal('dispute-modal');
+      this.showToast('💬 Abriendo WhatsApp para contactar a GOD MARKET...');
+    }
+  }
+
+    deleteOrderHistory(orderId) {
+    if (confirm(`¿Deseas quitar la orden #${orderId} de tu celular?`)) {
+      window.checkoutHandler?.deleteOrderFromHistory(orderId);
+      this.renderOrdersHistoryList();
+      this.updateOrdersBadges();
+      this.showToast(`🗑️ Pedido #${orderId} eliminado del historial`);
+    }
+  }
+
+  selectQuickTime(btn) {
+    document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    const timeVal = btn.dataset.time;
+    const input = document.getElementById('cust-time');
+    if (input) {
+      input.value = timeVal;
+      input.classList.remove('is-invalid');
+    }
+  }
+
+  openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      if (modalId === 'cart-drawer-modal' || modalId === 'checkout-modal') {
+        this.updateCartUI();
+      }
+      if (modalId === 'checkout-modal') {
+        this.setupCheckoutStoreHours();
+        // Pre-cargar datos del cliente guardados en el teléfono
+        try {
+          const nameInput = document.getElementById('cust-name');
+          const phoneInput = document.getElementById('cust-phone');
+          const addressInput = document.getElementById('cust-address');
+          const aptInput = document.getElementById('cust-apt');
+          const zoneInput = document.getElementById('cust-zone');
+
+          if (nameInput && !nameInput.value) {
+            nameInput.value = localStorage.getItem('godmarket_user_name') || '';
+          }
+          if (phoneInput && !phoneInput.value) {
+            phoneInput.value = localStorage.getItem('godmarket_user_phone') || '';
+          }
+          if (addressInput && !addressInput.value) {
+            addressInput.value = localStorage.getItem('godmarket_user_address') || '';
+          }
+          if (aptInput && !aptInput.value) {
+            aptInput.value = localStorage.getItem('godmarket_user_apt') || '';
+          }
+          if (zoneInput && !zoneInput.value) {
+            zoneInput.value = localStorage.getItem('godmarket_user_zone') || '';
+          }
+        } catch (e) {}
+      }
+      modal.classList.add('active');
+    }
+  }
+
+  closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove('active');
+  }
+
+  openAdminModalWithPin() {
+    const savedPin = localStorage.getItem('dulce_admin_pin') || '1234';
+    const entered = prompt('🔐 Ingrese el PIN de Acceso para Negocios (por defecto: 1234):');
+    if (entered === savedPin) {
+      if (window.adminManager && typeof window.adminManager.populateBusinessSelect === 'function') {
+        window.adminManager.populateBusinessSelect();
+      }
+      this.openModal('admin-product-modal');
+    } else if (entered !== null) {
+      this.showToast('❌ PIN incorrecto');
+    }
+  }
+
+  safeImageUrl(value, fallback = 'assets/images/lumiere_cafe.webp') {
+    if (typeof value !== 'string') return fallback;
+    if (/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/i.test(value)) return value;
+    try {
+      const url = new URL(value, window.location.origin);
+      if (url.protocol !== 'https:' && url.origin !== window.location.origin) return fallback;
+      return url.href;
+    } catch {
+      return fallback;
+    }
+  }
+
+  escapeHTML(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  showToast(message) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<span>🍰</span> ${this.escapeHTML(message)}`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-10px)';
+      toast.style.transition = 'all 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, 2800);
+  }
+
+  /* =========================================================================
+     MAPA INTERACTIVO Y CAPTURA DE DIRECCIÓN POR PIN ROJO (LEAFLET / OSM)
+     ========================================================================= */
+  toggleMapPicker() {
+    const mapContainer = document.getElementById('checkout-map-container');
+    const toggleBtn = document.getElementById('btn-toggle-map');
+    if (!mapContainer) return;
+
+    const isVisible = mapContainer.style.display === 'block';
+    if (isVisible) {
+      mapContainer.style.display = 'none';
+      if (toggleBtn) toggleBtn.innerHTML = '🗺️ Marcar en el Mapa';
+    } else {
+      mapContainer.style.display = 'block';
+      if (toggleBtn) toggleBtn.innerHTML = '✕ Ocultar Mapa';
+
+      this.initDeliveryMap();
+      setTimeout(() => {
+        if (this.deliveryMap) {
+          this.deliveryMap.invalidateSize();
+        }
+      }, 200);
+
+      // Si el usuario ya escribió algo en Dirección (ej: "cilento 81"), buscarlo automáticamente
+      const currentAddress = document.getElementById('cust-address')?.value.trim();
+      const mapSearchInput = document.getElementById('map-search-input');
+      if (currentAddress) {
+        if (mapSearchInput) mapSearchInput.value = currentAddress;
+        setTimeout(() => this.searchAddressOnMap(currentAddress), 350);
+      }
+    }
+  }
+
+  async searchAddressOnMap(query) {
+    const input = document.getElementById('map-search-input');
+    const addressInput = document.getElementById('cust-address');
+    const searchQuery = (query || input?.value || addressInput?.value || '').trim();
+
+    if (!searchQuery) {
+      this.showToast('ℹ️ Escribe una calle o localidad para buscar en el mapa.');
+      return;
+    }
+
+    const statusEl = document.getElementById('map-address-status');
+    if (statusEl) statusEl.textContent = `🔍 Buscando "${searchQuery}" en el mapa...`;
+
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery + ', argentina')}&addressdetails=1&limit=3`;
+      const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+      const results = await res.json();
+
+      if (results && results.length > 0) {
+        const first = results[0];
+        const lat = parseFloat(first.lat);
+        const lng = parseFloat(first.lon);
+
+        if (this.deliveryMap && this.deliveryMarker) {
+          this.deliveryMap.flyTo([lat, lng], 16, { duration: 1.2 });
+          this.deliveryMarker.setLatLng([lat, lng]);
+          this.reverseGeocode(lat, lng);
+        }
+      } else {
+        if (statusEl) statusEl.textContent = `⚠️ No se ubicó "${searchQuery}". Puedes mover el pin rojo manualmente.`;
+        this.showToast(`⚠️ No se encontró "${searchQuery}". Mueve el pin rojo o añade la localidad.`);
+      }
+    } catch (err) {
+      console.error('Error al buscar dirección:', err);
+      if (statusEl) statusEl.textContent = '📍 Mueve el pin rojo manualmente sobre el mapa';
+    }
+  }
+
+  initDeliveryMap() {
+    if (this.deliveryMap) return;
+    const mapEl = document.getElementById('delivery-map');
+    if (!mapEl || typeof L === 'undefined') return;
+
+    // Coordenadas por defecto (Buenos Aires / Centro)
+    const defaultLat = -34.6037;
+    const defaultLng = -58.3816;
+
+    this.deliveryMap = L.map('delivery-map', {
+      center: [defaultLat, defaultLng],
+      zoom: 14,
+      zoomControl: true
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(this.deliveryMap);
+
+    const redPinSvg = `
+      <div class="map-red-pin-wrapper">
+        <svg viewBox="0 0 24 24" width="38" height="38" fill="#D9536F" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+      </div>
+    `;
+
+    const redIcon = L.divIcon({
+      className: 'custom-red-pin',
+      html: redPinSvg,
+      iconSize: [38, 38],
+      iconAnchor: [19, 36]
+    });
+
+    this.deliveryMarker = L.marker([defaultLat, defaultLng], {
+      draggable: true,
+      icon: redIcon
+    }).addTo(this.deliveryMap);
+
+    // Evento al arrastrar el pin rojo
+    this.deliveryMarker.on('dragend', () => {
+      const pos = this.deliveryMarker.getLatLng();
+      this.reverseGeocode(pos.lat, pos.lng);
+    });
+
+    // Evento al tocar en cualquier punto del mapa
+    this.deliveryMap.on('click', (e) => {
+      this.deliveryMarker.setLatLng(e.latlng);
+      this.reverseGeocode(e.latlng.lat, e.latlng.lng);
+    });
+  }
+
+  locateUserGPS() {
+    if (!navigator.geolocation) {
+      this.showToast('⚠️ Tu navegador no soporta geolocalización.');
+      return;
+    }
+
+    const statusEl = document.getElementById('map-address-status');
+    if (statusEl) statusEl.textContent = '📡 Conectando con tu ubicación...';
+
+    const onGeoSuccess = (pos) => {
+      const { latitude, longitude } = pos.coords;
+      if (this.deliveryMap && this.deliveryMarker) {
+        this.deliveryMap.flyTo([latitude, longitude], 17, { duration: 1.2 });
+        this.deliveryMarker.setLatLng([latitude, longitude]);
+        this.reverseGeocode(latitude, longitude);
+      }
+    };
+
+    const onGeoError = (err) => {
+      console.warn('Geolocation error:', err);
+      if (err.code === 1) {
+        this.showToast('ℹ️ Permiso de ubicación no otorgado. Puedes buscar tu calle escribiéndola arriba.');
+        if (statusEl) statusEl.textContent = 'ℹ️ Permiso denegado. Escribe tu calle o mueve el pin rojo.';
+      } else {
+        this.showToast('ℹ️ Ubicación GPS no detectada. Escribe tu calle en el buscador del mapa.');
+        if (statusEl) statusEl.textContent = '📍 Escribe tu calle arriba o arrastra el pin rojo.';
+      }
+    };
+
+    // Intentar con configuración estándar compatible con PC y celular
+    navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, {
+      enableHighAccuracy: false,
+      timeout: 9000,
+      maximumAge: 120000
+    });
+  }
+
+  async reverseGeocode(lat, lng) {
+    const statusEl = document.getElementById('map-address-status');
+    if (statusEl) statusEl.textContent = '⏳ Identificando calle y altura...';
+
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+        headers: { 'Accept-Language': 'es' }
+      });
+      const data = await res.json();
+
+      if (data && data.address) {
+        const addr = data.address;
+        const street = addr.road || addr.pedestrian || addr.street || addr.footway || '';
+        const number = addr.house_number || '';
+        const zone = addr.suburb || addr.neighbourhood || addr.city_district || addr.quarter || addr.city || '';
+
+        let fullAddress = street;
+        if (street && number) {
+          fullAddress = `${street} ${number}`;
+        } else if (!street) {
+          fullAddress = data.display_name.split(',')[0];
+        }
+
+        const addressInput = document.getElementById('cust-address');
+        const zoneInput = document.getElementById('cust-zone');
+
+        if (addressInput && fullAddress) {
+          addressInput.value = fullAddress;
+          addressInput.classList.remove('is-invalid');
+        }
+        if (zoneInput && zone) {
+          zoneInput.value = zone;
+        }
+
+        if (statusEl) {
+          statusEl.innerHTML = `✅ <strong>Dirección tomada:</strong> ${fullAddress} ${zone ? `(${zone})` : ''}`;
+        }
+        this.showToast(`📍 Dirección tomada: ${fullAddress}`);
+      } else {
+        if (statusEl) statusEl.textContent = '📍 Ubicación seleccionada en el mapa';
+      }
+    } catch (err) {
+      console.warn('Error en reverse geocoding:', err);
+      if (statusEl) statusEl.textContent = '📍 Coordenadas tomadas (Verifica la altura)';
+    }
+  }
+
+  copyToClipboard(text, successMsg) {
+    navigator.clipboard.writeText(text).then(() => {
+      this.showToast(successMsg || "¡Copiado al portapapeles!");
+    });
+  }
+}
+
+// Instancia global
+window.app = new DulceAtelierApp();
+ + (order.total || 0));
+    this.openModal('dispute-modal');
+  }
+
+  async submitDispute(reason) {
+    const modal = document.getElementById('dispute-modal');
+    if (!modal) return;
+    const orderId = modal.dataset.orderId;
+    if (!orderId) return;
+
+    const order = window.checkoutHandler?.getOrderById(orderId);
+    if (!order) return;
+
+    const btn = document.getElementById('btn-submit-dispute');
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+    try {
+      const res = await fetch('/api/orders/' + encodeURIComponent(orderId) + '/dispute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: order.formData?.fullName || order.customerName || '',
+          customerPhone: order.formData?.phone || order.customerPhone || '',
+          reason: reason || 'no_response'
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        try {
+          const history = window.checkoutHandler.getOrderHistory();
+          const idx = history.findIndex(o => o.orderId === orderId);
+          if (idx >= 0) {
+            history[idx].disputeStatus = 'abierta';
+            history[idx].disputeId = data.dispute?.id;
+            localStorage.setItem('dulce_orders_history', JSON.stringify(history));
+          }
+        } catch (e) {}
+
+        this.closeModal('dispute-modal');
+        this.renderOrdersHistoryList();
+
+        const name = order.formData?.fullName || '';
+        const waText = '¡Hola GOD MARKET! ⚠️ Necesito ayuda con mi pedido #' + orderId + (name ? ' a nombre de ' + name : '') + '. El local no respondió mi pedido. ID de disputa: ' + (data.dispute?.id || 'N/A') + '. Por favor contáctenme. ¡Gracias!';
+        const waUrl = window.checkoutHandler.buildWhatsAppUrl(waText);
+        window.open(waUrl, '_blank');
+
+        this.showToast('✅ Disputa registrada. GOD MARKET te contactará pronto.');
+      } else {
+        this.showToast('❌ ' + (data.error || 'No se pudo registrar la disputa.'));
+        if (btn) { btn.disabled = false; btn.textContent = 'Reportar problema'; }
+      }
+    } catch (err) {
+      const name = order.formData?.fullName || '';
+      const waText = '¡Hola GOD MARKET! ⚠️ Necesito ayuda con mi pedido #' + orderId + (name ? ' a nombre de ' + name : '') + '. El local no respondió mi pedido. Por favor contáctenme.';
+      const waUrl = window.checkoutHandler.buildWhatsAppUrl(waText);
+      window.open(waUrl, '_blank');
+      this.closeModal('dispute-modal');
+      this.showToast('💬 Abriendo WhatsApp para contactar a GOD MARKET...');
+    }
+  }
+
   deleteOrderHistory(orderId) {
+    if (confirm(`¿Deseas quitar la orden #${orderId} de tu celular?`)) {
+      window.checkoutHandler?.deleteOrderFromHistory(orderId);
+      this.renderOrdersHistoryList();
+      this.updateOrdersBadges();
+      this.showToast(`🗑️ Pedido #${orderId} eliminado del historial`);
+    }
+  }
+
+  selectQuickTime(btn) {
+    document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    const timeVal = btn.dataset.time;
+    const input = document.getElementById('cust-time');
+    if (input) {
+      input.value = timeVal;
+      input.classList.remove('is-invalid');
+    }
+  }
+
+  openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      if (modalId === 'cart-drawer-modal' || modalId === 'checkout-modal') {
+        this.updateCartUI();
+      }
+      if (modalId === 'checkout-modal') {
+        this.setupCheckoutStoreHours();
+        // Pre-cargar datos del cliente guardados en el teléfono
+        try {
+          const nameInput = document.getElementById('cust-name');
+          const phoneInput = document.getElementById('cust-phone');
+          const addressInput = document.getElementById('cust-address');
+          const aptInput = document.getElementById('cust-apt');
+          const zoneInput = document.getElementById('cust-zone');
+
+          if (nameInput && !nameInput.value) {
+            nameInput.value = localStorage.getItem('godmarket_user_name') || '';
+          }
+          if (phoneInput && !phoneInput.value) {
+            phoneInput.value = localStorage.getItem('godmarket_user_phone') || '';
+          }
+          if (addressInput && !addressInput.value) {
+            addressInput.value = localStorage.getItem('godmarket_user_address') || '';
+          }
+          if (aptInput && !aptInput.value) {
+            aptInput.value = localStorage.getItem('godmarket_user_apt') || '';
+          }
+          if (zoneInput && !zoneInput.value) {
+            zoneInput.value = localStorage.getItem('godmarket_user_zone') || '';
+          }
+        } catch (e) {}
+      }
+      modal.classList.add('active');
+    }
+  }
+
+  closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove('active');
+  }
+
+  openAdminModalWithPin() {
+    const savedPin = localStorage.getItem('dulce_admin_pin') || '1234';
+    const entered = prompt('🔐 Ingrese el PIN de Acceso para Negocios (por defecto: 1234):');
+    if (entered === savedPin) {
+      if (window.adminManager && typeof window.adminManager.populateBusinessSelect === 'function') {
+        window.adminManager.populateBusinessSelect();
+      }
+      this.openModal('admin-product-modal');
+    } else if (entered !== null) {
+      this.showToast('❌ PIN incorrecto');
+    }
+  }
+
+  safeImageUrl(value, fallback = 'assets/images/lumiere_cafe.webp') {
+    if (typeof value !== 'string') return fallback;
+    if (/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/i.test(value)) return value;
+    try {
+      const url = new URL(value, window.location.origin);
+      if (url.protocol !== 'https:' && url.origin !== window.location.origin) return fallback;
+      return url.href;
+    } catch {
+      return fallback;
+    }
+  }
+
+  escapeHTML(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  showToast(message) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<span>🍰</span> ${this.escapeHTML(message)}`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-10px)';
+      toast.style.transition = 'all 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, 2800);
+  }
+
+  /* =========================================================================
+     MAPA INTERACTIVO Y CAPTURA DE DIRECCIÓN POR PIN ROJO (LEAFLET / OSM)
+     ========================================================================= */
+  toggleMapPicker() {
+    const mapContainer = document.getElementById('checkout-map-container');
+    const toggleBtn = document.getElementById('btn-toggle-map');
+    if (!mapContainer) return;
+
+    const isVisible = mapContainer.style.display === 'block';
+    if (isVisible) {
+      mapContainer.style.display = 'none';
+      if (toggleBtn) toggleBtn.innerHTML = '🗺️ Marcar en el Mapa';
+    } else {
+      mapContainer.style.display = 'block';
+      if (toggleBtn) toggleBtn.innerHTML = '✕ Ocultar Mapa';
+
+      this.initDeliveryMap();
+      setTimeout(() => {
+        if (this.deliveryMap) {
+          this.deliveryMap.invalidateSize();
+        }
+      }, 200);
+
+      // Si el usuario ya escribió algo en Dirección (ej: "cilento 81"), buscarlo automáticamente
+      const currentAddress = document.getElementById('cust-address')?.value.trim();
+      const mapSearchInput = document.getElementById('map-search-input');
+      if (currentAddress) {
+        if (mapSearchInput) mapSearchInput.value = currentAddress;
+        setTimeout(() => this.searchAddressOnMap(currentAddress), 350);
+      }
+    }
+  }
+
+  async searchAddressOnMap(query) {
+    const input = document.getElementById('map-search-input');
+    const addressInput = document.getElementById('cust-address');
+    const searchQuery = (query || input?.value || addressInput?.value || '').trim();
+
+    if (!searchQuery) {
+      this.showToast('ℹ️ Escribe una calle o localidad para buscar en el mapa.');
+      return;
+    }
+
+    const statusEl = document.getElementById('map-address-status');
+    if (statusEl) statusEl.textContent = `🔍 Buscando "${searchQuery}" en el mapa...`;
+
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery + ', argentina')}&addressdetails=1&limit=3`;
+      const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+      const results = await res.json();
+
+      if (results && results.length > 0) {
+        const first = results[0];
+        const lat = parseFloat(first.lat);
+        const lng = parseFloat(first.lon);
+
+        if (this.deliveryMap && this.deliveryMarker) {
+          this.deliveryMap.flyTo([lat, lng], 16, { duration: 1.2 });
+          this.deliveryMarker.setLatLng([lat, lng]);
+          this.reverseGeocode(lat, lng);
+        }
+      } else {
+        if (statusEl) statusEl.textContent = `⚠️ No se ubicó "${searchQuery}". Puedes mover el pin rojo manualmente.`;
+        this.showToast(`⚠️ No se encontró "${searchQuery}". Mueve el pin rojo o añade la localidad.`);
+      }
+    } catch (err) {
+      console.error('Error al buscar dirección:', err);
+      if (statusEl) statusEl.textContent = '📍 Mueve el pin rojo manualmente sobre el mapa';
+    }
+  }
+
+  initDeliveryMap() {
+    if (this.deliveryMap) return;
+    const mapEl = document.getElementById('delivery-map');
+    if (!mapEl || typeof L === 'undefined') return;
+
+    // Coordenadas por defecto (Buenos Aires / Centro)
+    const defaultLat = -34.6037;
+    const defaultLng = -58.3816;
+
+    this.deliveryMap = L.map('delivery-map', {
+      center: [defaultLat, defaultLng],
+      zoom: 14,
+      zoomControl: true
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(this.deliveryMap);
+
+    const redPinSvg = `
+      <div class="map-red-pin-wrapper">
+        <svg viewBox="0 0 24 24" width="38" height="38" fill="#D9536F" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+      </div>
+    `;
+
+    const redIcon = L.divIcon({
+      className: 'custom-red-pin',
+      html: redPinSvg,
+      iconSize: [38, 38],
+      iconAnchor: [19, 36]
+    });
+
+    this.deliveryMarker = L.marker([defaultLat, defaultLng], {
+      draggable: true,
+      icon: redIcon
+    }).addTo(this.deliveryMap);
+
+    // Evento al arrastrar el pin rojo
+    this.deliveryMarker.on('dragend', () => {
+      const pos = this.deliveryMarker.getLatLng();
+      this.reverseGeocode(pos.lat, pos.lng);
+    });
+
+    // Evento al tocar en cualquier punto del mapa
+    this.deliveryMap.on('click', (e) => {
+      this.deliveryMarker.setLatLng(e.latlng);
+      this.reverseGeocode(e.latlng.lat, e.latlng.lng);
+    });
+  }
+
+  locateUserGPS() {
+    if (!navigator.geolocation) {
+      this.showToast('⚠️ Tu navegador no soporta geolocalización.');
+      return;
+    }
+
+    const statusEl = document.getElementById('map-address-status');
+    if (statusEl) statusEl.textContent = '📡 Conectando con tu ubicación...';
+
+    const onGeoSuccess = (pos) => {
+      const { latitude, longitude } = pos.coords;
+      if (this.deliveryMap && this.deliveryMarker) {
+        this.deliveryMap.flyTo([latitude, longitude], 17, { duration: 1.2 });
+        this.deliveryMarker.setLatLng([latitude, longitude]);
+        this.reverseGeocode(latitude, longitude);
+      }
+    };
+
+    const onGeoError = (err) => {
+      console.warn('Geolocation error:', err);
+      if (err.code === 1) {
+        this.showToast('ℹ️ Permiso de ubicación no otorgado. Puedes buscar tu calle escribiéndola arriba.');
+        if (statusEl) statusEl.textContent = 'ℹ️ Permiso denegado. Escribe tu calle o mueve el pin rojo.';
+      } else {
+        this.showToast('ℹ️ Ubicación GPS no detectada. Escribe tu calle en el buscador del mapa.');
+        if (statusEl) statusEl.textContent = '📍 Escribe tu calle arriba o arrastra el pin rojo.';
+      }
+    };
+
+    // Intentar con configuración estándar compatible con PC y celular
+    navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, {
+      enableHighAccuracy: false,
+      timeout: 9000,
+      maximumAge: 120000
+    });
+  }
+
+  async reverseGeocode(lat, lng) {
+    const statusEl = document.getElementById('map-address-status');
+    if (statusEl) statusEl.textContent = '⏳ Identificando calle y altura...';
+
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+        headers: { 'Accept-Language': 'es' }
+      });
+      const data = await res.json();
+
+      if (data && data.address) {
+        const addr = data.address;
+        const street = addr.road || addr.pedestrian || addr.street || addr.footway || '';
+        const number = addr.house_number || '';
+        const zone = addr.suburb || addr.neighbourhood || addr.city_district || addr.quarter || addr.city || '';
+
+        let fullAddress = street;
+        if (street && number) {
+          fullAddress = `${street} ${number}`;
+        } else if (!street) {
+          fullAddress = data.display_name.split(',')[0];
+        }
+
+        const addressInput = document.getElementById('cust-address');
+        const zoneInput = document.getElementById('cust-zone');
+
+        if (addressInput && fullAddress) {
+          addressInput.value = fullAddress;
+          addressInput.classList.remove('is-invalid');
+        }
+        if (zoneInput && zone) {
+          zoneInput.value = zone;
+        }
+
+        if (statusEl) {
+          statusEl.innerHTML = `✅ <strong>Dirección tomada:</strong> ${fullAddress} ${zone ? `(${zone})` : ''}`;
+        }
+        this.showToast(`📍 Dirección tomada: ${fullAddress}`);
+      } else {
+        if (statusEl) statusEl.textContent = '📍 Ubicación seleccionada en el mapa';
+      }
+    } catch (err) {
+      console.warn('Error en reverse geocoding:', err);
+      if (statusEl) statusEl.textContent = '📍 Coordenadas tomadas (Verifica la altura)';
+    }
+  }
+
+  copyToClipboard(text, successMsg) {
+    navigator.clipboard.writeText(text).then(() => {
+      this.showToast(successMsg || "¡Copiado al portapapeles!");
+    });
+  }
+}
+
+// Instancia global
+window.app = new DulceAtelierApp();
+ + (order.total || 0));
+    this.openModal('dispute-modal');
+  }
+
+  async submitDispute(reason) {
+    const modal = document.getElementById('dispute-modal');
+    if (!modal) return;
+    const orderId = modal.dataset.orderId;
+    if (!orderId) return;
+
+    const order = window.checkoutHandler?.getOrderById(orderId);
+    if (!order) return;
+
+    const btn = document.getElementById('btn-submit-dispute');
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+    try {
+      const res = await fetch('/api/orders/' + encodeURIComponent(orderId) + '/dispute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: order.formData?.fullName || order.customerName || '',
+          customerPhone: order.formData?.phone || order.customerPhone || '',
+          reason: reason || 'no_response'
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Guardar estado de disputa localmente
+        try {
+          const history = window.checkoutHandler.getOrderHistory();
+          const idx = history.findIndex(o => o.orderId === orderId);
+          if (idx >= 0) {
+            history[idx].disputeStatus = 'abierta';
+            history[idx].disputeId = data.dispute?.id;
+            localStorage.setItem('dulce_orders_history', JSON.stringify(history));
+          }
+        } catch (e) {}
+
+        this.closeModal('dispute-modal');
+        this.renderOrdersHistoryList();
+
+        // Abrir WhatsApp con el centro de ayuda
+        const name = order.formData?.fullName || '';
+        const waText = '¡Hola GOD MARKET! ⚠️ Necesito ayuda con mi pedido #' + orderId + (name ? ' a nombre de ' + name : '') + '. El local no respondió mi pedido. ID de disputa: ' + (data.dispute?.id || 'N/A') + '. Por favor contáctenme. ¡Gracias!';
+        const waUrl = window.checkoutHandler.buildWhatsAppUrl(waText);
+        window.open(waUrl, '_blank');
+
+        this.showToast('✅ Disputa registrada. GOD MARKET te contactará pronto.');
+      } else {
+        this.showToast('❌ ' + (data.error || 'No se pudo registrar la disputa.'));
+        if (btn) { btn.disabled = false; btn.textContent = 'Reportar problema'; }
+      }
+    } catch (err) {
+      console.error('Error al enviar disputa:', err);
+      // Fallback: abrir WhatsApp directamente si falla la API
+      const name = order.formData?.fullName || '';
+      const waText = '¡Hola GOD MARKET! ⚠️ Necesito ayuda con mi pedido #' + orderId + (name ? ' a nombre de ' + name : '') + '. El local no respondió mi pedido. Por favor contáctenme.';
+      const waUrl = window.checkoutHandler.buildWhatsAppUrl(waText);
+      window.open(waUrl, '_blank');
+      this.closeModal('dispute-modal');
+      this.showToast('💬 Abriendo WhatsApp para contactar a GOD MARKET...');
+    }
+  }
+
+    deleteOrderHistory(orderId) {
     if (confirm(`¿Deseas quitar la orden #${orderId} de tu celular?`)) {
       window.checkoutHandler?.deleteOrderFromHistory(orderId);
       this.renderOrdersHistoryList();
