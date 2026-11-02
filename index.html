@@ -62,53 +62,6 @@
   <!-- Modern Libraries (Lucide Icons & Canvas Confetti) -->
   
 
-  <!-- MODAL: Disputa / El local no respondió -->
-  <div id="dispute-modal" class="modal-overlay"
-    onclick="if(event.target === this) window.app.closeModal('dispute-modal')">
-    <div class="bottom-sheet" style="max-width: 520px; padding: 24px 20px; position: relative;">
-      <div class="drag-handle"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('dispute-modal')" aria-label="Cerrar">✕</button>
-
-      <div style="text-align: center; margin-bottom: 20px;">
-        <div style="font-size: 2.5rem; margin-bottom: 8px;">⚠️</div>
-        <h3 class="font-serif" style="font-size: 1.25rem; margin-bottom: 6px;">¿El local no respondió?</h3>
-        <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-          Si tu pedido <strong id="dispute-order-id" style="color: var(--primary);"></strong> 
-          (<strong id="dispute-order-total"></strong>) no fue confirmado por el local en tiempo razonable,
-          GOD MARKET puede ayudarte.
-        </p>
-      </div>
-
-      <div style="background: rgba(255,107,53,0.08); border: 1px solid rgba(255,107,53,0.2); border-radius: 14px; padding: 16px; margin-bottom: 20px;">
-        <p style="font-size: 0.8rem; color: var(--cream-subtle); line-height: 1.6; margin: 0;">
-          🔴 Al confirmar, <strong>GOD MARKET te contactará por WhatsApp</strong> para revisar tu caso.<br>
-          ✅ Si corresponde, gestionaremos el reembolso con el local.<br>
-          📋 Se generará un número de caso para el seguimiento.
-        </p>
-      </div>
-
-      <div style="margin-bottom: 16px;">
-        <label style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Motivo del problema:</label>
-        <select id="dispute-reason" style="width: 100%; background: #1A1A1A; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #FFF; padding: 12px 16px; font-size: 0.9rem; appearance: none;">
-          <option value="no_response">El local no confirmó mi pedido</option>
-          <option value="wrong_order">Recibí un pedido incorrecto</option>
-          <option value="quality_issue">Problema con la calidad del producto</option>
-          <option value="other">Otro motivo</option>
-        </select>
-      </div>
-
-      <button id="btn-submit-dispute" type="button"
-        style="width: 100%; padding: 16px; background: linear-gradient(135deg, #FF6B35, #E63E00); color: #FFF; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;"
-        onclick="window.app.submitDispute(document.getElementById('dispute-reason').value)">
-        ⚠️ Reportar problema y contactar a GOD MARKET
-      </button>
-
-      <p style="font-size: 0.73rem; color: var(--text-muted); text-align: center; margin-top: 12px; line-height: 1.4;">
-        Al reportar, se abrirá WhatsApp para que puedas comunicarte directamente con el equipo de GOD MARKET.
-      </p>
-    </div>
-  </div>
-
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
 
@@ -122,7 +75,7 @@
   <link rel="stylesheet" href="css/components.css?v=25.0">
   <link rel="stylesheet" href="css/responsive.css?v=23.0">
   <link rel="stylesheet" href="css/mejoras-premium.css?v=19.0">
-  <link rel="stylesheet" href="css/seller-portal.css?v=21.0">
+  <link rel="stylesheet" href="css/seller-portal.css?v=25.0">
 
   <!-- Google Identity Services (GIS SDK oficial) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -243,6 +196,15 @@
         Inicia sesión con tu cuenta de Google para gestionar tu pastelería, publicar tus propuestas y recibir pedidos en tu WhatsApp.
       </p>
 
+      <!-- Banner Programa Cafeterías Fundadoras (Primer Mes 0% Servicio) -->
+      <div id="promo-slots-auth-banner" class="founding-promo-callout">
+        <div class="founding-promo-badge">🎁 BENEFICIO LANZAMIENTO · 1ER MES BONIFICADO</div>
+        <div class="founding-promo-text">
+          Publicá con los <strong>mismos precios habituales de tu cafetería</strong> y tus clientes compran con <strong>0% de cargo de servicio</strong> (el 20% queda 100% bonificado durante 30 días).
+          <span class="founding-promo-sub">⏱️ Tu reloj de 30 días recién empieza a correr cuando subís tu 1° producto con foto.</span>
+        </div>
+      </div>
+
       <!-- Botón Oficial de Google Identity Services -->
       <div id="google-signin-btn-container" class="google-btn-wrapper"></div>
 
@@ -283,6 +245,13 @@
       <p style="font-size: 0.85rem; color: #A3B8AC; margin-bottom: 22px; line-height: 1.4;">
         ¡Hola <strong id="onboarding-welcome-name" style="color: #E5C07B;">pastelero/a</strong>! Completa la información de tu negocio para activar tu local en el marketplace.
       </p>
+
+      <div id="promo-slots-onboard-banner" class="founding-promo-callout" style="margin-bottom: 18px;">
+        <div class="founding-promo-badge">🎁 30 DÍAS CON 0% SERVICIO (20% BONIFICADO)</div>
+        <div class="founding-promo-text">
+          <strong>¡No perdés días por registrarte hoy!</strong> Podés crear tu perfil ahora con tranquilidad: el contador de <strong>30 días sin el 20% de servicio para tus compradores</strong> arrancará recién cuando publiques tu primer combo o producto con foto.
+        </div>
+      </div>
 
       <form id="seller-onboarding-form">
         <div class="onboarding-field-group">
@@ -453,6 +422,9 @@
         </div>
       </div>
 
+      <!-- Minutero / Contador en Vivo de 30 Días Bonificados (0% Servicio) -->
+      <div id="seller-promo-timer-banner" class="seller-promo-timer-banner" style="display: none;"></div>
+
       <!-- Navegación de Pestañas -->
       <nav class="seller-nav-tabs">
         <button class="seller-tab-btn active" data-tab="products" onclick="window.sellerPortal.switchTab('products')">
@@ -463,6 +435,9 @@
         </button>
         <button class="seller-tab-btn" data-tab="coverage" onclick="window.sellerPortal.switchTab('coverage')">
           <span>📍 Cobertura y Envíos</span>
+        </button>
+        <button class="seller-tab-btn" data-tab="promo" onclick="window.sellerPortal.switchTab('promo')" id="promo-tab-btn">
+          <span>🎁 Promo 30 Días (Admin)</span>
         </button>
         <button class="seller-tab-btn" data-tab="disputes" onclick="window.sellerPortal.switchTab('disputes')" id="disputes-tab-btn">
           <span>🚨 Centro de Ayuda <span id="disputes-badge" class="disputes-nav-badge" style="display:none">!</span></span>
@@ -560,7 +535,26 @@
       </section>
 
 
-      <!-- Pestaña 4: Centro de Ayuda / Disputas (solo para Faku - admin) -->
+      <!-- Pestaña 4: Programa Cafeterías Fundadoras — Promo 30 Días 0% Servicio (Admin Faku) -->
+      <section id="tab-pane-promo" class="seller-tab-pane">
+        <div class="seller-actions-bar">
+          <div>
+            <h3 style="color: #FFF; font-size: 1.15rem; margin-bottom: 2px;">🎁 Programa Lanzamiento — 30 Días sin el 20% de Servicio</h3>
+            <span style="font-size: 0.8rem; color: #8CA093;">Configurá cuántos comercios entran con el 1er mes bonificado (3, 5 o más) y controlá el minutero de 30 días de cada cafetería</span>
+          </div>
+          <button type="button" class="btn-add-prod" onclick="window.sellerPortal.loadPromoAdmin()" style="background: #1A1A1A; border: 1px solid rgba(255,107,53,0.4);">
+            🔄 Actualizar Panel
+          </button>
+        </div>
+
+        <div id="promo-admin-container">
+          <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.45); font-size: 0.9rem;">
+            Cargando configuración de Cafeterías Fundadoras...
+          </div>
+        </div>
+      </section>
+
+      <!-- Pestaña 5: Centro de Ayuda / Disputas (solo para Faku - admin) -->
       <section id="tab-pane-disputes" class="seller-tab-pane">
         <div class="seller-actions-bar">
           <div>
@@ -1003,6 +997,7 @@
           </div>
           <h3 id="modal-product-title" class="modal-product-title font-serif"></h3>
           <div id="modal-product-price" class="modal-product-price"></div>
+          <div id="modal-service-fee-pill" style="margin: -4px 0 10px 0;"></div>
           <p id="modal-product-desc"
             style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 12px;"></p>
 
@@ -1091,9 +1086,14 @@
       </div>
 
       <div class="cart-footer">
+        <div id="cart-promo-savings-note" class="cart-promo-savings-note" style="display: none;"></div>
         <div class="cart-summary-row">
-          <span>Subtotal:</span>
+          <span>Subtotal (Precio de local):</span>
           <span id="cart-drawer-subtotal" class="cart-calc-subtotal">$0</span>
+        </div>
+        <div class="cart-summary-row" id="cart-service-fee-row">
+          <span>Servicio GOD MARKET (20%):</span>
+          <span id="cart-drawer-service-fee" class="cart-calc-service-fee">$0</span>
         </div>
         <div class="cart-summary-row" id="cart-delivery-fee-row">
           <span>Envío por el Vendedor:</span>
@@ -1355,6 +1355,10 @@
           <!-- Dinámico -->
         </div>
 
+        <div id="ticket-service-fee-row"
+          style="display: none; justify-content: space-between; align-items: center; padding: 4px 4px; font-size: 0.82rem; color: var(--text-secondary);">
+        </div>
+
         <div
           style="display: flex; justify-content: space-between; align-items: center; padding: 6px 4px; font-weight: 800; font-size: 1.05rem; border-bottom: 1px solid var(--border-light); margin-bottom: 14px;">
           <span>Total a Pagar:</span>
@@ -1520,6 +1524,53 @@
     </div>
   </div>
 
+  <!-- MODAL: Disputa / El local no respondió -->
+  <div id="dispute-modal" class="modal-overlay"
+    onclick="if(event.target === this) window.app.closeModal('dispute-modal')">
+    <div class="bottom-sheet" style="max-width: 520px; padding: 24px 20px; position: relative;">
+      <div class="drag-handle"></div>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('dispute-modal')" aria-label="Cerrar">✕</button>
+
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="font-size: 2.5rem; margin-bottom: 8px;">⚠️</div>
+        <h3 class="font-serif" style="font-size: 1.25rem; margin-bottom: 6px;">¿El local no respondió?</h3>
+        <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+          Si tu pedido <strong id="dispute-order-id" style="color: var(--primary);"></strong> 
+          (<strong id="dispute-order-total"></strong>) no fue confirmado por el local en tiempo razonable,
+          GOD MARKET puede ayudarte.
+        </p>
+      </div>
+
+      <div style="background: rgba(255,107,53,0.08); border: 1px solid rgba(255,107,53,0.2); border-radius: 14px; padding: 16px; margin-bottom: 20px;">
+        <p style="font-size: 0.8rem; color: var(--cream-subtle); line-height: 1.6; margin: 0;">
+          🔴 Al confirmar, <strong>GOD MARKET te contactará por WhatsApp</strong> para revisar tu caso.<br>
+          ✅ Si corresponde, gestionaremos el reembolso con el local.<br>
+          📋 Se generará un número de caso para el seguimiento.
+        </p>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Motivo del problema:</label>
+        <select id="dispute-reason" style="width: 100%; background: #1A1A1A; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #FFF; padding: 12px 16px; font-size: 0.9rem; appearance: none;">
+          <option value="no_response">El local no confirmó mi pedido</option>
+          <option value="wrong_order">Recibí un pedido incorrecto</option>
+          <option value="quality_issue">Problema con la calidad del producto</option>
+          <option value="other">Otro motivo</option>
+        </select>
+      </div>
+
+      <button id="btn-submit-dispute" type="button"
+        style="width: 100%; padding: 16px; background: linear-gradient(135deg, #FF6B35, #E63E00); color: #FFF; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;"
+        onclick="window.app.submitDispute(document.getElementById('dispute-reason').value)">
+        ⚠️ Reportar problema y contactar a GOD MARKET
+      </button>
+
+      <p style="font-size: 0.73rem; color: var(--text-muted); text-align: center; margin-top: 12px; line-height: 1.4;">
+        Al reportar, se abrirá WhatsApp para que puedas comunicarte directamente con el equipo de GOD MARKET.
+      </p>
+    </div>
+  </div>
+
 
   <!-- 6. Portal de Negocios: Publicar Desayuno o Merienda -->
   <div id="admin-product-modal" class="modal-overlay"
@@ -1610,8 +1661,11 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="prod-price">Precio (ARS) *</label>
+            <label class="form-label" for="prod-price">Precio Habitual de Local (ARS) *</label>
             <input type="number" id="prod-price" class="form-control" placeholder="Ej: 21500" required>
+            <div id="prod-price-promo-hint" style="font-size: 0.71rem; color: #4ADE80; margin-top: 5px; line-height: 1.35;">
+              💡 Poné el mismo precio de tu mostrador sin aumentar nada. Con el Mes Lanzamiento activo, el cliente paga este mismo valor (0% cargo de servicio).
+            </div>
           </div>
         </div>
 
@@ -1760,13 +1814,13 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Pure Standard JavaScript Scripts -->
-  <script charset="UTF-8" src="js/products.js?v=19.0"></script>
-  <script charset="UTF-8" src="js/cart.js?v=19.0"></script>
-  <script charset="UTF-8" src="js/checkout.js?v=19.0"></script>
-  <script charset="UTF-8" src="js/cloudinary.js?v=20.0"></script>
-  <script charset="UTF-8" src="js/seller.js?v=21.0"></script>
-  <script charset="UTF-8" src="js/admin.js?v=19.0"></script>
-  <script charset="UTF-8" src="js/app.js?v=24.0"></script>
+  <script charset="UTF-8" src="js/products.js?v=25.0"></script>
+  <script charset="UTF-8" src="js/cart.js?v=25.0"></script>
+  <script charset="UTF-8" src="js/checkout.js?v=25.0"></script>
+  <script charset="UTF-8" src="js/cloudinary.js?v=25.0"></script>
+  <script charset="UTF-8" src="js/seller.js?v=25.0"></script>
+  <script charset="UTF-8" src="js/admin.js?v=25.0"></script>
+  <script charset="UTF-8" src="js/app.js?v=25.0"></script>
 
   <!-- Modal de Guía para Instalar en iPhone / iPad (iOS) -->
   <div id="ios-install-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('ios-install-modal')">

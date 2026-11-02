@@ -221,13 +221,29 @@ class AdminManager {
         throw new Error(result.error || 'No se pudo publicar el producto.');
       }
 
-      // Actualizar el catálogo local solo después de confirmar la persistencia.
+      // Actualizar el catálogo local y el estado del contador de 30 días si acaba de activarse
+      if (result.business) {
+        window.productManager.addBusiness(result.business);
+        if (window.sellerPortal) {
+          window.sellerPortal.currentBusiness = result.business;
+          try {
+            localStorage.setItem('godmarket_business', JSON.stringify(result.business));
+          } catch (e) {}
+          if (typeof window.sellerPortal.renderPromoCountdownBanner === 'function') {
+            window.sellerPortal.renderPromoCountdownBanner();
+          }
+        }
+      }
       window.productManager.addProduct(result.product);
       if (window.sellerPortal && typeof window.sellerPortal.renderSellerProducts === 'function') {
         window.sellerPortal.renderSellerProducts();
       }
 
-      window.app.showToast(`✅ "${name}" publicado por ${targetBusinessName}`);
+      if (result.promoActivatedNow) {
+        window.app.showToast(`🎉 "${name}" publicado — ¡Comenzaron tus 30 días con 0% cargo de servicio!`);
+      } else {
+        window.app.showToast(`✅ "${name}" publicado por ${targetBusinessName}`);
+      }
       window.app.renderBusinessesSlider();
       window.app.renderProducts();
       window.app.closeModal('admin-product-modal');

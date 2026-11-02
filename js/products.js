@@ -135,6 +135,76 @@ class ProductManager {
     return this.businesses.find(b => b.id === id);
   }
 
+  getBusinessPromoState(businessOrId) {
+    const biz = typeof businessOrId === 'string' ? this.getBusinessById(businessOrId) : businessOrId;
+    const standardRate = (biz && Number.isFinite(Number(biz.standardServiceFeeRate)))
+      ? Number(biz.standardServiceFeeRate)
+      : 0.20;
+    const durationDays = (biz && Number(biz.promoDurationDays)) || 30;
+    const fullDurationMs = durationDays * 24 * 60 * 60 * 1000;
+
+    if (!biz || !biz.promoEligible) {
+      return {
+        promoEligible: false,
+        promoState: biz && biz.promoGrantedEver ? 'expired' : 'standard',
+        isPromoActive: false,
+        serviceFeeRate: standardRate,
+        standardServiceFeeRate: standardRate,
+        promoDurationDays: durationDays,
+        promoStartedAt: (biz && biz.promoStartedAt) || null,
+        promoExpiresAt: (biz && biz.promoExpiresAt) || null,
+        promoMsRemaining: 0
+      };
+    }
+
+    if (!biz.promoStartedAt || !biz.promoExpiresAt) {
+      return {
+        promoEligible: true,
+        promoState: 'pending_first_product',
+        isPromoActive: true,
+        serviceFeeRate: 0,
+        standardServiceFeeRate: standardRate,
+        promoDurationDays: durationDays,
+        promoStartedAt: null,
+        promoExpiresAt: null,
+        promoMsRemaining: fullDurationMs
+      };
+    }
+
+    const expMs = new Date(biz.promoExpiresAt).getTime();
+    const msRemaining = Number.isFinite(expMs) ? Math.max(0, expMs - Date.now()) : 0;
+
+    if (msRemaining > 0) {
+      return {
+        promoEligible: true,
+        promoState: 'active',
+        isPromoActive: true,
+        serviceFeeRate: 0,
+        standardServiceFeeRate: standardRate,
+        promoDurationDays: durationDays,
+        promoStartedAt: biz.promoStartedAt,
+        promoExpiresAt: biz.promoExpiresAt,
+        promoMsRemaining: msRemaining
+      };
+    }
+
+    return {
+      promoEligible: true,
+      promoState: 'expired',
+      isPromoActive: false,
+      serviceFeeRate: standardRate,
+      standardServiceFeeRate: standardRate,
+      promoDurationDays: durationDays,
+      promoStartedAt: biz.promoStartedAt,
+      promoExpiresAt: biz.promoExpiresAt,
+      promoMsRemaining: 0
+    };
+  }
+
+  isBusinessPromoActive(businessOrId) {
+    return this.getBusinessPromoState(businessOrId).isPromoActive;
+  }
+
   addBusiness(newBusiness) {
     const business = {
       id: 'biz-' + Date.now(),
@@ -150,7 +220,12 @@ class ProductManager {
       phone: "5491156192616",
       ...newBusiness
     };
-    this.businesses.unshift(business);
+    const existingIdx = this.businesses.findIndex(b => b.id === business.id);
+    if (existingIdx >= 0) {
+      this.businesses[existingIdx] = { ...this.businesses[existingIdx], ...business };
+    } else {
+      this.businesses.unshift(business);
+    }
     this.saveBusinesses(this.businesses);
     return business;
   }

@@ -107,7 +107,10 @@ class CheckoutHandler {
 ━━━━━━━━━━━━━━━━━━━━
 ◆ *RESUMEN DE PRODUCTOS:*${itemsText}
 
-• *Subtotal:* ${cart.formatCurrency(cart.getSubtotal())}
+• *Subtotal (Precio de local):* ${cart.formatCurrency(cart.getSubtotal())}
+${cart.getServiceFee() === 0 && cart.getWaivedServiceFee() > 0
+  ? `• *Servicio GOD MARKET (20%):* $0 (¡100% BONIFICADO · Ahorraste ${cart.formatCurrency(cart.getWaivedServiceFee())}!)`
+  : `• *Servicio GOD MARKET (20%):* ${cart.formatCurrency(cart.getServiceFee())}`}
 ${deliveryText}
 • *TOTAL A PAGAR:* ${cart.formatCurrency(cart.getTotal())}
 ━━━━━━━━━━━━━━━━━━━━
@@ -176,7 +179,11 @@ Por favor confírmenme el pedido para que el vendedor comience la preparación y
             customerName: order.customerName || (order.formData && order.formData.fullName),
             customerPhone: order.customerPhone || (order.formData && order.formData.phone),
             deliveryType: order.deliveryType,
+            paymentMethod: order.paymentMethod || (order.formData && order.formData.paymentMethod),
             address: order.deliveryAddress || (order.formData && order.formData.address),
+            subtotal: order.subtotal,
+            serviceFee: order.serviceFee,
+            waivedServiceFee: order.waivedServiceFee,
             total: order.total,
             items: order.items,
             businessId: (order.items && order.items[0] && order.items[0].product && order.items[0].product.businessId) || null
@@ -206,9 +213,14 @@ Por favor confírmenme el pedido para que el vendedor comience la preparación y
 
   processOrder(formData, cart) {
     const orderId = this.generateOrderNumber();
+    const subtotal = cart.getSubtotal();
+    const serviceFee = cart.getServiceFee();
+    const waivedServiceFee = cart.getWaivedServiceFee();
     const total = cart.getTotal();
     const totalFormatted = cart.formatCurrency(total);
-    const subtotalFormatted = cart.formatCurrency(cart.getSubtotal());
+    const subtotalFormatted = cart.formatCurrency(subtotal);
+    const serviceFeeFormatted = cart.formatCurrency(serviceFee);
+    const waivedServiceFeeFormatted = cart.formatCurrency(waivedServiceFee);
     const itemsCopy = JSON.parse(JSON.stringify(cart.items));
 
     const message = this.generateWhatsAppMessage(formData, cart, orderId);
@@ -225,9 +237,15 @@ Por favor confírmenme el pedido para que el vendedor comience la preparación y
     // Guardar último pedido para la pantalla de confirmación y persistencia
     this.lastOrder = {
       orderId,
+      subtotal,
+      serviceFee,
+      waivedServiceFee,
       total,
       totalFormatted,
       subtotalFormatted,
+      serviceFeeFormatted,
+      waivedServiceFeeFormatted,
+      deliveryType: cart.deliveryType,
       items: itemsCopy,
       formData,
       rawMessage: message,

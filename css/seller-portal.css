@@ -1401,3 +1401,329 @@
   margin-left: 4px;
   animation: pulseGlow 1.5s ease infinite;
 }
+
+
+/* ==========================================================================
+   PROGRAMA CAFETERÍAS FUNDADORAS — 30 DÍAS 0% SERVICIO (20% BONIFICADO)
+   ========================================================================== */
+
+/* 1. Banner de Cupos Fundadores en Login y Onboarding */
+.founding-promo-callout {
+  background: linear-gradient(135deg, rgba(0, 200, 83, 0.12) 0%, rgba(212, 175, 55, 0.1) 100%);
+  border: 1px solid rgba(74, 222, 128, 0.38);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.founding-promo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 200, 83, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.45);
+  color: #4ADE80;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+
+.founding-promo-text {
+  font-size: 0.81rem;
+  color: #E5EBE7;
+  line-height: 1.45;
+}
+
+.founding-promo-text strong {
+  color: #FFFFFF;
+}
+
+.founding-promo-sub {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.74rem;
+  color: #E5C07B;
+  font-weight: 600;
+}
+
+/* 2. Minutero / Contador en Vivo de 30 Días en Dashboard del Vendedor */
+.seller-promo-timer-banner {
+  margin-top: 14px;
+  margin-bottom: 14px;
+  border-radius: 18px;
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(18, 38, 27, 0.85);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.seller-promo-timer-banner.state-pending {
+  background: linear-gradient(135deg, rgba(255, 179, 0, 0.11) 0%, rgba(18, 38, 27, 0.92) 100%);
+  border-color: rgba(255, 179, 0, 0.42);
+}
+
+.seller-promo-timer-banner.state-active {
+  background: linear-gradient(135deg, rgba(0, 200, 83, 0.13) 0%, rgba(18, 38, 27, 0.94) 100%);
+  border-color: rgba(74, 222, 128, 0.45);
+  box-shadow: 0 12px 32px rgba(0, 200, 83, 0.12);
+}
+
+.seller-promo-timer-banner.state-standard {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(212, 175, 55, 0.28);
+}
+
+.promo-timer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.promo-timer-top > div:first-child {
+  flex: 1 1 320px;
+}
+
+.promo-timer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+
+.promo-timer-pill.pending {
+  background: rgba(255, 179, 0, 0.18);
+  border: 1px solid rgba(255, 179, 0, 0.45);
+  color: #FACC15;
+}
+
+.promo-timer-pill.active {
+  background: rgba(0, 200, 83, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.5);
+  color: #4ADE80;
+}
+
+.promo-timer-pill.standard {
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: #E5C07B;
+}
+
+.promo-timer-heading {
+  color: #FFFFFF;
+  font-size: 1.02rem;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+}
+
+.promo-timer-desc {
+  color: #B9CBC0;
+  font-size: 0.81rem;
+  line-height: 1.48;
+  margin: 0;
+}
+
+.promo-timer-desc strong {
+  color: #FFFFFF;
+}
+
+/* Reloj digital / Minutero (Días : Hs : Min : Seg) */
+.promo-countdown-boxes {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 10px 14px;
+  flex-shrink: 0;
+}
+
+.promo-countdown-boxes.live {
+  border-color: rgba(74, 222, 128, 0.42);
+  box-shadow: inset 0 0 18px rgba(0, 200, 83, 0.12);
+}
+
+.promo-countdown-boxes.paused {
+  border-color: rgba(255, 179, 0, 0.38);
+  opacity: 0.92;
+}
+
+.cd-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 44px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 9px;
+  padding: 6px 8px;
+}
+
+.cd-box span {
+  font-size: 1.22rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.promo-countdown-boxes.live .cd-box span {
+  color: #4ADE80;
+}
+
+.promo-countdown-boxes.paused .cd-box span {
+  color: #FACC15;
+}
+
+.cd-box small {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #9AB0A3;
+  margin-top: 3px;
+}
+
+.cd-sep {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.45);
+  padding-bottom: 10px;
+}
+
+.promo-progress-track {
+  margin-top: 14px;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.promo-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00C853 0%, #4ADE80 60%, #D4AF37 100%);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.promo-timer-actions {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn-activate-promo-upload {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: #0A1810;
+  border: none;
+  border-radius: 11px;
+  padding: 10px 18px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-activate-promo-upload:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.45);
+}
+
+/* 3. Panel Admin de Tracción y Cupos (Faku) */
+.promo-admin-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.promo-metric-card {
+  background: #141414;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.promo-metric-val {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.15;
+}
+
+.promo-metric-lbl {
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+}
+
+/* 4. Badges y Avisos de 0% Servicio para Compradores */
+.cafeteria-promo-float-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(8, 24, 15, 0.9);
+  border: 1px solid rgba(74, 222, 128, 0.55);
+  color: #4ADE80;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 3;
+}
+
+.cart-promo-savings-note {
+  background: rgba(0, 200, 83, 0.12);
+  border: 1px solid rgba(74, 222, 128, 0.38);
+  color: #D7FBE8;
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin-bottom: 10px;
+  font-size: 0.76rem;
+  line-height: 1.38;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cart-promo-savings-note strong {
+  color: #4ADE80;
+}
+
+@media (max-width: 600px) {
+  .promo-countdown-boxes {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-activate-promo-upload {
+    width: 100%;
+    justify-content: center;
+  }
+}

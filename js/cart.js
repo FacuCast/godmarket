@@ -10,6 +10,7 @@ class CartManager {
     this.listeners = [];
     this.deliveryType = 'delivery'; // 'delivery' | 'pickup'
     this.deliveryFee = 1500; // Costo estimado de envío en ARS
+    this.standardServiceFeeRate = 0.20; // Servicio habitual de GOD MARKET (20%)
     this.discount = 0;
   }
 
@@ -110,6 +111,36 @@ class CartManager {
     return this.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   }
 
+  isItemPromoActive(item) {
+    if (!item || !item.product) return false;
+    if (window.productManager && typeof window.productManager.getBusinessPromoState === 'function') {
+      const biz = window.productManager.getBusinessById(item.product.businessId);
+      if (biz) {
+        return window.productManager.getBusinessPromoState(biz).isPromoActive;
+      }
+    }
+    return item.product.isPromoActive === true;
+  }
+
+  getServiceFeeRateForItem(item) {
+    return this.isItemPromoActive(item) ? 0 : this.standardServiceFeeRate;
+  }
+
+  getServiceFee() {
+    return this.items.reduce((sum, item) => {
+      const lineTotal = (Number(item.product.price) || 0) * (Number(item.quantity) || 0);
+      return sum + Math.round(lineTotal * this.getServiceFeeRateForItem(item));
+    }, 0);
+  }
+
+  getWaivedServiceFee() {
+    return this.items.reduce((sum, item) => {
+      if (!this.isItemPromoActive(item)) return sum;
+      const lineTotal = (Number(item.product.price) || 0) * (Number(item.quantity) || 0);
+      return sum + Math.round(lineTotal * this.standardServiceFeeRate);
+    }, 0);
+  }
+
   getVendorsInCart() {
     const map = new Map();
     this.items.forEach(item => {
@@ -148,7 +179,7 @@ class CartManager {
   }
 
   getTotal() {
-    return Math.max(0, this.getSubtotal() + this.getEffectiveDeliveryFee() - this.discount);
+    return Math.max(0, this.getSubtotal() + this.getServiceFee() + this.getEffectiveDeliveryFee() - this.discount);
   }
 
   formatCurrency(amount) {

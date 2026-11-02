@@ -43,6 +43,17 @@ let businessesCache = readJsonFile('businesses.json', []);
 let productsCache = readJsonFile('products.json', []);
 let ordersCache = readJsonFile('orders.json', []);
 
+const DEFAULT_PROMO_SETTINGS = {
+  enabled: true,
+  maxPromoBusinesses: 5,
+  promoDurationDays: 30,
+  standardServiceFeeRate: 0.20
+};
+let promoSettingsCache = {
+  ...DEFAULT_PROMO_SETTINGS,
+  ...(readJsonFile('promo_settings.json', DEFAULT_PROMO_SETTINGS) || {})
+};
+
 // Conexión MySQL / MariaDB (Hostinger Database)
 let sqlPool = null;
 
@@ -510,6 +521,206 @@ const db = {
     disputes[index].resolvedAt = new Date().toISOString();
     writeJsonFile('disputes.json', disputes);
     return disputes[index];
+  },
+
+  // PROMO LANZAMIENTO — 1er Mes con 0% Servicio (20% Bonificado) & Contador 30 Días
+  getPromoSettings() {
+    return { ...DEFAULT_PROMO_SETTINGS, ...promoSettingsCache };
+  },
+  savePromoSettings(updates = {}) {
+    const clean = { ...this.getPromoSettings() };
+    if (typeof updates.enabled === 'boolean') clean.enabled = updates.enabled;
+    if (updates.maxPromoBusinesses !== undefined) {
+      const maxBiz = parseInt(updates.maxPromoBusinesses, 10);
+      if (Number.isInteger(maxBiz) && maxBiz >= 0 && maxBiz <= 500) {
+        clean.maxPromoBusinesses = maxBiz;
+      }
+    }
+    if (updates.promoDurationDays !== undefined) {
+      const days = parseInt(updates.promoDurationDays, 10);
+      if (Number.isInteger(days) && days >= 1 && days <= 365) {
+        clean.promoDurationDays = days;
+      }
+    }
+    if (updates.standardServiceFeeRate !== undefined) {
+      const rate = Number(updates.standardServiceFeeRate);
+      if (Number.isFinite(rate) && rate >= 0 && rate <= 0.5) {
+        clean.standardServiceFeeRate = rate;
+      }
+    }
+    promoSettingsCache = clean;
+    writeJsonFile('promo_settings.json', promoSettingsCache);
+    return { ...promoSettingsCache };
+  },
+  getPromoBusinessesCount() {
+    return businessesCache.filter(b => b && (b.promoEligible === true || b.promoGrantedEver === true)).length;
+  },
+  getRemainingPromoSlots() {
+    const settings = this.getPromoSettings();
+    if (!settings.enabled) return 0;
+    return Math.max(0, (Number(settings.maxPromoBusinesses) || 0) - this.getPromoBusinessesCount());
+  },
+  computeBusinessPromoState(business) {
+    const settings = this.getPromoSettings();
+    const standardRate = Number.isFinite(Number(settings.standardServiceFeeRate))
+      ? Number(settings.standardServiceFeeRate)
+      : 0.20;
+    const durationDays = Number(business && business.promoDurationDays) || Number(settings.promoDurationDays) || 30;
+    const fullDurationMs = durationDays * 24 * 60 * 60 * 1000;
+
+    if (!business || !business.promoEligible) {
+      return {
+        promoEligible: false,
+        promoState: business && business.promoGrantedEver ? 'expired' : 'standard',
+        isPromoActive: false,
+        serviceFeeRate: standardRate,
+        standardServiceFeeRate: standardRate,
+        promoDurationDays: durationDays,
+        promoStartedAt: (business && business.promoStartedAt) || null,
+        promoExpiresAt: (business && business.promoExpiresAt) || null,
+        promoMsRemaining: 0,
+        promoSlotNumber: (business && business.promoSlotNumber) || null
+      };
+    }
+
+    // Beneficio asignado al comercio fundador, esperando que suba su 1° producto con foto para no perder días
+    if (!business.promoStartedAt || !business.promoExpiresAt) {
+      return {
+        promoEligible: true,
+        promoState: 'pending_first_product',
+        isPromoActive: true,
+        serviceFeeRate: 0,
+        standardServiceFeeRate: standardRate,
+        promoDurationDays: durationDays,
+        promoStartedAt: null,
+        promoExpiresAt: null,
+        promoMsRemaining: fullDurationMs,
+        promoSlotNumber: business.promoSlotNumber || null
+      };
+    }
+
+    const expiresMs = new Date(business.promoExpiresAt).getTime();
+    const nowMs = Date.now();
+    const msRemaining = Number.isFinite(expiresMs) ? Math.max(0, expiresMs - nowMs) : 0;
+
+    if (msRemaining > 0) {
+      return {
+        promoEligible: true,
+        promoState: 'active',
+        isPromoActive: true,
+        serviceFeeRate: 0,
+        standardServiceFeeRate: standardRate,
+        promoDurationDays: durationDays,
+        promoStartedAt: business.promoStartedAt,
+        promoExpiresAt: business.promoExpiresAt,
+        promoMsRemaining: msRemaining,
+        promoSlotNumber: business.promoSlotNumber || null
+      };
+    }
+
+    return {
+      promoEligible: true,
+      promoState: 'expired',
+      isPromoActive: false,
+      serviceFeeRate: standardRate,
+      standardServiceFeeRate: standardRate,
+      promoDurationDays: durationDays,
+      promoStartedAt: business.promoStartedAt,
+      promoExpiresAt: business.promoExpiresAt,
+      promoMsRemaining: 0,
+      promoSlotNumber: business.promoSlotNumber || null
+    };
+  },
+  enrichBusinessWithPromo(business) {
+    if (!business) return null;
+    return {
+      ...business,
+      ...this.computeBusinessPromoState(business)
+    };
+  },
+  isBusinessPromoActive(businessOrId) {
+    const biz = typeof businessOrId === 'string' ? this.getBusinessById(businessOrId) : businessOrId;
+    if (!biz) return false;
+    return this.computeBusinessPromoState(biz).isPromoActive;
+  },
+  activateBusinessPromoTimerIfNeeded(businessId) {
+    const business = this.getBusinessById(businessId);
+    if (!business) return { activated: false, business: null };
+    if (!business.promoEligible || (business.promoStartedAt && business.promoExpiresAt)) {
+      return { activated: false, business: this.enrichBusinessWithPromo(business) };
+    }
+
+    const settings = this.getPromoSettings();
+    const durationDays = Number(business.promoDurationDays) || Number(settings.promoDurationDays) || 30;
+    const now = new Date();
+    const expires = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
+
+    const saved = this.saveBusiness({
+      ...business,
+      promoEligible: true,
+      promoGrantedEver: true,
+      promoDurationDays: durationDays,
+      promoStartedAt: now.toISOString(),
+      promoExpiresAt: expires.toISOString(),
+      badge: '🎁 Precio de Local · 0% Servicio'
+    });
+
+    return { activated: true, business: this.enrichBusinessWithPromo(saved) };
+  },
+  adminUpdateBusinessPromo(businessId, action) {
+    const business = this.getBusinessById(businessId);
+    if (!business) return null;
+
+    const settings = this.getPromoSettings();
+    const durationDays = Number(settings.promoDurationDays) || 30;
+    const now = new Date();
+
+    let updates = {};
+    if (action === 'start_30d') {
+      const expires = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
+      updates = {
+        promoEligible: true,
+        promoGrantedEver: true,
+        promoDurationDays: durationDays,
+        promoStartedAt: now.toISOString(),
+        promoExpiresAt: expires.toISOString(),
+        promoSlotNumber: business.promoSlotNumber || (this.getPromoBusinessesCount() + 1),
+        badge: '🎁 Precio de Local · 0% Servicio'
+      };
+    } else if (action === 'pending_first_product') {
+      updates = {
+        promoEligible: true,
+        promoGrantedEver: true,
+        promoDurationDays: durationDays,
+        promoStartedAt: null,
+        promoExpiresAt: null,
+        promoSlotNumber: business.promoSlotNumber || (this.getPromoBusinessesCount() + 1),
+        badge: '🎁 Precio de Local · 0% Servicio'
+      };
+    } else if (action === 'extend_15d') {
+      const currentExpMs = business.promoExpiresAt ? new Date(business.promoExpiresAt).getTime() : 0;
+      const baseMs = currentExpMs > now.getTime() ? currentExpMs : now.getTime();
+      const newExpires = new Date(baseMs + 15 * 24 * 60 * 60 * 1000);
+      updates = {
+        promoEligible: true,
+        promoGrantedEver: true,
+        promoStartedAt: business.promoStartedAt || now.toISOString(),
+        promoExpiresAt: newExpires.toISOString(),
+        badge: '🎁 Precio de Local · 0% Servicio'
+      };
+    } else if (action === 'end_promo') {
+      updates = {
+        promoEligible: false,
+        promoGrantedEver: business.promoGrantedEver || business.promoEligible || false,
+        promoExpiresAt: now.toISOString(),
+        badge: business.badge === '🎁 Precio de Local · 0% Servicio' ? '✨ Destacado en GOD MARKET' : business.badge
+      };
+    } else {
+      return null;
+    }
+
+    const saved = this.saveBusiness({ ...business, ...updates });
+    return this.enrichBusinessWithPromo(saved);
   }
 };
 

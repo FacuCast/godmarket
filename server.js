@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
@@ -64,7 +64,7 @@ app.use(cors({
     callback(null, !origin || allowedOrigins.has(origin));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-token'],
   maxAge: 600
 }));
 
@@ -232,10 +232,19 @@ async function verifyGoogleCredential(credential) {
 
 // 1. Configuración pública del cliente
 app.get('/api/config', (req, res) => {
+  const promoSettings = db.getPromoSettings();
   res.json({
     googleClientId: process.env.GOOGLE_CLIENT_ID || '',
     cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
-    demoLoginEnabled: process.env.NODE_ENV !== 'production' && process.env.ENABLE_DEMO_LOGIN === 'true'
+    demoLoginEnabled: process.env.NODE_ENV !== 'production' && process.env.ENABLE_DEMO_LOGIN === 'true',
+    promoProgram: {
+      enabled: promoSettings.enabled,
+      maxPromoBusinesses: promoSettings.maxPromoBusinesses,
+      usedSlots: db.getPromoBusinessesCount(),
+      remainingSlots: db.getRemainingPromoSlots(),
+      promoDurationDays: promoSettings.promoDurationDays,
+      standardServiceFeeRate: promoSettings.standardServiceFeeRate
+    }
   });
 });
 
@@ -312,7 +321,8 @@ app.post('/api/auth/google', authLimiter, async (req, res) => {
       });
     }
 
-    const business = db.getBusinessById(seller.businessId);
+    const rawBusiness = db.getBusinessById(seller.businessId);
+    const business = rawBusiness ? db.enrichBusinessWithPromo(rawBusiness) : null;
     const token = generateSellerToken(seller, business ? business.id : seller.businessId);
 
     return res.json({
@@ -381,6 +391,11 @@ app.post('/api/seller/register', verifySellerAuth, (req, res) => {
     const cleanSchedule = sanitizeInput(schedule || '08:30 - 20:00 hs', 60);
     const cleanDesc = sanitizeInput(description || 'Elaboración artesanal con los mejores ingredientes.', 500);
 
+    const promoSettings = db.getPromoSettings();
+    const remainingPromoSlots = db.getRemainingPromoSlots();
+    const grantFoundingPromo = Boolean(promoSettings.enabled && remainingPromoSlots > 0);
+    const promoSlotNumber = grantFoundingPromo ? (db.getPromoBusinessesCount() + 1) : null;
+
     const businessData = {
       id: businessId,
       sellerId: sellerId,
@@ -398,7 +413,7 @@ app.post('/api/seller/register', verifySellerAuth, (req, res) => {
       isOpen: true,
       schedule: cleanSchedule,
       avatar: ['🍰', '☕', '🥐', '🥑', '🎁', '🍪'].includes(avatar) ? avatar : '🍰',
-      badge: '✨ Nuevo en GOD MARKET',
+      badge: grantFoundingPromo ? '🎁 Precio de Local · 0% Servicio' : '✨ Nuevo en GOD MARKET',
       cover: sanitizeImageUrl(cover || seller.picture, 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80'),
       phone: cleanPhone,
       address: cleanAddress,
@@ -406,10 +421,17 @@ app.post('/api/seller/register', verifySellerAuth, (req, res) => {
       lng: req.body.lng ? parseFloat(req.body.lng) : -58.4285,
       deliveryRadiusKm: req.body.deliveryRadiusKm ? parseFloat(req.body.deliveryRadiusKm) : 5.0,
       verified: true,
-      description: cleanDesc
+      description: cleanDesc,
+      createdAt: new Date().toISOString(),
+      promoEligible: grantFoundingPromo,
+      promoGrantedEver: grantFoundingPromo,
+      promoDurationDays: Number(promoSettings.promoDurationDays) || 30,
+      promoStartedAt: null,
+      promoExpiresAt: null,
+      promoSlotNumber
     };
 
-    const savedBusiness = db.saveBusiness(businessData);
+    const savedBusiness = db.enrichBusinessWithPromo(db.saveBusiness(businessData));
 
     const updatedSeller = db.saveSeller({
       id: sellerId,
@@ -447,7 +469,8 @@ app.get('/api/seller/me', verifySellerAuth, (req, res) => {
       return res.status(404).json({ error: 'Vendedor no encontrado.' });
     }
 
-    const business = seller.businessId ? db.getBusinessById(seller.businessId) : null;
+    const rawBusiness = seller.businessId ? db.getBusinessById(seller.businessId) : null;
+    const business = rawBusiness ? db.enrichBusinessWithPromo(rawBusiness) : null;
     const products = seller.businessId ? db.getProductsByBusiness(seller.businessId) : [];
     const orders = seller.businessId ? db.getOrdersByBusiness(seller.businessId) : [];
 
@@ -532,7 +555,7 @@ app.put('/api/seller/profile', verifySellerAuth, (req, res) => {
       sellerId: req.seller.sellerId
     });
 
-    res.json({ success: true, business: updated });
+    res.json({ success: true, business: db.enrichBusinessWithPromo(updated) });
   } catch (err) {
     res.status(500).json({ error: 'Error al actualizar negocio.' });
   }
@@ -595,7 +618,20 @@ app.post('/api/seller/products', verifySellerAuth, (req, res) => {
       image: sanitizeImageUrl(image, 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80')
     });
 
-    res.json({ success: true, product: newProduct });
+    // Activar el contador de 30 días (0% cargo de servicio) recién al publicar el primer producto con foto
+    const promoActivation = db.activateBusinessPromoTimerIfNeeded(businessId);
+    const enrichedBusiness = promoActivation.business || db.enrichBusinessWithPromo(business);
+
+    res.json({
+      success: true,
+      product: {
+        ...newProduct,
+        isPromoActive: Boolean(enrichedBusiness && enrichedBusiness.isPromoActive),
+        serviceFeeRate: enrichedBusiness ? enrichedBusiness.serviceFeeRate : 0.20
+      },
+      promoActivatedNow: promoActivation.activated,
+      business: enrichedBusiness
+    });
   } catch (err) {
     res.status(500).json({ error: 'Error al crear producto.' });
   }
@@ -720,7 +756,17 @@ app.get('/api/products', (req, res) => {
       products = products.filter(p => p.businessId === businessId);
     }
 
-    res.json(products);
+    const enrichedProducts = products.map(p => {
+      const biz = p.businessId ? db.getBusinessById(p.businessId) : null;
+      const promoState = db.computeBusinessPromoState(biz);
+      return {
+        ...p,
+        isPromoActive: promoState.isPromoActive,
+        serviceFeeRate: promoState.serviceFeeRate
+      };
+    });
+
+    res.json(enrichedProducts);
   } catch (err) {
     res.status(500).json({ error: 'Error al obtener productos.' });
   }
@@ -728,7 +774,7 @@ app.get('/api/products', (req, res) => {
 
 app.get('/api/businesses', (req, res) => {
   try {
-    const businesses = db.getBusinesses();
+    const businesses = db.getBusinesses().map(b => db.enrichBusinessWithPromo(b));
     res.json(businesses);
   } catch (err) {
     res.status(500).json({ error: 'Error al obtener negocios.' });
@@ -746,7 +792,7 @@ app.post('/api/orders', orderLimiter, (req, res) => {
 
     const items = [];
     for (const item of orderData.items) {
-      const productId = item && item.product && item.product.id;
+      const productId = item && ((item.product && item.product.id) || item.id);
       const quantity = Number(item && item.quantity);
       const product = typeof productId === 'string' ? db.getProductById(productId) : null;
       if (!product || !Number.isInteger(quantity) || quantity < 1 || quantity > 25 ||
@@ -791,15 +837,35 @@ app.post('/api/orders', orderLimiter, (req, res) => {
     }
 
     const newOrders = [];
+    const rawOrderId = orderData.id || orderData.orderId;
+    const clientOrderId = typeof rawOrderId === 'string' && /^ORD-[A-Za-z0-9_-]{3,20}$/.test(rawOrderId)
+      ? rawOrderId
+      : null;
+    let bizIndex = 0;
+
     for (const [businessId, businessItems] of itemsByBusiness) {
+      bizIndex += 1;
       const business = db.getBusinessById(businessId);
+      const promoState = db.computeBusinessPromoState(business);
       const subtotal = businessItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+      const serviceFee = Math.round(subtotal * promoState.serviceFeeRate);
+      const waivedServiceFee = promoState.isPromoActive
+        ? Math.round(subtotal * promoState.standardServiceFeeRate)
+        : 0;
       const freeShippingFrom = Number(business.freeShippingFrom) || 45000;
       const deliveryFee = Number(business.deliveryFee) >= 0 ? Number(business.deliveryFee) : 1500;
-      const total = subtotal + (
-        deliveryType === 'delivery' && subtotal < freeShippingFrom ? deliveryFee : 0
-      );
+      const effectiveDeliveryFee = deliveryType === 'delivery' && subtotal < freeShippingFrom ? deliveryFee : 0;
+      const merchantPayout = subtotal + effectiveDeliveryFee;
+      const total = subtotal + serviceFee + effectiveDeliveryFee;
+
+      let candidateId = undefined;
+      if (clientOrderId) {
+        const desiredId = itemsByBusiness.size === 1 ? clientOrderId : `${clientOrderId}-${bizIndex}`;
+        if (!db.getOrderById(desiredId)) candidateId = desiredId;
+      }
+
       newOrders.push(db.addOrder({
+        ...(candidateId ? { id: candidateId } : {}),
         customerName: sanitizeInput(orderData.customerName, 80),
         customerPhone: typeof orderData.customerPhone === 'string'
           ? orderData.customerPhone.replace(/\D/g, '').slice(0, 20)
@@ -807,6 +873,13 @@ app.post('/api/orders', orderLimiter, (req, res) => {
         deliveryType,
         customerAddress: sanitizeInput(orderData.address, 200),
         paymentMethod,
+        subtotal,
+        serviceFee,
+        serviceFeeRate: promoState.serviceFeeRate,
+        waivedServiceFee,
+        isPromoOrder: promoState.isPromoActive,
+        deliveryFee: effectiveDeliveryFee,
+        merchantPayout,
         total,
         items: businessItems,
         businessId
@@ -912,6 +985,86 @@ app.patch('/api/admin/disputes/:id', (req, res) => {
   } catch (err) {
     console.error('Error al resolver disputa:', err);
     res.status(500).json({ error: 'Error al resolver la disputa.' });
+  }
+});
+
+// ============================================================================
+// 10-C. PROGRAMA COMERCIOS FUNDADORES (1ER MES 0% SERVICIO / 20% BONIFICADO)
+// ============================================================================
+
+function verifyAdminTokenHeader(req, res) {
+  const adminToken = req.headers['x-admin-token'];
+  const expectedToken = process.env.ADMIN_TOKEN;
+  if (!expectedToken || !adminToken || adminToken !== expectedToken) {
+    res.status(403).json({ error: 'Acceso denegado.' });
+    return false;
+  }
+  return true;
+}
+
+// GET /api/admin/promo — Estado general de cupos (3 o 5 cafeterías) y contadores de 30 días
+app.get('/api/admin/promo', (req, res) => {
+  try {
+    if (!verifyAdminTokenHeader(req, res)) return;
+    const settings = db.getPromoSettings();
+    const businesses = db.getBusinesses().map(b => {
+      const enriched = db.enrichBusinessWithPromo(b);
+      const productsCount = db.getProductsByBusiness(b.id).length;
+      const orders = db.getOrdersByBusiness(b.id);
+      const revenueTotal = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+      return {
+        ...enriched,
+        productsCount,
+        ordersCount: orders.length,
+        revenueTotal
+      };
+    });
+
+    res.json({
+      settings,
+      usedSlots: db.getPromoBusinessesCount(),
+      remainingSlots: db.getRemainingPromoSlots(),
+      businesses
+    });
+  } catch (err) {
+    console.error('Error en GET /api/admin/promo:', err);
+    res.status(500).json({ error: 'Error al obtener estado de promociones.' });
+  }
+});
+
+// PATCH /api/admin/promo/settings — Configurar cantidad de cafeterías fundadoras (ej: 3 o 5) y días
+app.patch('/api/admin/promo/settings', (req, res) => {
+  try {
+    if (!verifyAdminTokenHeader(req, res)) return;
+    const updated = db.savePromoSettings(req.body || {});
+    res.json({
+      success: true,
+      settings: updated,
+      usedSlots: db.getPromoBusinessesCount(),
+      remainingSlots: db.getRemainingPromoSlots()
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al guardar configuración de promoción.' });
+  }
+});
+
+// PATCH /api/admin/promo/business/:id — Activar / reiniciar 30 días / extender / finalizar promo de una cafetería
+app.patch('/api/admin/promo/business/:id', (req, res) => {
+  try {
+    if (!verifyAdminTokenHeader(req, res)) return;
+    const { id } = req.params;
+    const { action } = req.body || {};
+    const validActions = ['start_30d', 'pending_first_product', 'extend_15d', 'end_promo'];
+    if (!validActions.includes(action)) {
+      return res.status(400).json({ error: 'Acción no válida.' });
+    }
+    const updated = db.adminUpdateBusinessPromo(id, action);
+    if (!updated) {
+      return res.status(404).json({ error: 'Comercio no encontrado.' });
+    }
+    res.json({ success: true, business: updated });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al actualizar promoción del comercio.' });
   }
 });
 

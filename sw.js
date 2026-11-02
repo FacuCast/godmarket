@@ -1,5 +1,5 @@
-// Service Worker para GOD MARKET PWA (v16 - New Logo Emblem in Navbar & PWA Icon Refresh)
-const CACHE_NAME = 'godmarket-v16';
+// Service Worker para GOD MARKET PWA (v17 - Founding Cafeterias 30-Day 0% Service Promo & Countdown)
+const CACHE_NAME = 'godmarket-v17';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

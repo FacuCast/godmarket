@@ -1,4 +1,4 @@
-﻿/**
+/**
  * GOD MARKET - CONTROLADOR DEL PORTAL DE VENDEDORES & AUTENTICACIÓN GOOGLE
  * Maneja el Selector de Rol, Login con Google, Onboarding y Dashboard del Vendedor
  */
@@ -10,6 +10,9 @@ class SellerPortalManager {
     this.activeTab = 'products';
     this.googleClientId = '';
     this.gisLoaded = false;
+    this.promoProgram = null;
+    this.promoTickerInterval = null;
+    this._lastRenderedPromoState = null;
 
     // Estados de Mapa y Radio Circular de Envíos
     this.onboardMap = null;
@@ -52,8 +55,10 @@ class SellerPortalManager {
       if (res.ok) {
         const data = await res.json();
         this.googleClientId = data.googleClientId || '';
+        this.promoProgram = data.promoProgram || null;
         const demoButton = document.querySelector('.demo-login-btn');
         if (demoButton) demoButton.hidden = !data.demoLoginEnabled;
+        this.updateFoundingPromoCallouts();
       }
     } catch (err) {
       console.warn('No se pudo conectar al backend para /api/config:', err.message);
@@ -359,6 +364,8 @@ class SellerPortalManager {
     // Cargar datos actualizados del negocio y sus productos
     await this.refreshSellerData();
     this.renderDashboardHeader();
+    this.renderPromoCountdownBanner(true);
+    this.startPromoCountdownTicker();
     this.renderSellerProducts();
     this.renderSellerOrders();
   }
@@ -711,8 +718,13 @@ class SellerPortalManager {
 
           <div style="font-size: 0.85rem; color: #E5EBE7; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px;">
             <strong>Cliente:</strong> ${window.app.escapeHTML(o.customerName || 'Cliente')} (${window.app.escapeHTML(o.customerPhone || 'Sin tel')})<br>
-            <strong>Entrega:</strong> ${window.app.escapeHTML(o.deliveryType || 'delivery')} — ${window.app.escapeHTML(o.address || 'Buenos Aires')}<br>
-            <strong>Total a cobrar:</strong> <span style="color: #D4AF37; font-weight: 700;">$${Number(o.total || 0).toLocaleString('es-AR')}</span>
+            <strong>Entrega:</strong> ${window.app.escapeHTML(o.deliveryType || 'delivery')} — ${window.app.escapeHTML(o.customerAddress || o.address || 'Buenos Aires')}<br>
+            <strong>Total abonado por comprador:</strong> <span style="color: var(--primary); font-weight: 700;">$${Number(o.total || 0).toLocaleString('es-AR')}</span>
+            ${o.isPromoOrder || (Number(o.serviceFee || 0) === 0 && Number(o.waivedServiceFee || 0) > 0)
+              ? `<div style="margin-top: 4px; font-size: 0.76rem; color: #4ADE80; font-weight: 600;">🎁 Mes Bonificado Activo: 0% cargo de servicio (Recibís el 100% de tu precio habitual · Ahorro comprador: $${Number(o.waivedServiceFee || 0).toLocaleString('es-AR')})</div>`
+              : (Number(o.serviceFee || 0) > 0
+                ? `<div style="margin-top: 4px; font-size: 0.76rem; color: #9AB0A3;">Neto de tu local (100% precio habitual + envío): <strong style="color:#FFF;">$${Number(o.merchantPayout || (Number(o.total || 0) - Number(o.serviceFee || 0))).toLocaleString('es-AR')}</strong> · Servicio GOD MARKET (20%): $${Number(o.serviceFee).toLocaleString('es-AR')}</div>`
+                : '')}
           </div>
 
           <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
@@ -761,6 +773,21 @@ class SellerPortalManager {
     const sel = document.getElementById('prod-business');
     if (sel && this.currentBusiness) {
       sel.value = this.currentBusiness.id;
+    }
+    const priceHint = document.getElementById('prod-price-promo-hint');
+    if (priceHint && this.currentBusiness) {
+      const pState = window.productManager && typeof window.productManager.getBusinessPromoState === 'function'
+        ? window.productManager.getBusinessPromoState(this.currentBusiness)
+        : { isPromoActive: Boolean(this.currentBusiness.isPromoActive), promoState: this.currentBusiness.promoState };
+      if (pState.isPromoActive) {
+        priceHint.style.color = '#4ADE80';
+        priceHint.innerHTML = pState.promoState === 'pending_first_product'
+          ? '🎁 <strong>¡Este primer producto activará tus 30 días bonificados!</strong> Cargá el mismo precio habitual de tu cafetería: tus clientes comprarán con 0% de cargo de servicio.'
+          : '🎁 <strong>Mes Lanzamiento Activo (0% Servicio):</strong> Cargá el mismo precio habitual de tu cafetería. El comprador paga exactamente este precio sin el 20% adicional.';
+      } else {
+        priceHint.style.color = '#A3B8AC';
+        priceHint.innerHTML = '💡 Cargá el precio habitual de tu cafetería (recibís el 100% de este valor). El 20% de servicio de GOD MARKET se adiciona al comprador en el carrito.';
+      }
     }
     if (window.app && typeof window.app.openModal === 'function') {
       window.app.openModal('admin-product-modal');
@@ -824,6 +851,7 @@ class SellerPortalManager {
     if (tabName === 'products') this.renderSellerProducts();
     if (tabName === 'orders') this.renderSellerOrders();
     if (tabName === 'coverage') this.initDashboardCoverageMap();
+    if (tabName === 'promo') this.loadPromoAdmin();
     if (tabName === 'disputes') this.loadDisputes();
   }
 
@@ -1032,6 +1060,412 @@ class SellerPortalManager {
     }
   }
 
+
+  // ────────────────────────────────────────────────────────────
+  // PROGRAMA COMERCIOS FUNDADORES: MINUTERO 30 DÍAS & PANEL ADMIN
+  // ────────────────────────────────────────────────────────────
+
+  updateFoundingPromoCallouts() {
+    const authBanner = document.getElementById('promo-slots-auth-banner');
+    const onboardBanner = document.getElementById('promo-slots-onboard-banner');
+    const p = this.promoProgram;
+
+    if (!p || !p.enabled || p.remainingSlots <= 0) {
+      if (authBanner) authBanner.style.display = 'none';
+      if (onboardBanner) onboardBanner.style.display = 'none';
+      return;
+    }
+
+    const days = Number(p.promoDurationDays) || 30;
+    const slotsLabel = `🎁 BENEFICIO COMERCIO FUNDADOR · QUEDAN ${p.remainingSlots} DE ${p.maxPromoBusinesses} CUPOS`;
+
+    if (authBanner) {
+      authBanner.style.display = 'block';
+      const badge = authBanner.querySelector('.founding-promo-badge');
+      if (badge) badge.textContent = slotsLabel;
+    }
+    if (onboardBanner) {
+      onboardBanner.style.display = 'block';
+      const badge = onboardBanner.querySelector('.founding-promo-badge');
+      if (badge) badge.textContent = `${slotsLabel} (${days} DÍAS 0% SERVICIO)`;
+    }
+  }
+
+  getLiveCurrentBusinessPromoState() {
+    if (!this.currentBusiness) return null;
+    if (window.productManager && typeof window.productManager.getBusinessPromoState === 'function') {
+      return window.productManager.getBusinessPromoState(this.currentBusiness);
+    }
+    const expMs = this.currentBusiness.promoExpiresAt ? new Date(this.currentBusiness.promoExpiresAt).getTime() : 0;
+    const msRemaining = expMs ? Math.max(0, expMs - Date.now()) : 0;
+    return {
+      promoEligible: Boolean(this.currentBusiness.promoEligible),
+      promoState: !this.currentBusiness.promoEligible
+        ? 'standard'
+        : (!this.currentBusiness.promoStartedAt ? 'pending_first_product' : (msRemaining > 0 ? 'active' : 'expired')),
+      isPromoActive: Boolean(this.currentBusiness.promoEligible && (!this.currentBusiness.promoStartedAt || msRemaining > 0)),
+      promoDurationDays: Number(this.currentBusiness.promoDurationDays) || 30,
+      promoStartedAt: this.currentBusiness.promoStartedAt || null,
+      promoExpiresAt: this.currentBusiness.promoExpiresAt || null,
+      promoMsRemaining: msRemaining
+    };
+  }
+
+  formatDurationParts(ms) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return {
+      days: String(days).padStart(2, '0'),
+      hours: String(hours).padStart(2, '0'),
+      minutes: String(minutes).padStart(2, '0'),
+      seconds: String(seconds).padStart(2, '0')
+    };
+  }
+
+  startPromoCountdownTicker() {
+    if (this.promoTickerInterval) {
+      clearInterval(this.promoTickerInterval);
+    }
+    this.promoTickerInterval = setInterval(() => {
+      const portal = document.getElementById('seller-portal-view');
+      if (!portal || !portal.classList.contains('active')) return;
+      this.renderPromoCountdownBanner(false);
+    }, 1000);
+  }
+
+  renderPromoCountdownBanner(forceFullRender = false) {
+    const banner = document.getElementById('seller-promo-timer-banner');
+    if (!banner || !this.currentBusiness) return;
+
+    const state = this.getLiveCurrentBusinessPromoState();
+    if (!state) {
+      banner.style.display = 'none';
+      return;
+    }
+
+    banner.style.display = 'block';
+    const durationDays = Number(state.promoDurationDays) || 30;
+    const totalMs = durationDays * 24 * 60 * 60 * 1000;
+
+    // Si ya está renderizado en modo 'active' y no pedimos full render, solo actualizamos los números del minutero sin parpadeo
+    if (!forceFullRender && state.promoState === 'active' && this._lastRenderedPromoState === 'active') {
+      const parts = this.formatDurationParts(state.promoMsRemaining);
+      const dEl = document.getElementById('promo-cd-days');
+      const hEl = document.getElementById('promo-cd-hours');
+      const mEl = document.getElementById('promo-cd-mins');
+      const sEl = document.getElementById('promo-cd-secs');
+      const barEl = document.getElementById('promo-cd-progress-fill');
+      if (dEl && hEl && mEl && sEl) {
+        dEl.textContent = parts.days;
+        hEl.textContent = parts.hours;
+        mEl.textContent = parts.minutes;
+        sEl.textContent = parts.seconds;
+        if (barEl) {
+          const pct = Math.max(2, Math.min(100, (state.promoMsRemaining / totalMs) * 100));
+          barEl.style.width = pct.toFixed(1) + '%';
+        }
+        return;
+      }
+    }
+
+    this._lastRenderedPromoState = state.promoState;
+
+    if (state.promoState === 'pending_first_product') {
+      const slotInfo = this.currentBusiness.promoSlotNumber ? ` · Comercio Fundador #${this.currentBusiness.promoSlotNumber}` : '';
+      banner.className = 'seller-promo-timer-banner state-pending';
+      banner.innerHTML = `
+        <div class="promo-timer-top">
+          <div>
+            <span class="promo-timer-pill pending">🎁 MES BONIFICADO LISTO PARA ACTIVAR${slotInfo}</span>
+            <h4 class="promo-timer-heading">${durationDays} días completos con 0% Cargo de Servicio (20% bonificado para tus clientes)</h4>
+            <p class="promo-timer-desc">
+              <strong>¡No perdés ni un solo día por registrarte antes!</strong> Tu reloj de ${durationDays} días está en espera y <strong>comenzará a correr recién cuando subas tu primer producto con foto</strong>. Publicá tus combos con los mismos precios habituales de tu cafetería.
+            </p>
+          </div>
+          <div class="promo-countdown-boxes paused" title="El reloj comenzará cuando publiques tu 1° producto">
+            <div class="cd-box"><span>${String(durationDays).padStart(2, '0')}</span><small>DÍAS</small></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-box"><span>00</span><small>HS</small></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-box"><span>00</span><small>MIN</small></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-box"><span>00</span><small>SEG</small></div>
+          </div>
+        </div>
+        <div class="promo-timer-actions">
+          <button type="button" class="btn-activate-promo-upload" onclick="window.sellerPortal.openAddProductModal()">
+            📸 Subir mi 1° Producto con Foto y Activar los ${durationDays} Días
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    if (state.promoState === 'active') {
+      const parts = this.formatDurationParts(state.promoMsRemaining);
+      const pct = Math.max(2, Math.min(100, (state.promoMsRemaining / totalMs) * 100));
+      const expStr = state.promoExpiresAt
+        ? new Date(state.promoExpiresAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
+        : '';
+      const slotInfo = this.currentBusiness.promoSlotNumber ? ` · Comercio Fundador #${this.currentBusiness.promoSlotNumber}` : '';
+
+      banner.className = 'seller-promo-timer-banner state-active';
+      banner.innerHTML = `
+        <div class="promo-timer-top">
+          <div>
+            <span class="promo-timer-pill active">⏱️ MES LANZAMIENTO EN CURSO · 0% SERVICIO${slotInfo}</span>
+            <h4 class="promo-timer-heading">Tus clientes compran al mismo precio habitual de tu local</h4>
+            <p class="promo-timer-desc">
+              El cargo por servicio del <strong>20% de GOD MARKET está 100% bonificado ($0)</strong> para tus compradores${expStr ? ` hasta el <strong>${window.app.escapeHTML(expStr)}</strong>` : ''}. Aprovechá para difundir tu tienda y sumar ventas sin recargos.
+            </p>
+          </div>
+          <div class="promo-countdown-boxes live">
+            <div class="cd-box"><span id="promo-cd-days">${parts.days}</span><small>DÍAS</small></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-box"><span id="promo-cd-hours">${parts.hours}</span><small>HS</small></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-box"><span id="promo-cd-mins">${parts.minutes}</span><small>MIN</small></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-box"><span id="promo-cd-secs">${parts.seconds}</span><small>SEG</small></div>
+          </div>
+        </div>
+        <div class="promo-progress-track">
+          <div id="promo-cd-progress-fill" class="promo-progress-fill" style="width: ${pct.toFixed(1)}%;"></div>
+        </div>
+      `;
+      return;
+    }
+
+    // Estado estándar o promoción finalizada luego de los 30 días
+    banner.className = 'seller-promo-timer-banner state-standard';
+    banner.innerHTML = `
+      <div class="promo-timer-top">
+        <div>
+          <span class="promo-timer-pill standard">✦ MODALIDAD ESTÁNDAR GOD MARKET ACTIVA</span>
+          <h4 class="promo-timer-heading">${state.promoState === 'expired' ? 'Período promocional de 30 días completado' : 'Precios habituales de local protegidos'}</h4>
+          <p class="promo-timer-desc">
+            Seguís cobrando el <strong>100% del precio habitual</strong> publicado en tus productos. El cargo de servicio del <strong>20% de GOD MARKET</strong> es abonado directamente por el comprador al finalizar su pedido.
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
+  async loadPromoAdmin() {
+    const container = document.getElementById('promo-admin-container');
+    if (!container) return;
+
+    let adminToken = this.getAdminToken();
+    if (!adminToken) {
+      const token = prompt('Ingresá el token de administrador de GOD MARKET para gestionar los cupos y los 30 días:');
+      if (!token) {
+        container.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.5);">🔐 Ingresá tu token de administrador haciendo clic en "Actualizar Panel".</div>';
+        return;
+      }
+      localStorage.setItem('godmarket_admin_token', token);
+      adminToken = token;
+    }
+
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.5);">⏳ Cargando panel de Cafeterías Fundadoras...</div>';
+
+    try {
+      const res = await fetch('/api/admin/promo', {
+        headers: { 'x-admin-token': adminToken }
+      });
+
+      if (res.status === 403) {
+        localStorage.removeItem('godmarket_admin_token');
+        container.innerHTML = '<div style="text-align:center;padding:30px;color:#EF4444;">❌ Token de administrador incorrecto. Presioná "Actualizar Panel" para reintentar.</div>';
+        return;
+      }
+
+      const data = await res.json();
+      this.renderPromoAdminPanel(data);
+    } catch (err) {
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:#EF4444;">❌ Error de conexión al cargar el panel de promociones.</div>';
+    }
+  }
+
+  renderPromoAdminPanel(data) {
+    const container = document.getElementById('promo-admin-container');
+    if (!container || !data) return;
+
+    const settings = data.settings || { enabled: true, maxPromoBusinesses: 5, promoDurationDays: 30 };
+    const businesses = Array.isArray(data.businesses) ? data.businesses : [];
+    const totalProducts = businesses.reduce((sum, b) => sum + (b.productsCount || 0), 0);
+    const totalOrders = businesses.reduce((sum, b) => sum + (b.ordersCount || 0), 0);
+
+    const bizCardsHtml = businesses.length === 0
+      ? '<div style="text-align:center;padding:32px;background:#141414;border-radius:16px;border:1px dashed rgba(255,255,255,0.12);color:rgba(255,255,255,0.5);">Aún no hay cafeterías registradas. Las primeras <strong>' + settings.maxPromoBusinesses + '</strong> cafeterías recibirán automáticamente sus <strong>' + settings.promoDurationDays + ' días sin el 20% de servicio</strong> al registrarse y subir su 1° foto.</div>'
+      : businesses.map(b => {
+          let badgeHtml = '<span class="dispute-status-badge" style="background:rgba(255,255,255,0.08);color:#A3B8AC;">⚪ Estándar (20% al comprador)</span>';
+          let timerDetail = 'El comprador abona el 20% de servicio GOD MARKET.';
+
+          if (b.promoState === 'pending_first_product') {
+            badgeHtml = '<span class="dispute-status-badge" style="background:rgba(255,179,0,0.15);color:#FFB300;border:1px solid rgba(255,179,0,0.35);">⏳ Esperando 1° Foto (' + (b.promoDurationDays || 30) + 'd listos)</span>';
+            timerDetail = 'Registrado como fundador. Los 30 días arrancarán cuando suba su primer producto.';
+          } else if (b.promoState === 'active') {
+            const parts = this.formatDurationParts(b.promoMsRemaining || 0);
+            badgeHtml = '<span class="dispute-status-badge" style="background:rgba(0,200,83,0.15);color:#00C853;border:1px solid rgba(0,200,83,0.35);">🟢 0% Servicio · Quedan ' + parts.days + 'd ' + parts.hours + 'h ' + parts.minutes + 'm</span>';
+            const expDate = b.promoExpiresAt ? new Date(b.promoExpiresAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+            timerDetail = 'Vence el ' + expDate + ' · Luego pasa automáticamente al 20% de servicio.';
+          } else if (b.promoState === 'expired') {
+            badgeHtml = '<span class="dispute-status-badge" style="background:rgba(239,68,68,0.12);color:#F87171;border:1px solid rgba(239,68,68,0.25);">⏹️ 30 Días Finalizados (20% Activo)</span>';
+            timerDetail = 'Completó su primer mes bonificado. Ahora opera con el 20% estándar.';
+          }
+
+          return `
+            <div class="dispute-card">
+              <div class="dispute-card-header">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:1.5rem;">${window.app.escapeHTML(b.avatar || '☕')}</span>
+                  <div>
+                    <strong style="color:#FFF;font-size:0.95rem;">${window.app.escapeHTML(b.name)}</strong>
+                    <div style="font-size:0.75rem;color:#9AB0A3;">📍 ${window.app.escapeHTML(b.neighborhood || 'CABA')} · 🍰 ${b.productsCount || 0} productos · 📦 ${b.ordersCount || 0} pedidos</div>
+                  </div>
+                </div>
+                ${badgeHtml}
+              </div>
+              <div style="font-size:0.78rem;color:rgba(255,255,255,0.7);margin-bottom:12px;">
+                ${timerDetail}
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button type="button" class="dispute-refund-btn" style="padding:7px 12px;border-radius:9px;font-size:0.76rem;font-weight:700;cursor:pointer;"
+                  onclick="window.sellerPortal.updateBusinessPromoAdmin(${this.escapeJSAttribute(b.id)}, 'start_30d')">
+                  🚀 Activar / Reiniciar 30 Días Ya
+                </button>
+                <button type="button" class="dispute-mark-btn" style="padding:7px 12px;border-radius:9px;font-size:0.76rem;font-weight:700;cursor:pointer;"
+                  onclick="window.sellerPortal.updateBusinessPromoAdmin(${this.escapeJSAttribute(b.id)}, 'pending_first_product')">
+                  ⏳ Esperar 1° Producto (30d intactos)
+                </button>
+                <button type="button" class="dispute-filter-btn" style="padding:7px 12px;border-radius:9px;font-size:0.76rem;font-weight:700;cursor:pointer;"
+                  onclick="window.sellerPortal.updateBusinessPromoAdmin(${this.escapeJSAttribute(b.id)}, 'extend_15d')">
+                  ➕ Sumar +15 Días
+                </button>
+                <button type="button" class="dispute-reject-btn" style="padding:7px 12px;border-radius:9px;font-size:0.76rem;font-weight:700;cursor:pointer;"
+                  onclick="window.sellerPortal.updateBusinessPromoAdmin(${this.escapeJSAttribute(b.id)}, 'end_promo')">
+                  ⏹️ Pasar a 20% Estándar
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+    container.innerHTML = `
+      <!-- Métricas de Tracción para Venta Comercial a Otras Cafeterías -->
+      <div class="promo-admin-metrics-grid">
+        <div class="promo-metric-card">
+          <span class="promo-metric-val">${businesses.length}</span>
+          <span class="promo-metric-lbl">Cafeterías Activas</span>
+        </div>
+        <div class="promo-metric-card">
+          <span class="promo-metric-val" style="color:#4ADE80;">${data.usedSlots} / ${settings.maxPromoBusinesses}</span>
+          <span class="promo-metric-lbl">Cupos Fundadores Usados</span>
+        </div>
+        <div class="promo-metric-card">
+          <span class="promo-metric-val">${totalProducts}</span>
+          <span class="promo-metric-lbl">Productos en Carta</span>
+        </div>
+        <div class="promo-metric-card">
+          <span class="promo-metric-val" style="color:var(--primary);">${totalOrders}</span>
+          <span class="promo-metric-lbl">Pedidos Generados</span>
+        </div>
+      </div>
+
+      <!-- Configuración de Cupos (3 o 5 Cafeterías Fundadoras) -->
+      <div class="dispute-card" style="margin-bottom: 18px; border-color: rgba(255,107,53,0.28);">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:12px;">
+          <div>
+            <h4 style="color:#FFF;font-size:1rem;margin-bottom:2px;">⚙️ Cupos de Cafeterías con 1er Mes Sin el 20% de Servicio</h4>
+            <p style="font-size:0.78rem;color:#9AB0A3;margin:0;">Elegí cuántas cafeterías entran automáticamente con 30 días al 0% (quedan <strong>${data.remainingSlots}</strong> cupos libres).</p>
+          </div>
+          <label style="display:inline-flex;align-items:center;gap:8px;font-size:0.8rem;color:#FFF;cursor:pointer;font-weight:600;">
+            <input type="checkbox" id="admin-promo-enabled" ${settings.enabled ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--primary);" onchange="window.sellerPortal.savePromoSettingsAdmin()">
+            Asignación automática activa
+          </label>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button type="button" class="dispute-filter-btn ${settings.maxPromoBusinesses === 3 ? 'active' : ''}" onclick="window.sellerPortal.setPromoMaxQuick(3)">3 Cafeterías</button>
+          <button type="button" class="dispute-filter-btn ${settings.maxPromoBusinesses === 5 ? 'active' : ''}" onclick="window.sellerPortal.setPromoMaxQuick(5)">5 Cafeterías</button>
+          <button type="button" class="dispute-filter-btn ${settings.maxPromoBusinesses === 10 ? 'active' : ''}" onclick="window.sellerPortal.setPromoMaxQuick(10)">10 Cafeterías</button>
+          <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
+            <span style="font-size:0.76rem;color:#9AB0A3;">Cupos:</span>
+            <input type="number" id="admin-promo-max-input" value="${settings.maxPromoBusinesses}" min="0" max="500" style="width:68px;background:#1F1F1F;border:1px solid rgba(255,255,255,0.15);color:#FFF;border-radius:8px;padding:6px 8px;font-size:0.84rem;">
+            <span style="font-size:0.76rem;color:#9AB0A3;">Días:</span>
+            <input type="number" id="admin-promo-days-input" value="${settings.promoDurationDays || 30}" min="1" max="365" style="width:68px;background:#1F1F1F;border:1px solid rgba(255,255,255,0.15);color:#FFF;border-radius:8px;padding:6px 8px;font-size:0.84rem;">
+            <button type="button" class="btn-add-prod" style="padding:7px 14px;font-size:0.78rem;" onclick="window.sellerPortal.savePromoSettingsAdmin()">💾 Guardar</button>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="color:#FFF;font-size:0.95rem;margin-bottom:10px;">🏪 Estado del Minutero de 30 Días por Cafetería</h4>
+      <div>${bizCardsHtml}</div>
+    `;
+  }
+
+  async setPromoMaxQuick(maxCount) {
+    const input = document.getElementById('admin-promo-max-input');
+    if (input) input.value = maxCount;
+    await this.savePromoSettingsAdmin();
+  }
+
+  async savePromoSettingsAdmin() {
+    const enabled = document.getElementById('admin-promo-enabled')?.checked ?? true;
+    const maxPromoBusinesses = parseInt(document.getElementById('admin-promo-max-input')?.value || '5', 10);
+    const promoDurationDays = parseInt(document.getElementById('admin-promo-days-input')?.value || '30', 10);
+
+    try {
+      const res = await fetch('/api/admin/promo/settings', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-token': this.getAdminToken()
+        },
+        body: JSON.stringify({ enabled, maxPromoBusinesses, promoDurationDays })
+      });
+      if (res.ok) {
+        if (window.app) window.app.showToast(`✅ Cupos actualizados: ${maxPromoBusinesses} cafeterías (${promoDurationDays} días a 0%)`);
+        await this.loadConfig();
+        await this.loadPromoAdmin();
+      }
+    } catch (e) {
+      if (window.app) window.app.showToast('❌ Error guardando configuración de cupos');
+    }
+  }
+
+  async updateBusinessPromoAdmin(businessId, action) {
+    try {
+      const res = await fetch('/api/admin/promo/business/' + encodeURIComponent(businessId), {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-token': this.getAdminToken()
+        },
+        body: JSON.stringify({ action })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (this.currentBusiness && this.currentBusiness.id === businessId) {
+          this.currentBusiness = data.business;
+          localStorage.setItem('godmarket_business', JSON.stringify(data.business));
+          this.renderPromoCountdownBanner(true);
+        }
+        if (window.productManager) {
+          window.productManager.syncWithBackend();
+        }
+        if (window.app) window.app.showToast('✅ Estado promocional de la cafetería actualizado');
+        await this.loadPromoAdmin();
+      } else {
+        if (window.app) window.app.showToast('❌ ' + (data.error || 'No se pudo actualizar'));
+      }
+    } catch (e) {
+      if (window.app) window.app.showToast('❌ Error de conexión');
+    }
+  }
 
   // ────────────────────────────────────────────────────────────
   // CENTRO DE AYUDA — PANEL DE DISPUTAS (SOLO ADMIN/FAKU)
