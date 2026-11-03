@@ -133,6 +133,9 @@ function sanitizeImageUrl(value, fallback) {
   if (/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/i.test(trimmed)) {
     return trimmed;
   }
+  if (/^\/?assets\/images\/[a-zA-Z0-9._-]+\.(?:webp|jpg|jpeg|png|svg)$/i.test(trimmed)) {
+    return trimmed.replace(/^\//, '');
+  }
 
   try {
     const url = new URL(trimmed);
@@ -414,7 +417,7 @@ app.post('/api/seller/register', verifySellerAuth, (req, res) => {
       schedule: cleanSchedule,
       avatar: ['🍰', '☕', '🥐', '🥑', '🎁', '🍪'].includes(avatar) ? avatar : '🍰',
       badge: grantFoundingPromo ? '🎁 Precio de Local · 0% Servicio' : '✨ Nuevo en GOD MARKET',
-      cover: sanitizeImageUrl(cover || seller.picture, 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80'),
+      cover: sanitizeImageUrl(cover || seller.picture, 'assets/images/hero_breakfast.webp'),
       phone: cleanPhone,
       address: cleanAddress,
       lat: req.body.lat ? parseFloat(req.body.lat) : -34.5885,
@@ -615,7 +618,7 @@ app.post('/api/seller/products', verifySellerAuth, (req, res) => {
       tag: sanitizeInput(tag || '✨ Nuevo en GOD MARKET', 50),
       portion: sanitizeInput(portion || 'Para 1 o 2 personas', 50),
       description: sanitizeInput(description || '', 500),
-      image: sanitizeImageUrl(image, 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80')
+      image: sanitizeImageUrl(image, 'assets/images/hero_breakfast.webp')
     });
 
     // Activar el contador de 30 días (0% cargo de servicio) recién al publicar el primer producto con foto

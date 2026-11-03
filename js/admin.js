@@ -6,7 +6,7 @@
 class AdminManager {
   constructor() {
     this.selectedImageFile = null;
-    this.selectedPresetImage = "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80";
+    this.selectedPresetImage = "assets/images/hero_breakfast.webp";
     this.initListeners();
   }
 
@@ -176,7 +176,7 @@ class AdminManager {
     submitBtn.disabled = true;
 
     try {
-      let imageUrl = this.selectedPresetImage || "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80";
+      let imageUrl = this.selectedPresetImage || "assets/images/hero_breakfast.webp";
       
       if (this.selectedImageFile) {
         imageUrl = await window.cloudinaryService.uploadImage(this.selectedImageFile);
