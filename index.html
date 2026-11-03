@@ -72,10 +72,10 @@
 
   <!-- Stylesheets (Pure CSS) -->
   <link rel="stylesheet" href="css/main.css?v=20.0">
-  <link rel="stylesheet" href="css/components.css?v=25.0">
+  <link rel="stylesheet" href="css/components.css?v=26.0">
   <link rel="stylesheet" href="css/responsive.css?v=23.0">
   <link rel="stylesheet" href="css/mejoras-premium.css?v=19.0">
-  <link rel="stylesheet" href="css/seller-portal.css?v=25.0">
+  <link rel="stylesheet" href="css/seller-portal.css?v=26.0">
 
   <!-- Google Identity Services (GIS SDK oficial) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -348,7 +348,11 @@
           <textarea id="onboard-desc" class="onboarding-textarea" rows="2" placeholder="Describe brevemente tus mejores propuestas culinarias..."></textarea>
         </div>
 
-        <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+        <div style="font-size: 0.74rem; color: #9AB0A3; text-align: center; margin-top: 10px; line-height: 1.4;">
+          Al registrar tu local declaras contar con las habilitaciones sanitarias vigentes y aceptas los <a href="javascript:void(0)" onclick="window.app.openLegalModal('comercios')" style="color: #E5C07B; text-decoration: underline; font-weight: 600;">Términos para Comercios Asociados</a> de GOD MARKET.
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap;">
           <button type="button" onclick="window.sellerPortal.cancelOnboardingAndGoBack()" class="btn-onboarding-cancel" style="flex: 1; min-width: 180px; text-align: center;">
             ← Volver a la Tienda
           </button>
@@ -720,6 +724,10 @@
             <i data-lucide="users"></i>
             <span>Cambiar Rol (Cliente / Vendedor)</span>
           </button>
+          <button class="side-action-btn" onclick="window.app.openLegalModal('terminos'); window.app.toggleSideMenu();">
+            <i data-lucide="scale"></i>
+            <span>Centro Legal & Privacidad</span>
+          </button>
           <a href="https://wa.me/5491156192616" target="_blank" class="side-action-btn whatsapp-highlight">
             <i data-lucide="message-circle"></i>
             <span>Atención WhatsApp</span>
@@ -820,9 +828,38 @@
         </a>
       </div>
 
+      <!-- Enlaces Legales & Regulatorios Oficiales -->
+      <div class="footer-legal-links-grid" style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--green-border-subtle);">
+        <button type="button" class="footer-legal-link" onclick="window.app.openLegalModal('terminos')">
+          📜 Términos y Condiciones
+        </button>
+        <button type="button" class="footer-legal-link" onclick="window.app.openLegalModal('privacidad')">
+          🔒 Política de Privacidad
+        </button>
+        <button type="button" class="footer-legal-link" onclick="window.app.openLegalModal('comercios')">
+          🏪 Términos para Comercios
+        </button>
+        <button type="button" class="footer-legal-link footer-revocation-pill" onclick="window.app.openLegalModal('arrepentimiento')">
+          ↩️ Botón de Arrepentimiento
+        </button>
+      </div>
+
+      <!-- Bloque Regulatorio Defensa del Consumidor & Protección de Datos (Argentina) -->
+      <div style="font-size: 0.69rem; color: #8FA295; line-height: 1.55; max-width: 620px; margin: 0 auto 16px auto; text-align: center; background: rgba(0,0,0,0.22); border-radius: 10px; padding: 12px 14px; border: 1px solid rgba(255,255,255,0.05);">
+        <p style="margin: 0 0 6px 0;">
+          <strong>Defensa de las y los Consumidores:</strong> Conforme a la Ley Nacional 24.240 y la Res. 424/2020 de la Secretaría de Comercio Interior. Para consultas, orientación o reclamos ingrese a <a href="https://www.argentina.gob.ar/defensadelconsumidor" target="_blank" rel="noopener" style="color: #E5C07B; text-decoration: underline;">www.argentina.gob.ar/defensadelconsumidor</a> o llame a la línea gratuita nacional <strong>0800-666-1518</strong>. Dirección General de Defensa y Protección al Consumidor (CABA).
+        </p>
+        <p style="margin: 0 0 6px 0;">
+          <strong>Protección de Datos Personales (Ley 25.326):</strong> El titular de los datos personales tiene la facultad de ejercer el derecho de acceso en forma gratuita. La Agencia de Acceso a la Información Pública (AAIP) tiene la atribución de atender denuncias relativas al incumplimiento de las normas sobre protección de datos.
+        </p>
+        <p style="margin: 0; color: #768B7D;">
+          GOD MARKET es una plataforma tecnológica de intermediación. Los productos son elaborados y despachados bajo responsabilidad bromatológica y comercial exclusiva de cada cafetería o pastelería asociada habilitada.
+        </p>
+      </div>
+
       <div style="font-size: 0.7rem; color: var(--text-muted); border-top: 1px solid var(--green-border-subtle); padding-top: 14px; line-height: 1.6;">
-        💳 Transferencia Bancaria · Mercado Pago · Efectivo<br>
-        <span style="color: rgba(212,201,176,0.4);">© 2026 GOD MARKET — La red premium de pastelerías artesanales</span>
+        💳 Transferencia Bancaria · Mercado Pago · Efectivo contra entrega<br>
+        <span style="color: rgba(212,201,176,0.4);">© 2026 GOD MARKET — La red premium de cafeterías de especialidad y pastelerías de autor · Buenos Aires, Argentina</span>
       </div>
     </footer>
 
@@ -960,6 +997,15 @@
           </div>
           <span class="profile-opt-arrow">→</span>
         </a>
+
+        <div class="profile-option-card" onclick="window.app.closeModal('profile-modal'); window.app.openLegalModal('terminos');">
+          <span class="profile-opt-icon">⚖️</span>
+          <div class="profile-opt-info">
+            <strong>Centro Legal & Privacidad</strong>
+            <span>Términos de servicio, Ley 25.326 y arrepentimiento</span>
+          </div>
+          <span class="profile-opt-arrow">→</span>
+        </div>
       </div>
     </div>
   </div>
@@ -1310,9 +1356,10 @@
           <span>Confirmar y Enviar Pedido a WhatsApp</span>
         </button>
 
-        <p style="text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 8px;">
+        <p style="text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 8px; line-height: 1.45;">
           Al hacer clic, se generará tu <strong>Número de Orden</strong> y se enviará el pedido al WhatsApp
-          <strong>1156192616</strong>.
+          <strong>1156192616</strong>.<br>
+          Al confirmar, aceptas los <a href="javascript:void(0)" onclick="window.app.openLegalModal('terminos')" style="color: var(--primary); text-decoration: underline;">Términos y Condiciones</a>, la <a href="javascript:void(0)" onclick="window.app.openLegalModal('privacidad')" style="color: var(--primary); text-decoration: underline;">Política de Privacidad</a> y la <a href="javascript:void(0)" onclick="window.app.openLegalModal('arrepentimiento')" style="color: var(--primary); text-decoration: underline;">Revocación de Compra</a>.
         </p>
       </form>
     </div>
@@ -1572,6 +1619,295 @@
   </div>
 
 
+  
+  <!-- ============================================================================
+       MODAL: CENTRO LEGAL, TÉRMINOS Y CONDICIONES, PRIVACIDAD & ARREPENTIMIENTO
+       Marco Normativo República Argentina (Ley 24.240, Res. 424/2020 y Ley 25.326)
+       ============================================================================ -->
+  <div id="legal-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('legal-modal')">
+    <div class="bottom-sheet legal-modal-sheet" style="max-width: 680px; max-height: 90vh; display: flex; flex-direction: column; padding: 0; position: relative;">
+      <div class="drag-handle" style="margin-top: 10px;"></div>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('legal-modal')" aria-label="Cerrar" style="top: 12px; right: 14px;">✕</button>
+
+      <!-- Encabezado del Modal Legal -->
+      <div class="legal-modal-header" style="padding: 16px 22px 14px 22px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(8, 24, 15, 0.95);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(212,175,55,0.14); border: 1px solid rgba(212,175,55,0.38); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+            ⚖️
+          </div>
+          <div>
+            <h3 class="font-serif" style="font-size: 1.25rem; color: #FFFFFF; margin: 0; line-height: 1.2;">Centro Legal & Transparencia</h3>
+            <span style="font-size: 0.74rem; color: #9AB0A3;">GOD MARKET · Marco Normativo República Argentina</span>
+          </div>
+        </div>
+
+        <!-- Selector de Pestañas Legales -->
+        <nav class="legal-tabs-nav" style="display: flex; gap: 6px; overflow-x: auto; margin-top: 14px; padding-bottom: 2px;">
+          <button type="button" class="legal-tab-btn active" data-legal-tab="terminos" onclick="window.app.switchLegalTab('terminos')">
+            <span>📜 Términos Generales</span>
+          </button>
+          <button type="button" class="legal-tab-btn" data-legal-tab="privacidad" onclick="window.app.switchLegalTab('privacidad')">
+            <span>🔒 Privacidad (Ley 25.326)</span>
+          </button>
+          <button type="button" class="legal-tab-btn" data-legal-tab="comercios" onclick="window.app.switchLegalTab('comercios')">
+            <span>🏪 Términos Cafeterías</span>
+          </button>
+          <button type="button" class="legal-tab-btn" data-legal-tab="arrepentimiento" onclick="window.app.switchLegalTab('arrepentimiento')">
+            <span>↩️ Botón de Arrepentimiento</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Contenido Scrolleable de las Pestañas -->
+      <div class="legal-modal-body" style="padding: 20px 22px 28px 22px; overflow-y: auto; flex: 1; font-size: 0.83rem; line-height: 1.6; color: #D7E2DC;">
+
+        <!-- PESTAÑA 1: TÉRMINOS Y CONDICIONES GENERALES (COMPRADORES & MARKETPLACE) -->
+        <section id="legal-pane-terminos" class="legal-tab-pane active">
+          <div class="legal-callout-box highlight" style="margin-top: 0;">
+            <strong style="color: #4ADE80;">✦ Resumen de Confianza GOD MARKET:</strong>
+            Conectamos consumidores con cafeterías de especialidad y pastelerías artesanales independientes. Precios transparentes de local, desglose detallado de cargos y compras respaldadas.
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">1. Objeto y Rol de Intermediación Tecnológica</h4>
+            <p>
+              El presente documento establece los Términos y Condiciones Generales de Uso que rigen el acceso y utilización de la plataforma digital <strong>GOD MARKET</strong> (accesible a través de <code>somosgodmarket.com</code> y sus aplicaciones web progresivas asociadas).
+            </p>
+            <p>
+              <strong>GOD MARKET opera exclusivamente como una plataforma de software e intermediación tecnológica</strong> que conecta la oferta de cafeterías, pastelerías artesanales y comercios gastronómicos debidamente habilitados ("Comercios Asociados") con personas usuarias interesadas en adquirir sus propuestas culinarias ("Compradores"). GOD MARKET <strong>no elabora, manipula ni almacena alimentos</strong>, ni presta de manera directa servicios de transporte o cadetería.
+            </p>
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">2. Política de Precios y Cargo por Servicio GOD MARKET</h4>
+            <p>
+              • <strong>Precios de Mostrador:</strong> Los precios de los productos exhibidos en la plataforma son fijados de forma libre y autónoma por cada comercio asociado, conforme a su política habitual de venta directa al público.<br>
+              • <strong>Cargo por Servicio GOD MARKET:</strong> La plataforma aplica un cargo por servicio del <strong>20% (veinte por ciento)</strong> sobre el subtotal de productos a cargo del comprador, destinado al mantenimiento de la infraestructura técnica, procesamiento de catálogos en tiempo real, soporte de pedidos y desarrollo del ecosistema.<br>
+              • <strong>Bonificación por Programas Promocionales:</strong> En el marco de campañas comerciales autorizadas (tales como el <em>Programa de Cafeterías Fundadoras</em>), GOD MARKET bonifica el 100% de dicho cargo por servicio (resultando en un <strong>0% de cargo de servicio</strong> para el comprador durante el lapso de vigencia de 30 días de la cafetería elegida), pagando el consumidor exactamente el mismo precio de local.
+            </p>
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">3. Envíos y Logística a Cargo del Vendedor</h4>
+            <p>
+              • <strong>Despacho Directo:</strong> Los envíos a domicilio son operados de forma exclusiva por cada comercio asociado ("Envío propio del vendedor") mediante su propia cadetería o repartidores contratados, dentro de su radio circular de cobertura en kilómetros medido por geolocalización GPS.<br>
+              • <strong>Costos y Tiempos:</strong> El costo de envío informado corresponde al comercio seleccionado. Los tiempos de despacho comunicados (ej. 30 a 45 minutos) son estimativos y pueden variar por demanda del local o factores meteorológicos.<br>
+              • <strong>Modalidad Retiro en Tienda:</strong> Toda compra puede ser seleccionada bajo la modalidad de retiro presencial ("Take Away") sin costo de envío.
+            </p>
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">4. Formas de Pago y Perfeccionamiento del Pedido</h4>
+            <p>
+              Los medios de pago disponibles comprenden: <strong>Transferencia Bancaria Inmediata</strong> (con envío de comprobante oficial vía WhatsApp), <strong>Mercado Pago</strong> (CVU o dinero en cuenta) y <strong>Efectivo contra entrega o retiro</strong>.
+            </p>
+            <p>
+              El pedido se considera confirmado una vez validado el comprobante de pago o coordinado el pago en mano a través del canal oficial de WhatsApp del pedido y aceptado por el comercio.
+            </p>
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">5. Responsabilidad Sanitaria y Bromatológica</h4>
+            <p>
+              Cada cafetería o pastelería asociada asume de manera individual e indelegable la total responsabilidad sobre la calidad, inocuidad, higiene, elaboración, packaging hermético o térmico, alérgenos y cumplimiento irrestricto del <strong>Código Alimentario Argentino (Ley 18.284)</strong> y normativas de la Ciudad Autónoma de Buenos Aires y dependencias sanitarias competentes.
+            </p>
+          </div>
+        </section>
+
+        <!-- PESTAÑA 2: POLÍTICA DE PRIVACIDAD Y PROTECCIÓN DE DATOS (LEY 25.326) -->
+        <section id="legal-pane-privacidad" class="legal-tab-pane">
+          <div class="legal-callout-box" style="margin-top: 0; border-color: rgba(74, 222, 128, 0.4);">
+            <strong style="color: #4ADE80;">🔒 Ley Nacional 25.326 de Protección de los Datos Personales:</strong>
+            GOD MARKET respeta tu privacidad. Solo solicitamos los datos estrictamente necesarios para entregarte tu pedido y jamás comercializamos tu información.
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">1. Datos Personales Recolectados y Consentimiento</h4>
+            <p>
+              Al utilizar GOD MARKET y completar un pedido, el usuario brinda voluntariamente los siguientes datos indispensables:
+            </p>
+            <ul style="padding-left: 18px; margin: 6px 0;">
+              <li><strong>Nombre y Apellido:</strong> Para identificar al titular y destinatario del pedido.</li>
+              <li><strong>Teléfono / WhatsApp:</strong> Para enviar comprobantes, coordinar la entrega en tiempo real y brindar soporte.</li>
+              <li><strong>Dirección de Entrega:</strong> Calle, altura, piso/departamento, barrio y notas de acceso para el cadete.</li>
+              <li><strong>Ubicación GPS:</strong> Exclusivamente en caso de que el usuario pulse "Mi GPS" para centrar el mapa de cobertura o buscar locales en su radio.</li>
+            </ul>
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">2. Finalidad Exclusiva del Tratamiento</h4>
+            <p>
+              Los datos recabados son tratados exclusivamente con la finalidad de:
+            </p>
+            <p>
+              a) Gestionar el pedido ante la cafetería o pastelería elegida.<br>
+              b) Coordinar el despacho y trayecto con el cadete responsable.<br>
+              c) Atender consultas, reclamos o solicitudes de arrepentimiento/reembolso a través del Centro de Ayuda.<br>
+              d) Almacenar localmente en tu dispositivo tus direcciones y preferencias para que no tengas que reescribirlas.
+            </p>
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">3. No Comercialización ni Cesión a Terceros</h4>
+            <p>
+              GOD MARKET <strong>no comercializa, no arrienda, no cede ni comparte</strong> bases de datos personales con agencias de publicidad, brokers de datos ni entidades no vinculadas al cumplimiento estricto del servicio contratado.
+            </p>
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">4. Ejercicio de Derechos ARCO (Acceso, Rectificación y Supresión)</h4>
+            <p>
+              De conformidad con el artículo 14 de la Ley 25.326, el titular de los datos personales tiene la facultad de ejercer el derecho de acceso a los mismos en forma gratuita a intervalos no inferiores a seis meses.
+            </p>
+            <p>
+              Para solicitar la actualización, rectificación o eliminación total de sus datos de nuestros registros, el usuario puede comunicarse en cualquier momento a través del canal oficial de WhatsApp <strong>11 5619-2616</strong> o al correo de soporte.
+            </p>
+            <div style="background: rgba(0,0,0,0.25); border-radius: 10px; padding: 10px 12px; margin-top: 8px; font-size: 0.74rem; color: #8FA295;">
+              "La Agencia de Acceso a la Información Pública (AAIP), Órgano de Control de la Ley N° 25.326, tiene la atribución de atender las denuncias y reclamos que se interpongan con relación al incumplimiento de las normas sobre protección de datos personales."
+            </div>
+          </div>
+        </section>
+
+        <!-- PESTAÑA 3: TÉRMINOS PARA COMERCIOS Y CAFETERÍAS ASOCIADAS -->
+        <section id="legal-pane-comercios" class="legal-tab-pane">
+          <div class="legal-callout-box" style="margin-top: 0; border-color: rgba(212, 175, 55, 0.45);">
+            <strong style="color: #E5C07B;">🏪 Alianza Comercial & Cafeterías de Autor:</strong>
+            Buscamos potenciar los negocios gastronómicos locales cuidando su identidad, sus precios habituales y su rentabilidad.
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">1. Requisitos de Incorporación y Habilitaciones</h4>
+            <p>
+              Todo comercio que solicite su alta como vendedor en GOD MARKET declara y garantiza bajo juramento:
+            </p>
+            <p>
+              • Contar con habilitación comercial y bromatológica expedida por la autoridad sanitaria competente.<br>
+              • Disponer de personal capacitado en manipulación segura de alimentos.<br>
+              • Mantener un número de WhatsApp de atención y ventas operativo durante los horarios informados en su perfil.
+            </p>
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">2. Compromiso de Precios Habituales de Mostrador</h4>
+            <p>
+              Para garantizar una experiencia competitiva y equitativa para los compradores, el comercio se compromete a publicar sus productos, combos y especialidades al <strong>mismo precio habitual de local</strong> que ofrece en su mostrador físico.
+            </p>
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">3. Programa de Cafeterías Fundadoras (1er Mes Bonificado)</h4>
+            <p>
+              • <strong>Cupos y Beneficio:</strong> Los comercios beneficiarios de cupos fundadores disfrutan de 30 (treinta) días con el cargo por servicio de GOD MARKET bonificado al 100% para los compradores.<br>
+              • <strong>Inicio del Minutero:</strong> A fin de evitar que el comercio pierda días mientras prepara sus fotografías y catálogo, el contador de 30 días no se descuenta con el registro inicial, sino que <strong>inicia de forma automática en el instante en que publica su primer producto con foto</strong>.<br>
+              • <strong>Finalización del Período Promocional:</strong> Cumplidos los 30 días, el comercio continúa cobrando el 100% de su precio habitual de mostrador, y la plataforma pasa a aplicar el cargo por servicio estándar del 20% abonado por el consumidor final en el carrito.
+            </p>
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">4. Obligación de Cumplimiento, Disputas y Reembolsos</h4>
+            <p>
+              El comercio debe atender con celeridad los pedidos derivados a su WhatsApp. En caso de que el comercio confirme un pedido o reciba un pago y posteriormente no entregue el producto, no responda al comprador o incurra en un faltante insubsanable, <strong>GOD MARKET mediará mediante su Centro de Ayuda</strong>. Si se procede al reintegro del dinero al comprador, el comercio asume la obligación indelegable de restituir el monto reembolsado o emitir la nota de crédito respectiva a favor de la plataforma.
+            </p>
+          </div>
+        </section>
+
+        <!-- PESTAÑA 4: BOTÓN DE ARREPENTIMIENTO Y DEFENSORÍA (LEY 24.240 & RES. 424/2020) -->
+        <section id="legal-pane-arrepentimiento" class="legal-tab-pane">
+          <div class="legal-callout-box warning" style="margin-top: 0;">
+            <strong style="color: #FF8A50;">↩️ Botón de Arrepentimiento — Resolución 424/2020 Secretaría de Comercio:</strong>
+            Si compraste en GOD MARKET y necesitás revocar tu aceptación o reportar un problema antes de la elaboración, podés hacerlo de forma inmediata desde este formulario.
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">1. Marco Normativo y Alcance en Alimentos Perecederos</h4>
+            <p>
+              De conformidad con el artículo 34 de la Ley 24.240 de Defensa del Consumidor, el artículo 1110 del Código Civil y Comercial de la Nación y la Resolución 424/2020, los consumidores tienen derecho a revocar la aceptación de los contratos celebrados a distancia.
+            </p>
+            <p>
+              <strong>Particularidad en Alimentos Frescos y Gastronomía de Inmediata Elaboración:</strong> Conforme al art. 1116 inc. a) y b) del CCCN, el derecho de arrepentimiento respecto de productos confeccionados a medida, con fecha de caducidad inmediata o cafetería caliente recién preparada, rige de manera plena <strong>antes de que el establecimiento gastronómico haya iniciado el proceso de cocción o elaboración de la comanda</strong>.
+            </p>
+          </div>
+
+          <div class="legal-section-block">
+            <h4 class="legal-block-title">2. Causales Válidas de Cancelación y Reintegro Inmediato</h4>
+            <p>
+              Podrás ejercer la revocación y solicitar mediación de reembolso cuando:
+            </p>
+            <p>
+              a) <strong>El local no responde:</strong> La cafetería no acusó recibo del pedido en su WhatsApp tras 15 minutos de emitido en horario de atención.<br>
+              b) <strong>Arrepentimiento previo a elaboración:</strong> Solicitaste cancelar antes de que el local hornee o prepare tu pedido.<br>
+              c) <strong>Imposibilidad de despacho:</strong> El local carece de stock o se encuentra imposibilitado de realizar el envío.<br>
+              d) <strong>Discrepancia grave o defecto de entrega:</strong> Pedido recibido no coincidente o dañado en el transporte del repartidor.
+            </p>
+          </div>
+
+          <!-- FORMULARIO DIRECTO DE ARREPENTIMIENTO (RES. 424/2020) -->
+          <div class="legal-revocation-form">
+            <h4 style="color: #FFFFFF; font-size: 0.95rem; margin: 0 0 4px 0; display: flex; align-items: center; gap: 6px;">
+              <span>📝</span> Formulario Oficial de Revocación / Arrepentimiento
+            </h4>
+            <p style="font-size: 0.74rem; color: #9AB0A3; margin: 0 0 14px 0;">
+              Completa los datos del pedido que deseas revocar o cancelar para abrir tu solicitud formal de reintegro:
+            </p>
+
+            <form id="revocation-form" onsubmit="window.app.submitRevocationForm(event)">
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" for="revocation-order-id" style="font-size: 0.78rem;">Número de Pedido / Orden *</label>
+                <input type="text" id="revocation-order-id" class="form-control" placeholder="Ej: ORD-1045" style="font-size: 0.85rem;" required>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" for="revocation-phone" style="font-size: 0.78rem;">Teléfono / WhatsApp de contacto *</label>
+                <input type="tel" id="revocation-phone" class="form-control" placeholder="Ej: 11 5544-3322" style="font-size: 0.85rem;" required>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" for="revocation-reason" style="font-size: 0.78rem;">Motivo de la solicitud *</label>
+                <select id="revocation-reason" class="form-control" style="font-size: 0.84rem; background: #16241D;">
+                  <option value="cancellation_revocation">↩️ Arrepentimiento de compra (antes de elaboración)</option>
+                  <option value="no_response">⏰ El local no respondió ni confirmó mi pedido</option>
+                  <option value="wrong_order">📦 Pedido recibido incorrecto o incompleto</option>
+                  <option value="quality_issue">⚠️ Problema con la calidad o estado del alimento</option>
+                  <option value="other">💬 Otro motivo particular</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label class="form-label" for="revocation-notes" style="font-size: 0.78rem;">Detalle adicional (opcional)</label>
+                <input type="text" id="revocation-notes" class="form-control" placeholder="Describe brevemente lo ocurrido..." style="font-size: 0.82rem;">
+              </div>
+
+              <button type="submit" id="btn-submit-revocation" class="btn-primary" style="width: 100%; padding: 13px; font-size: 0.88rem; background: linear-gradient(135deg, #FF6B35 0%, #E63E00 100%); border: none;">
+                ↩️ Enviar Solicitud de Arrepentimiento y Abrir Mediación
+              </button>
+            </form>
+          </div>
+
+          <div class="legal-section-block" style="margin-top: 18px;">
+            <h4 class="legal-block-title" style="font-size: 0.85rem;">Organismos Oficiales de Defensa del Consumidor</h4>
+            <p style="font-size: 0.75rem; color: #9AB0A3;">
+              • <strong>Dirección Nacional de Defensa del Consumidor:</strong> Línea Gratuita Nacional <strong>0800-666-1518</strong> · Sitio web oficial: <a href="https://www.argentina.gob.ar/defensadelconsumidor" target="_blank" rel="noopener" style="color: #E5C07B; text-decoration: underline;">www.argentina.gob.ar/defensadelconsumidor</a>.<br>
+              • <strong>Defensa y Protección al Consumidor CABA:</strong> Sede Central: Maipú 169, CABA · Teléfono: 147.
+            </p>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Pie del Modal Legal -->
+      <div style="padding: 12px 20px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(8, 24, 15, 0.98); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <span style="font-size: 0.72rem; color: #8FA295;">
+          📍 GOD MARKET · Buenos Aires, Argentina
+        </span>
+        <button type="button" class="btn-primary" onclick="window.app.closeModal('legal-modal')" style="width: auto; padding: 7px 18px; font-size: 0.78rem;">
+          Cerrar Centro Legal
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
   <!-- 6. Portal de Negocios: Publicar Desayuno o Merienda -->
   <div id="admin-product-modal" class="modal-overlay"
     onclick="if(event.target === this) window.app.closeModal('admin-product-modal')">
@@ -1814,13 +2150,13 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Pure Standard JavaScript Scripts -->
-  <script charset="UTF-8" src="js/products.js?v=25.0"></script>
-  <script charset="UTF-8" src="js/cart.js?v=25.0"></script>
-  <script charset="UTF-8" src="js/checkout.js?v=25.0"></script>
-  <script charset="UTF-8" src="js/cloudinary.js?v=25.0"></script>
-  <script charset="UTF-8" src="js/seller.js?v=25.0"></script>
-  <script charset="UTF-8" src="js/admin.js?v=25.0"></script>
-  <script charset="UTF-8" src="js/app.js?v=25.0"></script>
+  <script charset="UTF-8" src="js/products.js?v=26.0"></script>
+  <script charset="UTF-8" src="js/cart.js?v=26.0"></script>
+  <script charset="UTF-8" src="js/checkout.js?v=26.0"></script>
+  <script charset="UTF-8" src="js/cloudinary.js?v=26.0"></script>
+  <script charset="UTF-8" src="js/seller.js?v=26.0"></script>
+  <script charset="UTF-8" src="js/admin.js?v=26.0"></script>
+  <script charset="UTF-8" src="js/app.js?v=26.0"></script>
 
   <!-- Modal de Guía para Instalar en iPhone / iPad (iOS) -->
   <div id="ios-install-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('ios-install-modal')">

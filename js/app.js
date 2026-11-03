@@ -2094,6 +2094,119 @@ class DulceAtelierApp {
     }
   }
 
+  // ────────────────────────────────────────────────────────────
+  // CENTRO LEGAL, PRIVACIDAD Y BOTÓN DE ARREPENTIMIENTO (LEY 24.240)
+  // ────────────────────────────────────────────────────────────
+
+  openLegalModal(tabId = 'terminos') {
+    this.openModal('legal-modal');
+    this.switchLegalTab(tabId);
+
+    // Si se abre la pestaña de arrepentimiento, pre-cargar datos del último pedido
+    if (tabId === 'arrepentimiento') {
+      try {
+        const history = window.checkoutHandler?.getOrderHistory() || [];
+        const lastOrder = window.checkoutHandler?.lastOrder || (history.length > 0 ? history[0] : null);
+        const orderInput = document.getElementById('revocation-order-id');
+        const phoneInput = document.getElementById('revocation-phone');
+        if (orderInput && !orderInput.value && lastOrder) {
+          orderInput.value = lastOrder.orderId || '';
+        }
+        if (phoneInput && !phoneInput.value && lastOrder) {
+          phoneInput.value = (lastOrder.formData && lastOrder.formData.phone) || lastOrder.customerPhone || '';
+        }
+      } catch (e) {}
+    }
+  }
+
+  switchLegalTab(tabId) {
+    const validTabs = ['terminos', 'privacidad', 'comercios', 'arrepentimiento'];
+    const safeTab = validTabs.includes(tabId) ? tabId : 'terminos';
+
+    document.querySelectorAll('.legal-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.legalTab === safeTab);
+    });
+
+    document.querySelectorAll('.legal-tab-pane').forEach(pane => {
+      pane.classList.toggle('active', pane.id === `legal-pane-${safeTab}`);
+    });
+
+    const bodyEl = document.querySelector('.legal-modal-body');
+    if (bodyEl) bodyEl.scrollTop = 0;
+  }
+
+  async submitRevocationForm(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+
+    const orderIdInput = document.getElementById('revocation-order-id');
+    const phoneInput = document.getElementById('revocation-phone');
+    const reasonInput = document.getElementById('revocation-reason');
+    const notesInput = document.getElementById('revocation-notes');
+    const btn = document.getElementById('btn-submit-revocation');
+
+    const orderId = orderIdInput ? orderIdInput.value.trim().toUpperCase() : '';
+    const phone = phoneInput ? phoneInput.value.trim() : '';
+    const reason = reasonInput ? reasonInput.value : 'cancellation_revocation';
+    const notes = notesInput ? notesInput.value.trim() : '';
+
+    if (!orderId) {
+      this.showToast('⚠️ Por favor ingresa el número de orden (ej: ORD-1045)');
+      if (orderIdInput) orderIdInput.focus();
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Procesando revocación...';
+    }
+
+    try {
+      const res = await fetch('/api/orders/' + encodeURIComponent(orderId) + '/dispute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: 'Cliente Solicitud Arrepentimiento',
+          customerPhone: phone,
+          reason: 'cancellation_revocation'
+        })
+      });
+
+      const data = await res.json();
+
+      // Guardar en historial local si existe la orden
+      try {
+        const history = window.checkoutHandler.getOrderHistory();
+        const idx = history.findIndex(o => o.orderId === orderId);
+        if (idx >= 0) {
+          history[idx].disputeStatus = 'en_revision';
+          history[idx].disputeId = data.dispute?.id || 'REV-' + Date.now();
+          history[idx].revocationRequested = true;
+          localStorage.setItem('dulce_orders_history', JSON.stringify(history));
+        }
+      } catch (errHistory) {}
+
+      this.closeModal('legal-modal');
+      this.renderOrdersHistoryList();
+
+      const waText = `¡Hola GOD MARKET! ↩️ Solicitud de Arrepentimiento / Revocación de Compra (Ley 24.240 y Res. 424/2020).\n✦ Pedido: #${orderId}\n✦ Teléfono: ${phone || 'No especificado'}\n✦ Motivo: ${reason}${notes ? `\n✦ Detalle: "${notes}"` : ''}\nPor favor confirmar la anulación y gestión de reintegro. ¡Muchas gracias!`;
+      const waUrl = window.checkoutHandler.buildWhatsAppUrl(waText);
+      window.open(waUrl, '_blank');
+
+      this.showToast('✅ Solicitud registrada. Se abrió WhatsApp para confirmar la anulación.');
+    } catch (err) {
+      const waText = `¡Hola GOD MARKET! ↩️ Solicitud de Arrepentimiento / Revocación de Compra (Ley 24.240 y Res. 424/2020) para el pedido #${orderId}. Por favor confirmar la anulación y reintegro.`;
+      const waUrl = window.checkoutHandler.buildWhatsAppUrl(waText);
+      window.open(waUrl, '_blank');
+      this.closeModal('legal-modal');
+      this.showToast('💬 Abriendo WhatsApp oficial para gestionar tu revocación...');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '↩️ Enviar Solicitud de Arrepentimiento y Abrir Mediación';
+      }
+    }
+  }
+
   deleteOrderHistory(orderId) {
     if (confirm(`¿Deseas quitar la orden #${orderId} de tu celular?`)) {
       window.checkoutHandler?.deleteOrderFromHistory(orderId);

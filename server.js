@@ -916,7 +916,7 @@ app.post('/api/orders/:id/dispute', disputeLimiter, (req, res) => {
     if (!order) {
       return res.status(404).json({ error: 'Pedido no encontrado.' });
     }
-    const validReasons = ['no_response', 'wrong_order', 'quality_issue', 'other'];
+    const validReasons = ['no_response', 'wrong_order', 'quality_issue', 'cancellation_revocation', 'arrepentimiento', 'other'];
     const safeReason = validReasons.includes(reason) ? reason : 'no_response';
     const existing = db.getDisputeByOrderId(id);
     if (existing) {

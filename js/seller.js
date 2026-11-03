@@ -1546,6 +1546,8 @@ class SellerPortalManager {
       no_response: 'Local no respondió',
       wrong_order: 'Pedido incorrecto',
       quality_issue: 'Problema de calidad',
+      cancellation_revocation: '↩️ Arrepentimiento de Compra (Ley 24.240)',
+      arrepentimiento: '↩️ Arrepentimiento de Compra (Ley 24.240)',
       other: 'Otro motivo'
     };
 
