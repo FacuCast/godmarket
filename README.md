@@ -1,4 +1,4 @@
-# 🍰 Dulce Atelier - Pastelería, Desayunos & Meriendas
+# 👑 GOD MARKET - Marketplace de Cafeterías de Especialidad & Desayunos Sorpresa
 
 Aplicación web **Mobile-First & PWA** (estilo PedidosYa / Delivery Gourmet) optimizada para celulares y computadoras, con catálogo dinámico, carrito de compras, confirmación y envío de pedidos directo a **WhatsApp (1156192616)**, subida de imágenes a la nube con **Cloudinary** y lista para desplegar en **Vercel**.
 

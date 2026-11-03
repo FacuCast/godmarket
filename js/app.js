@@ -1,8 +1,8 @@
 /**
- * DULCE ATELIER - APLICACIÓN PRINCIPAL (APP COORDINATOR)
+ * GOD MARKET - APLICACIÓN PRINCIPAL (APP COORDINATOR)
  */
 
-class DulceAtelierApp {
+class GodMarketApp {
   constructor() {
     this.selectedBusiness = 'todos';
     this.currentCategory = 'todos';
@@ -2537,4 +2537,5 @@ class DulceAtelierApp {
 }
 
 // Instancia global
-window.app = new DulceAtelierApp();
+window.app = new GodMarketApp();
+window.DulceAtelierApp = GodMarketApp;

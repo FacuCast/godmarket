@@ -1,5 +1,5 @@
 /**
- * DULCE ATELIER - CHECKOUT Y CONSTRUCTOR DE PEDIDO DE WHATSAPP
+ * GOD MARKET - CHECKOUT Y CONSTRUCTOR DE PEDIDO DE WHATSAPP
  * Destinatario de WhatsApp: 1156192616 (Código internacional +54 9 11 5619-2616)
  * Sistema de Número de Orden Automático y Envío de Comprobante (Estilo ByronCode / Perlato)
  */

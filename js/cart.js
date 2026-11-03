@@ -1,5 +1,5 @@
 /**
- * DULCE ATELIER - GESTOR DEL CARRITO DE COMPRAS
+ * GOD MARKET - GESTOR DEL CARRITO DE COMPRAS
  */
 
 const CART_STORAGE_KEY = 'godmarket_cart_v2';
@@ -144,7 +144,7 @@ class CartManager {
   getVendorsInCart() {
     const map = new Map();
     this.items.forEach(item => {
-      const bId = item.product.businessId || 'dulce-atelier';
+      const bId = item.product.businessId || 'atelier-cafe-palermo';
       if (!map.has(bId)) {
         map.set(bId, {
           id: bId,

@@ -1,5 +1,5 @@
 /**
- * DULCE MARKET - PORTAL DE PUBLICACIÓN PARA NEGOCIOS Y PASTELERÍAS
+ * GOD MARKET - PORTAL DE PUBLICACIÓN PARA CAFETERÍAS Y NEGOCIOS
  * Permite que los negocios publiquen nuevos desayunos, meriendas o boxes en el Marketplace
  */
 
@@ -107,7 +107,8 @@ class AdminManager {
     const priceInput = document.getElementById('prod-price');
     const descInput = document.getElementById('prod-desc');
 
-    const businessVal = businessSelect ? businessSelect.value : 'dulce-atelier';
+    const firstBiz = window.productManager?.getAllBusinesses()[0];
+    const businessVal = businessSelect ? businessSelect.value : (firstBiz?.id || 'atelier-cafe-palermo');
     const name = nameInput ? nameInput.value.trim() : '';
     const price = priceInput ? parseFloat(priceInput.value) : 0;
     const description = descInput ? descInput.value.trim() : '';
@@ -132,7 +133,7 @@ class AdminManager {
 
     // Determinar negocio
     let targetBusinessId = businessVal;
-    let targetBusinessName = "Dulce Atelier";
+    let targetBusinessName = firstBiz ? firstBiz.name : "Atelier Café";
     let targetBusinessNeighborhood = "Palermo";
     let targetBusinessAvatar = "🏪";
 
