@@ -42,6 +42,7 @@ let sellersCache = readJsonFile('sellers.json', []);
 let businessesCache = readJsonFile('businesses.json', []);
 let productsCache = readJsonFile('products.json', []);
 let ordersCache = readJsonFile('orders.json', []);
+let disputesCache = readJsonFile('disputes.json', []);
 
 const DEFAULT_PROMO_SETTINGS = {
   enabled: true,
@@ -56,6 +57,25 @@ let promoSettingsCache = {
 
 // Conexión MySQL / MariaDB (Hostinger Database)
 let sqlPool = null;
+const pendingSqlWrites = new Set();
+
+function trackSqlWrite(query, operation) {
+  const write = Promise.resolve(query).then(
+    () => null,
+    error => {
+      console.error(`MySQL write error (${operation}):`, error.message);
+      return new Error(`No se pudo guardar ${operation} en MySQL.`, { cause: error });
+    }
+  );
+  pendingSqlWrites.add(write);
+  write.then(() => pendingSqlWrites.delete(write));
+}
+
+async function flush() {
+  const results = await Promise.all([...pendingSqlWrites]);
+  const failure = results.find(Boolean);
+  if (failure) throw failure;
+}
 
 async function initSql() {
   const host = process.env.DB_HOST || process.env.MYSQL_HOST || 'localhost';
@@ -64,7 +84,10 @@ async function initSql() {
   const password = process.env.DB_PASSWORD || process.env.MYSQL_PASSWORD || '';
   const database = process.env.DB_NAME || process.env.MYSQL_DATABASE;
 
-  if (!user || !database) {
+  if (!user || !database || (process.env.NODE_ENV === 'production' && !password)) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('DB_USER, DB_NAME y DB_PASSWORD son obligatorios en producción.');
+    }
     console.log('📦 Base de Datos: Modo local JSON en ./data (Para activar MySQL en Hostinger define DB_NAME y DB_USER en las variables de entorno)');
     return;
   }
@@ -161,7 +184,28 @@ async function initSql() {
         created_at VARCHAR(50),
         updated_at VARCHAR(50),
         items_json LONGTEXT,
+        data_json LONGTEXT,
         INDEX idx_orders_business (business_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    const [orderDataColumn] = await sqlPool.query("SHOW COLUMNS FROM orders LIKE 'data_json'");
+    if (orderDataColumn.length === 0) {
+      await sqlPool.query('ALTER TABLE orders ADD COLUMN data_json LONGTEXT');
+    }
+    await sqlPool.query(`
+      CREATE TABLE IF NOT EXISTS disputes (
+        id VARCHAR(100) PRIMARY KEY,
+        order_id VARCHAR(100) NOT NULL,
+        business_id VARCHAR(100),
+        status VARCHAR(50),
+        data_json LONGTEXT,
+        UNIQUE INDEX idx_disputes_order (order_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    await sqlPool.query(`
+      CREATE TABLE IF NOT EXISTS app_settings (
+        setting_key VARCHAR(100) PRIMARY KEY,
+        data_json LONGTEXT NOT NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
 
@@ -230,6 +274,16 @@ async function initSql() {
     const [dbOrders] = await sqlPool.query('SELECT * FROM orders');
     if (dbOrders.length > 0) {
       ordersCache = dbOrders.map(r => {
+        if (r.data_json) {
+          try {
+            const fullOrder = JSON.parse(r.data_json);
+            if (fullOrder && typeof fullOrder === 'object' && !Array.isArray(fullOrder)) {
+              return { ...fullOrder, id: r.id, status: r.status, updatedAt: r.updated_at || fullOrder.updatedAt };
+            }
+          } catch (e) {
+            console.warn(`No se pudo leer la orden ${r.id} desde data_json:`, e.message);
+          }
+        }
         let items = [];
         try { if (r.items_json) items = JSON.parse(r.items_json); } catch (e) {}
         return {
@@ -244,26 +298,78 @@ async function initSql() {
     } else if (ordersCache.length > 0) {
       for (const o of ordersCache) {
         await sqlPool.query(
-          `INSERT INTO orders (id, customer_name, customer_phone, customer_address, payment_method, delivery_type, total, status, business_id, created_at, updated_at, items_json)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-           ON DUPLICATE KEY UPDATE status = VALUES(status), items_json = VALUES(items_json)`,
-          [o.id, o.customerName || '', o.customerPhone || '', o.customerAddress || '', o.paymentMethod || '', o.deliveryType || '', o.total || 0, o.status || 'pendiente', o.businessId || null, o.createdAt || null, o.updatedAt || null, JSON.stringify(o.items || [])]
+          `INSERT INTO orders (id, customer_name, customer_phone, customer_address, payment_method, delivery_type, total, status, business_id, created_at, updated_at, items_json, data_json)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE status = VALUES(status), items_json = VALUES(items_json), data_json = VALUES(data_json)`,
+          [o.id, o.customerName || '', o.customerPhone || '', o.customerAddress || '', o.paymentMethod || '', o.deliveryType || '', o.total || 0, o.status || 'pendiente', o.businessId || null, o.createdAt || null, o.updatedAt || null, JSON.stringify(o.items || []), JSON.stringify(o)]
         );
       }
+    }
+
+    const [dbDisputes] = await sqlPool.query('SELECT data_json FROM disputes');
+    if (dbDisputes.length > 0) {
+      disputesCache = dbDisputes.flatMap(row => {
+        try {
+          const dispute = JSON.parse(row.data_json);
+          return dispute && typeof dispute === 'object' && !Array.isArray(dispute) ? [dispute] : [];
+        } catch (error) {
+          console.warn('No se pudo leer una disputa desde MySQL:', error.message);
+          return [];
+        }
+      });
+      writeJsonFile('disputes.json', disputesCache);
+    } else if (disputesCache.length > 0) {
+      for (const dispute of disputesCache) {
+        await sqlPool.query(
+          `INSERT INTO disputes (id, order_id, business_id, status, data_json)
+           VALUES (?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE status = VALUES(status), data_json = VALUES(data_json)`,
+          [dispute.id, dispute.orderId, dispute.businessId || null, dispute.status || '', JSON.stringify(dispute)]
+        );
+      }
+    }
+
+    const [dbPromoSettings] = await sqlPool.query(
+      'SELECT data_json FROM app_settings WHERE setting_key = ?',
+      ['promo_settings']
+    );
+    if (dbPromoSettings.length > 0) {
+      try {
+        promoSettingsCache = {
+          ...DEFAULT_PROMO_SETTINGS,
+          ...promoSettingsCache,
+          ...JSON.parse(dbPromoSettings[0].data_json)
+        };
+        writeJsonFile('promo_settings.json', promoSettingsCache);
+      } catch (error) {
+        console.warn('No se pudieron leer las opciones de promoción desde MySQL:', error.message);
+      }
+    } else {
+      await sqlPool.query(
+        'INSERT INTO app_settings (setting_key, data_json) VALUES (?, ?)',
+        ['promo_settings', JSON.stringify(promoSettingsCache)]
+      );
     }
 
     console.log(`📊 Base de datos MySQL sincronizada: ${businessesCache.length} negocios, ${productsCache.length} productos, ${ordersCache.length} órdenes`);
 
   } catch (err) {
+    if (process.env.NODE_ENV === 'production') {
+      if (sqlPool) await sqlPool.end().catch(() => {});
+      sqlPool = null;
+      throw err;
+    }
     console.warn('⚠️ No se pudo conectar a MySQL:', err.message, '-> Continuando en modo local JSON.');
     sqlPool = null;
   }
 }
 
 // Inicializar conexión
-initSql();
+const ready = initSql();
 
 const db = {
+  ready,
+  flush,
   // SELLERS
   getSellers() {
     return sellersCache;
@@ -295,7 +401,7 @@ const db = {
     writeJsonFile('sellers.json', sellersCache);
 
     if (sqlPool) {
-      sqlPool.query(
+      trackSqlWrite(sqlPool.query(
         `INSERT INTO sellers (id, google_id, email, name, picture, has_completed_profile, business_id, created_at, updated_at, data_json)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
@@ -303,7 +409,7 @@ const db = {
            picture = VALUES(picture), has_completed_profile = VALUES(has_completed_profile),
            business_id = VALUES(business_id), updated_at = VALUES(updated_at), data_json = VALUES(data_json)`,
         [saved.id, saved.googleId || null, saved.email || null, saved.name || '', saved.picture || '', saved.hasCompletedProfile ? 1 : 0, saved.businessId || null, saved.createdAt || null, saved.updatedAt || null, JSON.stringify(saved)]
-      ).catch(e => console.warn('MySQL save error (seller):', e.message));
+      ), 'vendedor');
     }
     return saved;
   },
@@ -335,7 +441,7 @@ const db = {
     writeJsonFile('businesses.json', businessesCache);
 
     if (sqlPool) {
-      sqlPool.query(
+      trackSqlWrite(sqlPool.query(
         `INSERT INTO businesses (id, name, category, address, rating, reviews, phone, whatsapp, instagram, cover_image, logo, is_open, verified, seller_id, created_at, data_json)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
@@ -345,7 +451,7 @@ const db = {
            logo = VALUES(logo), is_open = VALUES(is_open), verified = VALUES(verified),
            seller_id = VALUES(seller_id), data_json = VALUES(data_json)`,
         [saved.id, saved.name || '', saved.category || '', saved.address || '', saved.rating || 5.0, saved.reviews || 1, saved.phone || '', saved.whatsapp || '', saved.instagram || '', saved.coverImage || '', saved.logo || '', saved.isOpen ? 1 : 0, saved.verified ? 1 : 0, saved.sellerId || null, saved.createdAt || null, JSON.stringify(saved)]
-      ).catch(e => console.warn('MySQL save error (business):', e.message));
+      ), 'negocio');
     }
     return saved;
   },
@@ -373,7 +479,7 @@ const db = {
     writeJsonFile('products.json', productsCache);
 
     if (sqlPool) {
-      sqlPool.query(
+      trackSqlWrite(sqlPool.query(
         `INSERT INTO products (id, name, description, price, original_price, category, image, business_id, rating, reviews, featured, is_available, created_at, updated_at, data_json)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
@@ -383,7 +489,7 @@ const db = {
            featured = VALUES(featured), is_available = VALUES(is_available), updated_at = VALUES(updated_at),
            data_json = VALUES(data_json)`,
         [newProduct.id, newProduct.name || '', newProduct.description || '', newProduct.price || 0, newProduct.originalPrice || null, newProduct.category || '', newProduct.image || '', newProduct.businessId || null, newProduct.rating || 5.0, newProduct.reviews || 1, newProduct.featured ? 1 : 0, newProduct.isAvailable !== false ? 1 : 0, newProduct.createdAt || null, newProduct.updatedAt || null, JSON.stringify(newProduct)]
-      ).catch(e => console.warn('MySQL save error (product):', e.message));
+      ), 'producto');
     }
     return newProduct;
   },
@@ -395,7 +501,7 @@ const db = {
       writeJsonFile('products.json', productsCache);
 
       if (sqlPool) {
-        sqlPool.query(
+        trackSqlWrite(sqlPool.query(
           `INSERT INTO products (id, name, description, price, original_price, category, image, business_id, rating, reviews, featured, is_available, created_at, updated_at, data_json)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON DUPLICATE KEY UPDATE
@@ -405,7 +511,7 @@ const db = {
              featured = VALUES(featured), is_available = VALUES(is_available), updated_at = VALUES(updated_at),
              data_json = VALUES(data_json)`,
           [updated.id, updated.name || '', updated.description || '', updated.price || 0, updated.originalPrice || null, updated.category || '', updated.image || '', updated.businessId || null, updated.rating || 5.0, updated.reviews || 1, updated.featured ? 1 : 0, updated.isAvailable !== false ? 1 : 0, updated.createdAt || null, updated.updatedAt || null, JSON.stringify(updated)]
-        ).catch(e => console.warn('MySQL update error (product):', e.message));
+        ), 'producto');
       }
       return updated;
     }
@@ -418,8 +524,7 @@ const db = {
       writeJsonFile('products.json', productsCache);
 
       if (sqlPool) {
-        sqlPool.query('DELETE FROM products WHERE id = ?', [id])
-          .catch(e => console.warn('MySQL delete error (product):', e.message));
+        trackSqlWrite(sqlPool.query('DELETE FROM products WHERE id = ?', [id]), 'producto');
       }
       return true;
     }
@@ -453,12 +558,20 @@ const db = {
     writeJsonFile('orders.json', ordersCache);
 
     if (sqlPool) {
-      sqlPool.query(
-        `INSERT INTO orders (id, customer_name, customer_phone, customer_address, payment_method, delivery_type, total, status, business_id, created_at, updated_at, items_json)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE status = VALUES(status), items_json = VALUES(items_json)`,
-        [newOrder.id, newOrder.customerName || '', newOrder.customerPhone || '', newOrder.customerAddress || '', newOrder.paymentMethod || '', newOrder.deliveryType || '', newOrder.total || 0, newOrder.status || 'pendiente', newOrder.businessId || null, newOrder.createdAt || null, newOrder.updatedAt || null, JSON.stringify(newOrder.items || [])]
-      ).catch(e => console.warn('MySQL save error (order):', e.message));
+      trackSqlWrite(
+        sqlPool.query(
+          `INSERT INTO orders (id, customer_name, customer_phone, customer_address, payment_method, delivery_type, total, status, business_id, created_at, updated_at, items_json, data_json)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE
+             customer_name = VALUES(customer_name), customer_phone = VALUES(customer_phone),
+             customer_address = VALUES(customer_address), payment_method = VALUES(payment_method),
+             delivery_type = VALUES(delivery_type), total = VALUES(total), status = VALUES(status),
+             business_id = VALUES(business_id), updated_at = VALUES(updated_at),
+             items_json = VALUES(items_json), data_json = VALUES(data_json)`,
+          [newOrder.id, newOrder.customerName || '', newOrder.customerPhone || '', newOrder.customerAddress || '', newOrder.paymentMethod || '', newOrder.deliveryType || '', newOrder.total || 0, newOrder.status || 'pendiente', newOrder.businessId || null, newOrder.createdAt || null, newOrder.updatedAt || null, JSON.stringify(newOrder.items || []), JSON.stringify(newOrder)]
+        ),
+        'pedido'
+      );
     }
     return newOrder;
   },
@@ -470,8 +583,12 @@ const db = {
       writeJsonFile('orders.json', ordersCache);
 
       if (sqlPool) {
-        sqlPool.query('UPDATE orders SET status = ?, updated_at = ? WHERE id = ?', [status, order.updatedAt, orderId])
-          .catch(e => console.warn('MySQL status error (order):', e.message));
+        trackSqlWrite(
+          sqlPool.query('UPDATE orders SET status = ?, updated_at = ?, data_json = ? WHERE id = ?', [
+            status, order.updatedAt, JSON.stringify(order), orderId
+          ]),
+          'estado del pedido'
+        );
       }
       return order;
     }
@@ -480,19 +597,19 @@ const db = {
 
   // DISPUTES — Sistema de Disputas y Reembolsos
   getDisputes() {
-    return readJsonFile('disputes.json', []);
+    return disputesCache;
   },
   getDisputeByOrderId(orderId) {
     return this.getDisputes().find(d => d.orderId === orderId) || null;
   },
   createDispute(disputeData) {
-    const disputes = this.getDisputes();
-    const existing = disputes.find(d => d.orderId === disputeData.orderId);
+    const existing = disputesCache.find(d => d.orderId === disputeData.orderId);
     if (existing) return existing; // Evitar duplicados
 
     const newDispute = {
       id: 'DISP-' + Math.floor(100000 + Math.random() * 900000),
       orderId: disputeData.orderId,
+      relatedOrderIds: Array.isArray(disputeData.relatedOrderIds) ? disputeData.relatedOrderIds : [disputeData.orderId],
       customerName: disputeData.customerName || '',
       customerPhone: disputeData.customerPhone || '',
       businessId: disputeData.businessId || '',
@@ -505,22 +622,42 @@ const db = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    disputes.unshift(newDispute);
-    writeJsonFile('disputes.json', disputes);
+    disputesCache.unshift(newDispute);
+    writeJsonFile('disputes.json', disputesCache);
+    if (sqlPool) {
+      trackSqlWrite(
+        sqlPool.query(
+          `INSERT INTO disputes (id, order_id, business_id, status, data_json)
+           VALUES (?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE status = VALUES(status), data_json = VALUES(data_json)`,
+          [newDispute.id, newDispute.orderId, newDispute.businessId || null, newDispute.status, JSON.stringify(newDispute)]
+        ),
+        'disputa'
+      );
+    }
     return newDispute;
   },
   resolveDispute(disputeId, resolution, resolutionNote) {
-    const disputes = this.getDisputes();
-    const index = disputes.findIndex(d => d.id === disputeId);
+    const index = disputesCache.findIndex(d => d.id === disputeId);
     if (index < 0) return null;
 
-    disputes[index].status = resolution === 'reembolso' ? 'reembolsada' : 'rechazada';
-    disputes[index].resolution = resolution;
-    disputes[index].resolutionNote = resolutionNote || '';
-    disputes[index].updatedAt = new Date().toISOString();
-    disputes[index].resolvedAt = new Date().toISOString();
-    writeJsonFile('disputes.json', disputes);
-    return disputes[index];
+    disputesCache[index].status = resolution === 'reembolso' ? 'reembolsada' : 'rechazada';
+    disputesCache[index].resolution = resolution;
+    disputesCache[index].resolutionNote = resolutionNote || '';
+    disputesCache[index].updatedAt = new Date().toISOString();
+    disputesCache[index].resolvedAt = new Date().toISOString();
+    writeJsonFile('disputes.json', disputesCache);
+    if (sqlPool) {
+      const dispute = disputesCache[index];
+      trackSqlWrite(
+        sqlPool.query(
+          'UPDATE disputes SET status = ?, data_json = ? WHERE id = ?',
+          [dispute.status, JSON.stringify(dispute), dispute.id]
+        ),
+        'resolución de disputa'
+      );
+    }
+    return disputesCache[index];
   },
 
   // PROMO LANZAMIENTO — 1er Mes con 0% Servicio (20% Bonificado) & Contador 30 Días
@@ -550,6 +687,16 @@ const db = {
     }
     promoSettingsCache = clean;
     writeJsonFile('promo_settings.json', promoSettingsCache);
+    if (sqlPool) {
+      trackSqlWrite(
+        sqlPool.query(
+          `INSERT INTO app_settings (setting_key, data_json) VALUES (?, ?)
+           ON DUPLICATE KEY UPDATE data_json = VALUES(data_json)`,
+          ['promo_settings', JSON.stringify(promoSettingsCache)]
+        ),
+        'configuración de promociones'
+      );
+    }
     return { ...promoSettingsCache };
   },
   getPromoBusinessesCount() {

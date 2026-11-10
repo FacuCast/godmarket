@@ -24,6 +24,7 @@ class GodMarketApp {
     this.deferredPrompt = null;
     this.deliveryMap = null;
     this.deliveryMarker = null;
+    this.paymentConfig = {};
 
     document.addEventListener('DOMContentLoaded', () => this.init());
   }
@@ -46,7 +47,8 @@ class GodMarketApp {
     localStorage.setItem('godmarket_user_coords', JSON.stringify(coords));
   }
 
-  init() {
+  async init() {
+    await this.loadPaymentConfig();
     this.setupPWA();
     this.setupEventListeners();
     this.renderLocationBar();
@@ -71,8 +73,93 @@ class GodMarketApp {
     // Suscribirse a cambios en el carrito
     window.cartManager.subscribe(() => {
       this.updateCartUI();
+      this.updateTransferPaymentOption();
       this.refreshIcons();
     });
+  }
+
+  async loadPaymentConfig() {
+    try {
+      const response = await fetch('/api/config', { signal: AbortSignal.timeout(5000) });
+      if (!response.ok) throw new Error(`Configuración no disponible (${response.status}).`);
+      const config = await response.json();
+      this.paymentConfig = config.paymentDetails || {};
+    } catch (error) {
+      console.warn('No se pudieron cargar los medios de pago configurados:', error.message);
+    }
+
+    const details = this.paymentConfig;
+    if (window.checkoutHandler) {
+      window.checkoutHandler.bankDetails = {
+        mercadoPagoAlias: details.mercadoPagoAlias || '',
+        mercadoPagoCvu: details.mercadoPagoCvu || '',
+        mercadoPagoHolder: details.mercadoPagoAccountHolder || ''
+      };
+    }
+    const mercadoPagoEnabled = Boolean(details.mercadoPagoAlias && details.mercadoPagoCvu && details.mercadoPagoAccountHolder);
+    const mercadoPagoCard = document.querySelector('.payment-card[data-payment="mercadopago"]');
+    if (mercadoPagoCard) mercadoPagoCard.hidden = !mercadoPagoEnabled;
+
+    const configuredValues = {
+      'mp-alias': details.mercadoPagoAlias,
+      'mp-cvu': details.mercadoPagoCvu,
+      'mp-account-holder': details.mercadoPagoAccountHolder,
+      'ticket-mp-alias-code': details.mercadoPagoAlias,
+      'ticket-mp-cvu-code': details.mercadoPagoCvu,
+      'ticket-mp-account-holder': details.mercadoPagoAccountHolder
+    };
+    Object.entries(configuredValues).forEach(([id, value]) => {
+      const element = document.getElementById(id);
+      if (element) element.textContent = value || '';
+    });
+
+    const method = mercadoPagoEnabled ? 'mercadopago' : 'cash';
+    const methodInput = document.getElementById('checkout-payment-method');
+    if (methodInput) methodInput.value = method;
+    document.querySelectorAll('.payment-card').forEach(card => {
+      card.classList.toggle('active', card.dataset.payment === method);
+    });
+    const bankInfo = document.getElementById('bank-transfer-info');
+    const mpInfo = document.getElementById('mercadopago-info');
+    const cashInfo = document.getElementById('cash-payment-info');
+    if (bankInfo) bankInfo.style.display = method === 'transfer' ? 'block' : 'none';
+    if (mpInfo) mpInfo.style.display = method === 'mercadopago' ? 'block' : 'none';
+    if (cashInfo) cashInfo.style.display = method === 'cash' ? 'block' : 'none';
+    this.updateTransferPaymentOption();
+  }
+
+  updateTransferPaymentOption() {
+    const checkout = window.checkoutHandler;
+    const cart = window.cartManager;
+    if (!checkout || !cart) return;
+
+    const payments = checkout.getTransferPayments(cart);
+    const transferEnabled = payments.length > 0 && payments.every(payment => Boolean(payment.transferAlias.trim()));
+    const transferCard = document.querySelector('.payment-card[data-payment="transfer"]');
+    if (transferCard) transferCard.hidden = !transferEnabled;
+
+    const bankInfo = document.getElementById('bank-transfer-info');
+    if (bankInfo) bankInfo.innerHTML = `
+      <div class="bank-title"><span>🏦</span> Datos para Transferencia:</div>
+      <p class="bank-subtitle">Transfiere el importe indicado al alias del comercio correspondiente:</p>
+      ${checkout.renderTransferDetails(payments)}
+    `;
+
+    const methodInput = document.getElementById('checkout-payment-method');
+    if (methodInput?.value === 'transfer' && !transferEnabled) {
+      const fallbackMethod = !document.querySelector('.payment-card[data-payment="mercadopago"]')?.hidden
+        ? 'mercadopago'
+        : 'cash';
+      methodInput.value = fallbackMethod;
+      document.querySelectorAll('.payment-card').forEach(card => {
+        card.classList.toggle('active', card.dataset.payment === fallbackMethod);
+      });
+      if (bankInfo) bankInfo.style.display = 'none';
+      const mpInfo = document.getElementById('mercadopago-info');
+      const cashInfo = document.getElementById('cash-payment-info');
+      if (mpInfo) mpInfo.style.display = fallbackMethod === 'mercadopago' ? 'block' : 'none';
+      if (cashInfo) cashInfo.style.display = fallbackMethod === 'cash' ? 'block' : 'none';
+    }
   }
 
   loadFavorites() {
@@ -258,6 +345,7 @@ class GodMarketApp {
     // Checkout: Formulario y opciones de pago
     document.querySelectorAll('.payment-card').forEach(card => {
       card.addEventListener('click', (e) => {
+        if (e.currentTarget.hidden) return;
         document.querySelectorAll('.payment-card').forEach(c => c.classList.remove('active'));
         e.currentTarget.classList.add('active');
         const method = e.currentTarget.dataset.payment;
@@ -308,7 +396,7 @@ class GodMarketApp {
     // Enviar Checkout a WhatsApp con Validaciones Robustas
     const checkoutForm = document.getElementById('checkout-form');
     if (checkoutForm) {
-      checkoutForm.addEventListener('submit', (e) => {
+      checkoutForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         // 1. Validar que el carrito no esté vacío
@@ -341,7 +429,7 @@ class GodMarketApp {
         // Validación de Teléfono (mínimo 8 dígitos numéricos)
         const phoneVal = phoneInput.value.trim();
         const digitsOnly = phoneVal.replace(/\D/g, '');
-        if (!phoneVal || digitsOnly.length < 8) {
+        if (!phoneVal || digitsOnly.length < 8 || digitsOnly.length > 20) {
           phoneInput.classList.add('is-invalid');
           isValid = false;
           if (!firstInvalidField) firstInvalidField = phoneInput;
@@ -453,13 +541,20 @@ class GodMarketApp {
         } catch (e) {}
 
         // Procesar orden generando Número de Orden único y enviando a WhatsApp
-        const order = window.checkoutHandler.processOrder(formData, window.cartManager);
-        this.closeModal('checkout-modal');
-        this.updateOrdersBadges();
-
-        // Renderizar el ticket de confirmación estilo ByronCode / Perlato
-        this.renderOrderTicket(order);
-        this.openModal('order-success-modal');
+        const submitButton = checkoutForm.querySelector('[type="submit"]');
+        if (submitButton) submitButton.disabled = true;
+        try {
+          const order = await window.checkoutHandler.processOrder(formData, window.cartManager);
+          this.closeModal('checkout-modal');
+          this.updateOrdersBadges();
+          this.renderOrderTicket(order);
+          this.openModal('order-success-modal');
+        } catch (error) {
+          console.error('No se pudo confirmar el pedido:', error);
+          this.showToast(error.message || 'No se pudo confirmar el pedido. Intenta nuevamente.');
+        } finally {
+          if (submitButton) submitButton.disabled = false;
+        }
       });
     }
   }
@@ -1302,12 +1397,16 @@ class GodMarketApp {
     const feePillEl = document.getElementById('modal-service-fee-pill');
     if (feePillEl) {
       const bizForPromo = window.productManager.getBusinessById(product.businessId);
-      const isPromo = bizForPromo
-        ? window.productManager.isBusinessPromoActive(bizForPromo)
-        : Boolean(product.isPromoActive);
+      const promoState = bizForPromo
+        ? window.productManager.getBusinessPromoState(bizForPromo)
+        : null;
+      const isPromo = promoState ? promoState.isPromoActive : Boolean(product.isPromoActive);
+      const servicePercent = Math.round(promoState
+        ? promoState.standardServiceFeeRate * 100
+        : Number(product.serviceFeeRate || 0.2) * 100);
       feePillEl.innerHTML = isPromo
-        ? '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,200,83,0.12);border:1px solid rgba(0,200,83,0.35);color:#4ADE80;font-size:0.74rem;font-weight:700;padding:4px 10px;border-radius:999px;">🎁 Precio habitual de cafetería · Servicio 20% Bonificado ($0)</span>'
-        : '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:var(--text-secondary);font-size:0.72rem;font-weight:600;padding:4px 10px;border-radius:999px;">+ 20% cargo por servicio GOD MARKET en el carrito</span>';
+        ? `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,200,83,0.12);border:1px solid rgba(0,200,83,0.35);color:#4ADE80;font-size:0.74rem;font-weight:700;padding:4px 10px;border-radius:999px;">🎁 Precio habitual de cafetería · Servicio ${servicePercent}% Bonificado ($0)</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:var(--text-secondary);font-size:0.72rem;font-weight:600;padding:4px 10px;border-radius:999px;">+ ${servicePercent}% cargo por servicio GOD MARKET en el carrito</span>`;
     }
     document.getElementById('modal-product-desc').textContent = product.description;
     document.getElementById('modal-product-portion').textContent = product.portion || 'Porción artesanal';
@@ -1444,6 +1543,9 @@ class GodMarketApp {
     const serviceFee = window.cartManager.getServiceFee();
     const waivedServiceFee = window.cartManager.getWaivedServiceFee();
     const deliveryFee = window.cartManager.getEffectiveDeliveryFee();
+    const serviceFeePercent = Math.round(window.cartManager.getStandardServiceFeeRate() * 100);
+    const serviceFeeLabel = document.querySelector('#cart-service-fee-row > span:first-child');
+    if (serviceFeeLabel) serviceFeeLabel.textContent = `Servicio GOD MARKET (${serviceFeePercent}%):`;
 
     // Floating pill bar
     const floatingBar = document.getElementById('floating-cart-bar');
@@ -1505,7 +1607,7 @@ class GodMarketApp {
     if (savingsNoteEl) {
       if (waivedServiceFee > 0) {
         savingsNoteEl.style.display = 'flex';
-        savingsNoteEl.innerHTML = `<span>🎁</span><span><strong>¡Servicio del 20% Bonificado!</strong> Estás ahorrando <strong>${window.cartManager.formatCurrency(waivedServiceFee)}</strong> y comprando al mismo precio habitual del local.</span>`;
+        savingsNoteEl.innerHTML = `<span>🎁</span><span><strong>¡Servicio del ${serviceFeePercent}% Bonificado!</strong> Estás ahorrando <strong>${window.cartManager.formatCurrency(waivedServiceFee)}</strong> y comprando al mismo precio habitual del local.</span>`;
       } else {
         savingsNoteEl.style.display = 'none';
       }
@@ -1592,17 +1694,18 @@ class GodMarketApp {
     const orderIdEl = document.getElementById('ticket-order-id');
     if (orderIdEl) orderIdEl.textContent = '#' + order.orderId;
 
-    // Totales y Cargo de Servicio (20% o Bonificado $0)
+    // Totales y cargo de servicio o bonificación.
     const ticketServiceRow = document.getElementById('ticket-service-fee-row');
     if (ticketServiceRow) {
       const oService = Number(order.serviceFee || 0);
       const oWaived = Number(order.waivedServiceFee || 0);
+      const serviceFeePercent = Math.round(Number(order.standardServiceFeeRate || 0.2) * 100);
       if (oService === 0 && oWaived > 0) {
         ticketServiceRow.style.display = 'flex';
-        ticketServiceRow.innerHTML = `<span>Servicio GOD MARKET (20%):</span><strong style="color: #00C853;"><s style="opacity:0.55;font-weight:400;margin-right:4px;">${order.waivedServiceFeeFormatted || window.cartManager.formatCurrency(oWaived)}</s> ¡$0 Bonificado!</strong>`;
+        ticketServiceRow.innerHTML = `<span>Servicio GOD MARKET (${serviceFeePercent}%):</span><strong style="color: #00C853;"><s style="opacity:0.55;font-weight:400;margin-right:4px;">${order.waivedServiceFeeFormatted || window.cartManager.formatCurrency(oWaived)}</s> ¡$0 Bonificado!</strong>`;
       } else if (oService > 0) {
         ticketServiceRow.style.display = 'flex';
-        ticketServiceRow.innerHTML = `<span>Servicio GOD MARKET (20%):</span><strong style="color: var(--text-main);">${order.serviceFeeFormatted || window.cartManager.formatCurrency(oService)}</strong>`;
+        ticketServiceRow.innerHTML = `<span>Servicio GOD MARKET (${serviceFeePercent}%):</span><strong style="color: var(--text-main);">${order.serviceFeeFormatted || window.cartManager.formatCurrency(oService)}</strong>`;
       } else {
         ticketServiceRow.style.display = 'none';
       }
@@ -1642,6 +1745,12 @@ class GodMarketApp {
 
     if (order.paymentMethod === 'transfer') {
       if (transferBox) transferBox.style.display = 'block';
+      if (transferBox) {
+        transferBox.innerHTML = `
+          <div class="ticket-alias-header"><span>🏦</span> Transfiere a cada comercio:</div>
+          ${window.checkoutHandler.renderTransferDetails(order.transferPayments || [])}
+        `;
+      }
       if (mpBox) mpBox.style.display = 'none';
       if (cashBox) cashBox.style.display = 'none';
       if (whatsappProofBtn) {
@@ -1725,19 +1834,30 @@ class GodMarketApp {
   }
 
   copyAlias() {
-    const alias = "GODMARKET.BA";
+    const alias = window.checkoutHandler?.getTransferPayments(window.cartManager || { items: [], deliveryType: 'pickup' })
+      .find(payment => payment.transferAlias)?.transferAlias;
+    if (!alias) return this.showToast('⚠️ El comercio no configuró su alias.');
+    if (!navigator.clipboard) return this.showToast('⚠️ El navegador no permite copiar al portapapeles.');
     navigator.clipboard.writeText(alias).then(() => {
-      const btnTicket = document.getElementById('btn-copy-alias-ticket');
-      if (btnTicket) {
-        btnTicket.innerHTML = '<span>✓</span> ¡Copiado!';
-        setTimeout(() => { btnTicket.innerHTML = '<span>📋</span> Copiar'; }, 2000);
-      }
       this.showToast(`🏦 Alias ${alias} copiado con éxito`);
-    });
+    }).catch(() => this.showToast('⚠️ No se pudo copiar el alias.'));
+  }
+
+  copyTransferAlias(button) {
+    const alias = button?.dataset.transferAlias || '';
+    if (!alias) return this.showToast('⚠️ El alias de este comercio no está disponible.');
+    if (!navigator.clipboard) return this.showToast('⚠️ El navegador no permite copiar al portapapeles.');
+    navigator.clipboard.writeText(alias).then(() => {
+      button.textContent = '✓ Copiado';
+      setTimeout(() => { button.textContent = 'Copiar'; }, 2000);
+      this.showToast(`🏦 Alias ${alias} copiado con éxito`);
+    }).catch(() => this.showToast('⚠️ No se pudo copiar el alias.'));
   }
 
   copyMPAlias() {
-    const alias = "GODMARKET.MP";
+    const alias = this.paymentConfig.mercadoPagoAlias;
+    if (!alias) return this.showToast('⚠️ El alias de Mercado Pago no está configurado.');
+    if (!navigator.clipboard) return this.showToast('⚠️ El navegador no permite copiar al portapapeles.');
     navigator.clipboard.writeText(alias).then(() => {
       const btnTicket = document.getElementById('btn-copy-mp-alias-ticket');
       const btnForm = document.getElementById('btn-copy-mp-alias');
@@ -1750,24 +1870,26 @@ class GodMarketApp {
         setTimeout(() => { btnForm.innerHTML = 'Copiar'; }, 2000);
       }
       this.showToast(`💳 Alias MP ${alias} copiado con éxito`);
-    });
+    }).catch(() => this.showToast('⚠️ No se pudo copiar el alias.'));
   }
 
-  copyCVU() {
-    const cvu = "0000003100012345678901";
+  copyCVU(provider = 'bank') {
+    const isMercadoPago = provider === 'mp';
+    const cvu = isMercadoPago ? this.paymentConfig.mercadoPagoCvu : '';
+    if (!cvu) return this.showToast('⚠️ El número de cuenta no está configurado.');
+    if (!navigator.clipboard) return this.showToast('⚠️ El navegador no permite copiar al portapapeles.');
     navigator.clipboard.writeText(cvu).then(() => {
-      const btnTicket = document.getElementById('btn-copy-cvu-ticket');
-      const btnMpTicket = document.getElementById('btn-copy-mp-cvu-ticket');
-      if (btnTicket) {
-        btnTicket.innerHTML = '<span>✓</span> ¡Copiado!';
-        setTimeout(() => { btnTicket.innerHTML = '<span>📋</span> Copiar'; }, 2000);
-      }
-      if (btnMpTicket) {
-        btnMpTicket.innerHTML = '<span>✓</span> ¡Copiado!';
-        setTimeout(() => { btnMpTicket.innerHTML = '<span>📋</span> Copiar'; }, 2000);
-      }
+      const buttonIds = isMercadoPago
+        ? ['btn-copy-mp-cvu-ticket']
+        : ['btn-copy-cvu-ticket'];
+      buttonIds.forEach(id => {
+        const button = document.getElementById(id);
+        if (!button) return;
+        button.innerHTML = '<span>✓</span> ¡Copiado!';
+        setTimeout(() => { button.innerHTML = '<span>📋</span> Copiar'; }, 2000);
+      });
       this.showToast(`💳 CVU ${cvu} copiado con éxito`);
-    });
+    }).catch(() => this.showToast('⚠️ No se pudo copiar el número de cuenta.'));
   }
 
   updateOrdersBadges() {
@@ -2044,25 +2166,33 @@ class GodMarketApp {
     }
 
     try {
-      const res = await fetch('/api/orders/' + encodeURIComponent(orderId) + '/dispute', {
+      const relatedOrderIds = Array.isArray(order.serverOrderIds) && order.serverOrderIds.length
+        ? order.serverOrderIds
+        : [orderId];
+      const res = await fetch('/api/orders/' + encodeURIComponent(relatedOrderIds[0]) + '/dispute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customerName: order.formData?.fullName || order.customerName || '',
           customerPhone: order.formData?.phone || order.customerPhone || '',
-          reason: reason || 'no_response'
+          reason: reason || 'no_response',
+          relatedOrderIds
         })
       });
 
       const data = await res.json();
 
-      if (data.success) {
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'No se pudo registrar la disputa.');
+      }
+
+      {
         try {
           const history = window.checkoutHandler.getOrderHistory();
           const idx = history.findIndex(o => o.orderId === orderId);
           if (idx >= 0) {
             history[idx].disputeStatus = 'abierta';
-            history[idx].disputeId = data.dispute?.id;
+            history[idx].disputeId = (data.disputes || [data.dispute]).map(dispute => dispute?.id).filter(Boolean).join(', ');
             localStorage.setItem('dulce_orders_history', JSON.stringify(history));
           }
         } catch (e) {}
@@ -2076,16 +2206,10 @@ class GodMarketApp {
         window.open(waUrl, '_blank');
 
         this.showToast('✅ Disputa registrada. GOD MARKET te contactará pronto.');
-      } else {
-        this.showToast('❌ ' + (data.error || 'No se pudo registrar la disputa.'));
       }
     } catch (err) {
-      const name = order.formData?.fullName || '';
-      const waText = '¡Hola GOD MARKET! ⚠️ Necesito ayuda con mi pedido #' + orderId + (name ? ' a nombre de ' + name : '') + '. El local no respondió mi pedido. Por favor contáctenme.';
-      const waUrl = window.checkoutHandler.buildWhatsAppUrl(waText);
-      window.open(waUrl, '_blank');
-      this.closeModal('dispute-modal');
-      this.showToast('💬 Abriendo WhatsApp para contactar a GOD MARKET...');
+      console.error('No se pudo registrar la disputa:', err);
+      this.showToast('❌ ' + (err.message || 'No se pudo registrar la disputa. Intenta nuevamente.'));
     } finally {
       if (btn) {
         btn.disabled = false;
@@ -2161,25 +2285,33 @@ class GodMarketApp {
     }
 
     try {
-      const res = await fetch('/api/orders/' + encodeURIComponent(orderId) + '/dispute', {
+      const history = window.checkoutHandler?.getOrderHistory() || [];
+      const localOrder = history.find(order => order.orderId === orderId);
+      const relatedOrderIds = Array.isArray(localOrder?.serverOrderIds) && localOrder.serverOrderIds.length
+        ? localOrder.serverOrderIds
+        : [orderId];
+      const res = await fetch('/api/orders/' + encodeURIComponent(relatedOrderIds[0]) + '/dispute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customerName: 'Cliente Solicitud Arrepentimiento',
           customerPhone: phone,
-          reason: 'cancellation_revocation'
+          reason: 'cancellation_revocation',
+          relatedOrderIds
         })
       });
 
       const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'No se pudo registrar la solicitud de revocación.');
+      }
 
       // Guardar en historial local si existe la orden
       try {
-        const history = window.checkoutHandler.getOrderHistory();
         const idx = history.findIndex(o => o.orderId === orderId);
         if (idx >= 0) {
           history[idx].disputeStatus = 'en_revision';
-          history[idx].disputeId = data.dispute?.id || 'REV-' + Date.now();
+          history[idx].disputeId = (data.disputes || [data.dispute]).map(dispute => dispute?.id).filter(Boolean).join(', ');
           history[idx].revocationRequested = true;
           localStorage.setItem('dulce_orders_history', JSON.stringify(history));
         }
@@ -2194,11 +2326,8 @@ class GodMarketApp {
 
       this.showToast('✅ Solicitud registrada. Se abrió WhatsApp para confirmar la anulación.');
     } catch (err) {
-      const waText = `¡Hola GOD MARKET! ↩️ Solicitud de Arrepentimiento / Revocación de Compra (Ley 24.240 y Res. 424/2020) para el pedido #${orderId}. Por favor confirmar la anulación y reintegro.`;
-      const waUrl = window.checkoutHandler.buildWhatsAppUrl(waText);
-      window.open(waUrl, '_blank');
-      this.closeModal('legal-modal');
-      this.showToast('💬 Abriendo WhatsApp oficial para gestionar tu revocación...');
+      console.error('No se pudo registrar la revocación:', err);
+      this.showToast('❌ ' + (err.message || 'No se pudo registrar la solicitud. Intenta nuevamente.'));
     } finally {
       if (btn) {
         btn.disabled = false;
@@ -2234,6 +2363,7 @@ class GodMarketApp {
         this.updateCartUI();
       }
       if (modalId === 'checkout-modal') {
+        this.updateTransferPaymentOption();
         this.setupCheckoutStoreHours();
         // Pre-cargar datos del cliente guardados en el teléfono
         try {

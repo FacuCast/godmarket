@@ -1,6 +1,6 @@
 # 👑 GOD MARKET - Marketplace de Cafeterías de Especialidad & Desayunos Sorpresa
 
-Aplicación web **Mobile-First & PWA** (estilo PedidosYa / Delivery Gourmet) optimizada para celulares y computadoras, con catálogo dinámico, carrito de compras, confirmación y envío de pedidos directo a **WhatsApp (1156192616)**, subida de imágenes a la nube con **Cloudinary** y lista para desplegar en **Vercel**.
+Aplicación web **Mobile-First & PWA** (estilo PedidosYa / Delivery Gourmet) optimizada para celulares y computadoras, con catálogo dinámico, carrito de compras, registro de pedidos, confirmación por **WhatsApp (1156192616)** y subida de imágenes a **Cloudinary**.
 
 ---
 
@@ -21,17 +21,15 @@ Aplicación web **Mobile-First & PWA** (estilo PedidosYa / Delivery Gourmet) opt
   - Modal de configuración para ingresar tus credenciales (`Cloud Name` y `Upload Preset`).
 - ⚡ **PWA (Progressive Web App):**
   - Totalmente instalable como app en dispositivos móviles (Android / iOS) con `manifest.json` y `sw.js`.
-- 🚀 **Listo para Vercel:**
-  - Contiene `vercel.json` con rutas limpias y encabezados de seguridad.
-
 ---
 
 ## 🚀 Cómo Ejecutar Localmente
 
-No requiere instalaciones complejas. Puedes probarlo ejecutando:
+Instala las dependencias y configura las variables locales de `.env.example` en `.env`:
 
 ```bash
-node server.js
+npm ci
+npm start
 ```
 
 Luego abre en tu navegador:
@@ -44,13 +42,14 @@ Luego abre en tu navegador:
 Antes de publicar el sitio:
 
 1. Configura una base MySQL/MariaDB persistente en el hosting y completa `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`.
-2. Define `JWT_SECRET` con un valor aleatorio de al menos 32 caracteres. Si se rota, se cierran las sesiones activas de vendedores.
+2. Define `JWT_SECRET` y `ADMIN_TOKEN` con valores aleatorios distintos de al menos 32 caracteres. Si se rota `JWT_SECRET`, se cierran las sesiones activas de vendedores.
 3. Completa `GOOGLE_CLIENT_ID` y agrega el dominio de producción en Google Identity Services.
 4. Completa `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` y `CLOUDINARY_API_SECRET`.
 5. Define `APP_ORIGINS` únicamente con los dominios HTTPS reales, separados por comas.
-6. Usa `NODE_ENV=production` y deja `ENABLE_DEMO_LOGIN=false`.
+6. Cada comercio debe cargar su alias de transferencia desde el portal vendedor; en carritos con varios comercios se muestra el alias y el importe correspondiente a cada uno. Si se ofrece Mercado Pago como medio global, configura `MERCADOPAGO_ALIAS`, `MERCADOPAGO_CVU` y `MERCADOPAGO_ACCOUNT_HOLDER`. Efectivo sigue disponible.
+7. Usa `NODE_ENV=production` y deja `ENABLE_DEMO_LOGIN=false`.
 
-La base MySQL es la persistencia de producción. El almacenamiento JSON en `./data` solo sirve como fallback local y no debe utilizarse para publicar el sitio en un entorno con múltiples instancias.
+En producción, el servidor no inicia si MySQL no está configurado o no es accesible. MySQL es la persistencia de producción; el almacenamiento JSON en `./data` solo se permite en desarrollo. La aplicación mantiene una caché en memoria y debe ejecutarse como una única instancia Node.js; no escales horizontalmente sin migrar las lecturas a almacenamiento compartido.
 
 ## ☁️ Cómo Conectar Cloudinary
 
@@ -61,14 +60,6 @@ La base MySQL es la persistencia de producción. El almacenamiento JSON en `./da
 
 ---
 
-## 🌐 Cómo Subir a un hosting Node.js
+## 🌐 Despliegue en un hosting Node.js
 
-El backend debe ejecutarse como proceso Node.js persistente (`npm start`). En Hostinger, configura el directorio del proyecto, el archivo de entrada `server.js`, el puerto asignado por el panel y todas las variables de entorno anteriores. Importa [database.sql](./database.sql) si el usuario de base de datos no tiene permisos para crear tablas automáticamente.
-
-## 🌐 Cómo Subir a Vercel
-
-1. Sube este proyecto a tu repositorio de **GitHub**.
-2. Ve a [vercel.com](https://vercel.com/) y haz clic en **"Add New Project"**.
-3. Selecciona tu repositorio `Pasteleria`.
-4. Deja la configuración por defecto (Vercel detectará el archivo `vercel.json` e `index.html`) y configura las variables de entorno en el panel.
-5. Haz clic en **Deploy** y tu pastelería estará online en pocos segundos.
+El backend requiere un proceso Node.js persistente (`npm start`); no es un despliegue estático ni serverless. En Hostinger, configura el directorio del proyecto, `server.js`, el puerto asignado por el panel y todas las variables de entorno anteriores. Importa [database.sql](./database.sql) si el usuario MySQL no tiene permisos para crear tablas automáticamente; la aplicación también agrega la columna de datos completos de pedido al actualizar una base existente.

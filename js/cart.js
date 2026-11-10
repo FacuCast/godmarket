@@ -123,22 +123,58 @@ class CartManager {
   }
 
   getServiceFeeRateForItem(item) {
+    if (item && item.product && window.productManager) {
+      const business = window.productManager.getBusinessById(item.product.businessId);
+      if (business) {
+        return window.productManager.getBusinessPromoState(business).serviceFeeRate;
+      }
+    }
+    if (item && item.product && Number.isFinite(Number(item.product.serviceFeeRate))) {
+      return Number(item.product.serviceFeeRate);
+    }
     return this.isItemPromoActive(item) ? 0 : this.standardServiceFeeRate;
   }
 
+  getStandardServiceFeeRate() {
+    const item = this.items.find(cartItem => cartItem && cartItem.product);
+    if (item && window.productManager) {
+      const business = window.productManager.getBusinessById(item.product.businessId);
+      if (business) {
+        return window.productManager.getBusinessPromoState(business).standardServiceFeeRate;
+      }
+    }
+    return this.standardServiceFeeRate;
+  }
+
   getServiceFee() {
-    return this.items.reduce((sum, item) => {
-      const lineTotal = (Number(item.product.price) || 0) * (Number(item.quantity) || 0);
-      return sum + Math.round(lineTotal * this.getServiceFeeRateForItem(item));
-    }, 0);
+    const businessTotals = new Map();
+    this.items.forEach(item => {
+      const businessId = item.product.businessId || '__unknown__';
+      const current = businessTotals.get(businessId) || { subtotal: 0, rate: this.getServiceFeeRateForItem(item) };
+      current.subtotal += (Number(item.product.price) || 0) * (Number(item.quantity) || 0);
+      businessTotals.set(businessId, current);
+    });
+    return Array.from(businessTotals.values())
+      .reduce((sum, business) => sum + Math.round(business.subtotal * business.rate), 0);
   }
 
   getWaivedServiceFee() {
-    return this.items.reduce((sum, item) => {
-      if (!this.isItemPromoActive(item)) return sum;
-      const lineTotal = (Number(item.product.price) || 0) * (Number(item.quantity) || 0);
-      return sum + Math.round(lineTotal * this.standardServiceFeeRate);
-    }, 0);
+    const businessTotals = new Map();
+    this.items.forEach(item => {
+      const businessId = item.product.businessId || '__unknown__';
+      const state = window.productManager
+        ? window.productManager.getBusinessPromoState(item.product.businessId)
+        : null;
+      if (!(state && state.isPromoActive) && !this.isItemPromoActive(item)) return;
+      const rate = state
+        ? state.standardServiceFeeRate
+        : this.standardServiceFeeRate;
+      const current = businessTotals.get(businessId) || { subtotal: 0, rate };
+      current.subtotal += (Number(item.product.price) || 0) * (Number(item.quantity) || 0);
+      businessTotals.set(businessId, current);
+    });
+    return Array.from(businessTotals.values())
+      .reduce((sum, business) => sum + Math.round(business.subtotal * business.rate), 0);
   }
 
   getVendorsInCart() {
@@ -168,14 +204,46 @@ class CartManager {
 
   getEffectiveDeliveryFee() {
     if (this.deliveryType === 'pickup' || this.items.length === 0) return 0;
-    // Envío gratis si el subtotal supera $45.000
-    if (this.getSubtotal() >= 45000) return 0;
-    return this.deliveryFee;
+    const businessTotals = new Map();
+    this.items.forEach(item => {
+      const businessId = item.product.businessId || '__unknown__';
+      businessTotals.set(
+        businessId,
+        (businessTotals.get(businessId) || 0) + (Number(item.product.price) || 0) * (Number(item.quantity) || 0)
+      );
+    });
+    let deliveryTotal = 0;
+    businessTotals.forEach((subtotal, businessId) => {
+      const business = window.productManager && window.productManager.getBusinessById(businessId);
+      const deliveryFee = business && Number.isFinite(Number(business.deliveryFee))
+        ? Math.max(0, Number(business.deliveryFee))
+        : this.deliveryFee;
+      const freeShippingFrom = business && Number.isFinite(Number(business.freeShippingFrom))
+        ? Math.max(0, Number(business.freeShippingFrom))
+        : 45000;
+      if (subtotal < freeShippingFrom) deliveryTotal += deliveryFee;
+    });
+    return deliveryTotal;
   }
 
   getFreeShippingRemaining() {
-    const sub = this.getSubtotal();
-    return Math.max(0, 45000 - sub);
+    const businessTotals = new Map();
+    this.items.forEach(item => {
+      const businessId = item.product.businessId || '__unknown__';
+      businessTotals.set(
+        businessId,
+        (businessTotals.get(businessId) || 0) + (Number(item.product.price) || 0) * (Number(item.quantity) || 0)
+      );
+    });
+    let remaining = 0;
+    businessTotals.forEach((subtotal, businessId) => {
+      const business = window.productManager && window.productManager.getBusinessById(businessId);
+      const freeShippingFrom = business && Number.isFinite(Number(business.freeShippingFrom))
+        ? Math.max(0, Number(business.freeShippingFrom))
+        : 45000;
+      remaining += Math.max(0, freeShippingFrom - subtotal);
+    });
+    return remaining;
   }
 
   getTotal() {

@@ -20,10 +20,9 @@ const ICONS = {
 class CheckoutHandler {
   constructor() {
     this.bankDetails = {
-      alias: "GODMARKET.BA",
-      cbu: "0000003100012345678901",
-      holder: "GOD MARKET Oficial",
-      bank: "Mercado Pago / Banco Galicia"
+      mercadoPagoAlias: '',
+      mercadoPagoCvu: '',
+      mercadoPagoHolder: ''
     };
     this.lastOrder = null;
 
@@ -45,6 +44,62 @@ class CheckoutHandler {
     lastNum += 1;
     localStorage.setItem('dulce_last_order_num', lastNum.toString());
     return 'ORD-' + lastNum;
+  }
+
+  getTransferPayments(cart) {
+    const businesses = new Map();
+    cart.items.forEach(item => {
+      const businessId = item.product.businessId;
+      const business = window.productManager?.getBusinessById(businessId);
+      const current = businesses.get(businessId) || {
+        businessId,
+        businessName: business?.name || item.product.businessName || 'Comercio',
+        transferAlias: typeof business?.transferAlias === 'string' ? business.transferAlias.trim() : '',
+        transferAccountHolder: typeof business?.transferAccountHolder === 'string' ? business.transferAccountHolder.trim() : '',
+        subtotal: 0,
+        serviceFeeRate: cart.getServiceFeeRateForItem(item),
+        deliveryFee: Number.isFinite(Number(business?.deliveryFee)) ? Math.max(0, Number(business.deliveryFee)) : 1500,
+        freeShippingFrom: Number.isFinite(Number(business?.freeShippingFrom)) ? Math.max(0, Number(business.freeShippingFrom)) : 45000
+      };
+      current.subtotal += Number(item.product.price) * Number(item.quantity);
+      businesses.set(businessId, current);
+    });
+
+    return Array.from(businesses.values()).map(business => {
+      const serviceFee = Math.round(business.subtotal * business.serviceFeeRate);
+      const deliveryFee = cart.deliveryType === 'delivery' && business.subtotal < business.freeShippingFrom
+        ? business.deliveryFee
+        : 0;
+      return {
+        ...business,
+        total: business.subtotal + serviceFee + deliveryFee
+      };
+    });
+  }
+
+  renderTransferDetails(payments) {
+    const formatCurrency = amount => Number(amount).toLocaleString('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      maximumFractionDigits: 0
+    });
+    const escape = value => window.app ? window.app.escapeHTML(String(value || '')) : String(value || '');
+    if (!payments.length || payments.some(payment => !payment.transferAlias)) {
+      return '<p class="bank-subtitle">La transferencia estará disponible cuando todos los comercios del pedido configuren su alias.</p>';
+    }
+
+    return payments.map(payment => `
+      <div class="bank-row" style="align-items: flex-start; margin-top: 12px;">
+        <div style="flex: 1;">
+          <strong>${escape(payment.businessName)}</strong>
+          <div class="bank-label" style="margin-top: 6px;">ALIAS</div>
+          <strong class="bank-code">${escape(payment.transferAlias)}</strong>
+          ${payment.transferAccountHolder ? `<div class="bank-value">Titular: ${escape(payment.transferAccountHolder)}</div>` : ''}
+          <div class="bank-value">Transferir: <strong>${formatCurrency(payment.total)}</strong></div>
+        </div>
+        <button type="button" class="copy-btn" data-transfer-alias="${escape(payment.transferAlias)}" onclick="window.app.copyTransferAlias(this)">Copiar</button>
+      </div>
+    `).join('');
   }
 
   generateWhatsAppMessage(formData, cart, orderId) {
@@ -76,6 +131,7 @@ class CheckoutHandler {
     });
 
     const businessesListStr = Array.from(businessesSet).join(', ');
+    const serviceFeePercent = Math.round(cart.getStandardServiceFeeRate() * 100);
 
     const isDelivery = cart.deliveryType === 'delivery';
     const deliveryText = isDelivery 
@@ -88,13 +144,18 @@ class CheckoutHandler {
 
     let paymentMethodName = "Efectivo";
     if (formData.paymentMethod === 'transfer') {
-      paymentMethodName = "Transferencia Bancaria (Alias: GODMARKET.BA)";
+      paymentMethodName = 'Transferencia bancaria a cada comercio';
     } else if (formData.paymentMethod === 'mercadopago') {
-      paymentMethodName = "Mercado Pago (Alias: GODMARKET.MP)";
+      paymentMethodName = `Mercado Pago${this.bankDetails.mercadoPagoAlias ? ` (Alias: ${this.bankDetails.mercadoPagoAlias})` : ''}`;
     }
 
     const cashNote = (formData.paymentMethod === 'cash' && formData.cashAmount) 
       ? `\n• *Paga con:* $${formData.cashAmount}` 
+      : '';
+    const transferNote = formData.paymentMethod === 'transfer'
+      ? `\n${this.getTransferPayments(cart).map(payment =>
+        `• *Transferencia a ${payment.businessName}:* Alias ${payment.transferAlias || 'a confirmar'} · ${cart.formatCurrency(payment.total)}`
+      ).join('\n')}`
       : '';
 
     const message = 
@@ -109,8 +170,8 @@ class CheckoutHandler {
 
 • *Subtotal (Precio de local):* ${cart.formatCurrency(cart.getSubtotal())}
 ${cart.getServiceFee() === 0 && cart.getWaivedServiceFee() > 0
-  ? `• *Servicio GOD MARKET (20%):* $0 (¡100% BONIFICADO · Ahorraste ${cart.formatCurrency(cart.getWaivedServiceFee())}!)`
-  : `• *Servicio GOD MARKET (20%):* ${cart.formatCurrency(cart.getServiceFee())}`}
+  ? `• *Servicio GOD MARKET (${serviceFeePercent}%):* $0 (¡100% BONIFICADO · Ahorraste ${cart.formatCurrency(cart.getWaivedServiceFee())}!)`
+  : `• *Servicio GOD MARKET (${serviceFeePercent}%):* ${cart.formatCurrency(cart.getServiceFee())}`}
 ${deliveryText}
 • *TOTAL A PAGAR:* ${cart.formatCurrency(cart.getTotal())}
 ━━━━━━━━━━━━━━━━━━━━
@@ -119,7 +180,7 @@ ${deliveryText}
 - *Cliente:* ${formData.fullName}
 - *Teléfono:* ${formData.phone}
 ${scheduleText}
-- *Forma de Pago:* ${paymentMethodName}${cashNote}
+- *Forma de Pago:* ${paymentMethodName}${cashNote}${transferNote}
 ${formData.comments ? `\n• *Comentarios / Indicaciones:* ${formData.comments}` : ''}
 
 Por favor confírmenme el pedido para que el vendedor comience la preparación y coordine su cadete. ¡Muchas gracias! ✦`;
@@ -168,31 +229,36 @@ Por favor confírmenme el pedido para que el vendedor comience la preparación y
       }
       const trimmed = history.slice(0, 25);
       localStorage.setItem('dulce_orders_history', JSON.stringify(trimmed));
-
-      // Sincronizar con el backend para que aparezca en el panel de los vendedores
-      try {
-        fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: order.orderId,
-            customerName: order.customerName || (order.formData && order.formData.fullName),
-            customerPhone: order.customerPhone || (order.formData && order.formData.phone),
-            deliveryType: order.deliveryType,
-            paymentMethod: order.paymentMethod || (order.formData && order.formData.paymentMethod),
-            address: order.deliveryAddress || (order.formData && order.formData.address),
-            subtotal: order.subtotal,
-            serviceFee: order.serviceFee,
-            waivedServiceFee: order.waivedServiceFee,
-            total: order.total,
-            items: order.items,
-            businessId: (order.items && order.items[0] && order.items[0].product && order.items[0].product.businessId) || null
-          })
-        }).catch(err => console.warn('Aviso backend /api/orders:', err));
-      } catch (err) {}
     } catch (e) {
       console.error("Error al guardar pedido en historial:", e);
     }
+  }
+
+  async persistOrder(order) {
+    const response = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: order.orderId,
+        customerName: order.formData.fullName,
+        customerPhone: order.formData.phone,
+        deliveryType: order.deliveryType,
+        paymentMethod: order.paymentMethod,
+        address: order.formData.address,
+        apartment: order.formData.apartment,
+        zone: order.formData.zone,
+        deliveryTime: order.formData.deliveryTime,
+        comments: order.formData.comments,
+        cashAmount: order.formData.cashAmount,
+        items: order.items
+      })
+    });
+
+    const result = await response.json();
+    if (!response.ok || !result.success || !Array.isArray(result.orders) || result.orders.length === 0) {
+      throw new Error(result.error || 'No se pudo registrar el pedido. Intenta nuevamente.');
+    }
+    return result.orders;
   }
 
   getOrderById(orderId) {
@@ -211,8 +277,10 @@ Por favor confírmenme el pedido para que el vendedor comience la preparación y
     }
   }
 
-  processOrder(formData, cart) {
+  async processOrder(formData, cart) {
     const orderId = this.generateOrderNumber();
+    const whatsappWindow = window.open('about:blank', '_blank');
+    if (whatsappWindow) whatsappWindow.opener = null;
     const subtotal = cart.getSubtotal();
     const serviceFee = cart.getServiceFee();
     const waivedServiceFee = cart.getWaivedServiceFee();
@@ -239,6 +307,7 @@ Por favor confírmenme el pedido para que el vendedor comience la preparación y
       orderId,
       subtotal,
       serviceFee,
+      standardServiceFeeRate: cart.getStandardServiceFeeRate(),
       waivedServiceFee,
       total,
       totalFormatted,
@@ -257,7 +326,28 @@ Por favor confírmenme el pedido para que el vendedor comience la preparación y
       dateFormatted
     };
 
-    localStorage.setItem('dulce_last_order', JSON.stringify(this.lastOrder));
+    try {
+      const persistedOrders = await this.persistOrder(this.lastOrder);
+      this.lastOrder.serverOrderIds = persistedOrders.map(order => order.id);
+      if (formData.paymentMethod === 'transfer') {
+        this.lastOrder.transferPayments = persistedOrders.map(order => ({
+          businessId: order.businessId,
+          businessName: order.items?.[0]?.product?.businessName || 'Comercio',
+          transferAlias: order.transferAlias || '',
+          transferAccountHolder: order.transferAccountHolder || '',
+          total: Number(order.total) || 0
+        }));
+      }
+    } catch (error) {
+      if (whatsappWindow) whatsappWindow.close();
+      throw error;
+    }
+
+    try {
+      localStorage.setItem('dulce_last_order', JSON.stringify(this.lastOrder));
+    } catch (error) {
+      console.warn('No se pudo guardar el último pedido en este dispositivo:', error);
+    }
     this.saveOrderToHistory(this.lastOrder);
 
     // Celebración con confetti si está disponible la librería
@@ -271,8 +361,8 @@ Por favor confírmenme el pedido para que el vendedor comience la preparación y
       } catch (err) {}
     }
 
-    // Abrir WhatsApp con el pedido inicial
-    window.open(whatsappUrl, '_blank');
+    // Navegar la pestaña abierta durante el gesto del usuario tras confirmar el pedido en el servidor.
+    if (whatsappWindow) whatsappWindow.location.href = whatsappUrl;
 
     // Limpiar carrito
     cart.clearCart();

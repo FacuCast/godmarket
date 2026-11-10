@@ -348,6 +348,14 @@
           <textarea id="onboard-desc" class="onboarding-textarea" rows="2" placeholder="Describe brevemente tus mejores propuestas culinarias..."></textarea>
         </div>
 
+        <div class="onboarding-field-group">
+          <label class="onboarding-label" for="onboard-transfer-alias">Alias para recibir transferencias</label>
+          <input type="text" id="onboard-transfer-alias" class="onboarding-input" maxlength="100" placeholder="Ej: mi.negocio.mp">
+          <label class="onboarding-label" for="onboard-transfer-holder" style="margin-top: 8px;">Titular (opcional)</label>
+          <input type="text" id="onboard-transfer-holder" class="onboarding-input" maxlength="100" placeholder="Nombre del titular de la cuenta">
+          <small style="display: block; color: #9AB0A3; margin-top: 6px;">El alias se mostrará a tus clientes al pagar por transferencia. Puedes configurarlo más tarde.</small>
+        </div>
+
         <div style="font-size: 0.74rem; color: #9AB0A3; text-align: center; margin-top: 10px; line-height: 1.4;">
           Al registrar tu local declaras contar con las habilitaciones sanitarias vigentes y aceptas los <a href="javascript:void(0)" onclick="window.app.openLegalModal('comercios')" style="color: #E5C07B; text-decoration: underline; font-weight: 600;">Términos para Comercios Asociados</a> de GOD MARKET.
         </div>
@@ -486,11 +494,11 @@
       <section id="tab-pane-coverage" class="seller-tab-pane">
         <div class="seller-actions-bar">
           <div>
-            <h3 style="color: #FFF; font-size: 1.15rem; margin-bottom: 2px;">📍 Cobertura y Radio de Entrega</h3>
-            <span style="font-size: 0.8rem; color: #8CA093;">Define el punto de tu local y el radio de despacho directo para tus clientes</span>
+            <h3 style="color: #FFF; font-size: 1.15rem; margin-bottom: 2px;">📍 Cobertura, entrega y pagos</h3>
+            <span style="font-size: 0.8rem; color: #8CA093;">Define el radio de despacho y el alias donde recibirás transferencias</span>
           </div>
           <button type="button" class="onboarding-submit-btn" style="width: auto; padding: 9px 18px; margin-top: 0; font-size: 0.84rem;" onclick="window.sellerPortal.saveCoverageSettings()">
-            💾 Guardar Cobertura
+            💾 Guardar datos
           </button>
         </div>
 
@@ -503,6 +511,17 @@
             <div>
               <label class="onboarding-label" for="dash-coverage-neighborhood">Barrio / Zona Principal</label>
               <input type="text" id="dash-coverage-neighborhood" class="onboarding-input" placeholder="Ej: Palermo Hollywood">
+            </div>
+          </div>
+
+          <div class="form-row-2col" style="margin-bottom: 16px;">
+            <div>
+              <label class="onboarding-label" for="dash-transfer-alias">Alias para recibir transferencias</label>
+              <input type="text" id="dash-transfer-alias" class="onboarding-input" maxlength="100" placeholder="Ej: mi.negocio.mp">
+            </div>
+            <div>
+              <label class="onboarding-label" for="dash-transfer-holder">Titular (opcional)</label>
+              <input type="text" id="dash-transfer-holder" class="onboarding-input" maxlength="100" placeholder="Nombre del titular">
             </div>
           </div>
 
@@ -532,7 +551,7 @@
 
           <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
             <button type="button" id="btn-save-dash-coverage" class="onboarding-submit-btn" style="max-width: 280px;" onclick="window.sellerPortal.saveCoverageSettings()">
-              💾 Guardar Cobertura de Envíos
+              💾 Guardar cobertura y pagos
             </button>
           </div>
         </div>
@@ -1182,7 +1201,7 @@
       </div>
 
       <form id="checkout-form" novalidate>
-        <input type="hidden" id="checkout-payment-method" value="transfer">
+        <input type="hidden" id="checkout-payment-method" value="cash">
 
         <div class="form-group">
           <label class="form-label" for="cust-name">Nombre y Apellido *</label>
@@ -1275,15 +1294,15 @@
         <div class="form-group">
           <label class="form-label">Forma de Pago:</label>
           <div class="payment-options">
-            <div class="payment-card active" data-payment="transfer">
+            <div class="payment-card" data-payment="transfer" hidden>
               <div class="payment-icon">🏦</div>
               <div class="payment-name">Transferencia</div>
             </div>
-            <div class="payment-card" data-payment="mercadopago">
+            <div class="payment-card" data-payment="mercadopago" hidden>
               <div class="payment-icon">💳</div>
               <div class="payment-name">Mercado Pago</div>
             </div>
-            <div class="payment-card" data-payment="cash">
+            <div class="payment-card active" data-payment="cash">
               <div class="payment-icon">💵</div>
               <div class="payment-name">Efectivo</div>
             </div>
@@ -1291,7 +1310,7 @@
         </div>
 
         <!-- Bank details summary box -->
-        <div id="bank-transfer-info" class="bank-details-box bank-transfer-theme">
+        <div id="bank-transfer-info" class="bank-details-box bank-transfer-theme" style="display: none;">
           <div class="bank-title">
             <span>🏦</span> Datos para Transferencia Bancaria:
           </div>
@@ -1300,12 +1319,12 @@
           </p>
           <div class="bank-row">
             <span class="bank-label">Alias:</span>
-            <strong id="bank-alias" class="bank-code">GODMARKET.BA</strong>
+            <strong id="bank-alias" class="bank-code"></strong>
             <button type="button" class="copy-btn" onclick="window.app.copyAlias()">Copiar</button>
           </div>
           <div class="bank-row">
             <span class="bank-label">Titular:</span>
-            <span class="bank-value">GOD MARKET Oficial</span>
+            <span class="bank-value" id="bank-account-holder"></span>
           </div>
         </div>
 
@@ -1319,17 +1338,17 @@
           </p>
           <div class="bank-row">
             <span class="bank-label">Alias MP:</span>
-            <strong id="mp-alias" class="bank-code mp-code">GODMARKET.MP</strong>
+            <strong id="mp-alias" class="bank-code mp-code"></strong>
             <button type="button" class="copy-btn copy-btn-mp" onclick="window.app.copyMPAlias()" id="btn-copy-mp-alias">Copiar</button>
           </div>
           <div class="bank-row">
             <span class="bank-label">CVU MP:</span>
-            <strong class="bank-code mp-cvu">0000003100012345678901</strong>
-            <button type="button" class="copy-btn copy-btn-mp" onclick="window.app.copyCVU()">Copiar</button>
+            <strong id="mp-cvu" class="bank-code mp-cvu"></strong>
+            <button type="button" class="copy-btn copy-btn-mp" onclick="window.app.copyCVU('mp')">Copiar</button>
           </div>
           <div class="bank-row">
             <span class="bank-label">Titular:</span>
-            <span class="bank-value">GOD MARKET (Mercado Pago Oficial)</span>
+            <span class="bank-value" id="mp-account-holder"></span>
           </div>
           <div class="mp-footer-note">
             ✨ También puedes solicitar el Link de Pago con tarjeta al confirmar por WhatsApp.
@@ -1413,20 +1432,20 @@
         </div>
 
         <!-- Datos de Transferencia -->
-        <div id="ticket-transfer-details" class="ticket-alias-box bank-transfer-theme">
+        <div id="ticket-transfer-details" class="ticket-alias-box bank-transfer-theme" style="display: none;">
           <div class="ticket-alias-header">
             <span>🏦</span> Para completar el pago, realiza la transferencia:
           </div>
 
           <div class="ticket-subtitle">
-            <strong>Titular:</strong> GOD MARKET Oficial
+            <strong>Titular:</strong> <span id="ticket-bank-account-holder"></span>
           </div>
 
           <!-- Fila Alias con botón copiar -->
           <div class="ticket-alias-value-row">
             <div>
               <div class="ticket-label">ALIAS:</div>
-              <div class="ticket-alias-code" id="ticket-alias-code">GODMARKET.BA</div>
+              <div class="ticket-alias-code" id="ticket-alias-code"></div>
             </div>
             <button type="button" class="btn-copy-sm" onclick="window.app.copyAlias()" id="btn-copy-alias-ticket">
               <span>📋</span> Copiar
@@ -1437,9 +1456,9 @@
           <div class="ticket-alias-value-row">
             <div>
               <div class="ticket-label">CVU:</div>
-              <div class="ticket-alias-code" style="font-size: 0.85rem;" id="ticket-cvu-code">0000003100012345678901</div>
+              <div class="ticket-alias-code" style="font-size: 0.85rem;" id="ticket-cvu-code"></div>
             </div>
-            <button type="button" class="btn-copy-sm" onclick="window.app.copyCVU()" id="btn-copy-cvu-ticket">
+            <button type="button" class="btn-copy-sm" onclick="window.app.copyCVU('bank')" id="btn-copy-cvu-ticket">
               <span>📋</span> Copiar
             </button>
           </div>
@@ -1456,13 +1475,13 @@
             <span>💳</span> Para completar el pago con Mercado Pago:
           </div>
           <div class="ticket-subtitle">
-            <strong>Titular:</strong> GOD MARKET (Mercado Pago Oficial)
+            <strong>Titular:</strong> <span id="ticket-mp-account-holder"></span>
           </div>
 
           <div class="ticket-alias-value-row">
             <div>
               <div class="ticket-label">ALIAS MERCADO PAGO:</div>
-              <div class="ticket-alias-code mp-code" id="ticket-mp-alias-code">GODMARKET.MP</div>
+              <div class="ticket-alias-code mp-code" id="ticket-mp-alias-code"></div>
             </div>
             <button type="button" class="btn-copy-sm btn-copy-mp" onclick="window.app.copyMPAlias()" id="btn-copy-mp-alias-ticket">
               <span>📋</span> Copiar
@@ -1472,9 +1491,9 @@
           <div class="ticket-alias-value-row">
             <div>
               <div class="ticket-label">CVU MERCADO PAGO:</div>
-              <div class="ticket-alias-code" style="font-size: 0.85rem;">0000003100012345678901</div>
+              <div class="ticket-alias-code" style="font-size: 0.85rem;" id="ticket-mp-cvu-code"></div>
             </div>
-            <button type="button" class="btn-copy-sm btn-copy-mp" onclick="window.app.copyCVU()" id="btn-copy-mp-cvu-ticket">
+            <button type="button" class="btn-copy-sm btn-copy-mp" onclick="window.app.copyCVU('mp')" id="btn-copy-mp-cvu-ticket">
               <span>📋</span> Copiar
             </button>
           </div>

@@ -1458,6 +1458,10 @@ img {
   gap: 4px !important;
 }
 
+.payment-card[hidden] {
+  display: none !important;
+}
+
 .payment-card .payment-icon {
   font-size: 1.5rem !important;
   line-height: 1 !important;
@@ -1961,7 +1965,6 @@ img {
   font-size: 2.5rem;
   margin-bottom: 10px;
 }
-
 
 
 

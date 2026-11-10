@@ -75,6 +75,21 @@ CREATE TABLE IF NOT EXISTS orders (
   created_at VARCHAR(50),
   updated_at VARCHAR(50),
   items_json LONGTEXT,
+  data_json LONGTEXT,
   INDEX idx_orders_business (business_id),
   INDEX idx_orders_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS disputes (
+  id VARCHAR(100) PRIMARY KEY,
+  order_id VARCHAR(100) NOT NULL,
+  business_id VARCHAR(100),
+  status VARCHAR(50),
+  data_json LONGTEXT,
+  UNIQUE INDEX idx_disputes_order (order_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS app_settings (
+  setting_key VARCHAR(100) PRIMARY KEY,
+  data_json LONGTEXT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

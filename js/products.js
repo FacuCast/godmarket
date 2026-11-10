@@ -58,6 +58,7 @@ class ProductManager {
       }
 
       if (window.app) {
+        window.app.updateTransferPaymentOption?.();
         window.app.renderBusinessesSlider?.();
         window.app.renderStoresCards?.();
         window.app.renderProducts?.();

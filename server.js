@@ -16,6 +16,21 @@ const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET || JWT_SECRET.length < 32) {
   throw new Error('JWT_SECRET must be configured with at least 32 characters.');
 }
+if (process.env.NODE_ENV === 'production') {
+  const missingProductionConfig = [
+    'GOOGLE_CLIENT_ID',
+    'CLOUDINARY_CLOUD_NAME',
+    'CLOUDINARY_API_KEY',
+    'CLOUDINARY_API_SECRET',
+    'ADMIN_TOKEN'
+  ].filter(name => !process.env[name]);
+  if (process.env.ADMIN_TOKEN && process.env.ADMIN_TOKEN.length < 32) {
+    missingProductionConfig.push('ADMIN_TOKEN (must contain at least 32 characters)');
+  }
+  if (missingProductionConfig.length) {
+    throw new Error(`Missing production configuration: ${missingProductionConfig.join(', ')}.`);
+  }
+}
 
 const allowedOrigins = new Set(
   (process.env.APP_ORIGINS || 'https://somosgodmarket.com,https://www.somosgodmarket.com')
@@ -240,6 +255,11 @@ app.get('/api/config', (req, res) => {
     googleClientId: process.env.GOOGLE_CLIENT_ID || '',
     cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
     demoLoginEnabled: process.env.NODE_ENV !== 'production' && process.env.ENABLE_DEMO_LOGIN === 'true',
+    paymentDetails: {
+      mercadoPagoAlias: process.env.MERCADOPAGO_ALIAS || '',
+      mercadoPagoCvu: process.env.MERCADOPAGO_CVU || '',
+      mercadoPagoAccountHolder: process.env.MERCADOPAGO_ACCOUNT_HOLDER || ''
+    },
     promoProgram: {
       enabled: promoSettings.enabled,
       maxPromoBusinesses: promoSettings.maxPromoBusinesses,
@@ -299,6 +319,7 @@ app.post('/api/auth/google', authLimiter, async (req, res) => {
         hasCompletedProfile: false,
         businessId: null
       });
+      await db.flush();
 
       const token = generateSellerToken(seller, null);
 
@@ -346,7 +367,7 @@ app.post('/api/auth/google', authLimiter, async (req, res) => {
 });
 
 // 3. Registro y Onboarding de Vendedor
-app.post('/api/seller/register', verifySellerAuth, (req, res) => {
+app.post('/api/seller/register', verifySellerAuth, async (req, res) => {
   try {
     const {
       businessName,
@@ -359,7 +380,9 @@ app.post('/api/seller/register', verifySellerAuth, (req, res) => {
       deliveryFee,
       avatar,
       cover,
-      description
+      description,
+      transferAlias,
+      transferAccountHolder
     } = req.body;
 
     const seller = db.getSellerById(req.seller.sellerId);
@@ -376,6 +399,23 @@ app.post('/api/seller/register', verifySellerAuth, (req, res) => {
     if (typeof phone !== 'string' || phone.trim().length < 6) {
       return res.status(400).json({ error: 'El número de WhatsApp es obligatorio para recibir pedidos.' });
     }
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 8 || cleanPhone.length > 20) {
+      return res.status(400).json({ error: 'El número de WhatsApp debe contener entre 8 y 20 dígitos.' });
+    }
+
+    const parsedDeliveryFee = deliveryFee === undefined || deliveryFee === ''
+      ? 1500
+      : Number(deliveryFee);
+    const lat = req.body.lat === undefined ? -34.5885 : Number(req.body.lat);
+    const lng = req.body.lng === undefined ? -58.4285 : Number(req.body.lng);
+    const deliveryRadiusKm = req.body.deliveryRadiusKm === undefined ? 5 : Number(req.body.deliveryRadiusKm);
+    if (!Number.isFinite(parsedDeliveryFee) || parsedDeliveryFee < 0 ||
+        !Number.isFinite(lat) || lat < -90 || lat > 90 ||
+        !Number.isFinite(lng) || lng < -180 || lng > 180 ||
+        !Number.isFinite(deliveryRadiusKm) || deliveryRadiusKm < 1 || deliveryRadiusKm > 15) {
+      return res.status(400).json({ error: 'El costo, la ubicación o el radio de entrega no son válidos.' });
+    }
 
     const sellerId = seller.id;
 
@@ -387,10 +427,12 @@ app.post('/api/seller/register', verifySellerAuth, (req, res) => {
     }
 
     const cleanBizName = sanitizeInput(businessName, 80);
+    if (cleanBizName.length < 2) {
+      return res.status(400).json({ error: 'El nombre del negocio debe tener al menos 2 caracteres válidos.' });
+    }
     const cleanTagline = sanitizeInput(tagline || 'Pastelería & Cafetería Artesanal', 120);
     const cleanNeighborhood = sanitizeInput(neighborhood || 'Buenos Aires', 80);
     const cleanAddress = sanitizeInput(address || 'Buenos Aires', 120);
-    const cleanPhone = phone.trim().replace(/\D/g, '');
     const cleanSchedule = sanitizeInput(schedule || '08:30 - 20:00 hs', 60);
     const cleanDesc = sanitizeInput(description || 'Elaboración artesanal con los mejores ingredientes.', 500);
 
@@ -408,7 +450,7 @@ app.post('/api/seller/register', verifySellerAuth, (req, res) => {
       rating: 5.0,
       reviews: 1,
       deliveryTime: sanitizeInput(deliveryTime || '30-45 min', 40),
-      deliveryFee: parseFloat(deliveryFee) || 1500,
+      deliveryFee: parsedDeliveryFee,
       freeShippingFrom: 45000,
       shippingType: 'Envío propio del vendedor',
       shippingNote: 'Cadete exclusivo del local con packaging térmico',
@@ -419,10 +461,12 @@ app.post('/api/seller/register', verifySellerAuth, (req, res) => {
       badge: grantFoundingPromo ? '🎁 Precio de Local · 0% Servicio' : '✨ Nuevo en GOD MARKET',
       cover: sanitizeImageUrl(cover || seller.picture, 'assets/images/hero_breakfast.webp'),
       phone: cleanPhone,
+      transferAlias: sanitizeInput(transferAlias, 100),
+      transferAccountHolder: sanitizeInput(transferAccountHolder, 100),
       address: cleanAddress,
-      lat: req.body.lat ? parseFloat(req.body.lat) : -34.5885,
-      lng: req.body.lng ? parseFloat(req.body.lng) : -58.4285,
-      deliveryRadiusKm: req.body.deliveryRadiusKm ? parseFloat(req.body.deliveryRadiusKm) : 5.0,
+      lat,
+      lng,
+      deliveryRadiusKm,
       verified: true,
       description: cleanDesc,
       createdAt: new Date().toISOString(),
@@ -445,6 +489,7 @@ app.post('/api/seller/register', verifySellerAuth, (req, res) => {
       hasCompletedProfile: true,
       businessId: savedBusiness.id
     });
+    await db.flush();
 
     const token = generateSellerToken(updatedSeller, savedBusiness.id);
 
@@ -489,7 +534,7 @@ app.get('/api/seller/me', verifySellerAuth, (req, res) => {
 });
 
 // 5. Actualizar perfil del negocio (Solo por el vendedor propietario)
-app.put('/api/seller/profile', verifySellerAuth, (req, res) => {
+app.put('/api/seller/profile', verifySellerAuth, async (req, res) => {
   try {
     const { businessId, updates } = req.body;
     if (!req.seller.businessId) {
@@ -509,20 +554,38 @@ app.put('/api/seller/profile', verifySellerAuth, (req, res) => {
 
     const allowedFields = new Set([
       'name', 'tagline', 'neighborhood', 'address', 'phone', 'schedule', 'deliveryTime',
-      'deliveryFee', 'avatar', 'cover', 'lat', 'lng', 'deliveryRadiusKm', 'description'
+      'deliveryFee', 'avatar', 'cover', 'lat', 'lng', 'deliveryRadiusKm', 'description',
+      'transferAlias', 'transferAccountHolder'
     ]);
     const cleanUpdates = {};
     for (const [key, value] of Object.entries(updates)) {
       if (allowedFields.has(key)) cleanUpdates[key] = value;
     }
-    if (cleanUpdates.name !== undefined) cleanUpdates.name = sanitizeInput(cleanUpdates.name, 80);
+    for (const field of ['name', 'tagline', 'neighborhood', 'address', 'phone', 'schedule', 'deliveryTime', 'description', 'avatar', 'cover', 'transferAlias', 'transferAccountHolder']) {
+      if (cleanUpdates[field] !== undefined && typeof cleanUpdates[field] !== 'string') {
+        return res.status(400).json({ error: `El valor de ${field} no es válido.` });
+      }
+    }
+    if (cleanUpdates.name !== undefined) {
+      cleanUpdates.name = sanitizeInput(cleanUpdates.name, 80);
+      if (cleanUpdates.name.length < 2) {
+        return res.status(400).json({ error: 'El nombre del negocio debe tener al menos 2 caracteres.' });
+      }
+    }
     if (cleanUpdates.tagline !== undefined) cleanUpdates.tagline = sanitizeInput(cleanUpdates.tagline, 120);
     if (cleanUpdates.neighborhood !== undefined) cleanUpdates.neighborhood = sanitizeInput(cleanUpdates.neighborhood, 80);
     if (cleanUpdates.address !== undefined) cleanUpdates.address = sanitizeInput(cleanUpdates.address, 120);
-    if (cleanUpdates.phone !== undefined) cleanUpdates.phone = String(cleanUpdates.phone).replace(/\D/g, '').slice(0, 20);
+    if (cleanUpdates.phone !== undefined) {
+      cleanUpdates.phone = cleanUpdates.phone.replace(/\D/g, '').slice(0, 20);
+      if (cleanUpdates.phone.length < 8) {
+        return res.status(400).json({ error: 'El número de WhatsApp debe contener al menos 8 dígitos.' });
+      }
+    }
     if (cleanUpdates.schedule !== undefined) cleanUpdates.schedule = sanitizeInput(cleanUpdates.schedule, 60);
     if (cleanUpdates.deliveryTime !== undefined) cleanUpdates.deliveryTime = sanitizeInput(cleanUpdates.deliveryTime, 40);
     if (cleanUpdates.description !== undefined) cleanUpdates.description = sanitizeInput(cleanUpdates.description, 500);
+    if (cleanUpdates.transferAlias !== undefined) cleanUpdates.transferAlias = sanitizeInput(cleanUpdates.transferAlias, 100);
+    if (cleanUpdates.transferAccountHolder !== undefined) cleanUpdates.transferAccountHolder = sanitizeInput(cleanUpdates.transferAccountHolder, 100);
     if (cleanUpdates.avatar !== undefined) {
       cleanUpdates.avatar = ['🍰', '☕', '🥐', '🥑', '🎁', '🍪'].includes(cleanUpdates.avatar) ? cleanUpdates.avatar : existing.avatar;
     }
@@ -557,6 +620,7 @@ app.put('/api/seller/profile', verifySellerAuth, (req, res) => {
       id: req.seller.businessId,
       sellerId: req.seller.sellerId
     });
+    await db.flush();
 
     res.json({ success: true, business: db.enrichBusinessWithPromo(updated) });
   } catch (err) {
@@ -581,7 +645,7 @@ app.get('/api/seller/products', verifySellerAuth, (req, res) => {
   }
 });
 
-app.post('/api/seller/products', verifySellerAuth, (req, res) => {
+app.post('/api/seller/products', verifySellerAuth, async (req, res) => {
   try {
     const businessId = req.seller.businessId;
     const {
@@ -597,7 +661,7 @@ app.post('/api/seller/products', verifySellerAuth, (req, res) => {
 
     const numericPrice = Number(price);
     if (!businessId || typeof name !== 'string' || name.trim().length < 3 ||
-        !Number.isFinite(numericPrice) || numericPrice <= 0) {
+        !Number.isFinite(numericPrice) || numericPrice <= 0 || numericPrice > 99_999_999.99) {
       return res.status(400).json({ error: 'Nombre, precio y negocio son obligatorios.' });
     }
 
@@ -605,13 +669,17 @@ app.post('/api/seller/products', verifySellerAuth, (req, res) => {
     if (!business) {
       return res.status(404).json({ error: 'Negocio no registrado.' });
     }
+    const cleanProductName = sanitizeInput(name, 100);
+    if (cleanProductName.length < 3) {
+      return res.status(400).json({ error: 'El nombre del producto debe tener al menos 3 caracteres válidos.' });
+    }
 
     const newProduct = db.addProduct({
       businessId,
       businessName: business.name,
       businessNeighborhood: business.neighborhood,
       businessAvatar: business.avatar,
-      name: sanitizeInput(name, 100),
+      name: cleanProductName,
       category: ['desayunos', 'meriendas', 'brunch', 'boxes'].includes(category) ? category : 'desayunos',
       categoryName: sanitizeInput(categoryName || 'Desayunos & Meriendas', 60),
       price: numericPrice,
@@ -624,6 +692,7 @@ app.post('/api/seller/products', verifySellerAuth, (req, res) => {
     // Activar el contador de 30 días (0% cargo de servicio) recién al publicar el primer producto con foto
     const promoActivation = db.activateBusinessPromoTimerIfNeeded(businessId);
     const enrichedBusiness = promoActivation.business || db.enrichBusinessWithPromo(business);
+    await db.flush();
 
     res.json({
       success: true,
@@ -640,7 +709,7 @@ app.post('/api/seller/products', verifySellerAuth, (req, res) => {
   }
 });
 
-app.put('/api/seller/products/:id', verifySellerAuth, (req, res) => {
+app.put('/api/seller/products/:id', verifySellerAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const existing = db.getProductById(id);
@@ -656,11 +725,19 @@ app.put('/api/seller/products/:id', verifySellerAuth, (req, res) => {
     for (const key of ['name', 'description', 'price', 'tag', 'portion', 'image', 'category', 'categoryName']) {
       if (Object.hasOwn(req.body, key)) updates[key] = req.body[key];
     }
-    if (updates.name) updates.name = sanitizeInput(updates.name, 100);
+    if (updates.name !== undefined) {
+      if (typeof updates.name !== 'string' || updates.name.trim().length < 3) {
+        return res.status(400).json({ error: 'El nombre del producto debe tener al menos 3 caracteres.' });
+      }
+      updates.name = sanitizeInput(updates.name, 100);
+      if (updates.name.length < 3) {
+        return res.status(400).json({ error: 'El nombre del producto debe tener al menos 3 caracteres válidos.' });
+      }
+    }
     if (updates.description) updates.description = sanitizeInput(updates.description, 500);
     if (updates.price !== undefined) {
       updates.price = Number(updates.price);
-      if (!Number.isFinite(updates.price) || updates.price <= 0) {
+      if (      !Number.isFinite(updates.price) || updates.price <= 0 || updates.price > 99_999_999.99) {
         return res.status(400).json({ error: 'El precio no es válido.' });
       }
     }
@@ -675,13 +752,14 @@ app.put('/api/seller/products/:id', verifySellerAuth, (req, res) => {
     }
 
     const updated = db.updateProduct(id, updates);
+    await db.flush();
     res.json({ success: true, product: updated });
   } catch (err) {
     res.status(500).json({ error: 'Error al actualizar producto.' });
   }
 });
 
-app.delete('/api/seller/products/:id', verifySellerAuth, (req, res) => {
+app.delete('/api/seller/products/:id', verifySellerAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const existing = db.getProductById(id);
@@ -694,6 +772,10 @@ app.delete('/api/seller/products/:id', verifySellerAuth, (req, res) => {
     }
 
     const ok = db.deleteProduct(id);
+    if (!ok) {
+      return res.status(409).json({ error: 'El producto ya no está disponible para eliminar.' });
+    }
+    await db.flush();
     res.json({ success: true, message: 'Producto eliminado con éxito.' });
   } catch (err) {
     res.status(500).json({ error: 'Error al eliminar producto.' });
@@ -719,7 +801,7 @@ app.get('/api/seller/orders', verifySellerAuth, (req, res) => {
   }
 });
 
-app.patch('/api/seller/orders/:id', verifySellerAuth, (req, res) => {
+app.patch('/api/seller/orders/:id', verifySellerAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -740,6 +822,7 @@ app.patch('/api/seller/orders/:id', verifySellerAuth, (req, res) => {
     if (!updated) {
       return res.status(404).json({ error: 'Pedido no encontrado.' });
     }
+    await db.flush();
     res.json({ success: true, order: updated });
   } catch (err) {
     res.status(500).json({ error: 'Error al actualizar estado del pedido.' });
@@ -785,12 +868,39 @@ app.get('/api/businesses', (req, res) => {
 });
 
 // 9. Registrar Pedido Realizado por Cliente (Con Rate Limiting y Sanitización)
-app.post('/api/orders', orderLimiter, (req, res) => {
+app.post('/api/orders', orderLimiter, async (req, res) => {
   try {
     const orderData = req.body;
+    const customerName = sanitizeInput(orderData && orderData.customerName, 80);
+    const customerPhone = typeof (orderData && orderData.customerPhone) === 'string'
+      ? orderData.customerPhone.replace(/\D/g, '').slice(0, 20)
+      : '';
     if (!orderData || !Array.isArray(orderData.items) ||
         orderData.items.length === 0 || orderData.items.length > 30) {
       return res.status(400).json({ error: 'El pedido no contiene ítems.' });
+    }
+    if (customerName.length < 3 || customerPhone.length < 8) {
+      return res.status(400).json({ error: 'El nombre y teléfono de contacto del cliente son obligatorios.' });
+    }
+    if (!['delivery', 'pickup'].includes(orderData.deliveryType)) {
+      return res.status(400).json({ error: 'La modalidad de entrega no es válida.' });
+    }
+    if (orderData.deliveryType === 'delivery' &&
+        (typeof orderData.address !== 'string' || !orderData.address.trim())) {
+      return res.status(400).json({ error: 'La dirección de entrega es obligatoria.' });
+    }
+    if (!['cash', 'transfer', 'mercadopago'].includes(orderData.paymentMethod)) {
+      return res.status(400).json({ error: 'La forma de pago no es válida.' });
+    }
+    if (orderData.paymentMethod === 'mercadopago' &&
+        !(process.env.MERCADOPAGO_ALIAS && process.env.MERCADOPAGO_CVU && process.env.MERCADOPAGO_ACCOUNT_HOLDER)) {
+      return res.status(400).json({ error: 'Mercado Pago no está disponible por el momento.' });
+    }
+    const cashAmount = orderData.cashAmount === undefined || orderData.cashAmount === ''
+      ? ''
+      : Number(orderData.cashAmount);
+    if (cashAmount !== '' && (!Number.isFinite(cashAmount) || cashAmount < 0)) {
+        return res.status(400).json({ error: 'El monto de efectivo no es válido.' });
     }
 
     const items = [];
@@ -828,22 +938,39 @@ app.post('/api/orders', orderLimiter, (req, res) => {
         }
       });
     }
-    const deliveryType = ['delivery', 'pickup'].includes(orderData.deliveryType) ? orderData.deliveryType : 'delivery';
-    const paymentMethod = ['cash', 'transfer', 'mercadopago'].includes(orderData.paymentMethod)
-      ? orderData.paymentMethod
-      : 'cash';
+    const deliveryType = orderData.deliveryType;
+    const paymentMethod = orderData.paymentMethod;
     const itemsByBusiness = new Map();
     for (const item of items) {
       const businessId = item.product.businessId;
       if (!itemsByBusiness.has(businessId)) itemsByBusiness.set(businessId, []);
       itemsByBusiness.get(businessId).push(item);
     }
+    if (paymentMethod === 'transfer') {
+      const missingAlias = [...itemsByBusiness.keys()]
+        .some(businessId => !String(db.getBusinessById(businessId).transferAlias || '').trim());
+      if (missingAlias) {
+        return res.status(400).json({
+          error: 'La transferencia no está disponible: uno o más comercios del pedido aún no configuraron su alias.'
+        });
+      }
+    }
 
-    const newOrders = [];
+    const orderPlans = [];
     const rawOrderId = orderData.id || orderData.orderId;
     const clientOrderId = typeof rawOrderId === 'string' && /^ORD-[A-Za-z0-9_-]{3,20}$/.test(rawOrderId)
       ? rawOrderId
       : null;
+    const customerAddress = deliveryType === 'delivery'
+      ? sanitizeInput([
+        orderData.address,
+        orderData.apartment ? `Piso/Depto: ${orderData.apartment}` : '',
+        orderData.zone ? `Zona: ${orderData.zone}` : ''
+      ].filter(Boolean).join(' · '), 255)
+      : 'Retiro en Tienda';
+    const deliveryTime = sanitizeInput(orderData.deliveryTime, 100);
+    const comments = sanitizeInput(orderData.comments, 500);
+    const cashAmountText = sanitizeInput(String(orderData.cashAmount || ''), 30);
     let bizIndex = 0;
 
     for (const [businessId, businessItems] of itemsByBusiness) {
@@ -855,27 +982,35 @@ app.post('/api/orders', orderLimiter, (req, res) => {
       const waivedServiceFee = promoState.isPromoActive
         ? Math.round(subtotal * promoState.standardServiceFeeRate)
         : 0;
-      const freeShippingFrom = Number(business.freeShippingFrom) || 45000;
+      const configuredFreeShippingFrom = Number(business.freeShippingFrom);
+      const freeShippingFrom = Number.isFinite(configuredFreeShippingFrom) && configuredFreeShippingFrom >= 0
+        ? configuredFreeShippingFrom
+        : 45000;
       const deliveryFee = Number(business.deliveryFee) >= 0 ? Number(business.deliveryFee) : 1500;
       const effectiveDeliveryFee = deliveryType === 'delivery' && subtotal < freeShippingFrom ? deliveryFee : 0;
       const merchantPayout = subtotal + effectiveDeliveryFee;
       const total = subtotal + serviceFee + effectiveDeliveryFee;
-
-      let candidateId = undefined;
-      if (clientOrderId) {
-        const desiredId = itemsByBusiness.size === 1 ? clientOrderId : `${clientOrderId}-${bizIndex}`;
-        if (!db.getOrderById(desiredId)) candidateId = desiredId;
+      if (!Number.isFinite(total) || total > 99_999_999.99) {
+        return res.status(400).json({ error: 'El total del pedido supera el límite permitido.' });
       }
 
-      newOrders.push(db.addOrder({
-        ...(candidateId ? { id: candidateId } : {}),
-        customerName: sanitizeInput(orderData.customerName, 80),
-        customerPhone: typeof orderData.customerPhone === 'string'
-          ? orderData.customerPhone.replace(/\D/g, '').slice(0, 20)
-          : '',
+      const desiredId = clientOrderId
+        ? (itemsByBusiness.size === 1 ? clientOrderId : `${clientOrderId}-${bizIndex}`)
+        : undefined;
+      orderPlans.push({
+        ...(desiredId ? { id: desiredId } : {}),
+        customerName,
+        customerPhone,
         deliveryType,
-        customerAddress: sanitizeInput(orderData.address, 200),
+        customerAddress,
+        deliveryTime,
+        comments,
+        cashAmount: cashAmountText,
         paymentMethod,
+        ...(paymentMethod === 'transfer' ? {
+          transferAlias: sanitizeInput(business.transferAlias, 100),
+          transferAccountHolder: sanitizeInput(business.transferAccountHolder, 100)
+        } : {}),
         subtotal,
         serviceFee,
         serviceFeeRate: promoState.serviceFeeRate,
@@ -886,8 +1021,55 @@ app.post('/api/orders', orderLimiter, (req, res) => {
         total,
         items: businessItems,
         businessId
-      }));
+      });
     }
+
+    const existingOrders = new Map();
+    if (clientOrderId) {
+      const plannedIds = new Set(orderPlans.map(order => order.id));
+      const existingClientOrders = db.getOrders().filter(order =>
+        order.id === clientOrderId || String(order.id).startsWith(`${clientOrderId}-`)
+      );
+      if (existingClientOrders.some(order => !plannedIds.has(order.id))) {
+        return res.status(409).json({ error: 'El identificador del pedido ya fue utilizado con otro contenido.' });
+      }
+
+      const getItemSignature = orderItems => JSON.stringify(orderItems.map(item => ({
+        productId: item.product && item.product.id,
+        quantity: item.quantity,
+        customization: item.customization || {}
+      })));
+      for (const plannedOrder of orderPlans) {
+        const existingOrder = db.getOrderById(plannedOrder.id);
+        if (!existingOrder) continue;
+
+        const isSameRequest =
+          existingOrder.customerName === plannedOrder.customerName &&
+          existingOrder.customerPhone === plannedOrder.customerPhone &&
+          existingOrder.deliveryType === plannedOrder.deliveryType &&
+          existingOrder.customerAddress === plannedOrder.customerAddress &&
+          existingOrder.deliveryTime === plannedOrder.deliveryTime &&
+          existingOrder.comments === plannedOrder.comments &&
+          existingOrder.cashAmount === plannedOrder.cashAmount &&
+          existingOrder.paymentMethod === plannedOrder.paymentMethod &&
+          existingOrder.businessId === plannedOrder.businessId &&
+          getItemSignature(existingOrder.items || []) === getItemSignature(plannedOrder.items);
+        if (!isSameRequest) {
+          return res.status(409).json({ error: 'El identificador del pedido ya fue utilizado con otro contenido.' });
+        }
+        existingOrders.set(plannedOrder.id, existingOrder);
+      }
+    }
+
+    const orderGrandTotal = orderPlans.reduce(
+      (sum, order) => sum + Number((existingOrders.get(order.id) || order).total),
+      0
+    );
+    if (paymentMethod === 'cash' && cashAmount !== '' && cashAmount < orderGrandTotal) {
+      return res.status(400).json({ error: 'El efectivo indicado no alcanza para cubrir el total del pedido.' });
+    }
+    const newOrders = orderPlans.map(order => existingOrders.get(order.id) || db.addOrder(order));
+    await db.flush();
     res.json({ success: true, order: newOrders[0], orders: newOrders });
   } catch (err) {
     console.error('Error al registrar pedido:', err);
@@ -911,33 +1093,62 @@ const disputeLimiter = rateLimit({
 });
 
 // POST /api/orders/:id/dispute — El comprador reporta que el local no respondio
-app.post('/api/orders/:id/dispute', disputeLimiter, (req, res) => {
+app.post('/api/orders/:id/dispute', disputeLimiter, async (req, res) => {
   try {
     const { id } = req.params;
-    const { customerName, customerPhone, reason } = req.body;
-    const order = db.getOrderById(id);
+    const { customerName, customerPhone, reason, relatedOrderIds } = req.body;
+    const normalizedPhone = typeof customerPhone === 'string' ? customerPhone.replace(/\D/g, '').slice(0, 20) : '';
+    const baseOrderId = id.replace(/-\d+$/, '');
+    const orderIds = Array.isArray(relatedOrderIds)
+      ? [...new Set([
+        id,
+        ...relatedOrderIds.filter(value =>
+          typeof value === 'string' &&
+          /^ORD-[A-Za-z0-9_-]{3,30}$/.test(value) &&
+          value.replace(/-\d+$/, '') === baseOrderId
+        )
+      ])].slice(0, 30)
+      : [id];
+    const orders = orderIds.map(orderId => db.getOrderById(orderId));
+    const order = orders[0];
     if (!order) {
       return res.status(404).json({ error: 'Pedido no encontrado.' });
     }
+    if (!normalizedPhone || normalizedPhone !== String(order.customerPhone || '').replace(/\D/g, '')) {
+      return res.status(403).json({ error: 'El teléfono no coincide con los datos del pedido.' });
+    }
     const validReasons = ['no_response', 'wrong_order', 'quality_issue', 'cancellation_revocation', 'arrepentimiento', 'other'];
     const safeReason = validReasons.includes(reason) ? reason : 'no_response';
-    const existing = db.getDisputeByOrderId(id);
-    if (existing) {
-      return res.json({ success: true, dispute: existing, alreadyExists: true });
+    const matchesCustomerPhone = relatedOrder =>
+      relatedOrder &&
+      String(relatedOrder.customerPhone || '').replace(/\D/g, '') === normalizedPhone;
+    const validRelatedOrderIds = orders
+      .filter(matchesCustomerPhone)
+      .map(relatedOrder => relatedOrder.id);
+    const disputes = [];
+    for (const relatedOrder of orders) {
+      if (!matchesCustomerPhone(relatedOrder)) continue;
+      const existingDispute = db.getDisputeByOrderId(relatedOrder.id);
+      const dispute = existingDispute || db.createDispute({
+        orderId: relatedOrder.id,
+        relatedOrderIds: validRelatedOrderIds,
+        customerName: sanitizeInput(customerName || relatedOrder.customerName, 80),
+        customerPhone: normalizedPhone,
+        businessId: relatedOrder.businessId || '',
+        total: relatedOrder.total || 0,
+        reason: safeReason
+      });
+      if (!existingDispute) {
+        db.updateOrderStatus(relatedOrder.id, 'en_disputa');
+      }
+      disputes.push(dispute);
     }
-    const dispute = db.createDispute({
-      orderId: id,
-      customerName: sanitizeInput(customerName || order.customerName, 80),
-      customerPhone: typeof (customerPhone || order.customerPhone) === 'string'
-        ? (customerPhone || order.customerPhone).replace(/\D/g, '').slice(0, 20)
-        : '',
-      businessId: order.businessId || '',
-      total: order.total || 0,
-      reason: safeReason
-    });
-    db.updateOrderStatus(id, 'en_disputa');
-    console.log('Disputa creada: ' + dispute.id + ' para pedido ' + id);
-    res.json({ success: true, dispute });
+    if (disputes.length === 0) {
+      return res.status(403).json({ error: 'No se pudieron validar los pedidos relacionados.' });
+    }
+    await db.flush();
+    console.log('Disputa creada para pedido ' + id);
+    res.json({ success: true, dispute: disputes[0], disputes });
   } catch (err) {
     console.error('Error al crear disputa:', err);
     res.status(500).json({ error: 'Error al procesar la disputa.' });
@@ -960,7 +1171,7 @@ app.get('/api/admin/disputes', (req, res) => {
 });
 
 // PATCH /api/admin/disputes/:id — Faku resuelve la disputa
-app.patch('/api/admin/disputes/:id', (req, res) => {
+app.patch('/api/admin/disputes/:id', async (req, res) => {
   try {
     const adminToken = req.headers['x-admin-token'];
     const expectedToken = process.env.ADMIN_TOKEN;
@@ -980,10 +1191,15 @@ app.patch('/api/admin/disputes/:id', (req, res) => {
     }
     const resolved = db.resolveDispute(id, resolution, sanitizeInput(resolutionNote, 300));
     if (resolution === 'reembolso') {
-      db.updateOrderStatus(dispute.orderId, 'reembolsado');
+      for (const orderId of dispute.relatedOrderIds || [dispute.orderId]) {
+        db.updateOrderStatus(orderId, 'reembolsado');
+      }
     } else if (resolution === 'rechazo') {
-      db.updateOrderStatus(dispute.orderId, 'disputa_cerrada');
+      for (const orderId of dispute.relatedOrderIds || [dispute.orderId]) {
+        db.updateOrderStatus(orderId, 'disputa_cerrada');
+      }
     }
+    await db.flush();
     res.json({ success: true, dispute: resolved });
   } catch (err) {
     console.error('Error al resolver disputa:', err);
@@ -1036,10 +1252,11 @@ app.get('/api/admin/promo', (req, res) => {
 });
 
 // PATCH /api/admin/promo/settings — Configurar cantidad de cafeterías fundadoras (ej: 3 o 5) y días
-app.patch('/api/admin/promo/settings', (req, res) => {
+app.patch('/api/admin/promo/settings', async (req, res) => {
   try {
     if (!verifyAdminTokenHeader(req, res)) return;
     const updated = db.savePromoSettings(req.body || {});
+    await db.flush();
     res.json({
       success: true,
       settings: updated,
@@ -1052,7 +1269,7 @@ app.patch('/api/admin/promo/settings', (req, res) => {
 });
 
 // PATCH /api/admin/promo/business/:id — Activar / reiniciar 30 días / extender / finalizar promo de una cafetería
-app.patch('/api/admin/promo/business/:id', (req, res) => {
+app.patch('/api/admin/promo/business/:id', async (req, res) => {
   try {
     if (!verifyAdminTokenHeader(req, res)) return;
     const { id } = req.params;
@@ -1065,6 +1282,7 @@ app.patch('/api/admin/promo/business/:id', (req, res) => {
     if (!updated) {
       return res.status(404).json({ error: 'Comercio no encontrado.' });
     }
+    await db.flush();
     res.json({ success: true, business: updated });
   } catch (err) {
     res.status(500).json({ error: 'Error al actualizar promoción del comercio.' });
@@ -1137,10 +1355,18 @@ app.get('*', (req, res) => {
 });
 
 // Iniciar Servidor
-app.listen(PORT, () => {
+async function startServer() {
+  await db.ready;
+  app.listen(PORT, () => {
   console.log(`=======================================================`);
   console.log(`🛡️ GOD MARKET Backend Protegido activo en puerto ${PORT}`);
   console.log(`🔒 Blindaje activo: Helmet + Rate Limiter + JWT + Whitelist`);
   console.log(`🌐 Listo para Hostinger (Node.js en Producción)`);
   console.log(`=======================================================`);
+  });
+}
+
+startServer().catch(error => {
+  console.error('No se pudo iniciar GOD MARKET:', error.message);
+  process.exitCode = 1;
 });
