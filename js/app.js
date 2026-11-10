@@ -63,6 +63,7 @@ class GodMarketApp {
     this.updateOrdersBadges();
     this.updateStoreStatusUI();
     this.updateDeliveryUI(window.cartManager.deliveryType);
+    this.initVisitCounter();
     const inRangeToggle = document.getElementById('toggle-filter-in-range');
     if (inRangeToggle) inRangeToggle.checked = this.onlyInRange;
     this.refreshIcons();
@@ -87,6 +88,9 @@ class GodMarketApp {
       if (!response.ok) throw new Error(`Configuración no disponible (${response.status}).`);
       const config = await response.json();
       this.paymentConfig = config.paymentDetails || {};
+      if (config.visits) {
+        this.renderVisitCounter(config.visits);
+      }
     } catch (error) {
       console.warn('No se pudieron cargar los medios de pago configurados:', error.message);
     }
@@ -129,6 +133,57 @@ class GodMarketApp {
     if (mpInfo) mpInfo.style.display = method === 'mercadopago' ? 'block' : 'none';
     if (cashInfo) cashInfo.style.display = method === 'cash' ? 'block' : 'none';
     this.updateTransferPaymentOption();
+  }
+
+  renderVisitCounter(stats = {}) {
+    const total = Math.max(0, Number(stats.total) || 0);
+    const today = Math.max(0, Number(stats.today) || 0);
+    const formattedTotal = total.toLocaleString('es-AR');
+    const formattedToday = today.toLocaleString('es-AR');
+
+    const totalEl = document.getElementById('visit-counter-total');
+    const todayEl = document.getElementById('visit-counter-today');
+    const sideTotalEl = document.getElementById('side-visit-counter-total');
+    const sellerVisitsEl = document.getElementById('stat-total-visits');
+
+    if (totalEl) totalEl.textContent = formattedTotal;
+    if (todayEl) todayEl.textContent = formattedToday;
+    if (sideTotalEl) sideTotalEl.textContent = formattedTotal;
+    if (sellerVisitsEl && !sellerVisitsEl.dataset.hasBusinessSpecific) {
+      sellerVisitsEl.textContent = formattedTotal;
+    }
+  }
+
+  async initVisitCounter() {
+    try {
+      const sessionKey = 'godmarket_visit_recorded';
+      const visitorKey = 'godmarket_visitor_seen';
+      const alreadyRecorded = sessionStorage.getItem(sessionKey) === '1';
+
+      if (!alreadyRecorded) {
+        const isNewVisitor = localStorage.getItem(visitorKey) !== '1';
+        const res = await fetch('/api/visits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isNewVisitor })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          sessionStorage.setItem(sessionKey, '1');
+          localStorage.setItem(visitorKey, '1');
+          this.renderVisitCounter(data);
+          return;
+        }
+      }
+
+      const res = await fetch('/api/visits');
+      if (res.ok) {
+        const data = await res.json();
+        this.renderVisitCounter(data);
+      }
+    } catch (err) {
+      // Silencioso en caso de modo offline
+    }
   }
 
   updateTransferPaymentOption() {
@@ -1120,6 +1175,19 @@ class GodMarketApp {
     this.selectedBusiness = businessId;
     if (businessId !== 'todos' && this.currentCategory === 'favoritos') {
       this.currentCategory = 'todos';
+    }
+    if (businessId && businessId !== 'todos') {
+      try {
+        const bizSessionKey = `godmarket_biz_visit_${businessId}`;
+        if (!sessionStorage.getItem(bizSessionKey)) {
+          sessionStorage.setItem(bizSessionKey, '1');
+          fetch('/api/visits', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ businessId })
+          }).catch(() => {});
+        }
+      } catch (_) {}
     }
     this.renderBusinessesSlider();
     this.renderBusinessSpotlight();

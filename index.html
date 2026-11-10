@@ -427,6 +427,10 @@
             <div id="stat-total-orders" class="seller-stat-val">0</div>
             <div class="seller-stat-lbl">Pedidos</div>
           </div>
+          <div class="seller-stat-item" style="border-right: 1px solid rgba(255,255,255,0.08);">
+            <div id="stat-total-visits" class="seller-stat-val">0</div>
+            <div class="seller-stat-lbl">Visitas</div>
+          </div>
           <div class="seller-stat-item">
             <div class="seller-stat-val">5.0 ⭐</div>
             <div class="seller-stat-lbl">Calificación</div>
@@ -770,6 +774,10 @@
         </div>
 
         <div class="side-drawer-footer">
+          <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.25); border-radius: 999px; padding: 4px 12px; margin-bottom: 6px; font-size: 0.7rem; color: var(--primary);">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #4ADE80; display: inline-block; box-shadow: 0 0 6px #4ADE80;"></span>
+            <span>Visitas: <strong id="side-visit-counter-total">0</strong></span>
+          </div>
           <span>© 2026 GOD MARKET</span>
           <span style="opacity: 0.6; font-size: 0.65rem;">Buenos Aires · Desayunos de Autor</span>
         </div>
@@ -860,11 +868,21 @@
         <span style="color: var(--primary); font-weight: 600;">📍 Palermo · Recoleta · Belgrano · San Telmo · Colegiales</span>
       </p>
 
-      <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;">
+      <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
         <a href="https://wa.me/5491156192616" target="_blank"
           style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: #fff; padding: 9px 18px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 700; box-shadow: 0 4px 16px rgba(37,211,102,0.3);">
           💬 WhatsApp: 11 5619-2616
         </a>
+      </div>
+
+      <!-- Contador de Visitas en Tiempo Real -->
+      <div id="visit-counter-badge" style="display: inline-flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(212, 175, 55, 0.32); border-radius: 999px; padding: 7px 16px; margin-bottom: 18px; font-size: 0.74rem; color: var(--cream-muted); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);">
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; display: inline-block; box-shadow: 0 0 8px #4ADE80;"></span>
+          <span>👁️ Visitas Totales: <strong id="visit-counter-total" style="color: var(--primary); font-weight: 700;">0</strong></span>
+        </span>
+        <span style="opacity: 0.35;">|</span>
+        <span>⚡ Hoy: <strong id="visit-counter-today" style="color: #4ADE80; font-weight: 700;">0</strong></span>
       </div>
 
       <!-- Enlaces Legales & Regulatorios Oficiales -->

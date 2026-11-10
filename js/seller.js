@@ -666,6 +666,23 @@ class SellerPortalManager {
     if (avatarEl) avatarEl.textContent = this.currentBusiness.avatar || '🍰';
     if (zoneEl) zoneEl.textContent = `📍 ${this.currentBusiness.neighborhood}`;
     if (phoneEl) phoneEl.textContent = `📱 WhatsApp: ${this.currentBusiness.phone}`;
+
+    this.loadSellerVisitStats();
+  }
+
+  async loadSellerVisitStats() {
+    if (!this.currentBusiness) return;
+    const visitsEl = document.getElementById('stat-total-visits');
+    if (!visitsEl) return;
+    try {
+      const res = await fetch(`/api/visits?businessId=${encodeURIComponent(this.currentBusiness.id)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const total = Math.max(0, Number(data.total) || 0);
+      const bizViews = Math.max(0, Number(data.businessVisits) || 0);
+      visitsEl.textContent = total.toLocaleString('es-AR');
+      visitsEl.title = `Visitas totales en la web: ${total.toLocaleString('es-AR')} · Hoy: ${(data.today || 0).toLocaleString('es-AR')} · Vistas de tu tienda: ${bizViews.toLocaleString('es-AR')}`;
+    } catch (_) {}
   }
 
   async renderSellerProducts() {
