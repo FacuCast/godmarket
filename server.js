@@ -57,6 +57,7 @@ app.use(helmet({
       fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
       imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
       connectSrc: ["'self'", 'https://accounts.google.com', 'https://oauth2.googleapis.com', 'https://api.cloudinary.com', 'https://nominatim.openstreetmap.org', 'https://unpkg.com', 'https://cdn.jsdelivr.net'],
+      workerSrc: ["'self'", 'blob:'],
       frameSrc: ["'self'", 'https://accounts.google.com'],
       objectSrc: ["'none'"],
       baseUri: ["'self'"],
