@@ -57,11 +57,17 @@ class ProductManager {
         }
       }
 
+      if (window.cartManager && typeof window.cartManager.syncWithCatalog === 'function') {
+        window.cartManager.syncWithCatalog(this.products);
+      }
+
       if (window.app) {
         window.app.updateTransferPaymentOption?.();
         window.app.renderBusinessesSlider?.();
         window.app.renderStoresCards?.();
+        window.app.renderBusinessSpotlight?.();
         window.app.renderProducts?.();
+        window.app.updateCartUI?.();
       }
     } catch (e) {
       console.warn('Sincronización con backend:', e.message);
@@ -308,6 +314,16 @@ class ProductManager {
     const updated = this.products.filter(p => p.id !== id);
     this.saveProducts(updated);
     return updated;
+  }
+
+  updateProduct(id, updates) {
+    const index = this.products.findIndex(p => p.id === id);
+    if (index >= 0) {
+      this.products[index] = { ...this.products[index], ...updates };
+      this.saveProducts(this.products);
+      return this.products[index];
+    }
+    return null;
   }
 }
 

@@ -62,6 +62,9 @@ class GodMarketApp {
     this.updateCartUI();
     this.updateOrdersBadges();
     this.updateStoreStatusUI();
+    this.updateDeliveryUI(window.cartManager.deliveryType);
+    const inRangeToggle = document.getElementById('toggle-filter-in-range');
+    if (inRangeToggle) inRangeToggle.checked = this.onlyInRange;
     this.refreshIcons();
 
     // Solicitar ubicación real automáticamente al ingresar
@@ -201,9 +204,10 @@ class GodMarketApp {
           .catch(err => console.log('Error al registrar ServiceWorker:', err));
       });
 
+      const hadController = Boolean(navigator.serviceWorker.controller);
       let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
+        if (hadController && !refreshing) {
           refreshing = true;
           window.location.reload();
         }
@@ -319,10 +323,13 @@ class GodMarketApp {
       btnAddModal.addEventListener('click', () => {
         if (this.selectedProductForModal) {
           const qty = parseInt(document.getElementById('modal-qty-val').textContent, 10);
-          const dedication = document.getElementById('modal-dedication')?.value.trim() || '';
-          const candle = document.getElementById('modal-candle-checkbox')?.checked || false;
-          const note = document.getElementById('modal-note')?.value.trim() || '';
-          const flavor = document.getElementById('modal-selected-flavor')?.value || 'Dulce de Leche';
+          const customSection = document.getElementById('modal-customization-options');
+          const hasCustom = customSection && customSection.style.display !== 'none';
+          const dedication = hasCustom ? (document.getElementById('modal-dedication')?.value.trim() || '') : '';
+          const candle = hasCustom ? (document.getElementById('modal-candle-checkbox')?.checked || false) : false;
+          const note = hasCustom ? (document.getElementById('modal-note')?.value.trim() || '') : '';
+          const rawFlavor = hasCustom ? (document.getElementById('modal-selected-flavor')?.value || '') : '';
+          const flavor = (rawFlavor && rawFlavor !== 'Clásica de la Casa' && rawFlavor !== 'Clásica') ? rawFlavor : '';
 
           window.cartManager.addItem(this.selectedProductForModal, qty, { dedication, candle, note, flavor });
           this.showToast(`✨ ${qty}x ${this.selectedProductForModal.name} agregado`);
@@ -668,9 +675,28 @@ class GodMarketApp {
     this.currentAddress = `${neighborhood}`;
     localStorage.setItem('godmarket_user_address', this.currentAddress);
 
-    // Si se pasan coordenadas fijas del barrio, guardarlas
+    // Si se pasan coordenadas fijas del barrio, guardarlas; si es dirección manual, geocodificar
     if (lat !== null && lng !== null) {
       this.saveUserCoords({ lat, lng });
+    } else if (neighborhood && neighborhood.length >= 3) {
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(neighborhood + ', Buenos Aires, Argentina')}&limit=1`, {
+        headers: { 'Accept-Language': 'es' }
+      })
+        .then(r => r.ok ? r.json() : [])
+        .then(results => {
+          if (Array.isArray(results) && results.length > 0) {
+            const parsedLat = parseFloat(results[0].lat);
+            const parsedLng = parseFloat(results[0].lon);
+            if (Number.isFinite(parsedLat) && Number.isFinite(parsedLng)) {
+              this.saveUserCoords({ lat: parseFloat(parsedLat.toFixed(5)), lng: parseFloat(parsedLng.toFixed(5)) });
+              this.renderStoresCards();
+              this.renderBusinessesSlider();
+              this.renderBusinessSpotlight();
+              this.renderProducts();
+            }
+          }
+        })
+        .catch(() => {});
     }
 
     this.renderLocationBar();
@@ -754,11 +780,13 @@ class GodMarketApp {
   }
 
   setOnlyInRange(checked) {
-    this.onlyInRange = checked;
-    localStorage.setItem('godmarket_only_in_range', checked ? 'true' : 'false');
+    this.onlyInRange = Boolean(checked);
+    localStorage.setItem('godmarket_only_in_range', this.onlyInRange ? 'true' : 'false');
+    const toggle = document.getElementById('toggle-filter-in-range');
+    if (toggle) toggle.checked = this.onlyInRange;
     this.renderStoresCards();
     this.renderProducts();
-    if (checked) {
+    if (this.onlyInRange) {
       this.showToast('🛵 Mostrando solo locales con envío a tu zona');
     } else {
       this.showToast('✨ Mostrando todos los locales del marketplace');
@@ -870,8 +898,13 @@ class GodMarketApp {
     if (this.favorites && this.favorites.length > 0) {
       this.currentCategory = 'favoritos';
       this.selectedBusiness = 'todos';
+      this.renderCategories();
+      this.renderStories();
+      this.renderBusinessSpotlight();
       this.renderProducts();
       this.showToast(`Mostrando tus ${this.favorites.length} favoritos ❤️`, 'gold');
+      const prodSec = document.getElementById('products-section-container');
+      if (prodSec) prodSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
       this.showToast('¡Toca el corazón en cualquier delicia para guardarla en Favoritos! 🔖', 'gold');
     }
@@ -914,9 +947,10 @@ class GodMarketApp {
 
   switchDeliveryType(type) {
     window.cartManager.setDeliveryType(type);
-    document.querySelectorAll('.side-delivery-tab, .delivery-tab').forEach(tab => {
+    document.querySelectorAll('.side-delivery-btn, .side-delivery-tab, .delivery-tab').forEach(tab => {
       tab.classList.toggle('active', tab.dataset.type === type);
     });
+    this.updateDeliveryUI(type);
     this.showToast(type === 'delivery' ? '🛵 Modo: Envío a domicilio por vendedor' : '🏪 Modo: Retiro en local', 'gold');
   }
 
@@ -1078,8 +1112,15 @@ class GodMarketApp {
     container.innerHTML = html;
   }
 
+  filterByBusiness(businessId) {
+    this.setBusiness(businessId);
+  }
+
   setBusiness(businessId) {
     this.selectedBusiness = businessId;
+    if (businessId !== 'todos' && this.currentCategory === 'favoritos') {
+      this.currentCategory = 'todos';
+    }
     this.renderBusinessesSlider();
     this.renderBusinessSpotlight();
     this.renderStories();
@@ -1117,7 +1158,7 @@ class GodMarketApp {
           <div class="store-profile-avatar-wrap">${this.escapeHTML(business.avatar || '🍰')}</div>
           
           <div class="store-profile-header-actions">
-            <a href="https://wa.me/${business.phone || '5491156192616'}?text=${encodeURIComponent(`¡Hola ${business.name}! Los contacto desde GOD MARKET por sus propuestas.`)}" 
+            <a href="https://wa.me/${window.formatWhatsAppPhone ? window.formatWhatsAppPhone(business.phone || business.whatsapp) : (business.phone || '5491156192616')}?text=${encodeURIComponent(`¡Hola ${business.name}! Los contacto desde GOD MARKET por sus propuestas.`)}" 
                target="_blank" class="btn-chat-seller">
               <span>💬</span>
               <span>Hablar con el Vendedor</span>
@@ -1223,7 +1264,18 @@ class GodMarketApp {
     const container = document.getElementById('products-section-container');
     if (!container) return;
 
-    let products = window.productManager.search(this.searchQuery, this.selectedBusiness, this.currentCategory);
+    const effectiveCategory = this.currentCategory === 'favoritos' ? 'todos' : this.currentCategory;
+    let products = window.productManager.search(this.searchQuery, this.selectedBusiness, effectiveCategory);
+
+    if (this.currentCategory === 'favoritos') {
+      products = products.filter(p => this.favorites.includes(p.id));
+    }
+
+    const filteredBusinesses = window.productManager.getBusinessesFiltered(this.currentFilter, this.userCoords, this.onlyInRange);
+    const allowedBizIds = new Set(filteredBusinesses.map(b => b.id));
+    if (this.selectedBusiness === 'todos' && (this.onlyInRange || this.currentFilter !== 'all')) {
+      products = products.filter(p => allowedBizIds.has(p.businessId));
+    }
 
     if (products.length === 0) {
       const totalInMarket = window.productManager.getAllProducts().length;
@@ -1248,7 +1300,7 @@ class GodMarketApp {
           <div style="font-size: 3rem; margin-bottom: 10px;">🥐</div>
           <h3>No encontramos desayunos ni meriendas</h3>
           <p style="font-size: 0.85rem;">Prueba buscando otra pastelería, producto o cambiando de categoría.</p>
-          <button class="btn-primary" onclick="window.app.setBusiness('todos'); window.app.setCategory('todos');" style="margin: 16px auto 0; max-width: 240px; padding: 10px 18px; font-size: 0.85rem;">
+          <button class="btn-primary" onclick="window.app.setOnlyInRange(false); window.app.setFilter('all'); window.app.setBusiness('todos'); window.app.setCategory('todos');" style="margin: 16px auto 0; max-width: 240px; padding: 10px 18px; font-size: 0.85rem;">
             Ver todo el Marketplace
           </button>
         </div>
@@ -1256,9 +1308,9 @@ class GodMarketApp {
       return;
     }
 
-    // Si estamos viendo "todos" sin búsqueda y sin negocio específico seleccionado, agrupar por los 7 negocios
+    // Si estamos viendo "todos" sin búsqueda y sin negocio específico seleccionado, agrupar por los negocios filtrados
     if (this.selectedBusiness === 'todos' && this.currentCategory === 'todos' && !this.searchQuery) {
-      const businesses = window.productManager.getAllBusinesses();
+      const businesses = filteredBusinesses;
       let html = '';
 
       businesses.forEach(b => {
@@ -1305,7 +1357,8 @@ class GodMarketApp {
           desayunos: '☀️ Desayunos Sorpresa',
           meriendas: '☕ Meriendas & Té de la Tarde',
           brunch: '🥐 Brunch & Opciones Saladas',
-          boxes: '🎁 Boxes de Cumpleaños & Regalo'
+          boxes: '🎁 Boxes de Cumpleaños & Regalo',
+          favoritos: '❤️ Tus Favoritos Guardados'
         };
         title = catMap[this.currentCategory] || 'Categoría';
       }
@@ -1455,11 +1508,14 @@ class GodMarketApp {
     }
 
     // Manejar selección interactiva de gustos / rellenos con cambio de foto en vivo
+    const supportsCustom = product.category === 'tortas' || product.category === 'desayunos' || product.category === 'boxes';
     const flavorChips = document.querySelectorAll('#modal-flavor-chips .flavor-chip');
     const hiddenFlavor = document.getElementById('modal-selected-flavor');
+    const flavorBadge = document.getElementById('modal-flavor-badge');
     const flavorBadgeText = document.getElementById('modal-flavor-badge-text');
-    if (hiddenFlavor) hiddenFlavor.value = 'Dulce de Leche';
-    if (flavorBadgeText) flavorBadgeText.textContent = '🍯 Dulce de Leche';
+    if (hiddenFlavor) hiddenFlavor.value = supportsCustom ? 'Clásica de la Casa' : '';
+    if (flavorBadge) flavorBadge.style.display = supportsCustom ? 'flex' : 'none';
+    if (flavorBadgeText) flavorBadgeText.textContent = '🍰 Clásica';
 
     flavorChips.forEach((chip, i) => {
       chip.classList.toggle('active', i === 0);
@@ -1468,17 +1524,21 @@ class GodMarketApp {
         chip.classList.add('active');
         const flavor = chip.dataset.flavor;
         if (hiddenFlavor) hiddenFlavor.value = flavor;
-        if (flavorBadgeText) flavorBadgeText.textContent = '🍯 ' + flavor;
+        if (flavorBadgeText) {
+          flavorBadgeText.textContent = (flavor === 'Clásica de la Casa' || flavor === 'Clásica')
+            ? '🍰 Clásica'
+            : '🍯 ' + flavor;
+        }
         
         // Cambiar la imagen del pastel según el sabor elegido con animación suave
         this.switchModalCakeImage(flavor, product);
       };
     });
 
-    // Mostrar sección de velita/dedicatoria y gustos especialmente para tortas y desayunos
+    // Mostrar sección de velita/dedicatoria y gustos especialmente para tortas, desayunos y boxes
     const customSection = document.getElementById('modal-customization-options');
     if (customSection) {
-      customSection.style.display = (product.category === 'tortas' || product.category === 'desayunos') ? 'block' : 'none';
+      customSection.style.display = supportsCustom ? 'block' : 'none';
     }
 
     // Actualizar texto del botón con precio calculado
@@ -1493,11 +1553,14 @@ class GodMarketApp {
 
     // Catálogo fotográfico gourmet según sabor/relleno
     const FLAVOR_IMAGES = {
+      'Clásica de la Casa': (product || this.selectedProductForModal)?.image,
+      'Clásica': (product || this.selectedProductForModal)?.image,
+      'Dulce de Leche Repostero': 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=800&q=80',
       'Dulce de Leche': 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=800&q=80',
       'Nutella & Avellanas': 'https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?auto=format&fit=crop&w=800&q=80',
+      'Frutos Rojos & Crema': 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=800&q=80',
       'Frutos Rojos': 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=800&q=80',
-      'Crema Bariloche': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
-      'Clásica': (product || this.selectedProductForModal)?.image
+      'Crema Bariloche': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80'
     };
 
     const targetUrl = FLAVOR_IMAGES[flavor] || (product || this.selectedProductForModal)?.image;
@@ -1746,9 +1809,19 @@ class GodMarketApp {
     if (order.paymentMethod === 'transfer') {
       if (transferBox) transferBox.style.display = 'block';
       if (transferBox) {
+        let paymentsToRender = Array.isArray(order.transferPayments) && order.transferPayments.length > 0
+          ? order.transferPayments
+          : [];
+        if (paymentsToRender.length === 0 && Array.isArray(order.items) && window.checkoutHandler) {
+          paymentsToRender = window.checkoutHandler.getTransferPayments({
+            items: order.items,
+            deliveryType: order.deliveryType || 'delivery',
+            getServiceFeeRateForItem: (it) => window.cartManager ? window.cartManager.getServiceFeeRateForItem(it) : 0
+          });
+        }
         transferBox.innerHTML = `
           <div class="ticket-alias-header"><span>🏦</span> Transfiere a cada comercio:</div>
-          ${window.checkoutHandler.renderTransferDetails(order.transferPayments || [])}
+          ${window.checkoutHandler.renderTransferDetails(paymentsToRender)}
         `;
       }
       if (mpBox) mpBox.style.display = 'none';
@@ -1912,6 +1985,42 @@ class GodMarketApp {
   openOrdersHistoryModal() {
     this.renderOrdersHistoryList();
     this.openModal('orders-history-modal');
+    this.syncOrdersHistoryStatuses();
+  }
+
+  async syncOrdersHistoryStatuses() {
+    const history = window.checkoutHandler?.getOrderHistory() || [];
+    if (!history.length) return;
+    let updated = false;
+
+    await Promise.all(history.slice(0, 10).map(async (order) => {
+      const targetId = (Array.isArray(order.serverOrderIds) && order.serverOrderIds[0]) || order.orderId;
+      const phone = (order.formData && order.formData.phone) || order.customerPhone || '';
+      if (!targetId || !phone) return;
+      try {
+        const res = await fetch(`/api/orders/${encodeURIComponent(targetId)}/status?phone=${encodeURIComponent(phone)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && data.success) {
+          if (data.status && order.status !== data.status) {
+            order.status = data.status;
+            updated = true;
+          }
+          if (data.dispute && data.dispute.status && order.disputeStatus !== data.dispute.status) {
+            order.disputeStatus = data.dispute.status;
+            order.disputeResolutionNote = data.dispute.resolutionNote || '';
+            updated = true;
+          }
+        }
+      } catch (e) {}
+    }));
+
+    if (updated) {
+      try {
+        localStorage.setItem('dulce_orders_history', JSON.stringify(history));
+      } catch (e) {}
+      this.renderOrdersHistoryList();
+    }
   }
 
   getArgentinaTime() {
@@ -1971,11 +2080,17 @@ class GodMarketApp {
 
     if (banner) banner.style.display = isOpen ? 'none' : 'block';
 
+    if (chipAfternoon) {
+      chipAfternoon.dataset.time = 'Hoy por la tarde (16:00 a 19:30 hs)';
+      chipAfternoon.innerHTML = '🕒 Hoy por la tarde';
+    }
+
     if (isOpen) {
       if (chipNow) {
         chipNow.style.display = 'inline-flex';
         chipNow.classList.add('active');
       }
+      if (chipAfternoon) chipAfternoon.classList.remove('active');
       if (chipTomorrow) chipTomorrow.classList.remove('active');
       if (timeInput && (!timeInput.value || timeInput.value.includes('Mañana') || timeInput.value.includes('desde 08:30'))) {
         timeInput.value = 'Lo antes posible (Ahora)';
@@ -1994,8 +2109,10 @@ class GodMarketApp {
           chipAfternoon.innerHTML = '☀️ Hoy desde 08:30 hs';
           chipAfternoon.classList.add('active');
         }
+        if (chipTomorrow) chipTomorrow.classList.remove('active');
         if (timeInput) timeInput.value = 'Hoy desde 08:30 hs';
       } else {
+        if (chipAfternoon) chipAfternoon.classList.remove('active');
         if (chipTomorrow) {
           chipTomorrow.classList.add('active');
         }
@@ -2038,12 +2155,24 @@ class GodMarketApp {
         ? '🏪 Retiro en Tienda'
         : `📍 ${this.escapeHTML(order.formData?.address || 'Envío a Domicilio')}${order.formData?.zone ? ` (${this.escapeHTML(order.formData.zone)})` : ''}`;
 
+      const orderStatusLabels = {
+        pendiente: { label: '⏳ Pendiente de confirmación', color: '#FFB703' },
+        en_preparacion: { label: '👨‍🍳 En preparación', color: '#38BDF8' },
+        despachado: { label: '🛵 En camino / Listo', color: '#A78BFA' },
+        entregado: { label: '✅ Entregado', color: '#4ADE80' },
+        en_disputa: { label: '⚠️ En revisión de soporte', color: '#F87171' },
+        reembolsado: { label: '💸 Reembolsado', color: '#4ADE80' },
+        disputa_cerrada: { label: '🔒 Caso cerrado', color: '#94A3B8' }
+      };
+      const statusMeta = orderStatusLabels[order.status || 'pendiente'] || orderStatusLabels.pendiente;
+
       return `
         <div class="order-history-card">
           <div class="order-history-header">
             <div>
-              <div class="order-history-id">
+              <div class="order-history-id" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <span>#${this.escapeHTML(order.orderId)}</span>
+                <span style="font-size: 0.7rem; font-weight: 700; color: ${statusMeta.color}; background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 999px; border: 1px solid ${statusMeta.color}40;">${statusMeta.label}</span>
               </div>
               <div class="order-history-date">📅 ${dateStr}</div>
             </div>
@@ -2527,9 +2656,9 @@ class GodMarketApp {
     const mapEl = document.getElementById('delivery-map');
     if (!mapEl || typeof L === 'undefined') return;
 
-    // Coordenadas por defecto (Buenos Aires / Centro)
-    const defaultLat = -34.6037;
-    const defaultLng = -58.3816;
+    // Coordenadas iniciales (ubicación del usuario o Buenos Aires Centro)
+    const defaultLat = (this.userCoords && typeof this.userCoords.lat === 'number') ? this.userCoords.lat : -34.6037;
+    const defaultLng = (this.userCoords && typeof this.userCoords.lng === 'number') ? this.userCoords.lng : -58.3816;
 
     this.deliveryMap = L.map('delivery-map', {
       center: [defaultLat, defaultLng],
@@ -2613,6 +2742,9 @@ class GodMarketApp {
   }
 
   async reverseGeocode(lat, lng) {
+    if (Number.isFinite(Number(lat)) && Number.isFinite(Number(lng))) {
+      this.saveUserCoords({ lat: parseFloat(Number(lat).toFixed(5)), lng: parseFloat(Number(lng).toFixed(5)) });
+    }
     const statusEl = document.getElementById('map-address-status');
     if (statusEl) statusEl.textContent = '⏳ Identificando calle y altura...';
 

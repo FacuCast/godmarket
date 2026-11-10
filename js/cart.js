@@ -98,6 +98,40 @@ class CartManager {
     this.saveCart();
   }
 
+  syncWithCatalog(products) {
+    if (!Array.isArray(products) || this.items.length === 0) return;
+    const catalogMap = new Map(products.map(p => [p.id, p]));
+    let changed = false;
+    const nextItems = [];
+    for (const item of this.items) {
+      if (!item || !item.product) {
+        changed = true;
+        continue;
+      }
+      const fresh = catalogMap.get(item.product.id);
+      if (!fresh || fresh.isAvailable === false) {
+        changed = true;
+        continue;
+      }
+      if (
+        item.product.price !== fresh.price ||
+        item.product.name !== fresh.name ||
+        item.product.image !== fresh.image ||
+        item.product.businessName !== fresh.businessName ||
+        item.product.isPromoActive !== fresh.isPromoActive ||
+        item.product.serviceFeeRate !== fresh.serviceFeeRate
+      ) {
+        item.product = { ...item.product, ...fresh };
+        changed = true;
+      }
+      nextItems.push(item);
+    }
+    if (changed) {
+      this.items = nextItems;
+      this.saveCart();
+    }
+  }
+
   setDeliveryType(type) {
     this.deliveryType = type;
     this.notify();

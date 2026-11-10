@@ -89,6 +89,18 @@ class AdminManager {
   populateBusinessSelect() {
     const select = document.getElementById('prod-business');
     if (!select) return;
+    const newBusinessFields = document.getElementById('new-business-fields');
+    if (newBusinessFields) newBusinessFields.style.display = 'none';
+
+    const currentSellerBiz = window.sellerPortal && window.sellerPortal.currentBusiness;
+    if (currentSellerBiz && currentSellerBiz.id) {
+      const esc = window.app && typeof window.app.escapeHTML === 'function'
+        ? (v) => window.app.escapeHTML(String(v || ''))
+        : (v) => String(v || '');
+      select.innerHTML = `<option value="${esc(currentSellerBiz.id)}">${esc(currentSellerBiz.avatar || '🏪')} ${esc(currentSellerBiz.name)} (${esc(currentSellerBiz.neighborhood || 'CABA')})</option>`;
+      select.value = currentSellerBiz.id;
+      return;
+    }
 
     const businesses = window.productManager.getAllBusinesses();
     let options = businesses.map(b => `
@@ -246,20 +258,22 @@ class AdminManager {
         window.app.showToast(`✅ "${name}" publicado por ${targetBusinessName}`);
       }
       window.app.renderBusinessesSlider();
+      window.app.renderStoresCards?.();
+      window.app.renderBusinessSpotlight?.();
       window.app.renderProducts();
       window.app.closeModal('admin-product-modal');
 
       // Limpiar formulario
       document.getElementById('add-product-form').reset();
       this.selectedImageFile = null;
-      this.selectedPresetImage = "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80";
+      this.selectedPresetImage = "assets/images/hero_breakfast.webp";
       const previewImg = document.getElementById('upload-preview-img');
       if (previewImg) previewImg.style.display = 'none';
       document.querySelector('.upload-prompt')?.classList.remove('hidden');
 
     } catch (error) {
       console.error("Error al guardar producto:", error);
-      window.app.showToast("❌ Ocurrió un error al guardar el producto");
+      window.app.showToast("❌ " + (error.message || "Ocurrió un error al guardar el producto"));
     } finally {
       submitBtn.innerHTML = originalBtnText;
       submitBtn.disabled = false;

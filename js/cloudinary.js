@@ -39,22 +39,67 @@ class CloudinaryService {
   }
 
   /**
-   * Sube una imagen mediante el endpoint /api/upload de Vercel (Firmado de forma segura)
+   * Comprime y redimensiona imágenes en el cliente para evitar superar límites de payload en móvil/producción
    */
-  async uploadImage(file) {
-    const base64Data = await new Promise((resolve, reject) => {
+  async compressImageToDataURL(file, maxDimension = 1080, quality = 0.80) {
+    const rawDataUrl = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result);
       reader.onerror = (err) => reject(err);
       reader.readAsDataURL(file);
     });
 
+    if (typeof document === 'undefined' || typeof Image === 'undefined') {
+      return rawDataUrl;
+    }
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          let width = img.naturalWidth || img.width;
+          let height = img.naturalHeight || img.height;
+          if (!width || !height) return resolve(rawDataUrl);
+
+          if (width > maxDimension || height > maxDimension) {
+            const ratio = Math.min(maxDimension / width, maxDimension / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return resolve(rawDataUrl);
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressed = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressed && compressed.length < rawDataUrl.length ? compressed : rawDataUrl);
+        } catch (err) {
+          resolve(rawDataUrl);
+        }
+      };
+      img.onerror = () => resolve(rawDataUrl);
+      img.src = rawDataUrl;
+    });
+  }
+
+  /**
+   * Sube una imagen mediante el endpoint /api/upload de Vercel (Firmado de forma segura)
+   */
+  async uploadImage(file) {
+    const base64Data = await this.compressImageToDataURL(file);
+
     const cloudName = this.getCloudName();
+    const headers = (window.sellerPortal && typeof window.sellerPortal.getAuthHeaders === 'function')
+      ? window.sellerPortal.getAuthHeaders()
+      : { 'Content-Type': 'application/json' };
 
     try {
       const response = await fetch('/api/upload', {
         method: 'POST',
-        headers: window.sellerPortal.getAuthHeaders(),
+        headers,
         body: JSON.stringify({
           image: base64Data,
           cloudName: cloudName
@@ -67,14 +112,14 @@ class CloudinaryService {
           return data.secure_url;
         }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         console.warn("API de Cloudinary devolvió error:", errorData);
       }
     } catch (err) {
       console.warn("Fallo el endpoint /api/upload, usando fallback:", err);
     }
 
-    // Fallback si no hay conexión al backend
+    // Fallback si no hay conexión al backend o faltan credenciales de Cloudinary
     return base64Data;
   }
 }

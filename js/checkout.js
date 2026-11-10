@@ -6,6 +6,19 @@
 
 const WHATSAPP_PHONE = "5491156192616";
 
+function formatWhatsAppPhone(phone, fallback = WHATSAPP_PHONE) {
+  let digits = String(phone || '').replace(/\D/g, '');
+  if (!digits) return fallback;
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.startsWith('549')) return digits;
+  if (digits.startsWith('54') && digits.length >= 12) return '549' + digits.slice(2);
+  if (digits.startsWith('0')) digits = digits.slice(1);
+  if (digits.length === 10) return '549' + digits;
+  if (digits.length >= 11 && !digits.startsWith('54')) return '549' + digits.replace(/^15/, '');
+  return digits;
+}
+window.formatWhatsAppPhone = formatWhatsAppPhone;
+
 // Símbolos tipográficos universales 100% compatibles con WhatsApp y navegadores
 // Garantizan que no aparezcan signos de interrogación ni rombos  en ninguna vista previa ni dispositivo
 const ICONS = {
@@ -41,9 +54,11 @@ class CheckoutHandler {
 
   generateOrderNumber() {
     let lastNum = parseInt(localStorage.getItem('dulce_last_order_num') || '1040', 10);
+    if (!Number.isFinite(lastNum) || lastNum < 1040) lastNum = 1040;
     lastNum += 1;
     localStorage.setItem('dulce_last_order_num', lastNum.toString());
-    return 'ORD-' + lastNum;
+    const uniqueSuffix = Date.now().toString().slice(-4) + Math.floor(10 + Math.random() * 90).toString();
+    return `ORD-${lastNum}${uniqueSuffix}`;
   }
 
   getTransferPayments(cart) {

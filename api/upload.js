@@ -50,6 +50,7 @@ module.exports = async (req, res) => {
     } catch {
       return res.status(401).json({ error: 'La sesión de vendedor no es válida o expiró.' });
     }
+    await db.ready;
     const seller = db.getSellerById(claims.sellerId);
     if (!seller || !seller.hasCompletedProfile || !seller.businessId) {
       return res.status(403).json({ error: 'Solo un vendedor con negocio registrado puede subir imágenes.' });

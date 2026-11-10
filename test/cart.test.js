@@ -92,3 +92,22 @@ test('pickup does not charge delivery for any business', () => {
 
   assert.equal(cart.getEffectiveDeliveryFee(), 0);
 });
+
+test('syncWithCatalog updates modified prices and removes deleted products', () => {
+  const cart = createCart([
+    { id: 'one', deliveryFee: 1500, freeShippingFrom: 45000, serviceFeeRate: 0.2 }
+  ]);
+  cart.items = [
+    { product: { id: 'p1', businessId: 'one', name: 'Croissant', price: 3000 }, quantity: 2, customization: {} },
+    { product: { id: 'p2', businessId: 'one', name: 'Eliminado', price: 5000 }, quantity: 1, customization: {} }
+  ];
+
+  cart.syncWithCatalog([
+    { id: 'p1', businessId: 'one', name: 'Croissant XL', price: 4500, isAvailable: true }
+  ]);
+
+  assert.equal(cart.items.length, 1);
+  assert.equal(cart.items[0].product.price, 4500);
+  assert.equal(cart.items[0].product.name, 'Croissant XL');
+  assert.equal(cart.getSubtotal(), 9000);
+});

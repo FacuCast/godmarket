@@ -11,6 +11,7 @@ const db = require('./db');
 const uploadHandler = require('./api/upload');
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET || JWT_SECRET.length < 32) {
@@ -56,7 +57,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", 'https://accounts.google.com', 'https://fonts.googleapis.com', 'https://unpkg.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
       imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
-      connectSrc: ["'self'", 'https://accounts.google.com', 'https://oauth2.googleapis.com', 'https://api.cloudinary.com', 'https://nominatim.openstreetmap.org', 'https://unpkg.com', 'https://cdn.jsdelivr.net'],
+      connectSrc: ["'self'", 'https://accounts.google.com', 'https://oauth2.googleapis.com', 'https://api.cloudinary.com', 'https://res.cloudinary.com', 'https://nominatim.openstreetmap.org', 'https://*.tile.openstreetmap.org', 'https://images.unsplash.com', 'https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'https://lh3.googleusercontent.com', 'https://unpkg.com', 'https://cdn.jsdelivr.net'],
       workerSrc: ["'self'", 'blob:'],
       frameSrc: ["'self'", 'https://accounts.google.com'],
       objectSrc: ["'none'"],
@@ -97,6 +98,16 @@ const apiLimiter = rateLimit({
   message: { error: 'Demasiadas solicitudes desde esta dirección IP. Intenta en un minuto.' }
 });
 app.use('/api/', apiLimiter);
+
+// Asegurar que la base de datos esté inicializada antes de atender rutas API
+app.use('/api/', async (req, res, next) => {
+  try {
+    await db.ready;
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Límite estricto para creación de pedidos: máximo 30 pedidos en 10 min por IP
 const orderLimiter = rateLimit({
@@ -269,8 +280,39 @@ app.get('/api/config', (req, res) => {
       remainingSlots: db.getRemainingPromoSlots(),
       promoDurationDays: promoSettings.promoDurationDays,
       standardServiceFeeRate: promoSettings.standardServiceFeeRate
-    }
+    },
+    visits: db.getVisitStats()
   });
+});
+
+// 1-B. Contador de Visitas en Tiempo Real
+app.get('/api/visits', (req, res) => {
+  try {
+    const businessId = typeof req.query.businessId === 'string' ? req.query.businessId.trim() : null;
+    res.json({
+      success: true,
+      ...db.getVisitStats(businessId)
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al obtener contador de visitas.' });
+  }
+});
+
+app.post('/api/visits', async (req, res) => {
+  try {
+    const isNewVisitor = Boolean(req.body && req.body.isNewVisitor);
+    const businessId = req.body && typeof req.body.businessId === 'string'
+      ? req.body.businessId.trim()
+      : null;
+    const stats = db.recordVisit({ isNewVisitor, businessId });
+    await db.flush();
+    res.json({
+      success: true,
+      ...stats
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al registrar visita.' });
+  }
 });
 
 // 2. Autenticación con Google (GIS) para Vendedores
@@ -849,6 +891,9 @@ app.get('/api/products', (req, res) => {
       const promoState = db.computeBusinessPromoState(biz);
       return {
         ...p,
+        businessName: (biz && biz.name) || p.businessName || 'Dulce Café',
+        businessNeighborhood: (biz && biz.neighborhood) || p.businessNeighborhood || 'Centro',
+        businessAvatar: (biz && biz.avatar) || p.businessAvatar || '☕',
         isPromoActive: promoState.isPromoActive,
         serviceFeeRate: promoState.serviceFeeRate
       };
@@ -1079,6 +1124,37 @@ app.post('/api/orders', orderLimiter, async (req, res) => {
   }
 });
 
+// GET /api/orders/:id/status — Consulta pública segura del estado del pedido validando teléfono del comprador
+app.get('/api/orders/:id/status', (req, res) => {
+  try {
+    const { id } = req.params;
+    const phone = typeof req.query.phone === 'string' ? req.query.phone.replace(/\D/g, '').slice(0, 20) : '';
+    const order = db.getOrderById(id) || db.getOrders().find(o => o.id === id || String(o.id).startsWith(`${id}-`));
+    if (!order) {
+      return res.status(404).json({ error: 'Pedido no encontrado.' });
+    }
+    const orderPhone = String(order.customerPhone || '').replace(/\D/g, '');
+    if (!phone || phone !== orderPhone) {
+      return res.status(403).json({ error: 'El teléfono no coincide con los datos del pedido.' });
+    }
+    const dispute = db.getDisputeByOrderId(order.id);
+    res.json({
+      success: true,
+      orderId: order.id,
+      status: order.status || 'pendiente',
+      updatedAt: order.updatedAt || order.createdAt || null,
+      dispute: dispute ? {
+        id: dispute.id,
+        status: dispute.status,
+        resolution: dispute.resolution,
+        resolutionNote: dispute.resolutionNote
+      } : null
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al consultar estado del pedido.' });
+  }
+});
+
 
 
 // ============================================================================
@@ -1100,14 +1176,15 @@ app.post('/api/orders/:id/dispute', disputeLimiter, async (req, res) => {
     const { id } = req.params;
     const { customerName, customerPhone, reason, relatedOrderIds } = req.body;
     const normalizedPhone = typeof customerPhone === 'string' ? customerPhone.replace(/\D/g, '').slice(0, 20) : '';
-    const baseOrderId = id.replace(/-\d+$/, '');
+    const getBaseOrderId = val => String(val || '').replace(/^(ORD-[^-]+)-\d+$/, '$1');
+    const baseOrderId = getBaseOrderId(id);
     const orderIds = Array.isArray(relatedOrderIds)
       ? [...new Set([
         id,
         ...relatedOrderIds.filter(value =>
           typeof value === 'string' &&
           /^ORD-[A-Za-z0-9_-]{3,30}$/.test(value) &&
-          value.replace(/-\d+$/, '') === baseOrderId
+          getBaseOrderId(value) === baseOrderId
         )
       ])].slice(0, 30)
       : [id];
@@ -1368,7 +1445,11 @@ async function startServer() {
   });
 }
 
-startServer().catch(error => {
-  console.error('No se pudo iniciar GOD MARKET:', error.message);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  startServer().catch(error => {
+    console.error('No se pudo iniciar GOD MARKET:', error.message);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = app;

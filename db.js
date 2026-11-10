@@ -3,8 +3,12 @@ const path = require('path');
 const { Pool } = require('pg');
 
 const DATA_DIR = path.join(__dirname, 'data');
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+try {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+} catch (err) {
+  console.warn('No se pudo crear el directorio local data:', err.message);
 }
 
 function getFilePath(file) {
@@ -54,6 +58,31 @@ let promoSettingsCache = {
   ...DEFAULT_PROMO_SETTINGS,
   ...(readJsonFile('promo_settings.json', DEFAULT_PROMO_SETTINGS) || {})
 };
+
+const DEFAULT_VISIT_STATS = {
+  total: 0,
+  uniqueSessions: 0,
+  daily: {},
+  byBusiness: {},
+  updatedAt: null
+};
+let visitStatsCache = {
+  ...DEFAULT_VISIT_STATS,
+  ...(readJsonFile('visits.json', DEFAULT_VISIT_STATS) || {})
+};
+
+function getArgentinaDateKey() {
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date());
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+}
 
 // Conexión PostgreSQL (Supabase)
 let sqlPool = null;
@@ -355,6 +384,33 @@ async function initSql() {
       );
     }
 
+    const [dbVisitStats] = await sqlPool.query(
+      'SELECT data_json FROM app_settings WHERE setting_key = ?',
+      ['visit_stats']
+    );
+    if (dbVisitStats.length > 0) {
+      try {
+        const parsedVisits = JSON.parse(dbVisitStats[0].data_json);
+        visitStatsCache = {
+          ...DEFAULT_VISIT_STATS,
+          ...visitStatsCache,
+          ...parsedVisits,
+          total: Math.max(Number(visitStatsCache.total) || 0, Number(parsedVisits && parsedVisits.total) || 0),
+          uniqueSessions: Math.max(Number(visitStatsCache.uniqueSessions) || 0, Number(parsedVisits && parsedVisits.uniqueSessions) || 0),
+          daily: { ...(visitStatsCache.daily || {}), ...((parsedVisits && parsedVisits.daily) || {}) },
+          byBusiness: { ...(visitStatsCache.byBusiness || {}), ...((parsedVisits && parsedVisits.byBusiness) || {}) }
+        };
+        writeJsonFile('visits.json', visitStatsCache);
+      } catch (error) {
+        console.warn('No se pudieron leer las estadísticas de visitas desde PostgreSQL:', error.message);
+      }
+    } else {
+      await sqlPool.query(
+        'INSERT INTO app_settings (setting_key, data_json) VALUES (?, ?)',
+        ['visit_stats', JSON.stringify(visitStatsCache)]
+      );
+    }
+
     console.log(`📊 PostgreSQL sincronizado: ${businessesCache.length} negocios, ${productsCache.length} productos, ${ordersCache.length} órdenes`);
 
   } catch (err) {
@@ -443,6 +499,19 @@ const db = {
       businessesCache.unshift(saved);
     }
     writeJsonFile('businesses.json', businessesCache);
+
+    // Sincronizar metadatos del negocio en productos asociados
+    let productsUpdated = false;
+    productsCache.forEach(p => {
+      if (p.businessId === saved.id) {
+        if (saved.name && p.businessName !== saved.name) { p.businessName = saved.name; productsUpdated = true; }
+        if (saved.neighborhood && p.businessNeighborhood !== saved.neighborhood) { p.businessNeighborhood = saved.neighborhood; productsUpdated = true; }
+        if (saved.avatar && p.businessAvatar !== saved.avatar) { p.businessAvatar = saved.avatar; productsUpdated = true; }
+      }
+    });
+    if (productsUpdated) {
+      writeJsonFile('products.json', productsCache);
+    }
 
     if (sqlPool) {
       trackSqlWrite(sqlPool.query(
@@ -872,6 +941,68 @@ const db = {
 
     const saved = this.saveBusiness({ ...business, ...updates });
     return this.enrichBusinessWithPromo(saved);
+  },
+
+  // CONTADOR DE VISITAS EN TIEMPO REAL
+  getVisitStats(businessId = null) {
+    const todayKey = getArgentinaDateKey();
+    const daily = (visitStatsCache && typeof visitStatsCache.daily === 'object' && visitStatsCache.daily) || {};
+    const byBusiness = (visitStatsCache && typeof visitStatsCache.byBusiness === 'object' && visitStatsCache.byBusiness) || {};
+    const total = Math.max(0, Number(visitStatsCache.total) || 0);
+    const today = Math.max(0, Number(daily[todayKey]) || 0);
+    const uniqueSessions = Math.max(0, Number(visitStatsCache.uniqueSessions) || 0);
+    const result = {
+      total,
+      today,
+      uniqueSessions,
+      date: todayKey,
+      updatedAt: visitStatsCache.updatedAt || null
+    };
+    if (businessId) {
+      result.businessVisits = Math.max(0, Number(byBusiness[businessId]) || 0);
+    }
+    return result;
+  },
+  recordVisit({ isNewVisitor = false, businessId = null } = {}) {
+    const todayKey = getArgentinaDateKey();
+    if (!visitStatsCache.daily || typeof visitStatsCache.daily !== 'object') {
+      visitStatsCache.daily = {};
+    }
+    if (!visitStatsCache.byBusiness || typeof visitStatsCache.byBusiness !== 'object') {
+      visitStatsCache.byBusiness = {};
+    }
+
+    if (businessId && typeof businessId === 'string' && /^[a-z0-9_-]{2,80}$/i.test(businessId)) {
+      visitStatsCache.byBusiness[businessId] = (Number(visitStatsCache.byBusiness[businessId]) || 0) + 1;
+    } else {
+      visitStatsCache.total = (Number(visitStatsCache.total) || 0) + 1;
+      visitStatsCache.daily[todayKey] = (Number(visitStatsCache.daily[todayKey]) || 0) + 1;
+      if (isNewVisitor) {
+        visitStatsCache.uniqueSessions = (Number(visitStatsCache.uniqueSessions) || 0) + 1;
+      }
+    }
+
+    // Mantener solo los últimos 30 días en daily para no inflar el almacenamiento
+    const keys = Object.keys(visitStatsCache.daily).sort();
+    while (keys.length > 30) {
+      const oldest = keys.shift();
+      delete visitStatsCache.daily[oldest];
+    }
+
+    visitStatsCache.updatedAt = new Date().toISOString();
+    writeJsonFile('visits.json', visitStatsCache);
+
+    if (sqlPool) {
+      trackSqlWrite(
+        sqlPool.query(
+          `INSERT INTO app_settings (setting_key, data_json) VALUES (?, ?)
+           ON CONFLICT (setting_key) DO UPDATE SET data_json = EXCLUDED.data_json`,
+          ['visit_stats', JSON.stringify(visitStatsCache)]
+        ),
+        'contador de visitas'
+      );
+    }
+    return this.getVisitStats(businessId);
   }
 };
 

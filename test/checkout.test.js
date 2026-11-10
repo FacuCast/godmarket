@@ -62,3 +62,25 @@ test('builds transfer alias and per-business total for mixed-vendor carts', () =
   assert.equal(payments[1].transferAlias, 'dos.mp');
   assert.equal(payments[1].total, 30000);
 });
+
+test('generates collision-free order numbers across separate devices and formats WhatsApp phones', () => {
+  const checkoutA = createCheckout([]);
+  const checkoutB = createCheckout([]);
+  const idA = checkoutA.generateOrderNumber();
+  const idB = checkoutB.generateOrderNumber();
+
+  assert.match(idA, /^ORD-[A-Za-z0-9_-]{3,20}$/);
+  assert.match(idB, /^ORD-[A-Za-z0-9_-]{3,20}$/);
+  assert.notEqual(idA, idB);
+
+  const window = {};
+  vm.runInNewContext(checkoutSource, {
+    window,
+    localStorage: { getItem: () => null, setItem: () => {} },
+    fetch: () => {},
+    console
+  });
+  assert.equal(window.formatWhatsAppPhone('11 5544-3322'), '5491155443322');
+  assert.equal(window.formatWhatsAppPhone('5491155443322'), '5491155443322');
+  assert.equal(window.formatWhatsAppPhone('01155443322'), '5491155443322');
+});

@@ -57,7 +57,7 @@
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 
   <!-- Leaflet Maps CSS -->
-  <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 
   <!-- Modern Libraries (Lucide Icons & Canvas Confetti) -->
   
@@ -525,6 +525,22 @@
             </div>
           </div>
 
+          <div class="form-row-2col" style="margin-bottom: 16px;">
+            <div>
+              <label class="onboarding-label" for="dash-coverage-phone">WhatsApp de Pedidos del Local</label>
+              <input type="tel" id="dash-coverage-phone" class="onboarding-input" maxlength="25" placeholder="Ej: 5491156192616">
+            </div>
+            <div>
+              <label class="onboarding-label" for="dash-coverage-delivery-fee">Costo de Envío Base ($ ARS)</label>
+              <input type="number" id="dash-coverage-delivery-fee" class="onboarding-input" min="0" max="100000" step="100" placeholder="Ej: 1500">
+            </div>
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <label class="onboarding-label" for="dash-coverage-schedule">Horario de Atención</label>
+            <input type="text" id="dash-coverage-schedule" class="onboarding-input" maxlength="80" placeholder="Ej: Lun a Dom · 08:30 a 20:00 hs">
+          </div>
+
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <strong style="color: #FFF; font-size: 0.88rem;">Ubicación en Mapa y Radio Circular</strong>
             <button type="button" class="btn-map-gps" onclick="window.sellerPortal.detectDashboardLocationGPS()">
@@ -779,6 +795,7 @@
         </span>
         <input type="text" id="main-search-input" class="search-god-input"
           placeholder="Buscar cafeterías, productos..." autocomplete="off">
+        <button type="button" id="search-clear-btn" class="search-clear-btn" style="display: none; background: transparent; border: none; color: var(--cream-muted); cursor: pointer; padding: 4px 8px; font-size: 0.9rem;" aria-label="Limpiar búsqueda">✕</button>
         <button type="button" class="search-god-btn" id="search-action-btn" aria-label="Buscar" onclick="window.app.focusSearch()">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
@@ -800,6 +817,9 @@
         <h2 class="section-title-god">Cafeterías destacadas</h2>
         <button type="button" class="see-all-god" onclick="window.app.showAllStores()">Ver todas →</button>
       </div>
+
+      <!-- Chips de filtrado rápido de comercios -->
+      <div id="filter-chips-slider" class="filter-chips-slider" style="margin-bottom: 12px;"></div>
 
       <!-- Tarjetas de cafeterías destacadas con swipe horizontal en móvil y grilla en desktop -->
       <div id="stores-py-grid" class="cafeterias-slider">
@@ -1078,13 +1098,13 @@
             <div class="form-group" id="modal-flavor-group">
               <label class="form-label">🍯 Elige tu gusto o relleno favorito:</label>
               <div class="flavor-chips-grid" id="modal-flavor-chips">
-                <div class="flavor-chip active" data-flavor="Dulce de Leche Repostero">Dulce de Leche</div>
+                <div class="flavor-chip active" data-flavor="Clásica de la Casa">Clásica</div>
+                <div class="flavor-chip" data-flavor="Dulce de Leche Repostero">Dulce de Leche</div>
                 <div class="flavor-chip" data-flavor="Nutella & Avellanas">Nutella & Avellanas</div>
                 <div class="flavor-chip" data-flavor="Frutos Rojos & Crema">Frutos Rojos</div>
                 <div class="flavor-chip" data-flavor="Crema Bariloche">Crema Bariloche</div>
-                <div class="flavor-chip" data-flavor="Clásica de la Casa">Clásica</div>
               </div>
-              <input type="hidden" id="modal-selected-flavor" value="Dulce de Leche">
+              <input type="hidden" id="modal-selected-flavor" value="Clásica de la Casa">
             </div>
 
             <div class="form-group">
@@ -1138,6 +1158,16 @@
           <span style="font-size: 1.4rem;">🛍️</span>
           <h3 class="font-serif" style="font-size: 1.25rem;">Tu Carrito de Delicias</h3>
         </div>
+      </div>
+
+      <!-- Selector de Modalidad de Entrega en Carrito -->
+      <div class="side-delivery-switcher" style="margin-bottom: 10px;">
+        <button type="button" class="side-delivery-btn active" data-type="delivery" onclick="window.app.switchDeliveryType('delivery')">
+          🛵 Envío a Domicilio
+        </button>
+        <button type="button" class="side-delivery-btn" data-type="pickup" onclick="window.app.switchDeliveryType('pickup')">
+          🏪 Retiro en Local
+        </button>
       </div>
 
       <!-- Aviso de Logística del Vendedor -->
@@ -1195,9 +1225,19 @@
       </div>
 
       <!-- Resumen Compacto del Pedido -->
-      <div id="checkout-order-summary-pill" style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-secondary); padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.85rem; border: 1px solid var(--border-light);">
+      <div id="checkout-order-summary-pill" style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-secondary); padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 12px; font-size: 0.85rem; border: 1px solid var(--border-light);">
         <span id="checkout-summary-items-count">🛒 Tu Pedido (0 ítems)</span>
         <strong style="color: var(--primary); font-size: 1.05rem;" id="checkout-summary-total">$0</strong>
+      </div>
+
+      <!-- Selector de Modalidad de Entrega en Checkout -->
+      <div class="side-delivery-switcher" style="margin-bottom: 14px;">
+        <button type="button" class="side-delivery-btn active" data-type="delivery" onclick="window.app.switchDeliveryType('delivery')">
+          🛵 Envío a Domicilio
+        </button>
+        <button type="button" class="side-delivery-btn" data-type="pickup" onclick="window.app.switchDeliveryType('pickup')">
+          🏪 Retiro en Local
+        </button>
       </div>
 
       <form id="checkout-form" novalidate>
@@ -1356,7 +1396,7 @@
         </div>
 
         <!-- Cash amount box (Shown if Cash) -->
-        <div id="cash-payment-info" style="display: none;" class="form-group">
+        <div id="cash-payment-info" style="display: block;" class="form-group">
           <label class="form-label" for="cust-cash-amount">¿Con cuánto abonas? (Para llevarte cambio):</label>
           <input type="number" id="cust-cash-amount" class="form-control" placeholder="Ej: $50000">
           <span id="cash-amount-feedback" class="invalid-feedback">El monto ingresado debe ser mayor o igual al total a

@@ -383,13 +383,19 @@ class SellerPortalManager {
   initGoogleIdentity() {
     if (window.google && window.google.accounts && window.google.accounts.id) {
       this.gisLoaded = true;
-      this.configureGis();
+      const authScreen = document.getElementById('seller-auth-screen');
+      if (authScreen && authScreen.classList.contains('active')) {
+        this.renderGoogleSignInButton();
+      }
     } else {
       // Reintentar si el script de Google carga con retraso
       const interval = setInterval(() => {
         if (window.google && window.google.accounts && window.google.accounts.id) {
           this.gisLoaded = true;
-          this.configureGis();
+          const authScreen = document.getElementById('seller-auth-screen');
+          if (authScreen && authScreen.classList.contains('active')) {
+            this.renderGoogleSignInButton();
+          }
           clearInterval(interval);
         }
       }, 300);
@@ -398,8 +404,10 @@ class SellerPortalManager {
   }
 
   configureGis() {
-    if (!this.gisLoaded || !window.google) return;
-    const clientId = this.googleClientId || '';
+    if (!this.gisLoaded || !window.google) return false;
+    const clientId = (this.googleClientId || '').trim();
+    if (!clientId) return false;
+    if (this._gisInitialized) return true;
 
     try {
       window.google.accounts.id.initialize({
@@ -409,15 +417,18 @@ class SellerPortalManager {
         cancel_on_tap_outside: true,
         itp_support: true
       });
-      this.renderGoogleSignInButton();
+      this._gisInitialized = true;
+      return true;
     } catch (e) {
       console.warn('Aviso de Google Identity Services:', e.message);
+      return false;
     }
   }
 
   renderGoogleSignInButton() {
     const container = document.getElementById('google-signin-btn-container');
-    if (!container || !window.google || !this.gisLoaded) return;
+    if (!container || !window.google || !this.gisLoaded || !(this.googleClientId || '').trim()) return;
+    if (!this.configureGis()) return;
 
     container.innerHTML = '';
     try {
@@ -739,9 +750,13 @@ class SellerPortalManager {
       container.innerHTML = orders.map(o => {
         const servicePercent = this.getStandardServiceFeePercent();
         const safeOrderId = /^[A-Za-z0-9_-]{1,80}$/.test(String(o.id)) ? String(o.id) : '';
-        const status = ['pendiente', 'en_preparacion', 'despachado', 'entregado'].includes(o.status)
+        const validOrderStatuses = ['pendiente', 'en_preparacion', 'despachado', 'entregado', 'en_disputa', 'reembolsado', 'disputa_cerrada'];
+        const status = validOrderStatuses.includes(o.status)
           ? o.status
           : 'pendiente';
+        const customerWaPhone = window.formatWhatsAppPhone
+          ? window.formatWhatsAppPhone(o.customerPhone, '')
+          : String(o.customerPhone || '').replace(/\D/g, '');
         const itemsMarkup = (Array.isArray(o.items) ? o.items : []).map(item => `
           <div style="margin-top: 5px;">
             <strong>${Number(item.quantity) || 0}x ${window.app.escapeHTML(item.product?.name || 'Producto')}</strong>
@@ -776,8 +791,8 @@ class SellerPortalManager {
           </div>
 
           <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
-            ${o.customerPhone ? `
-              <a href="https://wa.me/${String(o.customerPhone).replace(/\D/g, '')}?text=Hola%20${encodeURIComponent(o.customerName || '')},%20somos%20${encodeURIComponent(this.currentBusiness.name)}%20de%20GOD%20MARKET%20por%20tu%20pedido%20%23${encodeURIComponent(safeOrderId)}" target="_blank" rel="noopener noreferrer" class="seller-action-pill" style="background: rgba(37, 211, 102, 0.15); border-color: rgba(37, 211, 102, 0.4); color: #25D366;">
+            ${customerWaPhone ? `
+              <a href="https://wa.me/${customerWaPhone}?text=Hola%20${encodeURIComponent(o.customerName || '')},%20somos%20${encodeURIComponent(this.currentBusiness.name)}%20de%20GOD%20MARKET%20por%20tu%20pedido%20%23${encodeURIComponent(safeOrderId)}" target="_blank" rel="noopener noreferrer" class="seller-action-pill" style="background: rgba(37, 211, 102, 0.15); border-color: rgba(37, 211, 102, 0.4); color: #25D366;">
                 💬 Escribir por WhatsApp
               </a>
             ` : ''}
@@ -788,6 +803,9 @@ class SellerPortalManager {
                 <option value="en_preparacion" ${status === 'en_preparacion' ? 'selected' : ''}>👨‍🍳 En Preparación</option>
                 <option value="despachado" ${status === 'despachado' ? 'selected' : ''}>🛵 Despachado</option>
                 <option value="entregado" ${status === 'entregado' ? 'selected' : ''}>✅ Entregado</option>
+                ${status === 'en_disputa' ? '<option value="en_disputa" selected>⚠️ En Disputa</option>' : ''}
+                ${status === 'reembolsado' ? '<option value="reembolsado" selected>💸 Reembolsado</option>' : ''}
+                ${status === 'disputa_cerrada' ? '<option value="disputa_cerrada" selected>🔒 Disputa Cerrada</option>' : ''}
               </select>
             ` : '<span>Pedido sin identificador válido</span>'}
           </div>
@@ -863,6 +881,10 @@ class SellerPortalManager {
         body: JSON.stringify({ price: newPrice })
       });
       if (res.ok) {
+        if (window.productManager) {
+          window.productManager.updateProduct?.(productId, { price: newPrice });
+          window.productManager.syncWithBackend?.();
+        }
         if (window.app && typeof window.app.showToast === 'function') {
           window.app.showToast('✅ Precio actualizado correctamente');
         }
@@ -882,6 +904,10 @@ class SellerPortalManager {
         headers: this.getAuthHeaders()
       });
       if (res.ok) {
+        if (window.productManager) {
+          window.productManager.deleteProduct?.(productId);
+          window.productManager.syncWithBackend?.();
+        }
         if (window.app && typeof window.app.showToast === 'function') {
           window.app.showToast(`🗑️ "${name}" eliminado`);
         }
@@ -928,6 +954,12 @@ class SellerPortalManager {
     const transferHolderInput = document.getElementById('dash-transfer-holder');
     if (transferAliasInput) transferAliasInput.value = this.currentBusiness.transferAlias || '';
     if (transferHolderInput) transferHolderInput.value = this.currentBusiness.transferAccountHolder || '';
+    const phoneInput = document.getElementById('dash-coverage-phone');
+    const deliveryFeeInput = document.getElementById('dash-coverage-delivery-fee');
+    const scheduleInput = document.getElementById('dash-coverage-schedule');
+    if (phoneInput) phoneInput.value = this.currentBusiness.phone || '';
+    if (deliveryFeeInput) deliveryFeeInput.value = this.currentBusiness.deliveryFee !== undefined ? this.currentBusiness.deliveryFee : 1500;
+    if (scheduleInput) scheduleInput.value = this.currentBusiness.schedule || '08:30 a 20:00 hs';
 
     this.updateDashboardRadius(this.dashRadius);
     if (!window.L) return;
@@ -1041,6 +1073,12 @@ class SellerPortalManager {
     const neighborhood = document.getElementById('dash-coverage-neighborhood')?.value.trim() || this.currentBusiness.neighborhood;
     const transferAlias = document.getElementById('dash-transfer-alias')?.value.trim() || '';
     const transferAccountHolder = document.getElementById('dash-transfer-holder')?.value.trim() || '';
+    const phoneVal = document.getElementById('dash-coverage-phone')?.value.trim() || this.currentBusiness.phone || '';
+    const feeRaw = document.getElementById('dash-coverage-delivery-fee')?.value;
+    const deliveryFee = feeRaw !== undefined && feeRaw !== '' && Number.isFinite(Number(feeRaw))
+      ? Math.max(0, Number(feeRaw))
+      : (this.currentBusiness.deliveryFee !== undefined ? this.currentBusiness.deliveryFee : 1500);
+    const schedule = document.getElementById('dash-coverage-schedule')?.value.trim() || this.currentBusiness.schedule || '08:30 a 20:00 hs';
     const btn = document.getElementById('btn-save-dash-coverage');
 
     if (btn) {
@@ -1055,7 +1093,10 @@ class SellerPortalManager {
       address,
       neighborhood,
       transferAlias,
-      transferAccountHolder
+      transferAccountHolder,
+      phone: phoneVal,
+      deliveryFee,
+      schedule
     };
 
     try {
@@ -1081,6 +1122,7 @@ class SellerPortalManager {
           Object.assign(existing, this.currentBusiness);
           window.productManager.saveBusinesses(window.productManager.businesses);
         }
+        window.productManager.syncWithBackend?.();
       }
 
       this.renderDashboardHeader();
@@ -1101,8 +1143,12 @@ class SellerPortalManager {
 
   viewStoreAsCustomer() {
     this.showCustomerMarketplace();
-    if (this.currentBusiness && window.app && typeof window.app.filterByBusiness === 'function') {
-      window.app.filterByBusiness(this.currentBusiness.id);
+    if (this.currentBusiness && window.app) {
+      if (typeof window.app.setBusiness === 'function') {
+        window.app.setBusiness(this.currentBusiness.id);
+      } else if (typeof window.app.filterByBusiness === 'function') {
+        window.app.filterByBusiness(this.currentBusiness.id);
+      }
       window.app.showToast(`👁️ Viendo cómo los clientes ven tu pastelería "${this.currentBusiness.name}"`);
     }
   }
@@ -1613,19 +1659,23 @@ class SellerPortalManager {
       other: 'Otro motivo'
     };
 
+    const esc = (val) => window.app && typeof window.app.escapeHTML === 'function'
+      ? window.app.escapeHTML(String(val || ''))
+      : String(val || '');
+
     disputesList.innerHTML = disputes.map(d => {
-      const st = statusLabel[d.status] || { icon: '❓', label: d.status, color: '#888' };
+      const st = statusLabel[d.status] || { icon: '❓', label: esc(d.status), color: '#888' };
       const dateStr = d.createdAt ? new Date(d.createdAt).toLocaleDateString('es-AR', {
         day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
       }) : 'N/A';
       const canResolve = d.status === 'abierta' || d.status === 'en_revision';
 
       return `
-        <div class="dispute-card" id="dispute-${d.id}">
+        <div class="dispute-card" id="dispute-${esc(d.id)}">
           <div class="dispute-card-header">
             <div>
-              <span class="dispute-id">${d.id}</span>
-              <span class="dispute-order-ref">→ Pedido #${d.orderId}</span>
+              <span class="dispute-id">${esc(d.id)}</span>
+              <span class="dispute-order-ref">→ Pedido #${esc(d.orderId)}</span>
             </div>
             <span class="dispute-status-badge" style="background: ${st.color}20; color: ${st.color}; border: 1px solid ${st.color}40;">${st.icon} ${st.label}</span>
           </div>
@@ -1633,35 +1683,35 @@ class SellerPortalManager {
           <div class="dispute-card-body">
             <div class="dispute-info-row">
               <span class="dispute-info-label">👤 Comprador:</span>
-              <span>${d.customerName || 'N/A'}${d.customerPhone ? ' · +' + d.customerPhone : ''}</span>
+              <span>${esc(d.customerName || 'N/A')}${d.customerPhone ? ' · +' + esc(d.customerPhone) : ''}</span>
             </div>
             <div class="dispute-info-row">
               <span class="dispute-info-label">💰 Total:</span>
-              <span style="color: var(--primary); font-weight: 700;">${(d.total || 0).toLocaleString('es-AR')}</span>
+              <span style="color: var(--primary); font-weight: 700;">$${Number(d.total || 0).toLocaleString('es-AR')}</span>
             </div>
             <div class="dispute-info-row">
               <span class="dispute-info-label">📋 Motivo:</span>
-              <span>${reasonLabel[d.reason] || d.reason}</span>
+              <span>${esc(reasonLabel[d.reason] || d.reason)}</span>
             </div>
             <div class="dispute-info-row">
               <span class="dispute-info-label">📅 Fecha:</span>
-              <span>${dateStr}</span>
+              <span>${esc(dateStr)}</span>
             </div>
-            ${d.resolutionNote ? `<div class="dispute-info-row"><span class="dispute-info-label">📝 Nota:</span><span>${d.resolutionNote}</span></div>` : ''}
+            ${d.resolutionNote ? `<div class="dispute-info-row"><span class="dispute-info-label">📝 Nota:</span><span>${esc(d.resolutionNote)}</span></div>` : ''}
           </div>
 
           ${canResolve ? `
           <div class="dispute-card-actions">
-            <button class="dispute-contact-btn" onclick="window.sellerPortal.contactDisputeCustomer('${d.customerPhone}', '${d.orderId}')">
+            <button class="dispute-contact-btn" onclick="window.sellerPortal.contactDisputeCustomer(${this.escapeJSAttribute(d.customerPhone || '')}, ${this.escapeJSAttribute(d.orderId || '')})">
               💬 Contactar por WA
             </button>
-            <button class="dispute-mark-btn" onclick="window.sellerPortal.openResolveDispute('${d.id}', 'en_revision')">
+            <button class="dispute-mark-btn" onclick="window.sellerPortal.openResolveDispute(${this.escapeJSAttribute(d.id || '')}, 'en_revision')">
               🔄 Marcar en revisión
             </button>
-            <button class="dispute-refund-btn" onclick="window.sellerPortal.openResolveDispute('${d.id}', 'reembolso')">
+            <button class="dispute-refund-btn" onclick="window.sellerPortal.openResolveDispute(${this.escapeJSAttribute(d.id || '')}, 'reembolso')">
               ✅ Aprobar Reembolso
             </button>
-            <button class="dispute-reject-btn" onclick="window.sellerPortal.openResolveDispute('${d.id}', 'rechazo')">
+            <button class="dispute-reject-btn" onclick="window.sellerPortal.openResolveDispute(${this.escapeJSAttribute(d.id || '')}, 'rechazo')">
               ❌ Rechazar
             </button>
           </div>
@@ -1676,8 +1726,11 @@ class SellerPortalManager {
       window.app.showToast('⚠️ No hay número de WhatsApp para este comprador');
       return;
     }
+    const normalizedPhone = window.formatWhatsAppPhone
+      ? window.formatWhatsAppPhone(phone, '')
+      : ('549' + String(phone).replace(/\D/g, '').replace(/^549?/, ''));
     const text = 'Hola! Te contactamos desde GOD MARKET respecto a tu disputa por el pedido #' + orderId + '. Estamos revisando tu caso. En breve te informamos la resolucion. Gracias por tu paciencia!';
-    const url = 'https://api.whatsapp.com/send?phone=54' + phone + '&text=' + encodeURIComponent(text);
+    const url = 'https://api.whatsapp.com/send?phone=' + normalizedPhone + '&text=' + encodeURIComponent(text);
     window.open(url, '_blank');
   }
 
