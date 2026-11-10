@@ -1,5 +1,5 @@
 // Service Worker para GOD MARKET PWA (v18 - Legal & Compliance Suite, Boton de Arrepentimiento Ley 24.240 y Ley 25.326)
-const CACHE_NAME = 'godmarket-v20';
+const CACHE_NAME = 'godmarket-v21';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -143,11 +143,15 @@ class GodMarketApp {
 
     const totalEl = document.getElementById('visit-counter-total');
     const todayEl = document.getElementById('visit-counter-today');
+    const topTotalEl = document.getElementById('visit-counter-total-top');
+    const topTodayEl = document.getElementById('visit-counter-today-top');
     const sideTotalEl = document.getElementById('side-visit-counter-total');
     const sellerVisitsEl = document.getElementById('stat-total-visits');
 
     if (totalEl) totalEl.textContent = formattedTotal;
     if (todayEl) todayEl.textContent = formattedToday;
+    if (topTotalEl) topTotalEl.textContent = formattedTotal;
+    if (topTodayEl) topTodayEl.textContent = formattedToday;
     if (sideTotalEl) sideTotalEl.textContent = formattedTotal;
     if (sellerVisitsEl && !sellerVisitsEl.dataset.hasBusinessSpecific) {
       sellerVisitsEl.textContent = formattedTotal;
