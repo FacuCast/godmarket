@@ -1,9 +1,6 @@
--- ============================================================================
--- GOD MARKET - Esquema de Base de Datos MySQL / MariaDB para Hostinger
--- ============================================================================
--- Este script se ejecuta automáticamente por el backend al iniciar.
--- También puedes importarlo manualmente en phpMyAdmin desde el panel de Hostinger.
--- ============================================================================
+-- GOD MARKET - Esquema PostgreSQL para Supabase
+-- Ejecutar una vez en Supabase Dashboard > SQL Editor.
+-- El backend Node usa DATABASE_URL y no expone la clave de base al navegador.
 
 CREATE TABLE IF NOT EXISTS sellers (
   id VARCHAR(100) PRIMARY KEY,
@@ -11,15 +8,15 @@ CREATE TABLE IF NOT EXISTS sellers (
   email VARCHAR(255),
   name VARCHAR(255),
   picture TEXT,
-  has_completed_profile TINYINT(1) DEFAULT 0,
+  has_completed_profile BOOLEAN NOT NULL DEFAULT FALSE,
   business_id VARCHAR(100),
   created_at VARCHAR(50),
   updated_at VARCHAR(50),
-  data_json LONGTEXT,
-  INDEX idx_sellers_email (email),
-  INDEX idx_sellers_google (google_id),
-  INDEX idx_sellers_business (business_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  data_json TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_sellers_email ON sellers (email);
+CREATE INDEX IF NOT EXISTS idx_sellers_google ON sellers (google_id);
+CREATE INDEX IF NOT EXISTS idx_sellers_business ON sellers (business_id);
 
 CREATE TABLE IF NOT EXISTS businesses (
   id VARCHAR(100) PRIMARY KEY,
@@ -27,20 +24,20 @@ CREATE TABLE IF NOT EXISTS businesses (
   category VARCHAR(100),
   address VARCHAR(255),
   rating DECIMAL(3,2) DEFAULT 5.0,
-  reviews INT DEFAULT 1,
+  reviews INTEGER DEFAULT 1,
   phone VARCHAR(50),
   whatsapp VARCHAR(50),
   instagram VARCHAR(100),
   cover_image TEXT,
   logo TEXT,
-  is_open TINYINT(1) DEFAULT 1,
-  verified TINYINT(1) DEFAULT 1,
+  is_open BOOLEAN NOT NULL DEFAULT TRUE,
+  verified BOOLEAN NOT NULL DEFAULT TRUE,
   seller_id VARCHAR(100),
   created_at VARCHAR(50),
-  data_json LONGTEXT,
-  INDEX idx_businesses_seller (seller_id),
-  INDEX idx_businesses_category (category)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  data_json TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_businesses_seller ON businesses (seller_id);
+CREATE INDEX IF NOT EXISTS idx_businesses_category ON businesses (category);
 
 CREATE TABLE IF NOT EXISTS products (
   id VARCHAR(100) PRIMARY KEY,
@@ -52,15 +49,15 @@ CREATE TABLE IF NOT EXISTS products (
   image TEXT,
   business_id VARCHAR(100),
   rating DECIMAL(3,2) DEFAULT 5.0,
-  reviews INT DEFAULT 1,
-  featured TINYINT(1) DEFAULT 0,
-  is_available TINYINT(1) DEFAULT 1,
+  reviews INTEGER DEFAULT 1,
+  featured BOOLEAN NOT NULL DEFAULT FALSE,
+  is_available BOOLEAN NOT NULL DEFAULT TRUE,
   created_at VARCHAR(50),
   updated_at VARCHAR(50),
-  data_json LONGTEXT,
-  INDEX idx_products_business (business_id),
-  INDEX idx_products_category (category)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  data_json TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_products_business ON products (business_id);
+CREATE INDEX IF NOT EXISTS idx_products_category ON products (category);
 
 CREATE TABLE IF NOT EXISTS orders (
   id VARCHAR(100) PRIMARY KEY,
@@ -74,22 +71,34 @@ CREATE TABLE IF NOT EXISTS orders (
   business_id VARCHAR(100),
   created_at VARCHAR(50),
   updated_at VARCHAR(50),
-  items_json LONGTEXT,
-  data_json LONGTEXT,
-  INDEX idx_orders_business (business_id),
-  INDEX idx_orders_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  items_json TEXT,
+  data_json TEXT
+);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS data_json TEXT;
+CREATE INDEX IF NOT EXISTS idx_orders_business ON orders (business_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders (status);
 
 CREATE TABLE IF NOT EXISTS disputes (
   id VARCHAR(100) PRIMARY KEY,
-  order_id VARCHAR(100) NOT NULL,
+  order_id VARCHAR(100) NOT NULL UNIQUE,
   business_id VARCHAR(100),
   status VARCHAR(50),
-  data_json LONGTEXT,
-  UNIQUE INDEX idx_disputes_order (order_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  data_json TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_disputes_business ON disputes (business_id);
 
 CREATE TABLE IF NOT EXISTS app_settings (
   setting_key VARCHAR(100) PRIMARY KEY,
-  data_json LONGTEXT NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  data_json TEXT NOT NULL
+);
+
+-- El acceso al proyecto se realiza desde el backend privado.
+-- Sin políticas, RLS deniega el acceso de las claves anon/authenticated.
+ALTER TABLE sellers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE businesses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON TABLE sellers, businesses, products, orders, disputes, app_settings FROM anon, authenticated;

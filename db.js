@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const mysql = require('mysql2/promise');
+const { Pool } = require('pg');
 
 const DATA_DIR = path.join(__dirname, 'data');
 if (!fs.existsSync(DATA_DIR)) {
@@ -55,16 +55,30 @@ let promoSettingsCache = {
   ...(readJsonFile('promo_settings.json', DEFAULT_PROMO_SETTINGS) || {})
 };
 
-// Conexión MySQL / MariaDB (Hostinger Database)
+// Conexión PostgreSQL (Supabase)
 let sqlPool = null;
 const pendingSqlWrites = new Set();
+
+function createPostgresAdapter(pool) {
+  return {
+    async query(statement, values = []) {
+      let parameterIndex = 0;
+      const postgresStatement = statement.replace(/\?/g, () => `$${++parameterIndex}`);
+      const result = await pool.query(postgresStatement, values);
+      return [result.rows];
+    },
+    end() {
+      return pool.end();
+    }
+  };
+}
 
 function trackSqlWrite(query, operation) {
   const write = Promise.resolve(query).then(
     () => null,
     error => {
-      console.error(`MySQL write error (${operation}):`, error.message);
-      return new Error(`No se pudo guardar ${operation} en MySQL.`, { cause: error });
+      console.error(`PostgreSQL write error (${operation}):`, error.message);
+      return new Error(`No se pudo guardar ${operation} en PostgreSQL.`, { cause: error });
     }
   );
   pendingSqlWrites.add(write);
@@ -78,78 +92,62 @@ async function flush() {
 }
 
 async function initSql() {
-  const host = process.env.DB_HOST || process.env.MYSQL_HOST || 'localhost';
-  const port = parseInt(process.env.DB_PORT || process.env.MYSQL_PORT || '3306', 10);
-  const user = process.env.DB_USER || process.env.MYSQL_USER;
-  const password = process.env.DB_PASSWORD || process.env.MYSQL_PASSWORD || '';
-  const database = process.env.DB_NAME || process.env.MYSQL_DATABASE;
-
-  if (!user || !database || (process.env.NODE_ENV === 'production' && !password)) {
+  const connectionString = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL;
+  if (!connectionString) {
     if (process.env.NODE_ENV === 'production') {
-      throw new Error('DB_USER, DB_NAME y DB_PASSWORD son obligatorios en producción.');
+      throw new Error('DATABASE_URL es obligatorio en producción (Supabase PostgreSQL).');
     }
-    console.log('📦 Base de Datos: Modo local JSON en ./data (Para activar MySQL en Hostinger define DB_NAME y DB_USER en las variables de entorno)');
+    console.log('📦 Base de Datos: Modo local JSON en ./data (configura DATABASE_URL para PostgreSQL/Supabase).');
     return;
   }
 
   try {
-    sqlPool = mysql.createPool({
-      host,
-      port,
-      user,
-      password,
-      database,
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0,
-      connectTimeout: 8000
+    const postgresPool = new Pool({
+      connectionString,
+      max: 10,
+      connectionTimeoutMillis: 8000,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : undefined
     });
+    sqlPool = createPostgresAdapter(postgresPool);
 
     // Probar conexión
     await sqlPool.query('SELECT 1');
-    console.log(`🐬 MySQL / MariaDB (Hostinger): Conectado con éxito a "${database}" en ${host}:${port}`);
+    console.log('🐘 PostgreSQL: conectado a la base configurada.');
 
-    // Crear tablas automáticamente si no existen
-    await sqlPool.query(`
+    const schemaStatements = [
+      `
       CREATE TABLE IF NOT EXISTS sellers (
         id VARCHAR(100) PRIMARY KEY,
         google_id VARCHAR(100),
         email VARCHAR(255),
         name VARCHAR(255),
         picture TEXT,
-        has_completed_profile TINYINT(1) DEFAULT 0,
+        has_completed_profile BOOLEAN NOT NULL DEFAULT FALSE,
         business_id VARCHAR(100),
         created_at VARCHAR(50),
         updated_at VARCHAR(50),
-        data_json LONGTEXT,
-        INDEX idx_sellers_email (email),
-        INDEX idx_sellers_google (google_id)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
-
-    await sqlPool.query(`
+        data_json TEXT
+      )`,
+      `
       CREATE TABLE IF NOT EXISTS businesses (
         id VARCHAR(100) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         category VARCHAR(100),
         address VARCHAR(255),
         rating DECIMAL(3,2) DEFAULT 5.0,
-        reviews INT DEFAULT 1,
+        reviews INTEGER DEFAULT 1,
         phone VARCHAR(50),
         whatsapp VARCHAR(50),
         instagram VARCHAR(100),
         cover_image TEXT,
         logo TEXT,
-        is_open TINYINT(1) DEFAULT 1,
-        verified TINYINT(1) DEFAULT 1,
+        is_open BOOLEAN NOT NULL DEFAULT TRUE,
+        verified BOOLEAN NOT NULL DEFAULT TRUE,
         seller_id VARCHAR(100),
         created_at VARCHAR(50),
-        data_json LONGTEXT,
-        INDEX idx_businesses_seller (seller_id)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
-
-    await sqlPool.query(`
+        data_json TEXT
+      )`,
+      `
       CREATE TABLE IF NOT EXISTS products (
         id VARCHAR(100) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -160,17 +158,14 @@ async function initSql() {
         image TEXT,
         business_id VARCHAR(100),
         rating DECIMAL(3,2) DEFAULT 5.0,
-        reviews INT DEFAULT 1,
-        featured TINYINT(1) DEFAULT 0,
-        is_available TINYINT(1) DEFAULT 1,
+        reviews INTEGER DEFAULT 1,
+        featured BOOLEAN NOT NULL DEFAULT FALSE,
+        is_available BOOLEAN NOT NULL DEFAULT TRUE,
         created_at VARCHAR(50),
         updated_at VARCHAR(50),
-        data_json LONGTEXT,
-        INDEX idx_products_business (business_id)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
-
-    await sqlPool.query(`
+        data_json TEXT
+      )`,
+      `
       CREATE TABLE IF NOT EXISTS orders (
         id VARCHAR(100) PRIMARY KEY,
         customer_name VARCHAR(255),
@@ -183,33 +178,42 @@ async function initSql() {
         business_id VARCHAR(100),
         created_at VARCHAR(50),
         updated_at VARCHAR(50),
-        items_json LONGTEXT,
-        data_json LONGTEXT,
-        INDEX idx_orders_business (business_id)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
-    const [orderDataColumn] = await sqlPool.query("SHOW COLUMNS FROM orders LIKE 'data_json'");
-    if (orderDataColumn.length === 0) {
-      await sqlPool.query('ALTER TABLE orders ADD COLUMN data_json LONGTEXT');
-    }
-    await sqlPool.query(`
+        items_json TEXT,
+        data_json TEXT
+      )`,
+      `
       CREATE TABLE IF NOT EXISTS disputes (
         id VARCHAR(100) PRIMARY KEY,
-        order_id VARCHAR(100) NOT NULL,
+        order_id VARCHAR(100) NOT NULL UNIQUE,
         business_id VARCHAR(100),
         status VARCHAR(50),
-        data_json LONGTEXT,
-        UNIQUE INDEX idx_disputes_order (order_id)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
-    await sqlPool.query(`
+        data_json TEXT
+      )`,
+      `
       CREATE TABLE IF NOT EXISTS app_settings (
         setting_key VARCHAR(100) PRIMARY KEY,
-        data_json LONGTEXT NOT NULL
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
+        data_json TEXT NOT NULL
+      )`,
+      'ALTER TABLE orders ADD COLUMN IF NOT EXISTS data_json TEXT',
+      'CREATE INDEX IF NOT EXISTS idx_sellers_email ON sellers (email)',
+      'CREATE INDEX IF NOT EXISTS idx_sellers_google ON sellers (google_id)',
+      'CREATE INDEX IF NOT EXISTS idx_sellers_business ON sellers (business_id)',
+      'CREATE INDEX IF NOT EXISTS idx_businesses_seller ON businesses (seller_id)',
+      'CREATE INDEX IF NOT EXISTS idx_businesses_category ON businesses (category)',
+      'CREATE INDEX IF NOT EXISTS idx_products_business ON products (business_id)',
+      'CREATE INDEX IF NOT EXISTS idx_products_category ON products (category)',
+      'CREATE INDEX IF NOT EXISTS idx_orders_business ON orders (business_id)',
+      'CREATE INDEX IF NOT EXISTS idx_orders_status ON orders (status)',
+      'CREATE INDEX IF NOT EXISTS idx_disputes_business ON disputes (business_id)',
+      ...['sellers', 'businesses', 'products', 'orders', 'disputes', 'app_settings']
+        .map(table => `ALTER TABLE ${table} ENABLE ROW LEVEL SECURITY`),
+      'REVOKE ALL ON TABLE sellers, businesses, products, orders, disputes, app_settings FROM anon, authenticated'
+    ];
+    for (const statement of schemaStatements) {
+      await sqlPool.query(statement);
+    }
 
-    // Sincronizar datos: Cargar de MySQL o sembrar si está vacía
+    // Sincronizar datos: cargar desde PostgreSQL o sembrar si está vacía
     const [dbSellers] = await sqlPool.query('SELECT * FROM sellers');
     if (dbSellers.length > 0) {
       sellersCache = dbSellers.map(r => r.data_json ? JSON.parse(r.data_json) : {
@@ -223,8 +227,8 @@ async function initSql() {
         await sqlPool.query(
           `INSERT INTO sellers (id, google_id, email, name, picture, has_completed_profile, business_id, created_at, updated_at, data_json)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-           ON DUPLICATE KEY UPDATE data_json = VALUES(data_json)`,
-          [s.id, s.googleId || null, s.email || null, s.name || '', s.picture || '', s.hasCompletedProfile ? 1 : 0, s.businessId || null, s.createdAt || null, s.updatedAt || null, JSON.stringify(s)]
+           ON CONFLICT (id) DO UPDATE SET data_json = EXCLUDED.data_json`,
+          [s.id, s.googleId || null, s.email || null, s.name || '', s.picture || '', Boolean(s.hasCompletedProfile), s.businessId || null, s.createdAt || null, s.updatedAt || null, JSON.stringify(s)]
         );
       }
     }
@@ -244,8 +248,8 @@ async function initSql() {
         await sqlPool.query(
           `INSERT INTO businesses (id, name, category, address, rating, reviews, phone, whatsapp, instagram, cover_image, logo, is_open, verified, seller_id, created_at, data_json)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-           ON DUPLICATE KEY UPDATE data_json = VALUES(data_json)`,
-          [b.id, b.name || '', b.category || '', b.address || '', b.rating || 5.0, b.reviews || 1, b.phone || '', b.whatsapp || '', b.instagram || '', b.coverImage || '', b.logo || '', b.isOpen ? 1 : 0, b.verified ? 1 : 0, b.sellerId || null, b.createdAt || null, JSON.stringify(b)]
+           ON CONFLICT (id) DO UPDATE SET data_json = EXCLUDED.data_json`,
+          [b.id, b.name || '', b.category || '', b.address || '', b.rating || 5.0, b.reviews || 1, b.phone || '', b.whatsapp || '', b.instagram || '', b.coverImage || '', b.logo || '', Boolean(b.isOpen), Boolean(b.verified), b.sellerId || null, b.createdAt || null, JSON.stringify(b)]
         );
       }
     }
@@ -265,8 +269,8 @@ async function initSql() {
         await sqlPool.query(
           `INSERT INTO products (id, name, description, price, original_price, category, image, business_id, rating, reviews, featured, is_available, created_at, updated_at, data_json)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-           ON DUPLICATE KEY UPDATE data_json = VALUES(data_json)`,
-          [p.id, p.name || '', p.description || '', p.price || 0, p.originalPrice || null, p.category || '', p.image || '', p.businessId || null, p.rating || 5.0, p.reviews || 1, p.featured ? 1 : 0, p.isAvailable !== false ? 1 : 0, p.createdAt || null, p.updatedAt || null, JSON.stringify(p)]
+           ON CONFLICT (id) DO UPDATE SET data_json = EXCLUDED.data_json`,
+          [p.id, p.name || '', p.description || '', p.price || 0, p.originalPrice || null, p.category || '', p.image || '', p.businessId || null, p.rating || 5.0, p.reviews || 1, Boolean(p.featured), p.isAvailable !== false, p.createdAt || null, p.updatedAt || null, JSON.stringify(p)]
         );
       }
     }
@@ -300,7 +304,7 @@ async function initSql() {
         await sqlPool.query(
           `INSERT INTO orders (id, customer_name, customer_phone, customer_address, payment_method, delivery_type, total, status, business_id, created_at, updated_at, items_json, data_json)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-           ON DUPLICATE KEY UPDATE status = VALUES(status), items_json = VALUES(items_json), data_json = VALUES(data_json)`,
+           ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status, items_json = EXCLUDED.items_json, data_json = EXCLUDED.data_json`,
           [o.id, o.customerName || '', o.customerPhone || '', o.customerAddress || '', o.paymentMethod || '', o.deliveryType || '', o.total || 0, o.status || 'pendiente', o.businessId || null, o.createdAt || null, o.updatedAt || null, JSON.stringify(o.items || []), JSON.stringify(o)]
         );
       }
@@ -313,7 +317,7 @@ async function initSql() {
           const dispute = JSON.parse(row.data_json);
           return dispute && typeof dispute === 'object' && !Array.isArray(dispute) ? [dispute] : [];
         } catch (error) {
-          console.warn('No se pudo leer una disputa desde MySQL:', error.message);
+          console.warn('No se pudo leer una disputa desde PostgreSQL:', error.message);
           return [];
         }
       });
@@ -323,7 +327,7 @@ async function initSql() {
         await sqlPool.query(
           `INSERT INTO disputes (id, order_id, business_id, status, data_json)
            VALUES (?, ?, ?, ?, ?)
-           ON DUPLICATE KEY UPDATE status = VALUES(status), data_json = VALUES(data_json)`,
+           ON CONFLICT (order_id) DO UPDATE SET status = EXCLUDED.status, data_json = EXCLUDED.data_json`,
           [dispute.id, dispute.orderId, dispute.businessId || null, dispute.status || '', JSON.stringify(dispute)]
         );
       }
@@ -342,7 +346,7 @@ async function initSql() {
         };
         writeJsonFile('promo_settings.json', promoSettingsCache);
       } catch (error) {
-        console.warn('No se pudieron leer las opciones de promoción desde MySQL:', error.message);
+        console.warn('No se pudieron leer las opciones de promoción desde PostgreSQL:', error.message);
       }
     } else {
       await sqlPool.query(
@@ -351,15 +355,15 @@ async function initSql() {
       );
     }
 
-    console.log(`📊 Base de datos MySQL sincronizada: ${businessesCache.length} negocios, ${productsCache.length} productos, ${ordersCache.length} órdenes`);
+    console.log(`📊 PostgreSQL sincronizado: ${businessesCache.length} negocios, ${productsCache.length} productos, ${ordersCache.length} órdenes`);
 
   } catch (err) {
+    if (sqlPool) await sqlPool.end().catch(() => {});
+    sqlPool = null;
     if (process.env.NODE_ENV === 'production') {
-      if (sqlPool) await sqlPool.end().catch(() => {});
-      sqlPool = null;
       throw err;
     }
-    console.warn('⚠️ No se pudo conectar a MySQL:', err.message, '-> Continuando en modo local JSON.');
+    console.warn('⚠️ No se pudo conectar a PostgreSQL:', err.message, '-> Continuando en modo local JSON.');
     sqlPool = null;
   }
 }
@@ -404,11 +408,11 @@ const db = {
       trackSqlWrite(sqlPool.query(
         `INSERT INTO sellers (id, google_id, email, name, picture, has_completed_profile, business_id, created_at, updated_at, data_json)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE
-           google_id = VALUES(google_id), email = VALUES(email), name = VALUES(name),
-           picture = VALUES(picture), has_completed_profile = VALUES(has_completed_profile),
-           business_id = VALUES(business_id), updated_at = VALUES(updated_at), data_json = VALUES(data_json)`,
-        [saved.id, saved.googleId || null, saved.email || null, saved.name || '', saved.picture || '', saved.hasCompletedProfile ? 1 : 0, saved.businessId || null, saved.createdAt || null, saved.updatedAt || null, JSON.stringify(saved)]
+         ON CONFLICT (id) DO UPDATE SET
+           google_id = EXCLUDED.google_id, email = EXCLUDED.email, name = EXCLUDED.name,
+           picture = EXCLUDED.picture, has_completed_profile = EXCLUDED.has_completed_profile,
+           business_id = EXCLUDED.business_id, updated_at = EXCLUDED.updated_at, data_json = EXCLUDED.data_json`,
+        [saved.id, saved.googleId || null, saved.email || null, saved.name || '', saved.picture || '', Boolean(saved.hasCompletedProfile), saved.businessId || null, saved.createdAt || null, saved.updatedAt || null, JSON.stringify(saved)]
       ), 'vendedor');
     }
     return saved;
@@ -444,13 +448,13 @@ const db = {
       trackSqlWrite(sqlPool.query(
         `INSERT INTO businesses (id, name, category, address, rating, reviews, phone, whatsapp, instagram, cover_image, logo, is_open, verified, seller_id, created_at, data_json)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE
-           name = VALUES(name), category = VALUES(category), address = VALUES(address),
-           rating = VALUES(rating), reviews = VALUES(reviews), phone = VALUES(phone),
-           whatsapp = VALUES(whatsapp), instagram = VALUES(instagram), cover_image = VALUES(cover_image),
-           logo = VALUES(logo), is_open = VALUES(is_open), verified = VALUES(verified),
-           seller_id = VALUES(seller_id), data_json = VALUES(data_json)`,
-        [saved.id, saved.name || '', saved.category || '', saved.address || '', saved.rating || 5.0, saved.reviews || 1, saved.phone || '', saved.whatsapp || '', saved.instagram || '', saved.coverImage || '', saved.logo || '', saved.isOpen ? 1 : 0, saved.verified ? 1 : 0, saved.sellerId || null, saved.createdAt || null, JSON.stringify(saved)]
+         ON CONFLICT (id) DO UPDATE SET
+           name = EXCLUDED.name, category = EXCLUDED.category, address = EXCLUDED.address,
+           rating = EXCLUDED.rating, reviews = EXCLUDED.reviews, phone = EXCLUDED.phone,
+           whatsapp = EXCLUDED.whatsapp, instagram = EXCLUDED.instagram, cover_image = EXCLUDED.cover_image,
+           logo = EXCLUDED.logo, is_open = EXCLUDED.is_open, verified = EXCLUDED.verified,
+           seller_id = EXCLUDED.seller_id, data_json = EXCLUDED.data_json`,
+        [saved.id, saved.name || '', saved.category || '', saved.address || '', saved.rating || 5.0, saved.reviews || 1, saved.phone || '', saved.whatsapp || '', saved.instagram || '', saved.coverImage || '', saved.logo || '', Boolean(saved.isOpen), Boolean(saved.verified), saved.sellerId || null, saved.createdAt || null, JSON.stringify(saved)]
       ), 'negocio');
     }
     return saved;
@@ -482,13 +486,13 @@ const db = {
       trackSqlWrite(sqlPool.query(
         `INSERT INTO products (id, name, description, price, original_price, category, image, business_id, rating, reviews, featured, is_available, created_at, updated_at, data_json)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE
-           name = VALUES(name), description = VALUES(description), price = VALUES(price),
-           original_price = VALUES(original_price), category = VALUES(category), image = VALUES(image),
-           business_id = VALUES(business_id), rating = VALUES(rating), reviews = VALUES(reviews),
-           featured = VALUES(featured), is_available = VALUES(is_available), updated_at = VALUES(updated_at),
-           data_json = VALUES(data_json)`,
-        [newProduct.id, newProduct.name || '', newProduct.description || '', newProduct.price || 0, newProduct.originalPrice || null, newProduct.category || '', newProduct.image || '', newProduct.businessId || null, newProduct.rating || 5.0, newProduct.reviews || 1, newProduct.featured ? 1 : 0, newProduct.isAvailable !== false ? 1 : 0, newProduct.createdAt || null, newProduct.updatedAt || null, JSON.stringify(newProduct)]
+         ON CONFLICT (id) DO UPDATE SET
+           name = EXCLUDED.name, description = EXCLUDED.description, price = EXCLUDED.price,
+           original_price = EXCLUDED.original_price, category = EXCLUDED.category, image = EXCLUDED.image,
+           business_id = EXCLUDED.business_id, rating = EXCLUDED.rating, reviews = EXCLUDED.reviews,
+           featured = EXCLUDED.featured, is_available = EXCLUDED.is_available, updated_at = EXCLUDED.updated_at,
+           data_json = EXCLUDED.data_json`,
+        [newProduct.id, newProduct.name || '', newProduct.description || '', newProduct.price || 0, newProduct.originalPrice || null, newProduct.category || '', newProduct.image || '', newProduct.businessId || null, newProduct.rating || 5.0, newProduct.reviews || 1, Boolean(newProduct.featured), newProduct.isAvailable !== false, newProduct.createdAt || null, newProduct.updatedAt || null, JSON.stringify(newProduct)]
       ), 'producto');
     }
     return newProduct;
@@ -504,13 +508,13 @@ const db = {
         trackSqlWrite(sqlPool.query(
           `INSERT INTO products (id, name, description, price, original_price, category, image, business_id, rating, reviews, featured, is_available, created_at, updated_at, data_json)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-           ON DUPLICATE KEY UPDATE
-             name = VALUES(name), description = VALUES(description), price = VALUES(price),
-             original_price = VALUES(original_price), category = VALUES(category), image = VALUES(image),
-             business_id = VALUES(business_id), rating = VALUES(rating), reviews = VALUES(reviews),
-             featured = VALUES(featured), is_available = VALUES(is_available), updated_at = VALUES(updated_at),
-             data_json = VALUES(data_json)`,
-          [updated.id, updated.name || '', updated.description || '', updated.price || 0, updated.originalPrice || null, updated.category || '', updated.image || '', updated.businessId || null, updated.rating || 5.0, updated.reviews || 1, updated.featured ? 1 : 0, updated.isAvailable !== false ? 1 : 0, updated.createdAt || null, updated.updatedAt || null, JSON.stringify(updated)]
+           ON CONFLICT (id) DO UPDATE SET
+             name = EXCLUDED.name, description = EXCLUDED.description, price = EXCLUDED.price,
+             original_price = EXCLUDED.original_price, category = EXCLUDED.category, image = EXCLUDED.image,
+             business_id = EXCLUDED.business_id, rating = EXCLUDED.rating, reviews = EXCLUDED.reviews,
+             featured = EXCLUDED.featured, is_available = EXCLUDED.is_available, updated_at = EXCLUDED.updated_at,
+             data_json = EXCLUDED.data_json`,
+          [updated.id, updated.name || '', updated.description || '', updated.price || 0, updated.originalPrice || null, updated.category || '', updated.image || '', updated.businessId || null, updated.rating || 5.0, updated.reviews || 1, Boolean(updated.featured), updated.isAvailable !== false, updated.createdAt || null, updated.updatedAt || null, JSON.stringify(updated)]
         ), 'producto');
       }
       return updated;
@@ -562,12 +566,12 @@ const db = {
         sqlPool.query(
           `INSERT INTO orders (id, customer_name, customer_phone, customer_address, payment_method, delivery_type, total, status, business_id, created_at, updated_at, items_json, data_json)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-           ON DUPLICATE KEY UPDATE
-             customer_name = VALUES(customer_name), customer_phone = VALUES(customer_phone),
-             customer_address = VALUES(customer_address), payment_method = VALUES(payment_method),
-             delivery_type = VALUES(delivery_type), total = VALUES(total), status = VALUES(status),
-             business_id = VALUES(business_id), updated_at = VALUES(updated_at),
-             items_json = VALUES(items_json), data_json = VALUES(data_json)`,
+           ON CONFLICT (id) DO UPDATE SET
+             customer_name = EXCLUDED.customer_name, customer_phone = EXCLUDED.customer_phone,
+             customer_address = EXCLUDED.customer_address, payment_method = EXCLUDED.payment_method,
+             delivery_type = EXCLUDED.delivery_type, total = EXCLUDED.total, status = EXCLUDED.status,
+             business_id = EXCLUDED.business_id, updated_at = EXCLUDED.updated_at,
+             items_json = EXCLUDED.items_json, data_json = EXCLUDED.data_json`,
           [newOrder.id, newOrder.customerName || '', newOrder.customerPhone || '', newOrder.customerAddress || '', newOrder.paymentMethod || '', newOrder.deliveryType || '', newOrder.total || 0, newOrder.status || 'pendiente', newOrder.businessId || null, newOrder.createdAt || null, newOrder.updatedAt || null, JSON.stringify(newOrder.items || []), JSON.stringify(newOrder)]
         ),
         'pedido'
@@ -629,7 +633,7 @@ const db = {
         sqlPool.query(
           `INSERT INTO disputes (id, order_id, business_id, status, data_json)
            VALUES (?, ?, ?, ?, ?)
-           ON DUPLICATE KEY UPDATE status = VALUES(status), data_json = VALUES(data_json)`,
+           ON CONFLICT (order_id) DO UPDATE SET status = EXCLUDED.status, data_json = EXCLUDED.data_json`,
           [newDispute.id, newDispute.orderId, newDispute.businessId || null, newDispute.status, JSON.stringify(newDispute)]
         ),
         'disputa'
@@ -691,7 +695,7 @@ const db = {
       trackSqlWrite(
         sqlPool.query(
           `INSERT INTO app_settings (setting_key, data_json) VALUES (?, ?)
-           ON DUPLICATE KEY UPDATE data_json = VALUES(data_json)`,
+           ON CONFLICT (setting_key) DO UPDATE SET data_json = EXCLUDED.data_json`,
           ['promo_settings', JSON.stringify(promoSettingsCache)]
         ),
         'configuración de promociones'

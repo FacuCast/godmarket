@@ -41,7 +41,7 @@ Luego abre en tu navegador:
 
 Antes de publicar el sitio:
 
-1. Configura una base MySQL/MariaDB persistente en el hosting y completa `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`.
+1. Crea un proyecto Supabase y ejecuta [database.sql](./database.sql) una vez en **SQL Editor**. Si Supabase muestra el aviso de RLS, ejecuta habilitando RLS; el script no crea políticas para acceso público. En el hosting configura `DATABASE_URL` con la cadena PostgreSQL privada del **Session Pooler** de Supabase (no uses una clave `anon`/`service_role` de la API como contraseña ni la expongas al navegador). Si editas la URL a mano, codifica los caracteres reservados de la contraseña.
 2. Define `JWT_SECRET` y `ADMIN_TOKEN` con valores aleatorios distintos de al menos 32 caracteres. Si se rota `JWT_SECRET`, se cierran las sesiones activas de vendedores.
 3. Completa `GOOGLE_CLIENT_ID` y agrega el dominio de producción en Google Identity Services.
 4. Completa `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` y `CLOUDINARY_API_SECRET`.
@@ -49,7 +49,7 @@ Antes de publicar el sitio:
 6. Cada comercio debe cargar su alias de transferencia desde el portal vendedor; en carritos con varios comercios se muestra el alias y el importe correspondiente a cada uno. Si se ofrece Mercado Pago como medio global, configura `MERCADOPAGO_ALIAS`, `MERCADOPAGO_CVU` y `MERCADOPAGO_ACCOUNT_HOLDER`. Efectivo sigue disponible.
 7. Usa `NODE_ENV=production` y deja `ENABLE_DEMO_LOGIN=false`.
 
-En producción, el servidor no inicia si MySQL no está configurado o no es accesible. MySQL es la persistencia de producción; el almacenamiento JSON en `./data` solo se permite en desarrollo. La aplicación mantiene una caché en memoria y debe ejecutarse como una única instancia Node.js; no escales horizontalmente sin migrar las lecturas a almacenamiento compartido.
+En producción, el servidor no inicia si `DATABASE_URL` no está configurado o PostgreSQL no es accesible. PostgreSQL/Supabase es la persistencia de producción; el almacenamiento JSON en `./data` solo se permite en desarrollo. Las tablas tienen RLS habilitado sin políticas de acceso para `anon`/`authenticated`: solo el backend debe acceder mediante la conexión privada. La aplicación mantiene una caché en memoria y debe ejecutarse como una única instancia Node.js; no escales horizontalmente sin migrar las lecturas a almacenamiento compartido.
 
 ## ☁️ Cómo Conectar Cloudinary
 
@@ -62,4 +62,4 @@ En producción, el servidor no inicia si MySQL no está configurado o no es acce
 
 ## 🌐 Despliegue en un hosting Node.js
 
-El backend requiere un proceso Node.js persistente (`npm start`); no es un despliegue estático ni serverless. En Hostinger, configura el directorio del proyecto, `server.js`, el puerto asignado por el panel y todas las variables de entorno anteriores. Importa [database.sql](./database.sql) si el usuario MySQL no tiene permisos para crear tablas automáticamente; la aplicación también agrega la columna de datos completos de pedido al actualizar una base existente.
+El backend requiere un proceso Node.js persistente (`npm start`); no es un despliegue estático ni serverless. Configura el directorio del proyecto, `server.js`, el puerto asignado por el panel y las variables de entorno anteriores. Ejecuta [database.sql](./database.sql) en Supabase antes de iniciar el backend. Este esquema no migra automáticamente datos que existan previamente en una base MySQL.

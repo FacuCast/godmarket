@@ -18,6 +18,7 @@ if (!JWT_SECRET || JWT_SECRET.length < 32) {
 }
 if (process.env.NODE_ENV === 'production') {
   const missingProductionConfig = [
+    'DATABASE_URL',
     'GOOGLE_CLIENT_ID',
     'CLOUDINARY_CLOUD_NAME',
     'CLOUDINARY_API_KEY',
