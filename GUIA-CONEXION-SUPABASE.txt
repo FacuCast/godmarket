@@ -1,0 +1,99 @@
+GOD MARKET - GUIA PARA CONECTAR SUPABASE Y PUBLICAR
+
+Este proyecto usa PostgreSQL. Para producción, el backend necesita
+DATABASE_URL: la cadena de conexión privada de PostgreSQL. Las variables
+DB_HOST, DB_USER, DB_PASSWORD y las claves NEXT_PUBLIC_SUPABASE_* no sustituyen
+DATABASE_URL.
+
+ENLACES DIRECTOS A TU PROYECTO
+
+Panel del proyecto:
+https://supabase.com/dashboard/project/eotctrgmavueyxwygtkp
+
+Configuración de base de datos:
+https://supabase.com/dashboard/project/eotctrgmavueyxwygtkp/settings/database
+
+Editor SQL:
+https://supabase.com/dashboard/project/eotctrgmavueyxwygtkp/sql/new
+
+1. COPIAR LA URI PRIVADA DE POSTGRESQL
+
+1. Abre el panel del proyecto con el enlace de arriba e inicia sesión en
+   Supabase si te lo solicita.
+2. Pulsa "Connect" en el panel del proyecto. Si no encuentras esa opción,
+   abre Database Settings con el enlace directo y busca la sección de conexión.
+3. Selecciona "Session pooler" (Session mode) y el formato "URI".
+   No elijas una clave API anon, publishable, secret ni service_role.
+4. Copia la cadena PostgreSQL que muestra Supabase. Tendrá un formato parecido
+   a:
+
+   postgresql://postgres.<PROJECT_REF>:[YOUR-PASSWORD]@...pooler.supabase.com:6543/postgres
+
+   Usa la cadena real que muestra tu proyecto; no copies este ejemplo.
+5. Si Supabase muestra [YOUR-PASSWORD], reemplázalo por la contraseña de la
+   base de datos de Supabase. Si no la conoces, cámbiala desde Database
+   Settings y usa la nueva. Si la contraseña contiene caracteres especiales,
+   usa la URI copiada por Supabase o codifica esos caracteres para una URL.
+6. No pegues la URI en chats, capturas, repositorios ni archivos de texto.
+   Trátala como una contraseña secreta.
+
+2. CREAR LAS TABLAS EN SUPABASE
+
+1. Abre el Editor SQL con el enlace de arriba.
+2. En el repositorio GOD MARKET, abre el archivo database.sql.
+3. Copia todo su contenido y pégalo en una consulta nueva del Editor SQL.
+4. Pulsa "Run" y comprueba que la consulta termine sin errores.
+5. Si Supabase avisa sobre Row Level Security (RLS), el script habilita RLS.
+   No crees políticas públicas para estas tablas: el backend se conecta con
+   la URI privada.
+
+3. CONFIGURAR EL HOSTING
+
+1. En el panel de tu hosting, abre la configuración de Environment Variables,
+   Variables de entorno o Secrets.
+2. Añade:
+
+   Nombre: DATABASE_URL
+   Valor:  la URI privada PostgreSQL copiada en el paso 1
+
+3. Configura también las variables de producción que requiere la aplicación:
+   NODE_ENV=production
+   ENABLE_DEMO_LOGIN=false
+   JWT_SECRET=<secreto aleatorio privado de al menos 32 caracteres>
+   ADMIN_TOKEN=<token aleatorio privado de al menos 32 caracteres>
+   GOOGLE_CLIENT_ID=<tu Client ID de Google>
+   CLOUDINARY_CLOUD_NAME=<tu Cloud Name>
+   CLOUDINARY_API_KEY=<tu API Key>
+   CLOUDINARY_API_SECRET=<tu API Secret>
+   APP_ORIGINS=https://<tu-dominio>
+
+   Reemplaza los valores entre < > con los de tus cuentas. No uses esos textos
+   literalmente. Genera JWT_SECRET y ADMIN_TOKEN distintos entre sí.
+   Si el hosting asigna PORT automáticamente, no hace falta definirlo.
+4. Guarda los cambios y reinicia o vuelve a desplegar el servicio. Las variables
+   del .env local no se copian automáticamente al hosting.
+5. Despliega como servicio Node.js persistente con el comando:
+
+   npm start
+
+   No lo publiques como sitio estático ni como función serverless. Este proyecto
+   mantiene caché en memoria y debe ejecutarse como una sola instancia.
+
+4. COMPROBAR ANTES DE ABRIR AL PÚBLICO
+
+1. Confirma en los logs del hosting que el servidor inicia sin errores de
+   DATABASE_URL ni de conexión a PostgreSQL.
+2. Abre el sitio y verifica que carga el catálogo.
+3. Prueba el registro/inicio de sesión de vendedor y crea un pedido de prueba.
+4. Comprueba en Supabase que el pedido se haya guardado correctamente.
+5. Configura APP_ORIGINS con el dominio HTTPS real del sitio. Si usas otro
+   dominio para la API, incluye también ese origen, separado por comas.
+
+IMPORTANTE SOBRE CREDENCIALES
+
+- Nunca subas .env al repositorio ni guardes DATABASE_URL en este archivo.
+- No uses NEXT_PUBLIC_* para secretos: esas variables son públicas en el
+  navegador.
+- Una clave sb_secret que se haya compartido en un chat debe revocarse y
+  reemplazarse en Supabase.
+- La migración no copia automáticamente datos de una base MySQL anterior.

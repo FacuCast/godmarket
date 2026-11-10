@@ -106,7 +106,7 @@ async function initSql() {
       connectionString,
       max: 10,
       connectionTimeoutMillis: 8000,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : undefined
+      ssl: { rejectUnauthorized: false }
     });
     sqlPool = createPostgresAdapter(postgresPool);
 
