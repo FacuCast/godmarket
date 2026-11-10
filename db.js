@@ -48,6 +48,14 @@ let productsCache = readJsonFile('products.json', []);
 let ordersCache = readJsonFile('orders.json', []);
 let disputesCache = readJsonFile('disputes.json', []);
 
+if (process.env.NODE_ENV === 'production') {
+  sellersCache = [];
+  businessesCache = [];
+  productsCache = [];
+  ordersCache = [];
+  disputesCache = [];
+}
+
 const DEFAULT_PROMO_SETTINGS = {
   enabled: true,
   maxPromoBusinesses: 5,

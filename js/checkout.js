@@ -57,7 +57,15 @@ class CheckoutHandler {
     if (!Number.isFinite(lastNum) || lastNum < 1040) lastNum = 1040;
     lastNum += 1;
     localStorage.setItem('dulce_last_order_num', lastNum.toString());
-    const uniqueSuffix = Date.now().toString().slice(-4) + Math.floor(10 + Math.random() * 90).toString();
+    const randomBytes = new Uint8Array(8);
+    if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+      window.crypto.getRandomValues(randomBytes);
+    } else {
+      for (let i = 0; i < randomBytes.length; i++) {
+        randomBytes[i] = Math.floor(Math.random() * 256);
+      }
+    }
+    const uniqueSuffix = Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join('');
     return `ORD-${lastNum}${uniqueSuffix}`;
   }
 

@@ -7,9 +7,20 @@ const vm = require('node:vm');
 const checkoutSource = fs.readFileSync(path.join(__dirname, '..', 'js', 'checkout.js'), 'utf8') +
   '\nwindow.CheckoutHandler = CheckoutHandler;';
 
+let randomSequence = 0;
+
 function createCheckout(businesses) {
   const businessById = new Map(businesses.map(business => [business.id, business]));
   const window = {
+    crypto: {
+      getRandomValues(bytes) {
+        randomSequence += 1;
+        bytes.forEach((_, index) => {
+          bytes[index] = randomSequence + index;
+        });
+        return bytes;
+      }
+    },
     productManager: {
       getBusinessById: id => businessById.get(id)
     }

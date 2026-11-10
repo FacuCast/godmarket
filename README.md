@@ -49,7 +49,7 @@ Antes de publicar el sitio:
 6. Cada comercio debe cargar su alias de transferencia desde el portal vendedor; en carritos con varios comercios se muestra el alias y el importe correspondiente a cada uno. Si se ofrece Mercado Pago como medio global, configura `MERCADOPAGO_ALIAS`, `MERCADOPAGO_CVU` y `MERCADOPAGO_ACCOUNT_HOLDER`. Efectivo sigue disponible.
 7. Usa `NODE_ENV=production` y deja `ENABLE_DEMO_LOGIN=false`.
 
-En producción, el servidor no inicia si `DATABASE_URL` no está configurado o PostgreSQL no es accesible. PostgreSQL/Supabase es la persistencia de producción; el almacenamiento JSON en `./data` solo se permite en desarrollo. Las tablas tienen RLS habilitado sin políticas de acceso para `anon`/`authenticated`: solo el backend debe acceder mediante la conexión privada. La aplicación mantiene una caché en memoria y debe ejecutarse como una única instancia Node.js; no escales horizontalmente sin migrar las lecturas a almacenamiento compartido.
+En producción, el servidor no inicia si `DATABASE_URL` no está configurado o PostgreSQL no es accesible. PostgreSQL/Supabase es la persistencia de producción; el almacenamiento JSON en `./data` solo se permite en desarrollo y sus datos no se importan automáticamente a producción. Las tablas tienen RLS habilitado sin políticas de acceso para `anon`/`authenticated`: solo el backend debe acceder mediante la conexión privada. La aplicación mantiene una caché en memoria y debe ejecutarse como una única instancia Node.js; no escales horizontalmente sin migrar las lecturas a almacenamiento compartido.
 
 ## ☁️ Cómo Conectar Cloudinary
 
