@@ -219,7 +219,7 @@ class CartManager {
         map.set(bId, {
           id: bId,
           name: item.product.businessName || 'Pastelería Asociada',
-          avatar: item.product.businessAvatar || '🏪',
+          avatar: item.product.businessAvatar || 'store',
           neighborhood: item.product.businessNeighborhood || '',
           count: 0,
           subtotal: 0

@@ -6,64 +6,65 @@
    ========================================================================== */
 
 :root {
-  /* ── Brand Palette GOD MARKET (Luxury Dark Forest Emerald & Pure Gold) ── */
-  --primary: #D4AF37;               /* Classic Roman Gold */
-  --primary-hover: #E5C365;
-  --primary-light: rgba(212, 175, 55, 0.12);
-  --primary-gradient: linear-gradient(135deg, #F5DFAC 0%, #D4AF37 50%, #9F7624 100%);
-  --gold-shine: linear-gradient(90deg, #D4AF37, #FFF0BE, #D4AF37);
+  /* ── Brand Palette GOD MARKET — Atelier Porteño (Botanical Pine & Satin Champagne) ── */
+  --primary: #C8A96A;               /* Satin Champagne Gold */
+  --primary-hover: #D9BC82;
+  --primary-light: rgba(200, 169, 106, 0.12);
+  --primary-gradient: linear-gradient(135deg, #DEC38A 0%, #C8A96A 100%);
+  --gold-shine: linear-gradient(90deg, #C8A96A, #E6D09E, #C8A96A);
 
-  --green-deep: #051610;            /* Background canvas */
-  --green-dark: #081E16;            /* Header / navigation */
-  --green-mid: #0D271E;             /* Surfaces */
-  --green-card: #0A2219;            /* Cards surface */
-  --green-surface: #102C21;
-  --green-border: rgba(212, 175, 55, 0.20);
-  --green-border-subtle: rgba(255, 255, 255, 0.08);
+  --green-deep: #0E1B16;            /* Soft warm botanical pine canvas (eye-friendly) */
+  --green-dark: #12221C;            /* Header / modals / navigation */
+  --green-mid: #172B23;             /* Elevated containers */
+  --green-card: #14261F;            /* Cards surface */
+  --green-surface: #1B3128;         /* Interactive controls & inputs */
+  --green-border: rgba(244, 239, 230, 0.11);
+  --green-border-subtle: rgba(244, 239, 230, 0.07);
+  --gold-border: rgba(200, 169, 106, 0.32);
 
-  --cream: #FAF6F0;                 /* Ivory White */
-  --cream-muted: #CBD8D1;           /* Soft Sage */
-  --cream-subtle: rgba(250, 246, 240, 0.65);
-  --white-glass: rgba(255, 255, 255, 0.05);
+  --cream: #F4EFE6;                 /* Warm Alabaster Parchment (no harsh white glare) */
+  --cream-muted: #B9C8BF;           /* Clear Eucalyptus Sage (AA/AAA readable) */
+  --cream-subtle: rgba(244, 239, 230, 0.72);
+  --white-glass: rgba(244, 239, 230, 0.04);
 
-  /* ── Legacy aliases (keep JS compatibility) ── */
+  /* ── Semantic aliases (keep JS compatibility) ── */
   --bg-app: var(--green-deep);
   --bg-surface: var(--green-card);
   --bg-surface-secondary: var(--green-surface);
   --text-main: var(--cream);
   --text-secondary: var(--cream-muted);
-  --text-muted: rgba(212,201,176,0.55);
+  --text-muted: #899E93;
   --border-light: var(--green-border);
   --border-subtle: var(--green-border-subtle);
 
-  --accent-gold: #C9A84C;
-  --accent-gold-light: rgba(201,168,76,0.12);
-  --accent-mint: #5A9B76;
-  --accent-mint-light: rgba(90,155,118,0.15);
+  --accent-gold: #C8A96A;
+  --accent-gold-light: rgba(200, 169, 106, 0.12);
+  --accent-mint: #68B98E;
+  --accent-mint-light: rgba(104, 185, 142, 0.13);
 
-  --success: #5A9B76;
-  --warning: #C9A84C;
-  --danger: #C0392B;
-  --whatsapp-green: #25D366;
-  --whatsapp-hover: #20BA5A;
+  --success: #68B98E;
+  --warning: #D99B52;
+  --danger: #DF6B63;
+  --whatsapp-green: #25A85A;
+  --whatsapp-hover: #1F914D;
 
-  /* ── Shadows ── */
-  --shadow-sm: 0 2px 12px rgba(0,0,0,0.25);
-  --shadow-md: 0 6px 24px rgba(0,0,0,0.35);
-  --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
-  --shadow-gold: 0 4px 24px rgba(201,168,76,0.25);
-  --shadow-float: 0 16px 48px rgba(201,168,76,0.22);
+  /* ── Shadows (calm depth, zero neon glow) ── */
+  --shadow-sm: 0 2px 10px rgba(4, 12, 9, 0.22);
+  --shadow-md: 0 8px 24px rgba(4, 12, 9, 0.30);
+  --shadow-lg: 0 18px 44px rgba(4, 12, 9, 0.44);
+  --shadow-gold: 0 4px 16px rgba(200, 169, 106, 0.16);
+  --shadow-float: 0 14px 36px rgba(4, 12, 9, 0.45);
 
   /* ── Radius ── */
   --radius-xs: 8px;
-  --radius-sm: 14px;
-  --radius-md: 20px;
-  --radius-lg: 28px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
   --radius-full: 9999px;
 
   /* ── Transitions ── */
-  --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition-smooth: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* No dark mode needed — always dark luxury */
@@ -83,16 +84,17 @@ html {
 }
 
 body {
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background-color: var(--green-deep);
   background-image:
-    radial-gradient(ellipse at 20% 0%, rgba(201,168,76,0.04) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 100%, rgba(27,58,45,0.6) 0%, transparent 70%);
+    radial-gradient(ellipse at 18% 0%, rgba(200, 169, 106, 0.045) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 100%, rgba(28, 56, 45, 0.45) 0%, transparent 65%);
   color: var(--cream);
   min-height: 100%;
-  line-height: 1.5;
+  line-height: 1.55;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, h4, .font-serif {

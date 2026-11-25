@@ -202,8 +202,8 @@ class GodMarketApp {
 
     const bankInfo = document.getElementById('bank-transfer-info');
     if (bankInfo) bankInfo.innerHTML = `
-      <div class="bank-title"><span>🏦</span> Datos para Transferencia:</div>
-      <p class="bank-subtitle">Transfiere el importe indicado al alias del comercio correspondiente:</p>
+      <div class="bank-title">${this.icon('bank', 16)} Datos para transferencia</div>
+      <p class="bank-subtitle">Transferí el importe indicado al alias del comercio correspondiente:</p>
       ${checkout.renderTransferDetails(payments)}
     `;
 
@@ -237,15 +237,21 @@ class GodMarketApp {
     localStorage.setItem('dulce_favorites', JSON.stringify(this.favorites));
   }
 
+  playSound(name) {
+    if (window.gmSound) window.gmSound(name);
+  }
+
   toggleFavorite(productId, event) {
     if (event) event.stopPropagation();
     const index = this.favorites.indexOf(productId);
     if (index > -1) {
       this.favorites.splice(index, 1);
+      this.playSound('remove');
       this.showToast("Eliminado de favoritos");
     } else {
       this.favorites.push(productId);
-      this.showToast("❤️ Agregado a favoritos");
+      this.playSound('favorite');
+      this.showToast("Agregado a favoritos", 'success');
     }
     this.saveFavorites();
     this.renderProducts();
@@ -286,7 +292,7 @@ class GodMarketApp {
       this.deferredPrompt = null;
       const installBanner = document.getElementById('pwa-install-pill');
       if (installBanner) installBanner.style.display = 'none';
-      this.showToast("🎉 ¡App instalada con éxito en tu pantalla de inicio!", 'gold');
+      this.showToast("App instalada en tu pantalla de inicio", 'success');
     });
 
     // En celulares, si no se ha instalado ni cerrado el banner, mostrar sugerencia tras unos segundos
@@ -302,7 +308,7 @@ class GodMarketApp {
   installPWA() {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     if (isStandalone) {
-      this.showToast("✅ Ya estás navegando desde la App de GOD MARKET", 'gold');
+      this.showToast("Ya estás navegando desde la app de GOD MARKET", 'success');
       return;
     }
 
@@ -310,7 +316,7 @@ class GodMarketApp {
       this.deferredPrompt.prompt();
       this.deferredPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === 'accepted') {
-          this.showToast("🎉 ¡App instalada con éxito!", 'gold');
+          this.showToast("App instalada con éxito", 'success');
         }
         this.deferredPrompt = null;
         const installBanner = document.getElementById('pwa-install-pill');
@@ -325,7 +331,7 @@ class GodMarketApp {
       return;
     }
 
-    this.showToast("📲 Para instalar: abre el menú (⋮) de tu navegador y selecciona 'Instalar aplicación' o 'Agregar a inicio'.", 'gold');
+    this.showToast("Para instalar: abrí el menú del navegador y elegí 'Instalar aplicación'.", 'info');
   }
 
   dismissPWA() {
@@ -366,6 +372,7 @@ class GodMarketApp {
         if (current > 1) {
           qtyVal.textContent = current - 1;
           this.updateModalAddButton(current - 1);
+          this.playSound('stepDown');
         }
       });
 
@@ -373,6 +380,7 @@ class GodMarketApp {
         let current = parseInt(qtyVal.textContent, 10);
         qtyVal.textContent = current + 1;
         this.updateModalAddButton(current + 1);
+        this.playSound('stepUp');
       });
     }
 
@@ -391,7 +399,8 @@ class GodMarketApp {
           const flavor = (rawFlavor && rawFlavor !== 'Clásica de la Casa' && rawFlavor !== 'Clásica') ? rawFlavor : '';
 
           window.cartManager.addItem(this.selectedProductForModal, qty, { dedication, candle, note, flavor });
-          this.showToast(`✨ ${qty}x ${this.selectedProductForModal.name} agregado`);
+          this.playSound('addToCart');
+          this.showToast(`${qty}x ${this.selectedProductForModal.name} agregado al pedido`, 'success');
           this.closeModal('product-detail-modal');
         }
       });
@@ -405,6 +414,7 @@ class GodMarketApp {
         const type = e.currentTarget.dataset.type;
         window.cartManager.setDeliveryType(type);
         this.updateDeliveryUI(type);
+        this.playSound('tap');
       });
     });
 
@@ -414,6 +424,7 @@ class GodMarketApp {
         if (e.currentTarget.hidden) return;
         document.querySelectorAll('.payment-card').forEach(c => c.classList.remove('active'));
         e.currentTarget.classList.add('active');
+        this.playSound('tap');
         const method = e.currentTarget.dataset.payment;
         document.getElementById('checkout-payment-method').value = method;
 
@@ -449,7 +460,7 @@ class GodMarketApp {
       if (btn) {
         btn.addEventListener('click', () => {
           if (window.cartManager.getItemCount() === 0) {
-            this.showToast("⚠️ Tu carrito está vacío. Elige una delicia primero.");
+            this.showToast("Tu carrito está vacío. Elegí un producto primero.", 'warn');
             this.closeModal('cart-drawer-modal');
             return;
           }
@@ -467,7 +478,7 @@ class GodMarketApp {
 
         // 1. Validar que el carrito no esté vacío
         if (window.cartManager.getItemCount() === 0) {
-          this.showToast("⚠️ Tu carrito está vacío. Elige algún producto primero.");
+          this.showToast("Tu carrito está vacío. Elegí algún producto primero.", 'warn');
           this.closeModal('checkout-modal');
           return;
         }
@@ -534,12 +545,12 @@ class GodMarketApp {
 
           if (outOfRange.length > 0) {
             const listStr = outOfRange.map(o => `• ${o.name}: estás a ${o.dist} km (su radio máximo de envío es ${o.maxRadius} km)`).join('\n');
-            const switchPickup = confirm(`⚠️ Atención de Cobertura:\nTu dirección está fuera del radio de entrega a domicilio para:\n${listStr}\n\n¿Deseas cambiar tu pedido a 'Retiro en Local' para coordinar el retiro sin cargo?`);
+            const switchPickup = confirm(`Atención de cobertura:\nTu dirección está fuera del radio de entrega a domicilio para:\n${listStr}\n\n¿Deseás cambiar tu pedido a 'Retiro en local' sin cargo?`);
             if (switchPickup) {
               window.cartManager.setDeliveryType('pickup');
               this.switchDeliveryType('pickup');
             } else {
-              this.showToast("⚠️ Por favor cambia tu dirección o selecciona Retiro en Local");
+              this.showToast("Cambiá tu dirección o seleccioná retiro en local", 'warn');
               return;
             }
           }
@@ -555,7 +566,7 @@ class GodMarketApp {
           timeInput.classList.add('is-invalid');
           isValid = false;
           if (!firstInvalidField) firstInvalidField = timeInput;
-          this.showToast("🌙 El local está cerrado (08:30 a 20:00 hs). Por favor elige un horario programado.");
+          this.showToast("El local está cerrado (08:30 a 20:00 hs). Elegí un horario programado.", 'warn');
         } else {
           timeInput.classList.remove('is-invalid');
         }
@@ -575,9 +586,10 @@ class GodMarketApp {
 
         // Si hay errores, animar el formulario y hacer foco en el primer error
         if (!isValid) {
+          this.playSound('error');
           checkoutForm.classList.add('shake');
           setTimeout(() => checkoutForm.classList.remove('shake'), 400);
-          this.showToast("⚠️ Por favor revisa los campos en rojo");
+          this.showToast("Revisá los campos resaltados en rojo", 'warn');
           if (firstInvalidField) firstInvalidField.focus();
           return;
         }
@@ -614,9 +626,11 @@ class GodMarketApp {
           this.closeModal('checkout-modal');
           this.updateOrdersBadges();
           this.renderOrderTicket(order);
+          this.playSound('orderSuccess');
           this.openModal('order-success-modal');
         } catch (error) {
           console.error('No se pudo confirmar el pedido:', error);
+          this.playSound('error');
           this.showToast(error.message || 'No se pudo confirmar el pedido. Intenta nuevamente.');
         } finally {
           if (submitButton) submitButton.disabled = false;
@@ -632,7 +646,33 @@ class GodMarketApp {
     }
   }
 
+  icon(name, size = 16, className = '') {
+    return typeof window.gmIcon === 'function' ? window.gmIcon(name, className, size) : '';
+  }
+
+  avatarIcon(avatarValue, size = 18) {
+    return typeof window.gmAvatarIcon === 'function' ? window.gmAvatarIcon(avatarValue, size) : '';
+  }
+
+  cleanText(str) {
+    return typeof window.gmCleanText === 'function' ? window.gmCleanText(str) : String(str || '');
+  }
+
+  formatDistanceLabel(distanceKm) {
+    const num = parseFloat(distanceKm);
+    if (!Number.isFinite(num)) return '';
+    if (num < 0.25) return 'A pasos tuyo';
+    if (num < 1) return `${Math.round(num * 1000)} m`;
+    return `${num.toFixed(1).replace(/\.0$/, '')} km`;
+  }
+
   refreshIcons() {
+    if (typeof window.gmHydrateIcons === 'function') {
+      window.gmHydrateIcons(document);
+    }
+    if (window.soundEngine && typeof window.soundEngine.syncToggleButtons === 'function') {
+      window.soundEngine.syncToggleButtons();
+    }
     if (window.lucide && typeof lucide.createIcons === 'function') {
       setTimeout(() => {
         try { lucide.createIcons(); } catch (e) {}
@@ -711,7 +751,7 @@ class GodMarketApp {
         this.renderStoresCards();
         this.renderBusinessesSlider();
         this.renderProducts();
-        this.showToast(`📍 Ubicación detectada: ${this.currentAddress}`, 'gold');
+        this.showToast(`Ubicación detectada: ${this.currentAddress}`, 'success');
       },
       (err) => {
         console.warn('Geolocalización declinada o no disponible:', err);
@@ -760,7 +800,7 @@ class GodMarketApp {
 
     this.renderLocationBar();
     this.closeModal('address-picker-modal');
-    this.showToast(`📍 Ubicación actualizada a ${this.currentAddress}`, 'gold');
+    this.showToast(`Ubicación actualizada a ${this.currentAddress}`, 'success');
 
     // Re-renderizar locales y catálogo con las nuevas distancias
     this.renderStoresCards();
@@ -776,11 +816,11 @@ class GodMarketApp {
 
   detectUserGPS() {
     if (!navigator.geolocation) {
-      this.showToast('⚠️ Tu navegador no soporta geolocalización GPS.');
+      this.showToast('Tu navegador no soporta geolocalización GPS.', 'warn');
       return;
     }
 
-    this.showToast('📡 Detectando tu ubicación GPS...', 'gold');
+    this.showToast('Detectando tu ubicación GPS...', 'info');
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const lat = parseFloat(pos.coords.latitude.toFixed(5));
@@ -820,7 +860,7 @@ class GodMarketApp {
         this.renderBusinessesSlider();
         this.renderProducts();
         this.closeModal('address-picker-modal');
-        this.showToast(`✅ Ubicación detectada: ${this.currentAddress}`, 'gold');
+        this.showToast(`Ubicación detectada: ${this.currentAddress}`, 'success');
 
         const addressInput = document.getElementById('cust-address');
         if (addressInput) {
@@ -828,7 +868,7 @@ class GodMarketApp {
         }
       },
       (err) => {
-        this.showToast('⚠️ No se pudo obtener tu ubicación GPS. Selecciona tu barrio en la lista.');
+        this.showToast('No se pudo obtener tu ubicación GPS. Elegí tu barrio en la lista.', 'warn');
       },
       {
         enableHighAccuracy: true,
@@ -846,9 +886,9 @@ class GodMarketApp {
     this.renderStoresCards();
     this.renderProducts();
     if (this.onlyInRange) {
-      this.showToast('🛵 Mostrando solo locales con envío a tu zona');
+      this.showToast('Mostrando solo locales con envío a tu zona', 'info');
     } else {
-      this.showToast('✨ Mostrando todos los locales del marketplace');
+      this.showToast('Mostrando todos los locales del marketplace', 'info');
     }
   }
 
@@ -857,36 +897,12 @@ class GodMarketApp {
     if (!container) return;
 
     const stories = [
-      {
-        id: 'cafeterias',
-        name: 'Cafeterías',
-        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>`
-      },
-      {
-        id: 'desayunos',
-        name: 'Desayunos',
-        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`
-      },
-      {
-        id: 'healthy',
-        name: 'Healthy',
-        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`
-      },
-      {
-        id: 'bebidas',
-        name: 'Bebidas',
-        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m19 8-1.5 12a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2L5 8"/><path d="M4 8h16"/><path d="m14 2-2 6"/><line x1="8" y1="13" x2="8.01" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
-      },
-      {
-        id: 'pasteleria',
-        name: 'Pastelería',
-        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="m20 21-16-1v-4l16-3v8Z"/><path d="M4 16c2 1 4-1 6 0s4-1 6 0 4-1 4-1"/></svg>`
-      },
-      {
-        id: 'boxes',
-        name: 'Boxes',
-        svg: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect width="20" height="5" x="2" y="7" rx="1"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>`
-      }
+      { id: 'cafeterias', name: 'Cafeterías', icon: 'coffee' },
+      { id: 'desayunos', name: 'Desayunos', icon: 'croissant' },
+      { id: 'healthy', name: 'Healthy', icon: 'leaf' },
+      { id: 'bebidas', name: 'Bebidas', icon: 'drinks' },
+      { id: 'pasteleria', name: 'Pastelería', icon: 'patisserie' },
+      { id: 'boxes', name: 'Boxes', icon: 'gift' }
     ];
 
     container.innerHTML = stories.map(s => {
@@ -896,7 +912,7 @@ class GodMarketApp {
              onclick="window.app.handleCategoryClick('${s.id}')"
              title="${s.name}">
           <div class="story-ring">
-            <div class="story-avatar-inner">${s.svg}</div>
+            <div class="story-avatar-inner">${this.icon(s.icon, 23)}</div>
           </div>
           <span class="story-label">${s.name}</span>
         </div>
@@ -905,6 +921,7 @@ class GodMarketApp {
   }
 
   handleCategoryClick(id) {
+    this.playSound('tap');
     if (id === 'cafeterias') {
       this.selectedBusiness = 'todos';
       this.currentCategory = 'todos';
@@ -945,7 +962,9 @@ class GodMarketApp {
   toggleSideMenu() {
     const drawer = document.getElementById('side-menu-drawer');
     if (drawer) {
+      const opening = !drawer.classList.contains('active');
       drawer.classList.toggle('active');
+      if (opening) this.playSound('open');
     }
   }
 
@@ -961,11 +980,11 @@ class GodMarketApp {
       this.renderStories();
       this.renderBusinessSpotlight();
       this.renderProducts();
-      this.showToast(`Mostrando tus ${this.favorites.length} favoritos ❤️`, 'gold');
+      this.showToast(`Mostrando tus ${this.favorites.length} favoritos`, 'info');
       const prodSec = document.getElementById('products-section-container');
       if (prodSec) prodSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
-      this.showToast('¡Toca el corazón en cualquier delicia para guardarla en Favoritos! 🔖', 'gold');
+      this.showToast('Tocá el corazón en cualquier producto para guardarlo en favoritos.', 'info');
     }
   }
 
@@ -1010,7 +1029,8 @@ class GodMarketApp {
       tab.classList.toggle('active', tab.dataset.type === type);
     });
     this.updateDeliveryUI(type);
-    this.showToast(type === 'delivery' ? '🛵 Modo: Envío a domicilio por vendedor' : '🏪 Modo: Retiro en local', 'gold');
+    this.playSound('tap');
+    this.showToast(type === 'delivery' ? 'Modalidad: Envío a domicilio por vendedor' : 'Modalidad: Retiro en local', 'info');
   }
 
   renderFilterChips() {
@@ -1018,16 +1038,17 @@ class GodMarketApp {
     if (!container) return;
 
     const filters = [
-      { id: 'all', label: 'Todos los Locales', icon: '✨' },
-      { id: 'open', label: '⚡ Abiertos Ahora', icon: '' },
-      { id: 'freeShipping', label: '🛵 Envío Gratis por vendedor', icon: '' },
-      { id: 'topRated', label: '⭐ Calificación 4.9+', icon: '' },
-      { id: 'near', label: '📍 Más Cercanos', icon: '' }
+      { id: 'all', label: 'Todos los locales', icon: 'grid' },
+      { id: 'open', label: 'Abiertos ahora', icon: 'clock' },
+      { id: 'freeShipping', label: 'Envío bonificado', icon: 'delivery' },
+      { id: 'topRated', label: 'Destacados 4.9+', icon: 'star' },
+      { id: 'near', label: 'Más cercanos', icon: 'map-pin' }
     ];
 
     container.innerHTML = filters.map(f => `
       <button type="button" class="filter-chip-py ${this.currentFilter === f.id ? 'active' : ''}" 
               onclick="window.app.setFilter('${f.id}')">
+        ${this.icon(f.icon, 14)}
         <span>${f.label}</span>
       </button>
     `).join('');
@@ -1035,6 +1056,7 @@ class GodMarketApp {
 
   setFilter(filterId) {
     this.currentFilter = filterId;
+    this.playSound('tap');
     this.renderFilterChips();
     this.renderStoresCards();
     this.renderProducts();
@@ -1049,14 +1071,15 @@ class GodMarketApp {
     // Si aún no hay comercios registrados en el marketplace
     if (totalAll === 0) {
       container.innerHTML = `
-        <div class="marketplace-empty-state" style="grid-column: 1 / -1; text-align: center; padding: 48px 24px; color: #CBD8D1; background: rgba(0,0,0,0.3); border-radius: 20px; border: 1.5px dashed rgba(212,175,55,0.3); margin: 12px 0;">
-          <div style="font-size: 3.2rem; margin-bottom: 12px;">🏪</div>
-          <h3 style="color: #FFF; font-size: 1.3rem; font-family: 'Cinzel', serif; margin-bottom: 8px;">Marketplace Listo para Inaugurar</h3>
-          <p style="font-size: 0.88rem; max-width: 480px; margin: 0 auto 18px auto; line-height: 1.5; color: #A3B8AC;">
-            ¡Sé el primer comercio en formar parte de GOD MARKET! Registra tu pastelería o cafetería, define tu radio circular de entrega en el mapa y comienza a recibir pedidos.
+        <div class="marketplace-empty-state" style="grid-column: 1 / -1; text-align: center; padding: 44px 24px; color: var(--cream-muted); background: var(--green-card); border-radius: 20px; border: 1px dashed rgba(200,169,106,0.3); margin: 12px 0;">
+          <div class="gm-empty-icon-circle">${this.icon('store', 28)}</div>
+          <h3 style="color: var(--cream); font-size: 1.35rem; margin-bottom: 8px;">Marketplace listo para inaugurar</h3>
+          <p style="font-size: 0.88rem; max-width: 480px; margin: 0 auto 18px auto; line-height: 1.55; color: var(--cream-muted);">
+            Sé el primer comercio en formar parte de GOD MARKET. Registrá tu pastelería o cafetería, definí tu radio de entrega en el mapa y empezá a recibir pedidos.
           </p>
-          <button class="btn-primary" onclick="window.sellerPortal.chooseRole('vendedor')" style="width: auto; padding: 12px 28px; font-size: 0.92rem; font-weight: 700; margin: 0 auto; box-shadow: 0 4px 15px rgba(212,175,55,0.25); cursor: pointer;">
-            🚀 Registrar Mi Local & Vender
+          <button class="btn-primary" onclick="window.sellerPortal.chooseRole('vendedor')" style="width: auto; padding: 11px 26px; font-size: 0.9rem; margin: 0 auto;">
+            ${this.icon('store', 16)}
+            <span>Registrar mi local</span>
           </button>
         </div>
       `;
@@ -1065,21 +1088,21 @@ class GodMarketApp {
 
     const businesses = window.productManager.getBusinessesFiltered(this.currentFilter, this.userCoords, this.onlyInRange);
 
-    // Si hay locales pero ninguno llega con delivery a la ubicación actual del cliente
     if (businesses.length === 0) {
       container.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 32px 20px; color: var(--cream-muted); background: rgba(0,0,0,0.25); border-radius: 16px; border: 1px dashed rgba(212,175,55,0.25);">
-          <div style="font-size: 2.5rem; margin-bottom: 8px;">🛵</div>
-          <h4 style="color: #FFF; font-size: 1.05rem; margin-bottom: 6px;">No hay cafeterías disponibles en tu radio de entrega</h4>
-          <p style="font-size: 0.82rem; max-width: 360px; margin: 0 auto 14px auto; line-height: 1.4;">
-            Actualmente ningún local con este filtro llega a tu dirección (${this.escapeHTML(this.currentAddress)}). Puedes desactivar el filtro de cobertura o cambiar tu barrio.
+        <div style="grid-column: 1 / -1; text-align: center; padding: 36px 20px; color: var(--cream-muted); background: var(--green-card); border-radius: 16px; border: 1px dashed rgba(200,169,106,0.28);">
+          <div class="gm-empty-icon-circle">${this.icon('delivery', 26)}</div>
+          <h4 style="color: var(--cream); font-size: 1.08rem; margin-bottom: 6px;">No hay cafeterías disponibles en tu radio de entrega</h4>
+          <p style="font-size: 0.84rem; max-width: 380px; margin: 0 auto 16px auto; line-height: 1.45;">
+            Actualmente ningún local con este filtro llega a tu dirección (${this.escapeHTML(this.currentAddress || 'Buenos Aires')}). Podés desactivar el filtro de cobertura o cambiar tu barrio.
           </p>
           <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-            <button class="btn-primary" onclick="window.app.setOnlyInRange(false); window.app.setFilter('all');" style="width: auto; padding: 8px 18px; font-size: 0.82rem;">
-              Ver todos los locales (Modo Retiro)
+            <button class="btn-primary" onclick="window.app.setOnlyInRange(false); window.app.setFilter('all');" style="width: auto; padding: 9px 18px; font-size: 0.82rem;">
+              Ver todos los locales
             </button>
-            <button class="btn-secondary" onclick="window.app.openAddressModal()" style="width: auto; padding: 8px 18px; font-size: 0.82rem; background: rgba(255,255,255,0.1); color: #FFF; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer;">
-              📍 Cambiar mi ubicación
+            <button class="btn-secondary" onclick="window.app.openAddressModal()" style="width: auto; padding: 9px 18px; font-size: 0.82rem;">
+              ${this.icon('map-pin', 14)}
+              <span>Cambiar ubicación</span>
             </button>
           </div>
         </div>
@@ -1089,33 +1112,32 @@ class GodMarketApp {
 
     container.innerHTML = businesses.map(b => {
       const reachBadge = b.inDeliveryRange
-        ? `<span class="coverage-badge in-range">🛵 En tu zona</span>`
-        : `<span class="coverage-badge out-range">⚠️ Fuera de radio</span>`;
+        ? `<div class="cafeteria-reach-overlay in-range">${this.icon('delivery', 12)}<span>En tu zona</span></div>`
+        : `<div class="cafeteria-reach-overlay out-range">${this.icon('store', 12)}<span>Solo retiro</span></div>`;
       const isPromo = window.productManager.isBusinessPromoActive
         ? window.productManager.isBusinessPromoActive(b)
         : Boolean(b.isPromoActive);
       const promoBadgeHtml = isPromo
-        ? `<div class="cafeteria-promo-float-badge">🎁 Precio de Local · 0% Servicio</div>`
+        ? `<div class="cafeteria-promo-float-badge"><span class="promo-dot"></span><span>Precio de local · 0% servicio</span></div>`
         : '';
+      const distLabel = this.formatDistanceLabel(b.computedDistanceKm !== null && b.computedDistanceKm !== undefined ? b.computedDistanceKm : parseFloat(b.distance));
 
       return `
         <div class="cafeteria-god-card" onclick="window.app.setBusiness('${b.id}')" title="Ver menú de ${this.escapeHTML(b.name)}">
           <div class="cafeteria-card-img-wrap" style="position: relative;">
             <img class="cafeteria-card-img" src="${this.escapeHTML(this.safeImageUrl(b.cover, 'assets/images/lumiere_cafe.webp'))}" alt="${this.escapeHTML(b.name)}" loading="lazy">
             ${promoBadgeHtml}
+            ${reachBadge}
           </div>
           <div class="cafeteria-card-body">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-bottom: 4px;">
-              <h4 class="cafeteria-card-title">${this.escapeHTML(b.name)}</h4>
-              ${reachBadge}
-            </div>
+            <h4 class="cafeteria-card-title">${this.escapeHTML(b.name)}</h4>
             <p class="cafeteria-card-sub">${this.escapeHTML(b.tagline)}</p>
             <div class="cafeteria-card-meta">
-              <span class="star-gold">★ ${b.rating}</span>
+              <span class="star-gold">${this.icon('star-filled', 13)} ${b.rating}</span>
               <span>·</span>
-              <span title="Distancia estimada">${b.distance}</span>
+              <span>${this.escapeHTML(distLabel || b.neighborhood || 'CABA')}</span>
               <span>·</span>
-              <span style="font-size: 0.72rem; color: #8CA093;" title="Radio de entrega a domicilio">Radio: ${b.deliveryRadiusKm || 5} km</span>
+              <span>Radio ${b.deliveryRadiusKm || 5} km</span>
             </div>
           </div>
         </div>
@@ -1132,10 +1154,10 @@ class GodMarketApp {
     if (businesses.length === 0) {
       container.innerHTML = `
         <div class="business-chip active" onclick="window.sellerPortal.chooseRole('vendedor')">
-          <div class="business-chip-avatar">🏪</div>
+          <div class="business-chip-avatar">${this.icon('store', 16)}</div>
           <div class="business-chip-info">
-            <span class="business-chip-name">Publicar Mi Local</span>
-            <span class="business-chip-zone">Únete a GOD MARKET</span>
+            <span class="business-chip-name">Publicar mi local</span>
+            <span class="business-chip-zone">Sumate a GOD MARKET</span>
           </div>
         </div>
       `;
@@ -1145,7 +1167,7 @@ class GodMarketApp {
     let html = `
       <div class="business-chip ${this.selectedBusiness === 'todos' ? 'active' : ''}" 
            onclick="window.app.setBusiness('todos')">
-        <div class="business-chip-avatar">✨</div>
+        <div class="business-chip-avatar">${this.icon('grid', 15)}</div>
         <div class="business-chip-info">
           <span class="business-chip-name">Todas (${businesses.length})</span>
           <span class="business-chip-zone">Marketplace</span>
@@ -1158,12 +1180,12 @@ class GodMarketApp {
       html += `
         <div class="business-chip ${isActive ? 'active' : ''}" 
              onclick="window.app.setBusiness('${b.id}')">
-          <div class="business-chip-avatar">${this.escapeHTML(b.avatar || '🍰')}</div>
+          <div class="business-chip-avatar">${this.avatarIcon(b.avatar, 16)}</div>
           <div class="business-chip-info">
             <span class="business-chip-name">${this.escapeHTML(b.name)}</span>
-            <span class="business-chip-zone">📍 ${this.escapeHTML(b.neighborhood || 'Buenos Aires')}</span>
+            <span class="business-chip-zone">${this.escapeHTML(b.neighborhood || 'Buenos Aires')}</span>
           </div>
-          <div class="business-chip-rating">⭐ ${b.rating || 5.0}</div>
+          <div class="business-chip-rating gm-inline-label">${this.icon('star-filled', 11)} ${b.rating || 5.0}</div>
         </div>
       `;
     });
@@ -1222,74 +1244,71 @@ class GodMarketApp {
       return;
     }
 
+    const cleanBadge = this.cleanText(business.badge) || 'Destacado';
+    const bLat = business.lat !== undefined ? business.lat : -34.5885;
+    const bLng = business.lng !== undefined ? business.lng : -58.4285;
+    const dist = calculateDistanceKm(this.userCoords.lat, this.userCoords.lng, bLat, bLng);
+    const radius = business.deliveryRadiusKm || 5.0;
+    const inRange = dist <= radius;
+    const distText = this.formatDistanceLabel(dist);
+
     container.style.display = 'block';
     container.innerHTML = `
       <div class="store-profile-hero animate-fade">
         <img class="store-profile-cover" src="${this.escapeHTML(this.safeImageUrl(business.cover, 'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=800&q=80'))}" alt="${this.escapeHTML(business.name)}">
         <div class="store-profile-content">
-          <div class="store-profile-avatar-wrap">${this.escapeHTML(business.avatar || '🍰')}</div>
+          <div class="store-profile-avatar-wrap">${this.avatarIcon(business.avatar, 24)}</div>
           
           <div class="store-profile-header-actions">
-            <a href="https://wa.me/${window.formatWhatsAppPhone ? window.formatWhatsAppPhone(business.phone || business.whatsapp) : (business.phone || '5491156192616')}?text=${encodeURIComponent(`¡Hola ${business.name}! Los contacto desde GOD MARKET por sus propuestas.`)}" 
+            <a href="https://wa.me/${window.formatWhatsAppPhone ? window.formatWhatsAppPhone(business.phone || business.whatsapp) : (business.phone || '5491156192616')}?text=${encodeURIComponent(`Hola ${business.name}, los contacto desde GOD MARKET por sus propuestas.`)}" 
                target="_blank" class="btn-chat-seller">
-              <span>💬</span>
-              <span>Hablar con el Vendedor</span>
+              ${this.icon('whatsapp', 15)}
+              <span>Hablar con el local</span>
             </a>
-            <button class="btn-close-store-view" onclick="window.app.setBusiness('todos')" title="Ver todas las pastelerías">
-              ✕ Ver todas
+            <button class="btn-close-store-view gm-inline-label" onclick="window.app.setBusiness('todos')" title="Ver todas las pastelerías">
+              ${this.icon('x', 13)}
+              <span>Ver todas</span>
             </button>
           </div>
 
           <div style="margin-top: 14px;">
             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-              <h3 class="font-serif" style="font-size: 1.35rem; margin-bottom: 2px;">
-                ${this.escapeHTML(business.name)}
-                <span style="color: #009EE3; font-size: 0.95rem;">✔</span>
+              <h3 class="font-serif gm-inline-label" style="font-size: 1.4rem; margin-bottom: 2px;">
+                <span>${this.escapeHTML(business.name)}</span>
+                <span style="color: var(--success); display: inline-flex;">${this.icon('verified', 17)}</span>
               </h3>
-              <span class="store-spotlight-badge">${this.escapeHTML(business.badge || '⭐ Destacado')}</span>
+              <span class="store-spotlight-badge">${this.escapeHTML(cleanBadge)}</span>
             </div>
-            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.35;">
+            <p style="font-size: 0.84rem; color: var(--cream-muted); margin-bottom: 8px; line-height: 1.4;">
               ${this.escapeHTML(business.tagline)}
             </p>
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.74rem; color: var(--text-muted); flex-wrap: wrap;">
-              <span>📍 ${this.escapeHTML(business.address || business.neighborhood)}</span>
-              <span>•</span>
-              <span>⭐ ${business.rating} (${business.reviews} opiniones)</span>
-              <span>•</span>
-              <span>🕒 ${this.escapeHTML(business.schedule || '08:30 a 20:00 hs')}</span>
+            <div style="display: flex; align-items: center; gap: 10px; font-size: 0.76rem; color: var(--text-muted); flex-wrap: wrap;">
+              <span class="gm-inline-label">${this.icon('map-pin', 13)} ${this.escapeHTML(business.address || business.neighborhood)}</span>
+              <span>·</span>
+              <span class="gm-inline-label">${this.icon('star-filled', 13)} ${business.rating} (${business.reviews} opiniones)</span>
+              <span>·</span>
+              <span class="gm-inline-label">${this.icon('clock', 13)} ${this.escapeHTML(business.schedule || '08:30 a 20:00 hs')}</span>
             </div>
 
-            <!-- Badge dinámico de Cobertura según la ubicación del cliente -->
-            <div style="margin-top: 8px;">
-              ${(() => {
-                const bLat = business.lat !== undefined ? business.lat : -34.5885;
-                const bLng = business.lng !== undefined ? business.lng : -58.4285;
-                const dist = calculateDistanceKm(this.userCoords.lat, this.userCoords.lng, bLat, bLng);
-                const radius = business.deliveryRadiusKm || 5.0;
-                const inRange = dist <= radius;
-                return inRange
-                  ? `<span class="coverage-badge in-range">🛵 En tu zona (${dist} km de tu ubicación • Radio hasta ${radius} km)</span>`
-                  : `<span class="coverage-badge out-range">⚠️ Fuera de radio (${dist} km de tu ubicación • Radio máx: ${radius} km — Solo Retiro)</span>`;
-              })()}
+            <!-- Badge dinámico de Cobertura -->
+            <div style="margin-top: 10px;">
+              ${inRange
+                ? `<span class="coverage-badge in-range">${this.icon('delivery', 13)} En tu zona (${this.escapeHTML(distText)} · Radio hasta ${radius} km)</span>`
+                : `<span class="coverage-badge out-range">${this.icon('store', 13)} Fuera de radio (${this.escapeHTML(distText)} · Máx ${radius} km · Solo retiro)</span>`}
             </div>
           </div>
 
-          <!-- Política de Envío a cargo del vendedor destacada -->
+          <!-- Política de Envío -->
           <div class="store-profile-policy-box">
-            <span style="font-size: 1.2rem;">🛵</span>
+            ${this.icon('delivery', 18)}
             <div>
-              <strong>Logística a cargo de ${this.escapeHTML(business.name)}:</strong>
-              <div>Cadetería propia con caja térmica especial para pastelería y desayunos. Entrega estimada: <strong>${business.deliveryTime}</strong> (Costo: ${window.cartManager.formatCurrency(business.deliveryFee)}). ¡Envío gratis a partir de ${window.cartManager.formatCurrency(business.freeShippingFrom || 45000)}!</div>
-              ${(() => {
-                const bLat = business.lat !== undefined ? business.lat : -34.5885;
-                const bLng = business.lng !== undefined ? business.lng : -58.4285;
-                const dist = calculateDistanceKm(this.userCoords.lat, this.userCoords.lng, bLat, bLng);
-                const radius = business.deliveryRadiusKm || 5.0;
-                const inRange = dist <= radius;
-                return `<div style="margin-top: 5px; font-size: 0.73rem; font-weight: 600; color: ${inRange ? '#38D9A9' : '#F87171'};">
-                  ${inRange ? `✅ Tu dirección está dentro del radio de entrega (${dist} km / ${radius} km máx).` : `⚠️ Tu dirección está fuera del radio de entrega (${dist} km / ${radius} km máx). Tu pedido será preparado para retiro en local.`}
-                </div>`;
-              })()}
+              <strong style="color: var(--cream);">Logística a cargo de ${this.escapeHTML(business.name)}:</strong>
+              <div>Cadetería propia con caja térmica. Entrega estimada: <strong>${this.escapeHTML(business.deliveryTime)}</strong> (Costo: ${window.cartManager.formatCurrency(business.deliveryFee)}). Envío sin cargo desde ${window.cartManager.formatCurrency(business.freeShippingFrom || 45000)}.</div>
+              <div class="gm-inline-label" style="margin-top: 6px; font-size: 0.74rem; font-weight: 600; color: ${inRange ? 'var(--success)' : 'var(--danger)'};">
+                ${inRange
+                  ? `${this.icon('check-circle', 13)} Tu dirección está dentro del radio de entrega (${this.escapeHTML(distText)} / ${radius} km).`
+                  : `${this.icon('alert', 13)} Tu dirección está fuera del radio (${this.escapeHTML(distText)} / ${radius} km). Disponible para retiro en local.`}
+              </div>
             </div>
           </div>
         </div>
@@ -1299,11 +1318,11 @@ class GodMarketApp {
 
   renderCategories() {
     const categories = [
-      { id: 'todos', name: 'Todo el Menú', icon: '✨' },
-      { id: 'desayunos', name: 'Desayunos Sorpresa', icon: '☀️' },
-      { id: 'meriendas', name: 'Meriendas & Té', icon: '☕' },
-      { id: 'brunch', name: 'Brunch & Salado', icon: '🥐' },
-      { id: 'boxes', name: 'Boxes Regalo', icon: '🎁' }
+      { id: 'todos', name: 'Todo el menú', icon: 'grid' },
+      { id: 'desayunos', name: 'Desayunos', icon: 'croissant' },
+      { id: 'meriendas', name: 'Meriendas y té', icon: 'coffee' },
+      { id: 'brunch', name: 'Brunch y salado', icon: 'leaf' },
+      { id: 'boxes', name: 'Boxes regalo', icon: 'gift' }
     ];
 
     const container = document.getElementById('categories-slider');
@@ -1312,7 +1331,7 @@ class GodMarketApp {
     container.innerHTML = categories.map(cat => `
       <div class="category-item ${this.currentCategory === cat.id ? 'active' : ''}" 
            onclick="window.app.setCategory('${cat.id}')">
-        <div class="category-avatar">${cat.icon}</div>
+        <div class="category-avatar">${this.icon(cat.icon, 22)}</div>
         <span class="category-name">${cat.name}</span>
       </div>
     `).join('');
@@ -1353,14 +1372,15 @@ class GodMarketApp {
       const totalInMarket = window.productManager.getAllProducts().length;
       if (totalInMarket === 0) {
         container.innerHTML = `
-          <div class="catalog-empty-state" style="text-align: center; padding: 48px 24px; color: #CBD8D1; background: rgba(0,0,0,0.3); border-radius: 20px; border: 1.5px dashed rgba(212,175,55,0.3); margin: 20px 0;">
-            <div style="font-size: 3.2rem; margin-bottom: 12px;">🥐</div>
-            <h3 style="color: #FFF; font-size: 1.3rem; font-family: 'Cinzel', serif; margin-bottom: 8px;">Catálogo Listo para Cargar</h3>
-            <p style="font-size: 0.88rem; max-width: 480px; margin: 0 auto 18px auto; line-height: 1.5; color: #A3B8AC;">
-              Aún no hay productos publicados en el marketplace. Como comercio o pastelero, puedes registrarte y publicar tus creaciones gourmet con foto en minutos.
+          <div class="catalog-empty-state" style="text-align: center; padding: 44px 24px; color: var(--cream-muted); background: var(--green-card); border-radius: 20px; border: 1px dashed rgba(200,169,106,0.3); margin: 20px 0;">
+            <div class="gm-empty-icon-circle">${this.icon('patisserie', 28)}</div>
+            <h3 style="color: var(--cream); font-size: 1.35rem; margin-bottom: 8px;">Catálogo listo para cargar</h3>
+            <p style="font-size: 0.88rem; max-width: 480px; margin: 0 auto 18px auto; line-height: 1.55; color: var(--cream-muted);">
+              Aún no hay productos publicados en el marketplace. Como comercio o pastelero, podés registrarte y publicar tus creaciones con foto en minutos.
             </p>
-            <button class="btn-primary" onclick="window.sellerPortal.chooseRole('vendedor')" style="width: auto; padding: 12px 28px; font-size: 0.92rem; font-weight: 700; margin: 0 auto; box-shadow: 0 4px 15px rgba(212,175,55,0.25); cursor: pointer;">
-              ✨ Acceso Vendedores / Publicar Producto
+            <button class="btn-primary" onclick="window.sellerPortal.chooseRole('vendedor')" style="width: auto; padding: 11px 26px; font-size: 0.9rem; margin: 0 auto;">
+              ${this.icon('store', 16)}
+              <span>Acceso vendedores / Publicar producto</span>
             </button>
           </div>
         `;
@@ -1369,11 +1389,11 @@ class GodMarketApp {
 
       container.innerHTML = `
         <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
-          <div style="font-size: 3rem; margin-bottom: 10px;">🥐</div>
-          <h3>No encontramos desayunos ni meriendas</h3>
-          <p style="font-size: 0.85rem;">Prueba buscando otra pastelería, producto o cambiando de categoría.</p>
+          <div class="gm-empty-icon-circle">${this.icon('search', 24)}</div>
+          <h3 style="color: var(--cream); margin-bottom: 6px;">No encontramos resultados</h3>
+          <p style="font-size: 0.85rem; color: var(--cream-muted);">Probá buscando otra pastelería, producto o cambiando de categoría.</p>
           <button class="btn-primary" onclick="window.app.setOnlyInRange(false); window.app.setFilter('all'); window.app.setBusiness('todos'); window.app.setCategory('todos');" style="margin: 16px auto 0; max-width: 240px; padding: 10px 18px; font-size: 0.85rem;">
-            Ver todo el Marketplace
+            Ver todo el marketplace
           </button>
         </div>
       `;
@@ -1392,21 +1412,28 @@ class GodMarketApp {
             <div class="section-container animate-fade store-section-block">
               <div class="section-header store-section-header">
                 <div class="store-section-title-wrap">
-                  <div class="store-section-icon">${this.escapeHTML(b.avatar || '🍰')}</div>
+                  <div class="store-section-icon">${this.avatarIcon(b.avatar, 20)}</div>
                   <div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                       <h3 class="section-title">${this.escapeHTML(b.name)}</h3>
                       <span class="store-mini-badge">${this.escapeHTML(b.neighborhood)}</span>
                     </div>
-                    <p class="section-subtitle">${this.escapeHTML(b.tagline)} • ⭐ ${b.rating} (${b.reviews}) • 🛵 ${b.deliveryTime}</p>
+                    <p class="section-subtitle">
+                      <span>${this.escapeHTML(b.tagline)}</span>
+                      <span>·</span>
+                      <span class="gm-inline-label" style="color: var(--primary);">${this.icon('star-filled', 12)} ${b.rating} (${b.reviews})</span>
+                      <span>·</span>
+                      <span class="gm-inline-label">${this.icon('clock', 12)} ${this.escapeHTML(b.deliveryTime)}</span>
+                    </p>
                   </div>
                 </div>
                 <button class="btn-view-store" onclick="window.app.setBusiness('${b.id}')">
-                  Ver Carta →
+                  <span>Ver carta</span>
+                  ${this.icon('arrow-right', 13)}
                 </button>
               </div>
               <div class="products-grid">
-                ${bProducts.map(p => this.renderProductCard(p)).join('')}
+                ${bProducts.map(p => this.renderProductCard(p, false)).join('')}
               </div>
             </div>
           `;
@@ -1415,22 +1442,23 @@ class GodMarketApp {
       container.innerHTML = html;
     } else {
       // Vista filtrada por negocio, categoría o búsqueda
-      let title = "Resultados del Marketplace";
-      let subtitle = `${products.length} delicias disponibles`;
+      let title = "Resultados del marketplace";
+      let subtitle = `${products.length} propuestas disponibles`;
+      const showStoreMeta = this.selectedBusiness === 'todos';
 
       if (this.selectedBusiness !== 'todos') {
         const bObj = window.productManager.getBusinessById(this.selectedBusiness);
         if (bObj) {
-          title = `${bObj.avatar} Carta de ${bObj.name}`;
-          subtitle = `${products.length} productos en ${bObj.neighborhood}`;
+          title = `Carta de ${this.escapeHTML(bObj.name)}`;
+          subtitle = `${products.length} productos en ${this.escapeHTML(bObj.neighborhood)}`;
         }
       } else if (this.currentCategory !== 'todos') {
         const catMap = {
-          desayunos: '☀️ Desayunos Sorpresa',
-          meriendas: '☕ Meriendas & Té de la Tarde',
-          brunch: '🥐 Brunch & Opciones Saladas',
-          boxes: '🎁 Boxes de Cumpleaños & Regalo',
-          favoritos: '❤️ Tus Favoritos Guardados'
+          desayunos: 'Desayunos sorpresa',
+          meriendas: 'Meriendas y café de especialidad',
+          brunch: 'Brunch y opciones saludables',
+          boxes: 'Boxes de cumpleaños y regalo',
+          favoritos: 'Tus favoritos guardados'
         };
         title = catMap[this.currentCategory] || 'Categoría';
       }
@@ -1445,64 +1473,72 @@ class GodMarketApp {
             <span class="badge-count">${products.length}</span>
           </div>
           <div class="products-grid">
-            ${products.map(p => this.renderProductCard(p)).join('')}
+            ${products.map(p => this.renderProductCard(p, showStoreMeta)).join('')}
           </div>
         </div>
       `;
     }
   }
 
-  renderProductCard(product) {
+  renderProductCard(product, showStoreMeta = true) {
     const isFav = this.favorites.includes(product.id);
     const b = window.productManager.getBusinessById(product.businessId);
     let reachInfo = '';
-    if (b) {
+    if (b && showStoreMeta) {
       const bLat = b.lat !== undefined ? b.lat : -34.5885;
       const bLng = b.lng !== undefined ? b.lng : -58.4285;
       const dist = calculateDistanceKm(this.userCoords.lat, this.userCoords.lng, bLat, bLng);
       const inRange = dist <= (b.deliveryRadiusKm || 5.0);
       reachInfo = inRange
-        ? `<span style="font-size: 0.68rem; color: #38D9A9; font-weight: 700; background: rgba(56,217,169,0.12); padding: 2px 6px; border-radius: 4px;">🛵 En tu zona (${dist} km)</span>`
-        : `<span style="font-size: 0.68rem; color: #F87171; font-weight: 700; background: rgba(248,113,113,0.12); padding: 2px 6px; border-radius: 4px;">🏪 Retiro (${dist} km)</span>`;
+        ? `<span class="product-reach-pill in-range">${this.icon('delivery', 12)} En tu zona</span>`
+        : `<span class="product-reach-pill out-range">${this.icon('store', 12)} Retiro</span>`;
     }
+    const cleanTag = this.cleanText(product.tag);
+    const isPromo = b ? window.productManager.isBusinessPromoActive(b) : Boolean(product.isPromoActive);
 
     return `
       <div class="product-card" onclick="window.app.openProductModal('${product.id}')">
         <div class="product-image-container">
           <img class="product-image" src="${this.escapeHTML(this.safeImageUrl(product.image, 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80'))}" alt="${this.escapeHTML(product.name)}" loading="lazy"
                onerror="this.src='https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80'">
-          ${product.tag ? `<div class="product-tag">${this.escapeHTML(product.tag)}</div>` : ''}
+          ${cleanTag ? `<div class="product-tag">${this.escapeHTML(cleanTag)}</div>` : ''}
           <button class="favorite-btn ${isFav ? 'active' : ''}" 
                   onclick="window.app.toggleFavorite('${product.id}', event)" 
-                  title="Favorito">
-            ${isFav ? '❤️' : '🤍'}
+                  aria-label="${isFav ? 'Quitar de favoritos' : 'Guardar en favoritos'}"
+                  title="${isFav ? 'Quitar de favoritos' : 'Guardar en favoritos'}">
+            ${this.icon(isFav ? 'heart-filled' : 'heart', 16)}
           </button>
         </div>
         <div class="product-content">
-          <div class="product-store-badge" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
-            <div style="display: flex; align-items: center; gap: 4px;">
-              <span class="store-badge-avatar">${this.escapeHTML(product.businessAvatar || '🏪')}</span>
-              <span class="store-badge-name">${this.escapeHTML(product.businessName || 'Pastelería')}</span>
-              <span class="store-badge-zone">• ${this.escapeHTML(product.businessNeighborhood || '')}</span>
+          ${showStoreMeta ? `
+          <div class="product-card-meta-line">
+            <div class="product-card-store-inline">
+              ${this.avatarIcon(product.businessAvatar, 13)}
+              <span>${this.escapeHTML(product.businessName || 'Pastelería')}</span>
             </div>
             ${reachInfo}
           </div>
+          ` : ''}
           <h4 class="product-title">${this.escapeHTML(product.name)}</h4>
           <p class="product-desc-short">${this.escapeHTML(product.description)}</p>
-          <div class="product-portion-tag">📏 ${this.escapeHTML(product.portion || '1 o 2 pers.')}</div>
+          <div class="product-portion-tag">
+            ${this.icon('utensils', 12)}
+            <span>${this.escapeHTML(product.portion || '1 o 2 personas')}</span>
+          </div>
           <div class="product-footer">
             <div>
               <div class="product-price">
                 ${window.cartManager.formatCurrency(product.price)}
               </div>
-              ${(b ? window.productManager.isBusinessPromoActive(b) : product.isPromoActive)
-                ? `<div style="font-size: 0.65rem; color: #4ADE80; font-weight: 700; margin-top: 1px;">🎁 Precio local · 0% servicio</div>`
+              ${isPromo
+                ? `<div class="product-promo-caption">Precio de local · 0% servicio</div>`
                 : ''}
             </div>
             <button class="add-to-cart-btn" 
                     onclick="window.app.quickAddToCart('${product.id}', event)" 
-                    title="Añadir al carrito">
-              +
+                    aria-label="Agregar al carrito"
+                    title="Agregar al carrito">
+              ${this.icon('plus', 17)}
             </button>
           </div>
         </div>
@@ -1530,8 +1566,8 @@ class GodMarketApp {
         ? promoState.standardServiceFeeRate * 100
         : Number(product.serviceFeeRate || 0.2) * 100);
       feePillEl.innerHTML = isPromo
-        ? `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,200,83,0.12);border:1px solid rgba(0,200,83,0.35);color:#4ADE80;font-size:0.74rem;font-weight:700;padding:4px 10px;border-radius:999px;">🎁 Precio habitual de cafetería · Servicio ${servicePercent}% Bonificado ($0)</span>`
-        : `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:var(--text-secondary);font-size:0.72rem;font-weight:600;padding:4px 10px;border-radius:999px;">+ ${servicePercent}% cargo por servicio GOD MARKET en el carrito</span>`;
+        ? `<span class="gm-inline-label" style="background:rgba(104,185,142,0.12);border:1px solid rgba(104,185,142,0.32);color:#9EE0BC;font-size:0.74rem;font-weight:600;padding:4px 11px;border-radius:999px;">${this.icon('award', 13)} Precio habitual de cafetería · Servicio ${servicePercent}% bonificado ($0)</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(244,239,230,0.05);border:1px solid rgba(244,239,230,0.12);color:var(--cream-muted);font-size:0.73rem;font-weight:500;padding:4px 11px;border-radius:999px;">+ ${servicePercent}% cargo por servicio GOD MARKET en el carrito</span>`;
     }
     document.getElementById('modal-product-desc').textContent = product.description;
     document.getElementById('modal-product-portion').textContent = product.portion || 'Porción artesanal';
@@ -1539,7 +1575,7 @@ class GodMarketApp {
     const storeAvatar = document.getElementById('modal-store-avatar');
     const storeName = document.getElementById('modal-store-name');
     const storeZone = document.getElementById('modal-store-zone');
-    if (storeAvatar) storeAvatar.textContent = product.businessAvatar || '🏪';
+    if (storeAvatar) storeAvatar.innerHTML = this.avatarIcon(product.businessAvatar, 18);
     if (storeName) storeName.textContent = product.businessName || 'Pastelería Asociada';
 
     const b = window.productManager.getBusinessById(product.businessId);
@@ -1549,9 +1585,10 @@ class GodMarketApp {
         const bLng = b.lng !== undefined ? b.lng : -58.4285;
         const dist = calculateDistanceKm(this.userCoords.lat, this.userCoords.lng, bLat, bLng);
         const inRange = dist <= (b.deliveryRadiusKm || 5.0);
-        storeZone.innerHTML = `• 📍 ${product.businessNeighborhood || ''} <span style="margin-left: 6px; color: ${inRange ? '#38D9A9' : '#F87171'}; font-weight: 700;">(${inRange ? `🛵 En tu zona a ${dist} km` : `🏪 Solo retiro • ${dist} km`})</span>`;
+        const distLabel = this.formatDistanceLabel(dist);
+        storeZone.innerHTML = `${this.escapeHTML(product.businessNeighborhood || 'Buenos Aires')} · <span style="color: ${inRange ? 'var(--success)' : 'var(--danger)'}; font-weight: 600;">${inRange ? `En tu zona (${this.escapeHTML(distLabel)})` : `Solo retiro (${this.escapeHTML(distLabel)})`}</span>`;
       } else {
-        storeZone.textContent = product.businessNeighborhood ? `• 📍 ${product.businessNeighborhood}` : '';
+        storeZone.textContent = product.businessNeighborhood || 'Buenos Aires';
       }
     }
 
@@ -1562,7 +1599,7 @@ class GodMarketApp {
     const note = document.getElementById('modal-note');
     if (note) note.value = '';
 
-    // Manejo interactivo de Velita de Cumpleaños con badge sobre la foto
+    // Manejo interactivo de Velita de Cumpleaños
     const candleBadge = document.getElementById('modal-candle-badge');
     const candleCheckbox = document.getElementById('modal-candle-checkbox');
     if (candleBadge) candleBadge.style.display = 'none';
@@ -1571,38 +1608,39 @@ class GodMarketApp {
       candleCheckbox.checked = false;
       candleCheckbox.onchange = () => {
         if (candleBadge) {
-          candleBadge.style.display = candleCheckbox.checked ? 'flex' : 'none';
+          candleBadge.style.display = candleCheckbox.checked ? 'inline-flex' : 'none';
         }
+        this.playSound(candleCheckbox.checked ? 'favorite' : 'tap');
         if (candleCheckbox.checked) {
-          this.showToast("🕯️ ¡Velita de cumpleaños agregada al pastel!");
+          this.showToast("Velita de cumpleaños incluida sin cargo", 'success');
         }
       };
     }
 
-    // Manejar selección interactiva de gustos / rellenos con cambio de foto en vivo
+    // Manejar selección interactiva de gustos / rellenos
     const supportsCustom = product.category === 'tortas' || product.category === 'desayunos' || product.category === 'boxes';
     const flavorChips = document.querySelectorAll('#modal-flavor-chips .flavor-chip');
     const hiddenFlavor = document.getElementById('modal-selected-flavor');
     const flavorBadge = document.getElementById('modal-flavor-badge');
     const flavorBadgeText = document.getElementById('modal-flavor-badge-text');
     if (hiddenFlavor) hiddenFlavor.value = supportsCustom ? 'Clásica de la Casa' : '';
-    if (flavorBadge) flavorBadge.style.display = supportsCustom ? 'flex' : 'none';
-    if (flavorBadgeText) flavorBadgeText.textContent = '🍰 Clásica';
+    if (flavorBadge) flavorBadge.style.display = supportsCustom ? 'inline-flex' : 'none';
+    if (flavorBadgeText) flavorBadgeText.textContent = 'Clásica';
 
     flavorChips.forEach((chip, i) => {
       chip.classList.toggle('active', i === 0);
       chip.onclick = () => {
         flavorChips.forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
+        this.playSound('tap');
         const flavor = chip.dataset.flavor;
         if (hiddenFlavor) hiddenFlavor.value = flavor;
         if (flavorBadgeText) {
           flavorBadgeText.textContent = (flavor === 'Clásica de la Casa' || flavor === 'Clásica')
-            ? '🍰 Clásica'
-            : '🍯 ' + flavor;
+            ? 'Clásica'
+            : flavor;
         }
         
-        // Cambiar la imagen del pastel según el sabor elegido con animación suave
         this.switchModalCakeImage(flavor, product);
       };
     });
@@ -1667,8 +1705,27 @@ class GodMarketApp {
     const product = window.productManager.getById(productId);
     if (product) {
       window.cartManager.addItem(product, 1);
-      this.showToast(`🍰 ${product.name} añadido al pedido`);
+      this.playSound('addToCart');
+      this.showToast(`${product.name} añadido al pedido`, 'success');
     }
+  }
+
+  updateCartItemQty(index, newQty) {
+    const currentItem = window.cartManager.items[index];
+    if (!currentItem) return;
+    if (newQty <= 0) {
+      this.playSound('remove');
+    } else if (newQty > currentItem.quantity) {
+      this.playSound('stepUp');
+    } else {
+      this.playSound('stepDown');
+    }
+    window.cartManager.updateQuantity(index, newQty);
+  }
+
+  removeCartItem(index) {
+    this.playSound('remove');
+    window.cartManager.removeItem(index);
   }
 
   updateCartUI() {
@@ -1730,9 +1787,9 @@ class GodMarketApp {
     const serviceFeeEl = document.getElementById('cart-drawer-service-fee');
     if (serviceFeeEl) {
       if (serviceFee === 0 && waivedServiceFee > 0) {
-        serviceFeeEl.innerHTML = `<span style="text-decoration: line-through; opacity: 0.55; margin-right: 6px; font-weight: 400;">${window.cartManager.formatCurrency(waivedServiceFee)}</span><strong style="color: #00C853;">¡$0 Bonificado!</strong>`;
+        serviceFeeEl.innerHTML = `<span style="text-decoration: line-through; opacity: 0.55; margin-right: 6px; font-weight: 400;">${window.cartManager.formatCurrency(waivedServiceFee)}</span><strong style="color: var(--success);">$0 bonificado</strong>`;
       } else if (serviceFee > 0 && waivedServiceFee > 0) {
-        serviceFeeEl.innerHTML = `${window.cartManager.formatCurrency(serviceFee)} <small style="color: #00C853;">(-${window.cartManager.formatCurrency(waivedServiceFee)} bonif.)</small>`;
+        serviceFeeEl.innerHTML = `${window.cartManager.formatCurrency(serviceFee)} <small style="color: var(--success);">(-${window.cartManager.formatCurrency(waivedServiceFee)} bonif.)</small>`;
       } else {
         serviceFeeEl.textContent = window.cartManager.formatCurrency(serviceFee);
       }
@@ -1742,7 +1799,7 @@ class GodMarketApp {
     if (savingsNoteEl) {
       if (waivedServiceFee > 0) {
         savingsNoteEl.style.display = 'flex';
-        savingsNoteEl.innerHTML = `<span>🎁</span><span><strong>¡Servicio del ${serviceFeePercent}% Bonificado!</strong> Estás ahorrando <strong>${window.cartManager.formatCurrency(waivedServiceFee)}</strong> y comprando al mismo precio habitual del local.</span>`;
+        savingsNoteEl.innerHTML = `${this.icon('award', 16)}<span><strong>Servicio del ${serviceFeePercent}% bonificado:</strong> ahorrás <strong>${window.cartManager.formatCurrency(waivedServiceFee)}</strong> y pagás el mismo precio habitual del local.</span>`;
       } else {
         savingsNoteEl.style.display = 'none';
       }
@@ -1753,7 +1810,7 @@ class GodMarketApp {
       ...document.querySelectorAll('.cart-calc-delivery')
     ].filter(Boolean);
     shippingEls.forEach(el => {
-      el.textContent = deliveryFee === 0 ? '¡Gratis!' : window.cartManager.formatCurrency(deliveryFee);
+      el.textContent = deliveryFee === 0 ? 'Sin cargo' : window.cartManager.formatCurrency(deliveryFee);
     });
 
     const totalEls = [
@@ -1765,7 +1822,7 @@ class GodMarketApp {
     // Resumen en Modal de Checkout
     const checkoutCountEl = document.getElementById('checkout-summary-items-count');
     if (checkoutCountEl) {
-      checkoutCountEl.textContent = `🛒 Tu Pedido (${count} ${count === 1 ? 'producto' : 'productos'})`;
+      checkoutCountEl.textContent = `Tu pedido (${count} ${count === 1 ? 'producto' : 'productos'})`;
     }
     const checkoutTotalEl = document.getElementById('checkout-summary-total');
     if (checkoutTotalEl) {
@@ -1782,12 +1839,12 @@ class GodMarketApp {
 
     if (items.length === 0) {
       list.innerHTML = `
-        <div style="text-align: center; padding: 40px 16px; color: var(--text-muted);">
-          <div style="font-size: 3.2rem; margin-bottom: 12px; animation: popIn 0.3s ease;">🛍️</div>
-          <h4 style="font-size: 1.15rem; color: var(--text-main); margin-bottom: 6px;">Tu carrito está vacío</h4>
-          <p style="font-size: 0.85rem; margin-bottom: 20px; line-height: 1.4;">Elige alguna de nuestras tortas, desayunos o postres para armar tu pedido.</p>
-          <button type="button" class="btn-primary" onclick="window.app.closeModal('cart-drawer-modal'); window.scrollTo({top: 350, behavior: 'smooth'});" style="max-width: 220px; margin: 0 auto; padding: 12px 20px; font-size: 0.9rem;">
-            🍰 Explorar la Carta
+        <div style="text-align: center; padding: 36px 16px; color: var(--text-muted);">
+          <div class="gm-empty-icon-circle">${this.icon('bag', 26)}</div>
+          <h4 style="font-size: 1.15rem; color: var(--cream); margin-bottom: 6px;">Tu carrito está vacío</h4>
+          <p style="font-size: 0.85rem; color: var(--cream-muted); margin-bottom: 20px; line-height: 1.45;">Elegí alguno de nuestros desayunos, tortas o cafés para armar tu pedido.</p>
+          <button type="button" class="btn-primary" onclick="window.app.closeModal('cart-drawer-modal'); window.scrollTo({top: 350, behavior: 'smooth'});" style="max-width: 220px; margin: 0 auto; padding: 11px 20px; font-size: 0.88rem;">
+            Explorar la carta
           </button>
         </div>
       `;
@@ -1801,21 +1858,22 @@ class GodMarketApp {
       <div class="cart-item">
         <img class="cart-item-img" src="${this.escapeHTML(this.safeImageUrl(item.product.image))}" alt="${this.escapeHTML(item.product.name)}">
         <div class="cart-item-info">
-          <div class="cart-item-store-tag">🏪 ${this.escapeHTML(item.product.businessName || 'Pastelería')}${item.product.businessNeighborhood ? ' • ' + this.escapeHTML(item.product.businessNeighborhood) : ''}</div>
+          <div class="cart-item-store-tag gm-inline-label">${this.icon('store', 12)} <span>${this.escapeHTML(item.product.businessName || 'Pastelería')}${item.product.businessNeighborhood ? ' · ' + this.escapeHTML(item.product.businessNeighborhood) : ''}</span></div>
           <div class="cart-item-title">${this.escapeHTML(item.product.name)}</div>
-          ${item.customization?.flavor ? `<div class="cart-item-custom">🍯 ${this.escapeHTML(item.customization.flavor)}</div>` : ''}
-          ${item.customization?.dedication ? `<div class="cart-item-custom">✍️ "${this.escapeHTML(item.customization.dedication)}"</div>` : ''}
-          ${item.customization?.candle ? `<div class="cart-item-custom">🕯️ Con velita</div>` : ''}
+          ${item.customization?.flavor ? `<div class="cart-item-custom">Gusto: ${this.escapeHTML(item.customization.flavor)}</div>` : ''}
+          ${item.customization?.dedication ? `<div class="cart-item-custom">Dedicatoria: "${this.escapeHTML(item.customization.dedication)}"</div>` : ''}
+          ${item.customization?.candle ? `<div class="cart-item-custom">Con velita de cumpleaños</div>` : ''}
           <div class="cart-item-price">${window.cartManager.formatCurrency(item.product.price * item.quantity)}</div>
         </div>
         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-          <div class="quantity-stepper" style="transform: scale(0.85); transform-origin: right center;">
-            <button class="stepper-btn" onclick="window.cartManager.updateQuantity(${idx}, ${item.quantity - 1})">-</button>
+          <div class="quantity-stepper" style="transform: scale(0.86); transform-origin: right center;">
+            <button class="stepper-btn" onclick="window.app.updateCartItemQty(${idx}, ${item.quantity - 1})" aria-label="Restar">${this.icon('minus', 14)}</button>
             <span class="stepper-value">${item.quantity}</span>
-            <button class="stepper-btn" onclick="window.cartManager.updateQuantity(${idx}, ${item.quantity + 1})">+</button>
+            <button class="stepper-btn" onclick="window.app.updateCartItemQty(${idx}, ${item.quantity + 1})" aria-label="Sumar">${this.icon('plus', 14)}</button>
           </div>
-          <button type="button" onclick="window.cartManager.removeItem(${idx})" style="background: none; border: none; font-size: 0.72rem; color: var(--danger); cursor: pointer; padding: 2px 4px; display: flex; align-items: center; gap: 2px;">
-            🗑️ Eliminar
+          <button type="button" onclick="window.app.removeCartItem(${idx})" class="gm-inline-label" style="background: none; border: none; font-size: 0.72rem; color: var(--danger); cursor: pointer; padding: 2px 4px;">
+            ${this.icon('trash', 13)}
+            <span>Quitar</span>
           </button>
         </div>
       </div>
@@ -1837,7 +1895,7 @@ class GodMarketApp {
       const serviceFeePercent = Math.round(Number(order.standardServiceFeeRate || 0.2) * 100);
       if (oService === 0 && oWaived > 0) {
         ticketServiceRow.style.display = 'flex';
-        ticketServiceRow.innerHTML = `<span>Servicio GOD MARKET (${serviceFeePercent}%):</span><strong style="color: #00C853;"><s style="opacity:0.55;font-weight:400;margin-right:4px;">${order.waivedServiceFeeFormatted || window.cartManager.formatCurrency(oWaived)}</s> ¡$0 Bonificado!</strong>`;
+        ticketServiceRow.innerHTML = `<span>Servicio GOD MARKET (${serviceFeePercent}%):</span><strong style="color: var(--success);"><s style="opacity:0.55;font-weight:400;margin-right:4px;">${order.waivedServiceFeeFormatted || window.cartManager.formatCurrency(oWaived)}</s> $0 bonificado</strong>`;
       } else if (oService > 0) {
         ticketServiceRow.style.display = 'flex';
         ticketServiceRow.innerHTML = `<span>Servicio GOD MARKET (${serviceFeePercent}%):</span><strong style="color: var(--text-main);">${order.serviceFeeFormatted || window.cartManager.formatCurrency(oService)}</strong>`;
@@ -1862,8 +1920,8 @@ class GodMarketApp {
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dotted var(--border-light);">
           <div>
             <strong>${it.quantity}x</strong> ${this.escapeHTML(it.product.name)}
-            ${it.customization?.flavor ? `<div style="font-size: 0.74rem; color: var(--text-muted);">🍯 ${this.escapeHTML(it.customization.flavor)}</div>` : ''}
-            ${it.customization?.dedication ? `<div style="font-size: 0.74rem; color: var(--primary);">✍️ "${this.escapeHTML(it.customization.dedication)}"</div>` : ''}
+            ${it.customization?.flavor ? `<div style="font-size: 0.74rem; color: var(--text-muted);">Gusto: ${this.escapeHTML(it.customization.flavor)}</div>` : ''}
+            ${it.customization?.dedication ? `<div style="font-size: 0.74rem; color: var(--primary);">Dedicatoria: "${this.escapeHTML(it.customization.dedication)}"</div>` : ''}
           </div>
           <strong style="color: var(--text-main); margin-left: 10px;">${(it.product.price * it.quantity).toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })}</strong>
         </div>
@@ -1892,7 +1950,7 @@ class GodMarketApp {
           });
         }
         transferBox.innerHTML = `
-          <div class="ticket-alias-header"><span>🏦</span> Transfiere a cada comercio:</div>
+          <div class="ticket-alias-header">${this.icon('bank', 15)} <span>Transferí a cada comercio:</span></div>
           ${window.checkoutHandler.renderTransferDetails(paymentsToRender)}
         `;
       }
@@ -1901,7 +1959,7 @@ class GodMarketApp {
       if (whatsappProofBtn) {
         whatsappProofBtn.href = order.proofWhatsappUrl;
         whatsappProofBtn.innerHTML = `
-          <span style="font-size: 1.3rem;">📲</span>
+          ${this.icon('whatsapp', 18)}
           <span>Ya transferí, enviar comprobante</span>
         `;
       }
@@ -1912,7 +1970,7 @@ class GodMarketApp {
       if (whatsappProofBtn) {
         whatsappProofBtn.href = order.proofWhatsappUrl;
         whatsappProofBtn.innerHTML = `
-          <span style="font-size: 1.3rem;">📲</span>
+          ${this.icon('whatsapp', 18)}
           <span>Ya pagué por Mercado Pago, enviar comprobante</span>
         `;
       }
@@ -1923,7 +1981,7 @@ class GodMarketApp {
       if (whatsappProofBtn) {
         whatsappProofBtn.href = order.proofWhatsappUrl;
         whatsappProofBtn.innerHTML = `
-          <span style="font-size: 1.3rem;">📲</span>
+          ${this.icon('whatsapp', 18)}
           <span>Consultar estado por WhatsApp</span>
         `;
       }
@@ -1945,21 +2003,22 @@ class GodMarketApp {
   copyOrderMessage() {
     const lastOrder = window.checkoutHandler?.lastOrder;
     if (!lastOrder || !lastOrder.rawMessage) {
-      this.showToast("⚠️ No hay datos del pedido para copiar");
+      this.showToast("No hay datos del pedido para copiar", 'warn');
       return;
     }
 
     navigator.clipboard.writeText(lastOrder.rawMessage).then(() => {
       const btn = document.getElementById('btn-copy-full-order');
       if (btn) {
-        btn.innerHTML = '<span>✓</span> ¡Mensaje del Pedido Copiado!';
+        btn.innerHTML = `${this.icon('check', 15)} <span>Mensaje del pedido copiado</span>`;
         setTimeout(() => {
-          btn.innerHTML = '<span>📋</span> <span>Copiar Mensaje del Pedido</span>';
+          btn.innerHTML = `${this.icon('copy', 15)} <span>Copiar mensaje del pedido</span>`;
         }, 2000);
       }
-      this.showToast('📋 Mensaje completo del pedido copiado con éxito');
+      this.playSound('copy');
+      this.showToast('Mensaje completo del pedido copiado', 'success');
     }).catch(() => {
-      this.showToast('⚠️ No se pudo acceder al portapapeles');
+      this.showToast('No se pudo acceder al portapapeles', 'warn');
     });
   }
 
@@ -1971,58 +2030,62 @@ class GodMarketApp {
     navigator.clipboard.writeText(text).then(() => {
       const btn = document.getElementById('btn-copy-order');
       if (btn) {
-        btn.innerHTML = '<span>✓</span> ¡Copiado!';
-        setTimeout(() => { btn.innerHTML = '<span>📋</span> Copiar'; }, 2000);
+        btn.innerHTML = `${this.icon('check', 13)} <span>Copiado</span>`;
+        setTimeout(() => { btn.innerHTML = `${this.icon('copy', 13)} <span>Copiar</span>`; }, 2000);
       }
-      this.showToast(`📋 ${text} copiado al portapapeles`);
+      this.playSound('copy');
+      this.showToast(`${text} copiado al portapapeles`, 'success');
     });
   }
 
   copyAlias() {
     const alias = window.checkoutHandler?.getTransferPayments(window.cartManager || { items: [], deliveryType: 'pickup' })
       .find(payment => payment.transferAlias)?.transferAlias;
-    if (!alias) return this.showToast('⚠️ El comercio no configuró su alias.');
-    if (!navigator.clipboard) return this.showToast('⚠️ El navegador no permite copiar al portapapeles.');
+    if (!alias) return this.showToast('El comercio no configuró su alias.', 'warn');
+    if (!navigator.clipboard) return this.showToast('El navegador no permite copiar al portapapeles.', 'warn');
     navigator.clipboard.writeText(alias).then(() => {
-      this.showToast(`🏦 Alias ${alias} copiado con éxito`);
-    }).catch(() => this.showToast('⚠️ No se pudo copiar el alias.'));
+      this.playSound('copy');
+      this.showToast(`Alias ${alias} copiado`, 'success');
+    }).catch(() => this.showToast('No se pudo copiar el alias.', 'warn'));
   }
 
   copyTransferAlias(button) {
     const alias = button?.dataset.transferAlias || '';
-    if (!alias) return this.showToast('⚠️ El alias de este comercio no está disponible.');
-    if (!navigator.clipboard) return this.showToast('⚠️ El navegador no permite copiar al portapapeles.');
+    if (!alias) return this.showToast('El alias de este comercio no está disponible.', 'warn');
+    if (!navigator.clipboard) return this.showToast('El navegador no permite copiar al portapapeles.', 'warn');
     navigator.clipboard.writeText(alias).then(() => {
-      button.textContent = '✓ Copiado';
+      button.textContent = 'Copiado';
       setTimeout(() => { button.textContent = 'Copiar'; }, 2000);
-      this.showToast(`🏦 Alias ${alias} copiado con éxito`);
-    }).catch(() => this.showToast('⚠️ No se pudo copiar el alias.'));
+      this.playSound('copy');
+      this.showToast(`Alias ${alias} copiado`, 'success');
+    }).catch(() => this.showToast('No se pudo copiar el alias.', 'warn'));
   }
 
   copyMPAlias() {
     const alias = this.paymentConfig.mercadoPagoAlias;
-    if (!alias) return this.showToast('⚠️ El alias de Mercado Pago no está configurado.');
-    if (!navigator.clipboard) return this.showToast('⚠️ El navegador no permite copiar al portapapeles.');
+    if (!alias) return this.showToast('El alias de Mercado Pago no está configurado.', 'warn');
+    if (!navigator.clipboard) return this.showToast('El navegador no permite copiar al portapapeles.', 'warn');
     navigator.clipboard.writeText(alias).then(() => {
       const btnTicket = document.getElementById('btn-copy-mp-alias-ticket');
       const btnForm = document.getElementById('btn-copy-mp-alias');
       if (btnTicket) {
-        btnTicket.innerHTML = '<span>✓</span> ¡Copiado!';
-        setTimeout(() => { btnTicket.innerHTML = '<span>📋</span> Copiar'; }, 2000);
+        btnTicket.innerHTML = `${this.icon('check', 13)} <span>Copiado</span>`;
+        setTimeout(() => { btnTicket.innerHTML = `${this.icon('copy', 13)} <span>Copiar</span>`; }, 2000);
       }
       if (btnForm) {
-        btnForm.innerHTML = '✓ Copiado';
-        setTimeout(() => { btnForm.innerHTML = 'Copiar'; }, 2000);
+        btnForm.textContent = 'Copiado';
+        setTimeout(() => { btnForm.textContent = 'Copiar'; }, 2000);
       }
-      this.showToast(`💳 Alias MP ${alias} copiado con éxito`);
-    }).catch(() => this.showToast('⚠️ No se pudo copiar el alias.'));
+      this.playSound('copy');
+      this.showToast(`Alias MP ${alias} copiado`, 'success');
+    }).catch(() => this.showToast('No se pudo copiar el alias.', 'warn'));
   }
 
   copyCVU(provider = 'bank') {
     const isMercadoPago = provider === 'mp';
     const cvu = isMercadoPago ? this.paymentConfig.mercadoPagoCvu : '';
-    if (!cvu) return this.showToast('⚠️ El número de cuenta no está configurado.');
-    if (!navigator.clipboard) return this.showToast('⚠️ El navegador no permite copiar al portapapeles.');
+    if (!cvu) return this.showToast('El número de cuenta no está configurado.', 'warn');
+    if (!navigator.clipboard) return this.showToast('El navegador no permite copiar al portapapeles.', 'warn');
     navigator.clipboard.writeText(cvu).then(() => {
       const buttonIds = isMercadoPago
         ? ['btn-copy-mp-cvu-ticket']
@@ -2030,11 +2093,12 @@ class GodMarketApp {
       buttonIds.forEach(id => {
         const button = document.getElementById(id);
         if (!button) return;
-        button.innerHTML = '<span>✓</span> ¡Copiado!';
-        setTimeout(() => { button.innerHTML = '<span>📋</span> Copiar'; }, 2000);
+        button.innerHTML = `${this.icon('check', 13)} <span>Copiado</span>`;
+        setTimeout(() => { button.innerHTML = `${this.icon('copy', 13)} <span>Copiar</span>`; }, 2000);
       });
-      this.showToast(`💳 CVU ${cvu} copiado con éxito`);
-    }).catch(() => this.showToast('⚠️ No se pudo copiar el número de cuenta.'));
+      this.playSound('copy');
+      this.showToast(`CVU ${cvu} copiado`, 'success');
+    }).catch(() => this.showToast('No se pudo copiar el número de cuenta.', 'warn'));
   }
 
   updateOrdersBadges() {
@@ -2121,22 +2185,20 @@ class GodMarketApp {
     const { hour, minute } = this.getArgentinaTime();
 
     if (isOpen) {
-      dot.style.background = '#2A9D8F';
-      dot.style.animation = 'pulseGlow 2s infinite';
-      info.innerHTML = '<strong style="color: #2A9D8F;">Abierto Ahora</strong> • 08:30 a 20:00 hs';
+      dot.style.background = 'var(--success)';
+      info.innerHTML = '<strong style="color: var(--success);">Abierto ahora</strong> · 08:30 a 20:00 hs';
       if (tag) {
-        tag.textContent = '🛵 Envíos en el día';
+        tag.textContent = 'Envíos en el día';
         tag.style.color = 'var(--primary)';
       }
     } else {
-      dot.style.background = '#E63946';
-      dot.style.animation = 'none';
+      dot.style.background = 'var(--danger)';
       const isMorning = hour < 8 || (hour === 8 && minute < 30);
       const nextOpen = isMorning ? 'Abre hoy 08:30 hs' : 'Abre mañana 08:30 hs';
-      info.innerHTML = `<strong style="color: #E63946;">Cerrado Ahora</strong> • ${nextOpen}`;
+      info.innerHTML = `<strong style="color: var(--danger);">Cerrado ahora</strong> · ${nextOpen}`;
       if (tag) {
-        tag.textContent = '🌙 Pedidos programados';
-        tag.style.color = '#E65100';
+        tag.textContent = 'Pedidos programados';
+        tag.style.color = 'var(--warning)';
       }
     }
   }
@@ -2154,7 +2216,7 @@ class GodMarketApp {
 
     if (chipAfternoon) {
       chipAfternoon.dataset.time = 'Hoy por la tarde (16:00 a 19:30 hs)';
-      chipAfternoon.innerHTML = '🕒 Hoy por la tarde';
+      chipAfternoon.innerHTML = `${this.icon('sun', 14)} <span>Hoy por la tarde</span>`;
     }
 
     if (isOpen) {
@@ -2168,7 +2230,6 @@ class GodMarketApp {
         timeInput.value = 'Lo antes posible (Ahora)';
       }
     } else {
-      // Local cerrado en horario argentino
       if (chipNow) {
         chipNow.style.display = 'none';
         chipNow.classList.remove('active');
@@ -2178,7 +2239,7 @@ class GodMarketApp {
       if (isMorning) {
         if (chipAfternoon) {
           chipAfternoon.dataset.time = 'Hoy desde 08:30 hs';
-          chipAfternoon.innerHTML = '☀️ Hoy desde 08:30 hs';
+          chipAfternoon.innerHTML = `${this.icon('sun', 14)} <span>Hoy desde 08:30 hs</span>`;
           chipAfternoon.classList.add('active');
         }
         if (chipTomorrow) chipTomorrow.classList.remove('active');
@@ -2202,13 +2263,13 @@ class GodMarketApp {
     if (history.length === 0) {
       container.innerHTML = `
         <div class="orders-empty-state">
-          <div class="orders-empty-icon">🧁</div>
-          <h4 class="font-serif" style="font-size: 1.15rem; margin-bottom: 6px;">No tienes pedidos registrados</h4>
-          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.4;">
-            Cuando realices un pedido en GOD MARKET, quedará guardado automáticamente en tu celular para ver tu historial y comprobantes.
+          <div class="gm-empty-icon-circle">${this.icon('package', 26)}</div>
+          <h4 class="font-serif" style="font-size: 1.2rem; margin-bottom: 6px;">No tenés pedidos registrados</h4>
+          <p style="font-size: 0.82rem; color: var(--cream-muted); margin-bottom: 16px; line-height: 1.45;">
+            Cuando realices un pedido en GOD MARKET, quedará guardado automáticamente en este dispositivo para ver tu historial y comprobantes.
           </p>
-          <button type="button" class="btn-primary" onclick="window.app.closeModal('orders-history-modal')" style="width: auto; padding: 8px 20px; margin: 0 auto; font-size: 0.85rem;">
-            Ver Menú y Elegir Delicias
+          <button type="button" class="btn-primary" onclick="window.app.closeModal('orders-history-modal')" style="width: auto; padding: 9px 20px; margin: 0 auto; font-size: 0.85rem;">
+            Explorar el catálogo
           </button>
         </div>
       `;
@@ -2224,17 +2285,17 @@ class GodMarketApp {
 
       const isPickup = order.formData?.address?.includes('Retiro') || order.formData?.address === 'Retiro en Tienda';
       const addressText = isPickup 
-        ? '🏪 Retiro en Tienda'
-        : `📍 ${this.escapeHTML(order.formData?.address || 'Envío a Domicilio')}${order.formData?.zone ? ` (${this.escapeHTML(order.formData.zone)})` : ''}`;
+        ? `<span class="gm-inline-label">${this.icon('store', 13)} Retiro en tienda</span>`
+        : `<span class="gm-inline-label">${this.icon('map-pin', 13)} ${this.escapeHTML(order.formData?.address || 'Envío a domicilio')}${order.formData?.zone ? ` (${this.escapeHTML(order.formData.zone)})` : ''}</span>`;
 
       const orderStatusLabels = {
-        pendiente: { label: '⏳ Pendiente de confirmación', color: '#FFB703' },
-        en_preparacion: { label: '👨‍🍳 En preparación', color: '#38BDF8' },
-        despachado: { label: '🛵 En camino / Listo', color: '#A78BFA' },
-        entregado: { label: '✅ Entregado', color: '#4ADE80' },
-        en_disputa: { label: '⚠️ En revisión de soporte', color: '#F87171' },
-        reembolsado: { label: '💸 Reembolsado', color: '#4ADE80' },
-        disputa_cerrada: { label: '🔒 Caso cerrado', color: '#94A3B8' }
+        pendiente: { label: 'Pendiente de confirmación', icon: 'clock', color: '#D99B52' },
+        en_preparacion: { label: 'En preparación', icon: 'chef', color: '#6FB4D8' },
+        despachado: { label: 'En camino / Listo', icon: 'delivery', color: '#B49EE0' },
+        entregado: { label: 'Entregado', icon: 'check-circle', color: '#68B98E' },
+        en_disputa: { label: 'En revisión de soporte', icon: 'alert', color: '#DF6B63' },
+        reembolsado: { label: 'Reembolsado', icon: 'check-circle', color: '#68B98E' },
+        disputa_cerrada: { label: 'Caso cerrado', icon: 'lock', color: '#899E93' }
       };
       const statusMeta = orderStatusLabels[order.status || 'pendiente'] || orderStatusLabels.pendiente;
 
@@ -2244,48 +2305,48 @@ class GodMarketApp {
             <div>
               <div class="order-history-id" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <span>#${this.escapeHTML(order.orderId)}</span>
-                <span style="font-size: 0.7rem; font-weight: 700; color: ${statusMeta.color}; background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 999px; border: 1px solid ${statusMeta.color}40;">${statusMeta.label}</span>
+                <span class="gm-inline-label" style="font-size: 0.7rem; font-weight: 600; color: ${statusMeta.color}; background: rgba(244,239,230,0.05); padding: 2px 9px; border-radius: 999px; border: 1px solid ${statusMeta.color}44;">${this.icon(statusMeta.icon, 12)} <span>${statusMeta.label}</span></span>
               </div>
-              <div class="order-history-date">📅 ${dateStr}</div>
+              <div class="order-history-date gm-inline-label" style="margin-top: 4px;">${this.icon('calendar', 12)} <span>${dateStr}</span></div>
             </div>
-            <button type="button" class="btn-order-delete" onclick="window.app.deleteOrderHistory('${this.escapeHTML(order.orderId)}')" title="Eliminar del historial">
-              🗑️
+            <button type="button" class="btn-order-delete" onclick="window.app.deleteOrderHistory('${this.escapeHTML(order.orderId)}')" title="Eliminar del historial" aria-label="Eliminar del historial">
+              ${this.icon('trash', 14)}
             </button>
           </div>
 
           <div class="order-history-items-summary">
-            <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 3px; text-transform: uppercase; font-weight: 700;">Productos:</div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 3px; text-transform: uppercase; font-weight: 600;">Productos</div>
             <div>${itemsSummary || 'Detalle del pedido'}</div>
-            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 6px; border-top: 1px dashed var(--border-light); padding-top: 4px;">
-              ${addressText} • 🕒 ${this.escapeHTML(order.formData?.deliveryTime || 'Horario coordinado')}
+            <div style="font-size: 0.74rem; color: var(--cream-muted); margin-top: 6px; border-top: 1px dashed var(--border-light); padding-top: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              ${addressText} · <span class="gm-inline-label">${this.icon('clock', 12)} ${this.escapeHTML(order.formData?.deliveryTime || 'Horario coordinado')}</span>
             </div>
           </div>
 
           <div class="order-history-footer">
             <div>
-              <span style="font-size: 0.7rem; color: var(--text-muted); display: block; text-transform: uppercase; font-weight: 700;">Total:</span>
+              <span style="font-size: 0.69rem; color: var(--text-muted); display: block; text-transform: uppercase; font-weight: 600;">Total</span>
               <span class="order-history-total" style="color: var(--primary);">${order.totalFormatted || '$' + (order.total || 0)}</span>
             </div>
 
             <div class="order-history-actions">
               <button type="button" class="btn-order-action btn-order-ticket" onclick="window.app.viewOrderTicket('${this.escapeHTML(order.orderId)}')">
-                <span>🧾</span> Ver Ticket
+                ${this.icon('receipt', 14)} <span>Ver ticket</span>
               </button>
               <button type="button" class="btn-order-action btn-order-whatsapp" onclick="window.app.trackOrderWhatsApp('${this.escapeHTML(order.orderId)}')">
-                <span>💬</span> WhatsApp
+                ${this.icon('whatsapp', 14)} <span>WhatsApp</span>
               </button>
             </div>
             <div class="order-dispute-section">
               ${order.disputeStatus ? `
                 <div class="dispute-badge dispute-badge-${order.disputeStatus}">
-                  ${order.disputeStatus === 'abierta' ? '🔴 Disputa abierta — GOD MARKET está revisando tu caso' : ''}
-                  ${order.disputeStatus === 'en_revision' ? '🟡 En revisión por GOD MARKET' : ''}
-                  ${order.disputeStatus === 'reembolsada' ? '✅ Reembolso aprobado por GOD MARKET' : ''}
-                  ${order.disputeStatus === 'rechazada' ? '❌ Disputa cerrada' : ''}
+                  ${order.disputeStatus === 'abierta' ? 'Disputa abierta — GOD MARKET está revisando tu caso' : ''}
+                  ${order.disputeStatus === 'en_revision' ? 'En revisión por GOD MARKET' : ''}
+                  ${order.disputeStatus === 'reembolsada' ? 'Reembolso aprobado por GOD MARKET' : ''}
+                  ${order.disputeStatus === 'rechazada' ? 'Disputa cerrada' : ''}
                 </div>
               ` : `
                 <button type="button" class="btn-dispute" onclick="window.app.openDisputeFlow('${window.app.escapeHTML ? window.app.escapeHTML(order.orderId) : order.orderId}')">
-                  ⚠️ El local no respondió
+                  ${this.icon('alert', 14)} <span>El local no respondió</span>
                 </button>
               `}
             </div>
@@ -2298,7 +2359,7 @@ class GodMarketApp {
   viewOrderTicket(orderId) {
     const order = window.checkoutHandler?.getOrderById(orderId);
     if (!order) {
-      this.showToast("⚠️ No se encontró la información del pedido");
+      this.showToast("No se encontró la información del pedido", 'warn');
       return;
     }
     this.closeModal('orders-history-modal');
@@ -2311,7 +2372,7 @@ class GodMarketApp {
     if (!order) return;
 
     const name = order.formData?.fullName || '';
-    const text = `¡Hola GOD MARKET! ✦ Me comunico por mi pedido #${order.orderId}${name ? ` a nombre de ${name}` : ''}. ¡Muchas gracias!`;
+    const text = `Hola GOD MARKET, me comunico por mi pedido #${order.orderId}${name ? ` a nombre de ${name}` : ''}. Muchas gracias.`;
     const url = window.checkoutHandler.buildWhatsAppUrl(text);
     window.open(url, '_blank');
   }
@@ -2323,7 +2384,7 @@ class GodMarketApp {
   openDisputeFlow(orderId) {
     const order = window.checkoutHandler?.getOrderById(orderId);
     if (!order) {
-      this.showToast('⚠️ No se encontró el pedido');
+      this.showToast('No se encontró el pedido', 'warn');
       return;
     }
 
@@ -2334,13 +2395,13 @@ class GodMarketApp {
         reembolsada: 'Tu reembolso ya fue aprobado.',
         rechazada: 'Esta disputa ya fue cerrada.'
       };
-      this.showToast('ℹ️ ' + (statusMap[order.disputeStatus] || 'Ya existe una disputa para este pedido.'));
+      this.showToast(statusMap[order.disputeStatus] || 'Ya existe una disputa para este pedido.', 'info');
       return;
     }
 
     const modal = document.getElementById('dispute-modal');
     if (!modal) {
-      this.showToast('⚠️ Error interno: modal no encontrado');
+      this.showToast('Error interno: modal no encontrado', 'error');
       return;
     }
     modal.dataset.orderId = orderId;
@@ -2402,19 +2463,19 @@ class GodMarketApp {
         this.renderOrdersHistoryList();
 
         const name = order.formData?.fullName || '';
-        const waText = '¡Hola GOD MARKET! ⚠️ Necesito ayuda con mi pedido #' + orderId + (name ? ' a nombre de ' + name : '') + '. El local no respondió mi pedido. ID de disputa: ' + (data.dispute?.id || 'N/A') + '. Por favor contáctenme. ¡Gracias!';
+        const waText = 'Hola GOD MARKET, necesito ayuda con mi pedido #' + orderId + (name ? ' a nombre de ' + name : '') + '. El local no respondió mi pedido. ID de caso: ' + (data.dispute?.id || 'N/A') + '. Por favor contáctenme.';
         const waUrl = window.checkoutHandler.buildWhatsAppUrl(waText);
         window.open(waUrl, '_blank');
 
-        this.showToast('✅ Disputa registrada. GOD MARKET te contactará pronto.');
+        this.showToast('Disputa registrada. GOD MARKET te contactará pronto.', 'success');
       }
     } catch (err) {
       console.error('No se pudo registrar la disputa:', err);
-      this.showToast('❌ ' + (err.message || 'No se pudo registrar la disputa. Intenta nuevamente.'));
+      this.showToast(err.message || 'No se pudo registrar la disputa. Intentá nuevamente.', 'error');
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = '⚠️ Reportar problema y contactar a GOD MARKET';
+        btn.innerHTML = `${this.icon('alert', 17)} <span>Reportar problema y contactar a GOD MARKET</span>`;
       }
     }
   }
@@ -2475,7 +2536,7 @@ class GodMarketApp {
     const notes = notesInput ? notesInput.value.trim() : '';
 
     if (!orderId) {
-      this.showToast('⚠️ Por favor ingresa el número de orden (ej: ORD-1045)');
+      this.showToast('Por favor ingresá el número de orden (ej: ORD-1045)', 'warn');
       if (orderIdInput) orderIdInput.focus();
       return;
     }
@@ -2521,34 +2582,35 @@ class GodMarketApp {
       this.closeModal('legal-modal');
       this.renderOrdersHistoryList();
 
-      const waText = `¡Hola GOD MARKET! ↩️ Solicitud de Arrepentimiento / Revocación de Compra (Ley 24.240 y Res. 424/2020).\n✦ Pedido: #${orderId}\n✦ Teléfono: ${phone || 'No especificado'}\n✦ Motivo: ${reason}${notes ? `\n✦ Detalle: "${notes}"` : ''}\nPor favor confirmar la anulación y gestión de reintegro. ¡Muchas gracias!`;
+      const waText = `Hola GOD MARKET, solicito Arrepentimiento / Revocación de Compra (Ley 24.240 y Res. 424/2020).\n- Pedido: #${orderId}\n- Teléfono: ${phone || 'No especificado'}\n- Motivo: ${reason}${notes ? `\n- Detalle: "${notes}"` : ''}\nPor favor confirmar la anulación y gestión de reintegro.`;
       const waUrl = window.checkoutHandler.buildWhatsAppUrl(waText);
       window.open(waUrl, '_blank');
 
-      this.showToast('✅ Solicitud registrada. Se abrió WhatsApp para confirmar la anulación.');
+      this.showToast('Solicitud registrada. Se abrió WhatsApp para confirmar la anulación.', 'success');
     } catch (err) {
       console.error('No se pudo registrar la revocación:', err);
-      this.showToast('❌ ' + (err.message || 'No se pudo registrar la solicitud. Intenta nuevamente.'));
+      this.showToast(err.message || 'No se pudo registrar la solicitud. Intentá nuevamente.', 'error');
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = '↩️ Enviar Solicitud de Arrepentimiento y Abrir Mediación';
+        btn.innerHTML = `${this.icon('undo', 16)} <span>Enviar solicitud de arrepentimiento y abrir mediación</span>`;
       }
     }
   }
 
   deleteOrderHistory(orderId) {
-    if (confirm(`¿Deseas quitar la orden #${orderId} de tu celular?`)) {
+    if (confirm(`¿Deseás quitar la orden #${orderId} de este dispositivo?`)) {
       window.checkoutHandler?.deleteOrderFromHistory(orderId);
       this.renderOrdersHistoryList();
       this.updateOrdersBadges();
-      this.showToast(`🗑️ Pedido #${orderId} eliminado del historial`);
+      this.showToast(`Pedido #${orderId} eliminado del historial`);
     }
   }
 
   selectQuickTime(btn) {
     document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
+    this.playSound('tap');
     const timeVal = btn.dataset.time;
     const input = document.getElementById('cust-time');
     if (input) {
@@ -2560,6 +2622,9 @@ class GodMarketApp {
   openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
+      if (modalId === 'cart-drawer-modal' || modalId === 'product-detail-modal' || modalId === 'checkout-modal') {
+        this.playSound('open');
+      }
       if (modalId === 'cart-drawer-modal' || modalId === 'checkout-modal') {
         this.updateCartUI();
       }
@@ -2602,14 +2667,14 @@ class GodMarketApp {
 
   openAdminModalWithPin() {
     const savedPin = localStorage.getItem('dulce_admin_pin') || '1234';
-    const entered = prompt('🔐 Ingrese el PIN de Acceso para Negocios (por defecto: 1234):');
+    const entered = prompt('Ingresá el PIN de acceso para negocios (por defecto: 1234):');
     if (entered === savedPin) {
       if (window.adminManager && typeof window.adminManager.populateBusinessSelect === 'function') {
         window.adminManager.populateBusinessSelect();
       }
       this.openModal('admin-product-modal');
     } else if (entered !== null) {
-      this.showToast('❌ PIN incorrecto');
+      this.showToast('PIN incorrecto', 'error');
     }
   }
 
@@ -2635,25 +2700,34 @@ class GodMarketApp {
       .replace(/'/g, '&#039;');
   }
 
-  showToast(message) {
+  showToast(message, tone = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
+    const cleanMessage = this.cleanText(String(message || ''));
+    const iconName = tone === 'error' || tone === 'warn' ? 'alert'
+      : tone === 'success' ? 'check-circle'
+      : 'info';
+    const iconColor = tone === 'error' ? 'var(--danger)'
+      : tone === 'warn' ? 'var(--warning)'
+      : tone === 'success' ? 'var(--success)'
+      : 'var(--primary)';
+
     const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerHTML = `<span>🍰</span> ${this.escapeHTML(message)}`;
+    toast.className = `toast ${tone === 'error' ? 'error' : tone === 'success' ? 'success' : 'gold'}`;
+    toast.innerHTML = `<span class="toast-icon" style="color:${iconColor};">${this.icon(iconName, 16)}</span><span>${this.escapeHTML(cleanMessage || String(message || ''))}</span>`;
     container.appendChild(toast);
 
     setTimeout(() => {
       toast.style.opacity = '0';
-      toast.style.transform = 'translateY(-10px)';
-      toast.style.transition = 'all 0.3s ease';
-      setTimeout(() => toast.remove(), 300);
+      toast.style.transform = 'translateY(8px)';
+      toast.style.transition = 'all 0.25s ease';
+      setTimeout(() => toast.remove(), 260);
     }, 2800);
   }
 
   /* =========================================================================
-     MAPA INTERACTIVO Y CAPTURA DE DIRECCIÓN POR PIN ROJO (LEAFLET / OSM)
+     MAPA INTERACTIVO Y CAPTURA DE DIRECCIÓN POR MARCADOR (LEAFLET / OSM)
      ========================================================================= */
   toggleMapPicker() {
     const mapContainer = document.getElementById('checkout-map-container');
@@ -2663,10 +2737,10 @@ class GodMarketApp {
     const isVisible = mapContainer.style.display === 'block';
     if (isVisible) {
       mapContainer.style.display = 'none';
-      if (toggleBtn) toggleBtn.innerHTML = '🗺️ Marcar en el Mapa';
+      if (toggleBtn) toggleBtn.innerHTML = `${this.icon('map', 14)} <span>Marcar en el mapa</span>`;
     } else {
       mapContainer.style.display = 'block';
-      if (toggleBtn) toggleBtn.innerHTML = '✕ Ocultar Mapa';
+      if (toggleBtn) toggleBtn.innerHTML = `${this.icon('x', 14)} <span>Ocultar mapa</span>`;
 
       this.initDeliveryMap();
       setTimeout(() => {
@@ -2675,7 +2749,6 @@ class GodMarketApp {
         }
       }, 200);
 
-      // Si el usuario ya escribió algo en Dirección (ej: "cilento 81"), buscarlo automáticamente
       const currentAddress = document.getElementById('cust-address')?.value.trim();
       const mapSearchInput = document.getElementById('map-search-input');
       if (currentAddress) {
@@ -2691,12 +2764,12 @@ class GodMarketApp {
     const searchQuery = (query || input?.value || addressInput?.value || '').trim();
 
     if (!searchQuery) {
-      this.showToast('ℹ️ Escribe una calle o localidad para buscar en el mapa.');
+      this.showToast('Escribí una calle o localidad para buscar en el mapa.', 'info');
       return;
     }
 
     const statusEl = document.getElementById('map-address-status');
-    if (statusEl) statusEl.textContent = `🔍 Buscando "${searchQuery}" en el mapa...`;
+    if (statusEl) statusEl.textContent = `Buscando "${searchQuery}" en el mapa...`;
 
     try {
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery + ', argentina')}&addressdetails=1&limit=3`;
@@ -2714,12 +2787,12 @@ class GodMarketApp {
           this.reverseGeocode(lat, lng);
         }
       } else {
-        if (statusEl) statusEl.textContent = `⚠️ No se ubicó "${searchQuery}". Puedes mover el pin rojo manualmente.`;
-        this.showToast(`⚠️ No se encontró "${searchQuery}". Mueve el pin rojo o añade la localidad.`);
+        if (statusEl) statusEl.textContent = `No se ubicó "${searchQuery}". Podés mover el marcador manualmente.`;
+        this.showToast(`No se encontró "${searchQuery}". Mové el marcador o añadí la localidad.`, 'warn');
       }
     } catch (err) {
       console.error('Error al buscar dirección:', err);
-      if (statusEl) statusEl.textContent = '📍 Mueve el pin rojo manualmente sobre el mapa';
+      if (statusEl) statusEl.textContent = 'Mové el marcador manualmente sobre el mapa';
     }
   }
 
@@ -2728,7 +2801,6 @@ class GodMarketApp {
     const mapEl = document.getElementById('delivery-map');
     if (!mapEl || typeof L === 'undefined') return;
 
-    // Coordenadas iniciales (ubicación del usuario o Buenos Aires Centro)
     const defaultLat = (this.userCoords && typeof this.userCoords.lat === 'number') ? this.userCoords.lat : -34.6037;
     const defaultLng = (this.userCoords && typeof this.userCoords.lng === 'number') ? this.userCoords.lng : -58.3816;
 
@@ -2745,7 +2817,7 @@ class GodMarketApp {
 
     const redPinSvg = `
       <div class="map-red-pin-wrapper">
-        <svg viewBox="0 0 24 24" width="38" height="38" fill="#D9536F" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));">
+        <svg viewBox="0 0 24 24" width="38" height="38" fill="#C8A96A" stroke="#0E1B16" stroke-width="1.2" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));">
           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
         </svg>
       </div>
@@ -2763,13 +2835,11 @@ class GodMarketApp {
       icon: redIcon
     }).addTo(this.deliveryMap);
 
-    // Evento al arrastrar el pin rojo
     this.deliveryMarker.on('dragend', () => {
       const pos = this.deliveryMarker.getLatLng();
       this.reverseGeocode(pos.lat, pos.lng);
     });
 
-    // Evento al tocar en cualquier punto del mapa
     this.deliveryMap.on('click', (e) => {
       this.deliveryMarker.setLatLng(e.latlng);
       this.reverseGeocode(e.latlng.lat, e.latlng.lng);
@@ -2778,12 +2848,12 @@ class GodMarketApp {
 
   locateUserGPS() {
     if (!navigator.geolocation) {
-      this.showToast('⚠️ Tu navegador no soporta geolocalización.');
+      this.showToast('Tu navegador no soporta geolocalización.', 'warn');
       return;
     }
 
     const statusEl = document.getElementById('map-address-status');
-    if (statusEl) statusEl.textContent = '📡 Conectando con tu ubicación...';
+    if (statusEl) statusEl.textContent = 'Conectando con tu ubicación...';
 
     const onGeoSuccess = (pos) => {
       const { latitude, longitude } = pos.coords;
@@ -2797,15 +2867,14 @@ class GodMarketApp {
     const onGeoError = (err) => {
       console.warn('Geolocation error:', err);
       if (err.code === 1) {
-        this.showToast('ℹ️ Permiso de ubicación no otorgado. Puedes buscar tu calle escribiéndola arriba.');
-        if (statusEl) statusEl.textContent = 'ℹ️ Permiso denegado. Escribe tu calle o mueve el pin rojo.';
+        this.showToast('Permiso de ubicación no otorgado. Buscá tu calle escribiéndola arriba.', 'info');
+        if (statusEl) statusEl.textContent = 'Permiso denegado. Escribí tu calle o mové el marcador.';
       } else {
-        this.showToast('ℹ️ Ubicación GPS no detectada. Escribe tu calle en el buscador del mapa.');
-        if (statusEl) statusEl.textContent = '📍 Escribe tu calle arriba o arrastra el pin rojo.';
+        this.showToast('Ubicación GPS no detectada. Escribí tu calle en el buscador del mapa.', 'info');
+        if (statusEl) statusEl.textContent = 'Escribí tu calle arriba o arrastrá el marcador.';
       }
     };
 
-    // Intentar con configuración estándar compatible con PC y celular
     navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, {
       enableHighAccuracy: false,
       timeout: 9000,
@@ -2818,7 +2887,7 @@ class GodMarketApp {
       this.saveUserCoords({ lat: parseFloat(Number(lat).toFixed(5)), lng: parseFloat(Number(lng).toFixed(5)) });
     }
     const statusEl = document.getElementById('map-address-status');
-    if (statusEl) statusEl.textContent = '⏳ Identificando calle y altura...';
+    if (statusEl) statusEl.textContent = 'Identificando calle y altura...';
 
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
@@ -2851,15 +2920,15 @@ class GodMarketApp {
         }
 
         if (statusEl) {
-          statusEl.innerHTML = `✅ <strong>Dirección tomada:</strong> ${fullAddress} ${zone ? `(${zone})` : ''}`;
+          statusEl.innerHTML = `<strong>Dirección tomada:</strong> ${this.escapeHTML(fullAddress)} ${zone ? `(${this.escapeHTML(zone)})` : ''}`;
         }
-        this.showToast(`📍 Dirección tomada: ${fullAddress}`);
+        this.showToast(`Dirección tomada: ${fullAddress}`, 'success');
       } else {
-        if (statusEl) statusEl.textContent = '📍 Ubicación seleccionada en el mapa';
+        if (statusEl) statusEl.textContent = 'Ubicación seleccionada en el mapa';
       }
     } catch (err) {
       console.warn('Error en reverse geocoding:', err);
-      if (statusEl) statusEl.textContent = '📍 Coordenadas tomadas (Verifica la altura)';
+      if (statusEl) statusEl.textContent = 'Coordenadas tomadas (verificá la altura)';
     }
   }
 

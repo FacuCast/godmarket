@@ -137,7 +137,7 @@ class CheckoutHandler {
 
       const subtotal = item.product.price * item.quantity;
       itemsText += `\n• *${item.quantity}x ${item.product.name}* (${cart.formatCurrency(subtotal)})`;
-      itemsText += `\n   🏪 _Negocio:_ ${bizName}${bizZone}`;
+      itemsText += `\n   ▫ _Local:_ ${bizName}${bizZone}`;
       
       if (item.customization && item.customization.flavor) {
         itemsText += `\n   ▫ _Gusto/Relleno:_ ${item.customization.flavor}`;
@@ -184,9 +184,9 @@ class CheckoutHandler {
     const message = 
 `¡Hola GOD MARKET! ✦
 *NUEVO PEDIDO MARKETPLACE #${orderId}*
-🛵 *LOGÍSTICA: ENVÍO A CARGO DEL VENDEDOR*
+► *LOGÍSTICA:* Envío a cargo del vendedor
 
-🏪 *LOCALES / VENDEDORES:* ${businessesListStr}
+◆ *LOCALES / VENDEDORES:* ${businessesListStr}
 
 ━━━━━━━━━━━━━━━━━━━━
 ◆ *RESUMEN DE PRODUCTOS:*${itemsText}

@@ -65,17 +65,18 @@
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
 
-  <!-- Google Fonts: Cinzel + Cormorant Garamond + Outfit -->
+  <!-- Google Fonts: Plus Jakarta Sans + Cormorant Garamond + Cinzel (solo marca) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets (Pure CSS) -->
-  <link rel="stylesheet" href="css/main.css?v=20.0">
-  <link rel="stylesheet" href="css/components.css?v=27.0">
-  <link rel="stylesheet" href="css/responsive.css?v=23.0">
-  <link rel="stylesheet" href="css/mejoras-premium.css?v=19.0">
-  <link rel="stylesheet" href="css/seller-portal.css?v=26.0">
+  <link rel="stylesheet" href="css/main.css?v=21.0">
+  <link rel="stylesheet" href="css/components.css?v=28.0">
+  <link rel="stylesheet" href="css/responsive.css?v=24.0">
+  <link rel="stylesheet" href="css/mejoras-premium.css?v=20.0">
+  <link rel="stylesheet" href="css/seller-portal.css?v=27.0">
+  <link rel="stylesheet" href="css/editorial-ux.css?v=1.0">
 
   <!-- Google Identity Services (GIS SDK oficial) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -141,41 +142,44 @@
   <div id="toast-container" class="toast-container"></div>
 
   <!-- ============================================================================
-       1. MODAL SELECTOR DE ROL AL INGRESAR (Cliente vs Vendedor)
+       1. MODAL SELECTOR DE ROL (Cliente vs Vendedor)
        ============================================================================ -->
   <div id="role-selector-modal" class="role-modal-overlay">
     <div class="role-modal-card">
-      <button type="button" class="sheet-close-btn" style="position: absolute; top: 16px; right: 16px; color: #FFF; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="window.sellerPortal.chooseRole('cliente')" title="Cerrar y continuar como cliente">✕</button>
+      <button type="button" class="sheet-close-btn" style="position: absolute; top: 16px; right: 16px;" onclick="window.sellerPortal.chooseRole('cliente')" title="Cerrar y continuar como cliente" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
       <div class="role-modal-badge">
-        <span>✨ Experiencia Gastronómica</span>
+        <span data-gm-icon="brand-mark" data-gm-size="14"></span>
+        <span>Buenos Aires · Café y Pastelería</span>
       </div>
       <div class="role-modal-title" role="heading" aria-level="2">Bienvenido a <span>GOD MARKET</span></div>
-      <p class="role-modal-subtitle">¿Cómo deseas ingresar a la plataforma hoy?</p>
+      <p class="role-modal-subtitle">Elegí cómo querés ingresar a la plataforma</p>
 
       <div class="role-choices-grid">
         <!-- Opción 1: Cliente -->
         <div class="role-choice-card" onclick="window.sellerPortal.chooseRole('cliente')">
-          <div class="role-icon-box">🛍️</div>
+          <div class="role-icon-box"><span data-gm-icon="bag" data-gm-size="24"></span></div>
           <h4>Soy Cliente</h4>
-          <p>Explorar pastelerías, comprar desayunos gourmet, tortas y meriendas de autor.</p>
+          <p>Explorar cafeterías, pedir desayunos de autor, tortas y meriendas.</p>
           <button type="button" class="role-btn-action role-btn-client">
-            <span>Ingresar a Comprar →</span>
+            <span>Ingresar a comprar</span>
+            <span data-gm-icon="arrow-right" data-gm-size="15"></span>
           </button>
         </div>
 
         <!-- Opción 2: Vendedor -->
         <div class="role-choice-card highlight" onclick="window.sellerPortal.chooseRole('vendedor')">
-          <div class="role-icon-box">🏪</div>
+          <div class="role-icon-box"><span data-gm-icon="store" data-gm-size="24"></span></div>
           <h4>Soy Vendedor</h4>
-          <p>Gestionar mi pastelería o cafetería, publicar delicias y recibir pedidos.</p>
+          <p>Gestionar mi cafetería o pastelería, publicar propuestas y recibir pedidos.</p>
           <button type="button" class="role-btn-action role-btn-seller">
-            <span>Acceso Negocios →</span>
+            <span>Acceso negocios</span>
+            <span data-gm-icon="arrow-right" data-gm-size="15"></span>
           </button>
         </div>
       </div>
 
       <div class="role-footer-note">
-        Podrás alternar entre modo Cliente y Vendedor en cualquier momento desde el menú.
+        Podés alternar entre modo Cliente y Vendedor en cualquier momento desde el menú.
       </div>
     </div>
   </div>
@@ -185,23 +189,24 @@
        ============================================================================ -->
   <div id="seller-auth-screen" class="seller-auth-screen">
     <div class="seller-auth-box">
-      <button type="button" class="sheet-close-btn" style="position: absolute; top: 16px; right: 16px; color: #FFF; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="window.sellerPortal.chooseRole('cliente')" title="Cerrar y volver a la tienda">✕</button>
+      <button type="button" class="sheet-close-btn" style="position: absolute; top: 16px; right: 16px;" onclick="window.sellerPortal.chooseRole('cliente')" title="Cerrar y volver a la tienda" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
       <div class="role-modal-badge" style="margin-bottom: 12px;">
-        <span>🏪 Portal Negocios & Cafeterías</span>
+        <span data-gm-icon="store" data-gm-size="14"></span>
+        <span>Portal Negocios y Cafeterías</span>
       </div>
-      <div class="role-modal-title" role="heading" aria-level="2" style="font-size: 1.65rem; margin-bottom: 8px;">
+      <div class="role-modal-title" role="heading" aria-level="2" style="font-size: 1.7rem; margin-bottom: 8px;">
         Acceso para <span>Vendedores</span>
       </div>
-      <p style="font-size: 0.85rem; color: #A3B8AC; margin-bottom: 22px; line-height: 1.45;">
-        Inicia sesión con tu cuenta de Google para gestionar tu pastelería, publicar tus propuestas y recibir pedidos en tu WhatsApp.
+      <p style="font-size: 0.86rem; color: var(--cream-muted); margin-bottom: 22px; line-height: 1.5;">
+        Iniciá sesión con tu cuenta de Google para gestionar tu local, publicar tus propuestas y recibir pedidos en tu WhatsApp.
       </p>
 
       <!-- Banner Programa Cafeterías Fundadoras (Primer Mes 0% Servicio) -->
       <div id="promo-slots-auth-banner" class="founding-promo-callout">
-        <div class="founding-promo-badge">🎁 BENEFICIO LANZAMIENTO · 1ER MES BONIFICADO</div>
+        <div class="founding-promo-badge"><span data-gm-icon="award" data-gm-size="13"></span> BENEFICIO LANZAMIENTO · 1ER MES BONIFICADO</div>
         <div class="founding-promo-text">
           Publicá con los <strong>mismos precios habituales de tu cafetería</strong> y tus clientes compran con <strong>0% de cargo de servicio</strong> (el 20% queda 100% bonificado durante 30 días).
-          <span class="founding-promo-sub">⏱️ Tu reloj de 30 días recién empieza a correr cuando subís tu 1° producto con foto.</span>
+          <span class="founding-promo-sub gm-inline-label"><span data-gm-icon="clock" data-gm-size="13"></span> Tu reloj de 30 días recién empieza a correr cuando subís tu 1° producto con foto.</span>
         </div>
       </div>
 
@@ -210,12 +215,14 @@
 
       <!-- Acceso Rápido / Demo para pruebas inmediatas -->
       <button type="button" class="demo-login-btn" hidden onclick="window.sellerPortal.handleDemoLogin()">
-        <span>⚡ Iniciar sesión rápida (Modo Prueba / Demo)</span>
+        <span data-gm-icon="store" data-gm-size="16"></span>
+        <span>Iniciar sesión rápida (Modo prueba / demo)</span>
       </button>
 
-      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08);">
-        <button type="button" onclick="window.sellerPortal.chooseRole('cliente')" style="background: transparent; border: none; color: #8FA295; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-          ← Volver a la Tienda como Cliente
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(244,239,230,0.08);">
+        <button type="button" onclick="window.sellerPortal.chooseRole('cliente')" style="background: transparent; border: none; color: var(--cream-muted); font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+          <span data-gm-icon="arrow-left" data-gm-size="15"></span>
+          <span>Volver a la tienda como cliente</span>
         </button>
       </div>
     </div>
@@ -229,27 +236,30 @@
       <!-- Barra superior de navegación para volver atrás -->
       <div class="onboarding-top-nav">
         <button type="button" class="btn-onboarding-back" onclick="window.sellerPortal.goBackToAuth()" title="Volver a la pantalla de login con Google">
-          <span>← Volver al Login</span>
+          <span data-gm-icon="arrow-left" data-gm-size="14"></span>
+          <span>Volver al login</span>
         </button>
         <button type="button" class="btn-onboarding-back client-mode" onclick="window.sellerPortal.cancelOnboardingAndGoBack()" title="Volver al Marketplace como cliente">
-          <span>🛍️ Cancelar e ir a la Tienda</span>
+          <span data-gm-icon="bag" data-gm-size="14"></span>
+          <span>Cancelar e ir a la tienda</span>
         </button>
       </div>
 
       <div class="role-modal-badge" style="margin-bottom: 10px;">
-        <span>🎉 Primera vez en GOD MARKET</span>
+        <span data-gm-icon="store" data-gm-size="14"></span>
+        <span>Alta de comercio</span>
       </div>
-      <div class="role-modal-title" role="heading" aria-level="2" style="font-size: 1.55rem; margin-bottom: 6px;">
-        Configura tu <span>Pastelería</span>
+      <div class="role-modal-title" role="heading" aria-level="2" style="font-size: 1.6rem; margin-bottom: 6px;">
+        Configurá tu <span>Pastelería</span>
       </div>
-      <p style="font-size: 0.85rem; color: #A3B8AC; margin-bottom: 22px; line-height: 1.4;">
-        ¡Hola <strong id="onboarding-welcome-name" style="color: #E5C07B;">pastelero/a</strong>! Completa la información de tu negocio para activar tu local en el marketplace.
+      <p style="font-size: 0.86rem; color: var(--cream-muted); margin-bottom: 22px; line-height: 1.45;">
+        Hola <strong id="onboarding-welcome-name" style="color: var(--primary);">pastelero/a</strong>, completá la información de tu negocio para activar tu local en el marketplace.
       </p>
 
       <div id="promo-slots-onboard-banner" class="founding-promo-callout" style="margin-bottom: 18px;">
-        <div class="founding-promo-badge">🎁 30 DÍAS CON 0% SERVICIO (20% BONIFICADO)</div>
+        <div class="founding-promo-badge"><span data-gm-icon="award" data-gm-size="13"></span> 30 DÍAS CON 0% SERVICIO (20% BONIFICADO)</div>
         <div class="founding-promo-text">
-          <strong>¡No perdés días por registrarte hoy!</strong> Podés crear tu perfil ahora con tranquilidad: el contador de <strong>30 días sin el 20% de servicio para tus compradores</strong> arrancará recién cuando publiques tu primer combo o producto con foto.
+          <strong>No perdés días por registrarte hoy.</strong> Podés crear tu perfil ahora con tranquilidad: el contador de <strong>30 días sin el 20% de servicio para tus compradores</strong> arrancará recién cuando publiques tu primer combo o producto con foto.
         </div>
       </div>
 
@@ -278,22 +288,23 @@
         <!-- Selector interactivo de Ubicación y Radio Circular de Envíos -->
         <div class="onboarding-field-group">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label class="onboarding-label" style="margin-bottom: 0;">📍 Ubicación en el Mapa y Radio de Entrega</label>
+            <label class="onboarding-label gm-inline-label" style="margin-bottom: 0;"><span data-gm-icon="map-pin" data-gm-size="15"></span> Ubicación en el mapa y radio de entrega</label>
             <button type="button" class="btn-map-gps" onclick="window.sellerPortal.detectOnboardingLocationGPS()" title="Ubicar con GPS del dispositivo">
-              <span>📡 Mi GPS</span>
+              <span data-gm-icon="gps" data-gm-size="14"></span>
+              <span>Mi GPS</span>
             </button>
           </div>
-          <p style="font-size: 0.76rem; color: #8FA295; margin-bottom: 8px;">
-            Haz clic en el mapa o arrastra el marcador para ubicar tu local. Los clientes verán si llegan tus envíos según este círculo de cobertura.
+          <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;">
+            Hacé clic en el mapa o arrastrá el marcador para ubicar tu local. Los clientes verán si llegan tus envíos según este círculo de cobertura.
           </p>
 
           <!-- Contenedor del Mapa Leaflet para Vendedor -->
-          <div id="onboard-radius-map" class="seller-map-container" style="height: 220px; border-radius: 12px; border: 1px solid rgba(212,175,55,0.3); margin-bottom: 12px; z-index: 1;"></div>
+          <div id="onboard-radius-map" class="seller-map-container" style="height: 220px; border-radius: 12px; border: 1px solid rgba(244,239,230,0.14); margin-bottom: 12px; z-index: 1;"></div>
 
           <!-- Control de Radio Circular -->
           <div class="radius-control-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span style="font-size: 0.82rem; color: #E5EBE7; font-weight: 600;">Radio de alcance para envíos propios:</span>
+              <span style="font-size: 0.82rem; color: var(--cream); font-weight: 600;">Radio de alcance para envíos propios:</span>
               <span id="onboard-radius-val" class="radius-val-badge">5.0 km</span>
             </div>
             <input type="range" id="onboard-radius-slider" min="1" max="15" step="0.5" value="5.0" class="gold-range-slider" oninput="window.sellerPortal.updateOnboardingRadius(parseFloat(this.value))">
@@ -332,14 +343,14 @@
         </div>
 
         <div class="onboarding-field-group">
-          <label class="onboarding-label" for="onboard-avatar">Ícono / Emoji representativo del Local</label>
+          <label class="onboarding-label" for="onboard-avatar">Rubro / Emblema del Local</label>
           <select id="onboard-avatar" class="onboarding-select">
-            <option value="🍰">🍰 Pastelería Fina & Tortas</option>
-            <option value="☕">☕ Cafetería de Especialidad</option>
-            <option value="🥐">🥐 Boulangerie & Croissants</option>
-            <option value="🥑">🥑 Brunch Saludable & Healthy</option>
-            <option value="🎁">🎁 Boxes de Regalo & Sorpresa</option>
-            <option value="🍪">🍪 Cookies XL & Sweet Treats</option>
+            <option value="patisserie">Pastelería fina y tortas</option>
+            <option value="coffee">Cafetería de especialidad</option>
+            <option value="croissant">Boulangerie y croissants</option>
+            <option value="healthy">Brunch saludable y natural</option>
+            <option value="boxes">Boxes de regalo y sorpresa</option>
+            <option value="cookies">Cookies artesanales y dulces</option>
           </select>
         </div>
 
@@ -353,19 +364,21 @@
           <input type="text" id="onboard-transfer-alias" class="onboarding-input" maxlength="100" placeholder="Ej: mi.negocio.mp">
           <label class="onboarding-label" for="onboard-transfer-holder" style="margin-top: 8px;">Titular (opcional)</label>
           <input type="text" id="onboard-transfer-holder" class="onboarding-input" maxlength="100" placeholder="Nombre del titular de la cuenta">
-          <small style="display: block; color: #9AB0A3; margin-top: 6px;">El alias se mostrará a tus clientes al pagar por transferencia. Puedes configurarlo más tarde.</small>
+          <small style="display: block; color: var(--text-muted); margin-top: 6px;">El alias se mostrará a tus clientes al pagar por transferencia. Podés configurarlo más tarde.</small>
         </div>
 
-        <div style="font-size: 0.74rem; color: #9AB0A3; text-align: center; margin-top: 10px; line-height: 1.4;">
-          Al registrar tu local declaras contar con las habilitaciones sanitarias vigentes y aceptas los <a href="javascript:void(0)" onclick="window.app.openLegalModal('comercios')" style="color: #E5C07B; text-decoration: underline; font-weight: 600;">Términos para Comercios Asociados</a> de GOD MARKET.
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 10px; line-height: 1.45;">
+          Al registrar tu local declarás contar con las habilitaciones sanitarias vigentes y aceptás los <a href="javascript:void(0)" onclick="window.app.openLegalModal('comercios')" style="color: var(--primary); text-decoration: underline; font-weight: 600;">Términos para Comercios Asociados</a> de GOD MARKET.
         </div>
 
         <div style="display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap;">
-          <button type="button" onclick="window.sellerPortal.cancelOnboardingAndGoBack()" class="btn-onboarding-cancel" style="flex: 1; min-width: 180px; text-align: center;">
-            ← Volver a la Tienda
+          <button type="button" onclick="window.sellerPortal.cancelOnboardingAndGoBack()" class="btn-onboarding-cancel gm-inline-label" style="flex: 1; min-width: 180px; justify-content: center;">
+            <span data-gm-icon="arrow-left" data-gm-size="15"></span>
+            <span>Volver a la tienda</span>
           </button>
-          <button type="submit" id="btn-submit-onboard" class="onboarding-submit-btn" style="flex: 2; min-width: 220px; margin-top: 0;">
-            🚀 Crear Mi Perfil de Vendedor
+          <button type="submit" id="btn-submit-onboard" class="onboarding-submit-btn gm-inline-label" style="flex: 2; min-width: 220px; margin-top: 0; justify-content: center;">
+            <span data-gm-icon="check-circle" data-gm-size="16"></span>
+            <span>Crear mi perfil de vendedor</span>
           </button>
         </div>
       </form>
@@ -380,21 +393,26 @@
     <header class="seller-topbar">
       <div class="seller-topbar-brand">
         <div class="brand-godmarket" style="cursor: default;">
-          <img src="assets/icons/icon-192.png" alt="GOD MARKET" class="brand-emblem-img" style="width: 28px; height: 28px;">
+          <span class="brand-mark-svg" data-gm-icon="brand-mark" data-gm-size="18" style="width: 30px; height: 30px;"></span>
           <div class="brand-text-col">
-            <span class="brand-god" style="font-size: 1.25rem;">GOD</span>
-            <span class="brand-market" style="font-size: 0.48rem;">MARKET</span>
+            <span class="brand-god" style="font-size: 1.15rem;">GOD</span>
+            <span class="brand-market" style="font-size: 0.46rem;">MARKET</span>
           </div>
         </div>
         <span class="seller-badge-tag">Panel Vendedor</span>
       </div>
 
       <div class="seller-topbar-actions">
+        <button type="button" class="seller-action-pill sound-toggle-btn" data-sound-toggle onclick="window.soundEngine.toggle()" title="Silenciar sonidos" aria-label="Silenciar sonidos" aria-pressed="true">
+          <span data-sound-icon data-gm-icon="volume-on" data-gm-size="15"></span>
+        </button>
         <button class="seller-action-pill" onclick="window.sellerPortal.viewStoreAsCustomer()" title="Ver tienda como cliente">
-          <span>👁️ Ver como Cliente</span>
+          <span data-gm-icon="eye" data-gm-size="15"></span>
+          <span>Ver como cliente</span>
         </button>
         <button class="seller-action-pill btn-logout" onclick="window.sellerPortal.logout()" title="Cerrar sesión">
-          <span>🚪 Salir</span>
+          <span data-gm-icon="log-out" data-gm-size="15"></span>
+          <span>Salir</span>
         </button>
       </div>
     </header>
@@ -404,16 +422,16 @@
       <div class="seller-biz-header-card">
         <div class="seller-biz-identity">
           <div class="seller-biz-avatar-box">
-            <span id="dash-biz-avatar">🍰</span>
+            <span id="dash-biz-avatar" data-gm-icon="patisserie" data-gm-size="28"></span>
           </div>
           <div class="seller-biz-info">
             <h2 id="dash-biz-name">Mi Pastelería</h2>
             <p>
-              <span id="dash-biz-zone">📍 CABA</span>
-              <span>•</span>
-              <span id="dash-biz-phone">📱 WhatsApp</span>
-              <span>•</span>
-              <span style="color: #4ADE80; font-weight: 700;">🟢 Local Activo</span>
+              <span id="dash-biz-zone" class="gm-inline-label"><span data-gm-icon="map-pin" data-gm-size="13"></span> CABA</span>
+              <span>·</span>
+              <span id="dash-biz-phone" class="gm-inline-label"><span data-gm-icon="whatsapp" data-gm-size="13"></span> WhatsApp</span>
+              <span>·</span>
+              <span class="gm-inline-label" style="color: var(--success); font-weight: 600;"><span class="promo-dot"></span> Local activo</span>
             </p>
           </div>
         </div>
@@ -423,16 +441,16 @@
             <div id="stat-total-products" class="seller-stat-val">0</div>
             <div class="seller-stat-lbl">Productos</div>
           </div>
-          <div class="seller-stat-item" style="border-left: 1px solid rgba(255,255,255,0.08); border-right: 1px solid rgba(255,255,255,0.08);">
+          <div class="seller-stat-item" style="border-left: 1px solid rgba(244,239,230,0.08); border-right: 1px solid rgba(244,239,230,0.08);">
             <div id="stat-total-orders" class="seller-stat-val">0</div>
             <div class="seller-stat-lbl">Pedidos</div>
           </div>
-          <div class="seller-stat-item" style="border-right: 1px solid rgba(255,255,255,0.08);">
+          <div class="seller-stat-item" style="border-right: 1px solid rgba(244,239,230,0.08);">
             <div id="stat-total-visits" class="seller-stat-val">0</div>
             <div class="seller-stat-lbl">Visitas</div>
           </div>
           <div class="seller-stat-item">
-            <div class="seller-stat-val">5.0 ⭐</div>
+            <div class="seller-stat-val gm-inline-label" style="justify-content: center;">5.0 <span data-gm-icon="star-filled" data-gm-size="14"></span></div>
             <div class="seller-stat-lbl">Calificación</div>
           </div>
         </div>
@@ -444,19 +462,24 @@
       <!-- Navegación de Pestañas -->
       <nav class="seller-nav-tabs">
         <button class="seller-tab-btn active" data-tab="products" onclick="window.sellerPortal.switchTab('products')">
-          <span>🍰 Mis Productos</span>
+          <span data-gm-icon="patisserie" data-gm-size="16"></span>
+          <span>Mis Productos</span>
         </button>
         <button class="seller-tab-btn" data-tab="orders" onclick="window.sellerPortal.switchTab('orders')">
-          <span>📦 Pedidos Recibidos</span>
+          <span data-gm-icon="package" data-gm-size="16"></span>
+          <span>Pedidos Recibidos</span>
         </button>
         <button class="seller-tab-btn" data-tab="coverage" onclick="window.sellerPortal.switchTab('coverage')">
-          <span>📍 Cobertura y Envíos</span>
+          <span data-gm-icon="map-pin" data-gm-size="16"></span>
+          <span>Cobertura y Envíos</span>
         </button>
         <button class="seller-tab-btn" data-tab="promo" onclick="window.sellerPortal.switchTab('promo')" id="promo-tab-btn">
-          <span>🎁 Promo 30 Días (Admin)</span>
+          <span data-gm-icon="award" data-gm-size="16"></span>
+          <span>Promo 30 Días</span>
         </button>
         <button class="seller-tab-btn" data-tab="disputes" onclick="window.sellerPortal.switchTab('disputes')" id="disputes-tab-btn">
-          <span>🚨 Centro de Ayuda <span id="disputes-badge" class="disputes-nav-badge" style="display:none">!</span></span>
+          <span data-gm-icon="shield" data-gm-size="16"></span>
+          <span>Centro de Ayuda <span id="disputes-badge" class="disputes-nav-badge" style="display:none">!</span></span>
         </button>
       </nav>
     </div>
@@ -467,11 +490,12 @@
       <section id="tab-pane-products" class="seller-tab-pane active">
         <div class="seller-actions-bar">
           <div>
-            <h3 style="color: #FFF; font-size: 1.15rem; margin-bottom: 2px;">Catálogo de tu Negocio</h3>
-            <span style="font-size: 0.8rem; color: #8CA093;">Tus delicias disponibles para los clientes en el Marketplace</span>
+            <h3 style="color: var(--cream); font-size: 1.2rem; margin-bottom: 2px;">Catálogo de tu negocio</h3>
+            <span style="font-size: 0.82rem; color: var(--text-muted);">Tus propuestas disponibles para los clientes en el marketplace</span>
           </div>
           <button class="btn-add-prod" onclick="window.sellerPortal.openAddProductModal()">
-            <span>+ Publicar Nuevo Producto</span>
+            <span data-gm-icon="plus" data-gm-size="16"></span>
+            <span>Publicar nuevo producto</span>
           </button>
         </div>
 
@@ -484,8 +508,8 @@
       <section id="tab-pane-orders" class="seller-tab-pane">
         <div class="seller-actions-bar">
           <div>
-            <h3 style="color: #FFF; font-size: 1.15rem; margin-bottom: 2px;">Pedidos de tu Local</h3>
-            <span style="font-size: 0.8rem; color: #8CA093;">Gestiona las órdenes entrantes y contacta a los compradores por WhatsApp</span>
+            <h3 style="color: var(--cream); font-size: 1.2rem; margin-bottom: 2px;">Pedidos de tu local</h3>
+            <span style="font-size: 0.82rem; color: var(--text-muted);">Gestioná las órdenes entrantes y contactá a los compradores por WhatsApp</span>
           </div>
         </div>
 
@@ -498,15 +522,16 @@
       <section id="tab-pane-coverage" class="seller-tab-pane">
         <div class="seller-actions-bar">
           <div>
-            <h3 style="color: #FFF; font-size: 1.15rem; margin-bottom: 2px;">📍 Cobertura, entrega y pagos</h3>
-            <span style="font-size: 0.8rem; color: #8CA093;">Define el radio de despacho y el alias donde recibirás transferencias</span>
+            <h3 class="gm-inline-label" style="color: var(--cream); font-size: 1.2rem; margin-bottom: 2px;"><span data-gm-icon="map-pin" data-gm-size="18" style="color: var(--primary);"></span> Cobertura, entrega y pagos</h3>
+            <span style="font-size: 0.82rem; color: var(--text-muted);">Definí el radio de despacho y el alias donde recibirás transferencias</span>
           </div>
-          <button type="button" class="onboarding-submit-btn" style="width: auto; padding: 9px 18px; margin-top: 0; font-size: 0.84rem;" onclick="window.sellerPortal.saveCoverageSettings()">
-            💾 Guardar datos
+          <button type="button" class="onboarding-submit-btn gm-inline-label" style="width: auto; padding: 9px 18px; margin-top: 0; font-size: 0.84rem;" onclick="window.sellerPortal.saveCoverageSettings()">
+            <span data-gm-icon="save" data-gm-size="15"></span>
+            <span>Guardar datos</span>
           </button>
         </div>
 
-        <div class="coverage-dashboard-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.25); border-radius: 16px; padding: 20px; margin-top: 14px;">
+        <div class="coverage-dashboard-card" style="background: var(--green-card); border: 1px solid var(--green-border); border-radius: 16px; padding: 20px; margin-top: 14px;">
           <div class="form-row-2col" style="margin-bottom: 16px;">
             <div>
               <label class="onboarding-label" for="dash-coverage-address">Dirección del Local / Punto de Despacho</label>
@@ -546,17 +571,18 @@
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <strong style="color: #FFF; font-size: 0.88rem;">Ubicación en Mapa y Radio Circular</strong>
+            <strong style="color: var(--cream); font-size: 0.88rem;">Ubicación en mapa y radio circular</strong>
             <button type="button" class="btn-map-gps" onclick="window.sellerPortal.detectDashboardLocationGPS()">
-              <span>📡 Centrar con mi GPS</span>
+              <span data-gm-icon="gps" data-gm-size="14"></span>
+              <span>Centrar con mi GPS</span>
             </button>
           </div>
 
-          <div id="dash-radius-map" class="seller-map-container" style="height: 320px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15); margin-bottom: 16px; z-index: 1;"></div>
+          <div id="dash-radius-map" class="seller-map-container" style="height: 320px; border-radius: 12px; border: 1px solid rgba(244,239,230,0.14); margin-bottom: 16px; z-index: 1;"></div>
 
           <div class="radius-control-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span style="font-size: 0.85rem; color: #E5EBE7; font-weight: 600;">Radio circular de envíos directos:</span>
+              <span style="font-size: 0.85rem; color: var(--cream); font-weight: 600;">Radio circular de envíos directos:</span>
               <span id="dash-radius-val" class="radius-val-badge">5.0 km</span>
             </div>
             <input type="range" id="dash-radius-slider" min="1" max="15" step="0.5" value="5.0" class="gold-range-slider" oninput="window.sellerPortal.updateDashboardRadius(parseFloat(this.value))">
@@ -570,56 +596,59 @@
           </div>
 
           <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
-            <button type="button" id="btn-save-dash-coverage" class="onboarding-submit-btn" style="max-width: 280px;" onclick="window.sellerPortal.saveCoverageSettings()">
-              💾 Guardar cobertura y pagos
+            <button type="button" id="btn-save-dash-coverage" class="onboarding-submit-btn gm-inline-label" style="max-width: 280px; justify-content: center;" onclick="window.sellerPortal.saveCoverageSettings()">
+              <span data-gm-icon="save" data-gm-size="16"></span>
+              <span>Guardar cobertura y pagos</span>
             </button>
           </div>
         </div>
       </section>
 
 
-      <!-- Pestaña 4: Programa Cafeterías Fundadoras — Promo 30 Días 0% Servicio (Admin Faku) -->
+      <!-- Pestaña 4: Programa Cafeterías Fundadoras — Promo 30 Días 0% Servicio (Admin) -->
       <section id="tab-pane-promo" class="seller-tab-pane">
         <div class="seller-actions-bar">
           <div>
-            <h3 style="color: #FFF; font-size: 1.15rem; margin-bottom: 2px;">🎁 Programa Lanzamiento — 30 Días sin el 20% de Servicio</h3>
-            <span style="font-size: 0.8rem; color: #8CA093;">Configurá cuántos comercios entran con el 1er mes bonificado (3, 5 o más) y controlá el minutero de 30 días de cada cafetería</span>
+            <h3 class="gm-inline-label" style="color: var(--cream); font-size: 1.2rem; margin-bottom: 2px;"><span data-gm-icon="award" data-gm-size="18" style="color: var(--primary);"></span> Programa Lanzamiento — 30 días sin cargo de servicio</h3>
+            <span style="font-size: 0.82rem; color: var(--text-muted);">Configurá cuántos comercios entran con el 1er mes bonificado y controlá el reloj de cada local</span>
           </div>
-          <button type="button" class="btn-add-prod" onclick="window.sellerPortal.loadPromoAdmin()" style="background: #1A1A1A; color: #FFFFFF; border: 1px solid rgba(255,107,53,0.4);">
-            🔄 Actualizar Panel
+          <button type="button" class="seller-action-pill" onclick="window.sellerPortal.loadPromoAdmin()">
+            <span data-gm-icon="refresh" data-gm-size="15"></span>
+            <span>Actualizar panel</span>
           </button>
         </div>
 
         <div id="promo-admin-container">
-          <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.45); font-size: 0.9rem;">
+          <div style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.9rem;">
             Cargando configuración de Cafeterías Fundadoras...
           </div>
         </div>
       </section>
 
-      <!-- Pestaña 5: Centro de Ayuda / Disputas (solo para Faku - admin) -->
+      <!-- Pestaña 5: Centro de Ayuda / Disputas (solo admin) -->
       <section id="tab-pane-disputes" class="seller-tab-pane">
         <div class="seller-actions-bar">
           <div>
-            <h3 style="color: #FFF; font-size: 1.15rem; margin-bottom: 2px;">🚨 Centro de Ayuda — Disputas</h3>
-            <span style="font-size: 0.8rem; color: #8CA093;">Gestiona los casos donde compradores reportaron problemas con sus pedidos</span>
+            <h3 class="gm-inline-label" style="color: var(--cream); font-size: 1.2rem; margin-bottom: 2px;"><span data-gm-icon="shield" data-gm-size="18" style="color: var(--primary);"></span> Centro de Ayuda — Disputas</h3>
+            <span style="font-size: 0.82rem; color: var(--text-muted);">Gestioná los casos donde compradores reportaron problemas con sus pedidos</span>
           </div>
-          <button type="button" class="btn-add-prod" onclick="window.sellerPortal.loadDisputes()" style="background: #1A1A1A; color: #FFFFFF; border: 1px solid rgba(255,107,53,0.4);">
-            🔄 Actualizar
+          <button type="button" class="seller-action-pill" onclick="window.sellerPortal.loadDisputes()">
+            <span data-gm-icon="refresh" data-gm-size="15"></span>
+            <span>Actualizar</span>
           </button>
         </div>
 
         <!-- Filtro de disputas -->
         <div style="display: flex; gap: 8px; padding: 0 0 16px; flex-wrap: wrap;">
           <button class="dispute-filter-btn active" data-filter="all" onclick="window.sellerPortal.filterDisputes('all', this)">Todas</button>
-          <button class="dispute-filter-btn" data-filter="abierta" onclick="window.sellerPortal.filterDisputes('abierta', this)">🔴 Abiertas</button>
-          <button class="dispute-filter-btn" data-filter="en_revision" onclick="window.sellerPortal.filterDisputes('en_revision', this)">🟡 En revisión</button>
-          <button class="dispute-filter-btn" data-filter="reembolsada" onclick="window.sellerPortal.filterDisputes('reembolsada', this)">✅ Reembolsadas</button>
-          <button class="dispute-filter-btn" data-filter="rechazada" onclick="window.sellerPortal.filterDisputes('rechazada', this)">❌ Rechazadas</button>
+          <button class="dispute-filter-btn" data-filter="abierta" onclick="window.sellerPortal.filterDisputes('abierta', this)">Abiertas</button>
+          <button class="dispute-filter-btn" data-filter="en_revision" onclick="window.sellerPortal.filterDisputes('en_revision', this)">En revisión</button>
+          <button class="dispute-filter-btn" data-filter="reembolsada" onclick="window.sellerPortal.filterDisputes('reembolsada', this)">Reembolsadas</button>
+          <button class="dispute-filter-btn" data-filter="rechazada" onclick="window.sellerPortal.filterDisputes('rechazada', this)">Rechazadas</button>
         </div>
 
         <div id="disputes-list">
-          <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.4); font-size: 0.9rem;">
+          <div style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.9rem;">
             Presioná "Actualizar" para cargar las disputas.
           </div>
         </div>
@@ -630,8 +659,7 @@
   <!-- App Wrapper (Mobile-first centered frame) -->
   <div class="app-container">
 
-    <!-- Header Sticky -->
-    <!-- Header Sticky (GOD MARKET Luxury Dark Emerald & Gold) -->
+    <!-- Header Sticky (GOD MARKET Editorial Navigation) -->
     <header class="app-header">
       <!-- Mobile: Minimalist Hamburger Menu -->
       <button class="hamburger-menu-btn" onclick="window.app.toggleSideMenu()" aria-label="Abrir menú" title="Menú">
@@ -640,292 +668,326 @@
         <span></span>
       </button>
 
-      <!-- Center Brand Logo: GOD MARKET -->
+      <!-- Brand Logo: GOD MARKET -->
       <div class="brand-godmarket" onclick="window.app.goHome()" style="cursor: pointer;" title="GOD MARKET - Inicio">
-        <img src="assets/icons/icon-192.png" alt="GOD MARKET" class="brand-emblem-img">
+        <span class="brand-mark-svg" data-gm-icon="brand-mark" data-gm-size="18"></span>
         <div class="brand-text-col">
           <span class="brand-god">GOD</span>
           <span class="brand-market">MARKET</span>
         </div>
       </div>
 
-      <!-- Desktop Navigation Links (Hidden on mobile, visible on PC & TV) -->
+      <!-- Desktop Navigation Links -->
       <nav class="desktop-nav-links">
         <button class="desktop-nav-link active" data-desktop-nav="home" onclick="window.app.goHome()">Inicio</button>
         <button class="desktop-nav-link" data-desktop-nav="cafeterias" onclick="window.app.filterCafeterias()">Cafeterías</button>
         <button class="desktop-nav-link" data-desktop-nav="desayunos" onclick="window.app.setCategory('desayunos')">Desayunos</button>
         <button class="desktop-nav-link" data-desktop-nav="healthy" onclick="window.app.setCategory('brunch')">Healthy</button>
-        <button class="desktop-nav-link" data-desktop-nav="bebidas" onclick="window.app.setCategory('meriendas')">Bebidas & Café</button>
-        <button class="desktop-nav-link" data-desktop-nav="boxes" onclick="window.app.setCategory('boxes')">Boxes Regalo</button>
+        <button class="desktop-nav-link" data-desktop-nav="bebidas" onclick="window.app.setCategory('meriendas')">Café y té</button>
+        <button class="desktop-nav-link" data-desktop-nav="boxes" onclick="window.app.setCategory('boxes')">Boxes regalo</button>
       </nav>
 
-      <!-- Desktop Actions: Location & Portals (Hidden on mobile) -->
+      <!-- Desktop Actions: Location, Orders & Seller Portal -->
       <div class="desktop-header-actions">
         <div class="desktop-location-pill" onclick="window.app.openAddressModal()" title="Cambiar dirección de entrega">
-          <span class="location-pin-icon">📍</span>
+          <span data-gm-icon="map-pin" data-gm-size="15"></span>
           <span id="desktop-delivery-address">Seleccionar ubicación</span>
         </div>
-        <button class="icon-btn" onclick="window.app.openOrdersHistoryModal()" title="Mis Pedidos" style="position: relative;">
-          <i data-lucide="package" style="width:18px;height:18px;"></i>
-          <span id="header-orders-badge" class="badge-count" style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.6rem; padding: 1px 5px; background: var(--primary); color: var(--green-deep);">0</span>
+        <button type="button" id="header-sound-toggle" class="icon-btn sound-toggle-btn" data-sound-toggle onclick="window.soundEngine.toggle()" title="Silenciar sonidos" aria-label="Silenciar sonidos" aria-pressed="true">
+          <span data-sound-icon data-gm-icon="volume-on" data-gm-size="17"></span>
         </button>
-        <button class="icon-btn" onclick="window.sellerPortal.chooseRole('vendedor')" title="Portal Negocios & Vendedores">
-          <i data-lucide="store" style="width:18px;height:18px;"></i>
+        <button class="icon-btn" onclick="window.app.openOrdersHistoryModal()" title="Mis pedidos" aria-label="Mis pedidos" style="position: relative;">
+          <span data-gm-icon="package" data-gm-size="18"></span>
+          <span id="header-orders-badge" class="badge-count" style="display: none; position: absolute; top: -4px; right: -4px; font-size: 0.62rem; padding: 1px 5px; background: var(--primary); color: var(--green-deep);">0</span>
+        </button>
+        <button class="header-seller-pill" onclick="window.sellerPortal.chooseRole('vendedor')" title="Portal para cafeterías y vendedores">
+          <span data-gm-icon="store" data-gm-size="15"></span>
+          <span>Soy vendedor</span>
         </button>
       </div>
 
-      <!-- Right: Minimalist Shopping Bag Button with Badge -->
-      <button class="header-bag-btn" onclick="window.app.openModal('cart-drawer-modal')" aria-label="Ver Carrito de Compras" title="Ver Carrito">
-        <svg class="bag-icon" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
-        </svg>
+      <!-- Right: Shopping Bag Button with Badge -->
+      <button class="header-bag-btn" onclick="window.app.openModal('cart-drawer-modal')" aria-label="Ver carrito de compras" title="Ver carrito">
+        <span data-gm-icon="bag" data-gm-size="20"></span>
         <span id="header-bag-badge" class="bag-badge" style="display: none;">0</span>
       </button>
     </header>
+
+    <!-- Mobile Quick Location Strip (Visible below 1024px) -->
+    <div class="mobile-location-strip" onclick="window.app.openAddressModal()" role="button" tabindex="0">
+      <div class="mobile-loc-left">
+        <span data-gm-icon="map-pin" data-gm-size="16"></span>
+        <div class="mobile-loc-text">
+          <span>Entregar en</span>
+          <strong id="current-delivery-address">Seleccionar ubicación</strong>
+        </div>
+      </div>
+      <span class="mobile-loc-action">
+        <span>Cambiar</span>
+        <span data-gm-icon="chevron-right" data-gm-size="14"></span>
+      </span>
+    </div>
 
     <!-- Side Menu Drawer (Opened by Hamburger button) -->
     <div id="side-menu-drawer" class="side-drawer-overlay" onclick="if(event.target === this) window.app.toggleSideMenu()">
       <div class="side-drawer">
         <div class="side-drawer-header">
           <div class="brand-godmarket" onclick="window.app.goHome(); window.app.toggleSideMenu();" style="cursor: pointer;">
-            <img src="assets/icons/icon-192.png" alt="GOD MARKET" class="brand-emblem-img" style="width: 36px; height: 36px;">
+            <span class="brand-mark-svg" data-gm-icon="brand-mark" data-gm-size="18"></span>
             <div class="brand-text-col">
               <span class="brand-god">GOD</span>
               <span class="brand-market">MARKET</span>
             </div>
           </div>
-          <button class="side-drawer-close" onclick="window.app.toggleSideMenu()" aria-label="Cerrar">✕</button>
+          <button class="side-drawer-close" onclick="window.app.toggleSideMenu()" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
         </div>
 
         <!-- Address in Drawer -->
         <div class="side-drawer-location" onclick="window.app.openAddressModal(); window.app.toggleSideMenu();">
-          <span class="location-pin-icon" style="font-size: 1.1rem;">📍</span>
+          <span class="location-pin-icon" data-gm-icon="map-pin" data-gm-size="18"></span>
           <div class="side-drawer-loc-text">
             <span class="side-drawer-loc-sub">Dirección de entrega</span>
             <span id="side-menu-address" class="side-drawer-loc-val">Seleccionar ubicación</span>
           </div>
-          <span class="side-chevron">→</span>
+          <span class="side-chevron" data-gm-icon="chevron-right" data-gm-size="16"></span>
         </div>
 
         <!-- Delivery Mode in Drawer -->
         <div class="side-delivery-switcher">
           <button class="side-delivery-tab active" data-type="delivery" onclick="window.app.switchDeliveryType('delivery')">
-            🛵 Envío a Domicilio
+            <span data-gm-icon="delivery" data-gm-size="15"></span>
+            <span>Envío</span>
           </button>
           <button class="side-delivery-tab" data-type="pickup" onclick="window.app.switchDeliveryType('pickup')">
-            🏪 Retiro en Negocio
+            <span data-gm-icon="store" data-gm-size="15"></span>
+            <span>Retiro</span>
           </button>
         </div>
 
         <nav class="side-drawer-nav">
           <button class="side-nav-item active" onclick="window.app.setBusiness('todos'); window.app.setCategory('todos'); window.app.toggleSideMenu(); window.scrollTo({top:0, behavior:'smooth'});">
-            <i data-lucide="home"></i>
+            <span data-gm-icon="home" data-gm-size="18"></span>
             <span>Inicio</span>
           </button>
           <button class="side-nav-item" onclick="window.app.filterCafeterias(); window.app.toggleSideMenu();">
-            <i data-lucide="coffee"></i>
-            <span>Cafeterías de Especialidad</span>
+            <span data-gm-icon="coffee" data-gm-size="18"></span>
+            <span>Cafeterías de especialidad</span>
           </button>
           <button class="side-nav-item" onclick="window.app.setCategory('desayunos'); window.app.toggleSideMenu();">
-            <i data-lucide="croissant"></i>
-            <span>Desayunos & Brunch</span>
+            <span data-gm-icon="croissant" data-gm-size="18"></span>
+            <span>Desayunos y brunch</span>
           </button>
           <button class="side-nav-item" onclick="window.app.setCategory('brunch'); window.app.toggleSideMenu();">
-            <i data-lucide="leaf"></i>
-            <span>Propuestas Saludables</span>
+            <span data-gm-icon="leaf" data-gm-size="18"></span>
+            <span>Propuestas saludables</span>
           </button>
           <button class="side-nav-item" onclick="window.app.setCategory('meriendas'); window.app.toggleSideMenu();">
-            <i data-lucide="cup-soda"></i>
-            <span>Bebidas & Cafés</span>
+            <span data-gm-icon="drinks" data-gm-size="18"></span>
+            <span>Bebidas y cafés</span>
           </button>
           <button class="side-nav-item" onclick="window.app.setCategory('boxes'); window.app.toggleSideMenu();">
-            <i data-lucide="gift"></i>
-            <span>Boxes Regalo Gourmet</span>
+            <span data-gm-icon="gift" data-gm-size="18"></span>
+            <span>Boxes regalo gourmet</span>
           </button>
         </nav>
 
         <div class="side-drawer-divider"></div>
 
         <div class="side-drawer-actions">
-                    <button class="side-action-btn" onclick="window.app.installPWA(); window.app.toggleSideMenu();">
-            <i data-lucide="smartphone"></i>
-            <span>Instalar App en el Celular</span>
+          <button type="button" id="side-sound-toggle" class="side-action-btn sound-toggle-btn" data-sound-toggle onclick="window.soundEngine.toggle()">
+            <span data-sound-icon data-gm-icon="volume-on" data-gm-size="17"></span>
+            <span data-sound-label>Sonidos: Activados</span>
           </button>
-<button class="side-action-btn" onclick="window.app.openOrdersHistoryModal(); window.app.toggleSideMenu();">
-            <i data-lucide="package"></i>
-            <span>Mis Pedidos</span>
+          <button class="side-action-btn" onclick="window.app.installPWA(); window.app.toggleSideMenu();">
+            <span data-gm-icon="smartphone" data-gm-size="17"></span>
+            <span>Instalar app en el celular</span>
+          </button>
+          <button class="side-action-btn" onclick="window.app.openOrdersHistoryModal(); window.app.toggleSideMenu();">
+            <span data-gm-icon="package" data-gm-size="17"></span>
+            <span>Mis pedidos</span>
           </button>
           <button class="side-action-btn" onclick="window.sellerPortal.chooseRole('vendedor'); window.app.toggleSideMenu();">
-            <i data-lucide="store"></i>
-            <span>Portal Vendedores</span>
+            <span data-gm-icon="store" data-gm-size="17"></span>
+            <span>Portal vendedores</span>
           </button>
           <button class="side-action-btn" onclick="window.sellerPortal.openRoleModal(); window.app.toggleSideMenu();">
-            <i data-lucide="users"></i>
-            <span>Cambiar Rol (Cliente / Vendedor)</span>
+            <span data-gm-icon="users" data-gm-size="17"></span>
+            <span>Cambiar rol (Cliente / Vendedor)</span>
           </button>
           <button class="side-action-btn" onclick="window.app.openLegalModal('terminos'); window.app.toggleSideMenu();">
-            <i data-lucide="scale"></i>
-            <span>Centro Legal & Privacidad</span>
+            <span data-gm-icon="scale" data-gm-size="17"></span>
+            <span>Centro legal y privacidad</span>
           </button>
           <a href="https://wa.me/5491156192616" target="_blank" class="side-action-btn whatsapp-highlight">
-            <i data-lucide="message-circle"></i>
-            <span>Atención WhatsApp</span>
+            <span data-gm-icon="whatsapp" data-gm-size="17"></span>
+            <span>Atención por WhatsApp</span>
           </a>
         </div>
 
         <div class="side-drawer-footer">
-          <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.25); border-radius: 999px; padding: 4px 12px; margin-bottom: 6px; font-size: 0.7rem; color: var(--primary);">
-            <span style="width: 6px; height: 6px; border-radius: 50%; background: #4ADE80; display: inline-block; box-shadow: 0 0 6px #4ADE80;"></span>
+          <div class="gm-visit-pill" style="padding: 5px 12px; font-size: 0.72rem; margin-bottom: 8px; align-self: flex-start;">
+            <span class="gm-visit-dot"></span>
             <span>Visitas: <strong id="side-visit-counter-total">0</strong></span>
           </div>
           <span>© 2026 GOD MARKET</span>
-          <span style="opacity: 0.6; font-size: 0.65rem;">Buenos Aires · Desayunos de Autor</span>
+          <span style="opacity: 0.65; font-size: 0.68rem;">Buenos Aires · Desayunos de Autor</span>
         </div>
       </div>
     </div>
 
-    <!-- 1. Hero Featured Card ("Desayunos premium, cerca tuyo.") -->
+    <!-- 1. Hero Featured Card -->
     <section class="hero-banner-god" id="hero-banner">
+      <div class="hero-eyebrow">
+        <span class="hero-eyebrow-dot"></span>
+        <span>Buenos Aires · Café y Pastelería de Autor</span>
+      </div>
       <h1 class="hero-god-title">
-        <span>Desayunos<br>premium, cerca<br>tuyo.</span>
+        <span>Desayunos de autor,<br>cerca tuyo.</span>
         <span class="sr-only"> — GOD MARKET | Cafeterías de especialidad y desayunos gourmet en Buenos Aires</span>
       </h1>
-      <p class="hero-god-sub">Cafeterías de especialidad,<br>propuestas saludables y mucho más.</p>
-      <div class="visit-counter-hero" role="status" aria-label="Contador de visitas de GOD MARKET">
-        <span>👁️ <strong id="visit-counter-total-top">0</strong> visitas</span>
-        <span class="visit-counter-hero-divider" aria-hidden="true">·</span>
-        <span>⚡ <strong id="visit-counter-today-top">0</strong> hoy</span>
+      <p class="hero-god-sub">Cafeterías de especialidad, viennoiserie artesanal y boxes de regalo con envío directo desde cada local.</p>
+      <div class="hero-actions-row">
+        <button type="button" class="hero-cta-primary" onclick="window.app.showAllStores()">
+          <span>Explorar cafeterías</span>
+          <span data-gm-icon="arrow-right" data-gm-size="15"></span>
+        </button>
+        <button type="button" class="hero-cta-secondary" onclick="window.sellerPortal.chooseRole('vendedor')">
+          <span data-gm-icon="store" data-gm-size="15"></span>
+          <span>Sumar mi cafetería</span>
+        </button>
       </div>
     </section>
 
     <!-- 2. Realtime Search Bar Capsule -->
     <div class="search-god-wrapper">
       <div class="search-god-capsule">
-        <span class="search-god-icon">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-          </svg>
-        </span>
+        <span class="search-god-icon" data-gm-icon="search" data-gm-size="18"></span>
         <input type="text" id="main-search-input" class="search-god-input"
-          placeholder="Buscar cafeterías, productos..." autocomplete="off">
-        <button type="button" id="search-clear-btn" class="search-clear-btn" style="display: none; background: transparent; border: none; color: var(--cream-muted); cursor: pointer; padding: 4px 8px; font-size: 0.9rem;" aria-label="Limpiar búsqueda">✕</button>
+          placeholder="Buscar cafeterías, croissants, desayunos o barrios..." autocomplete="off">
+        <button type="button" id="search-clear-btn" class="search-clear-btn" style="display: none; background: transparent; border: none; color: var(--cream-muted); cursor: pointer; padding: 4px 8px;" aria-label="Limpiar búsqueda"><span data-gm-icon="x" data-gm-size="15"></span></button>
         <button type="button" class="search-god-btn" id="search-action-btn" aria-label="Buscar" onclick="window.app.focusSearch()">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-          </svg>
+          <span data-gm-icon="arrow-right" data-gm-size="18"></span>
         </button>
       </div>
     </div>
 
-    <!-- 3. Category Circles Row (Cafeterías, Desayunos, Healthy, Bebidas, etc.) -->
+    <!-- 3. Category Circles Row -->
     <section class="stories-section">
       <div id="stories-slider" class="stories-slider">
-        <!-- Renderizado dinámicamente con iconos dorados por JS -->
+        <!-- Renderizado dinámicamente con iconografía propia por JS -->
       </div>
     </section>
 
-    <!-- 4. Cafeterías destacadas (Lumière Café, Brew & Co., etc.) -->
+    <!-- 4. Cafeterías destacadas -->
     <section class="cafeterias-god-section" id="cafeterias-section">
       <div class="cafeterias-header-row">
         <h2 class="section-title-god">Cafeterías destacadas</h2>
-        <button type="button" class="see-all-god" onclick="window.app.showAllStores()">Ver todas →</button>
+        <button type="button" class="see-all-god" onclick="window.app.showAllStores()">
+          <span>Ver todas</span>
+          <span data-gm-icon="arrow-right" data-gm-size="14"></span>
+        </button>
       </div>
 
       <!-- Chips de filtrado rápido de comercios -->
-      <div id="filter-chips-slider" class="filter-chips-slider" style="margin-bottom: 12px;"></div>
+      <div id="filter-chips-slider" class="filter-chips-slider" style="margin-bottom: 14px;"></div>
 
-      <!-- Tarjetas de cafeterías destacadas con swipe horizontal en móvil y grilla en desktop -->
+      <!-- Tarjetas de cafeterías destacadas -->
       <div id="stores-py-grid" class="cafeterias-slider">
         <!-- Renderizado dinámicamente por JS -->
       </div>
     </section>
 
-    <!-- Mini slider de selección rápida de negocio (opcional cuando se filtra) -->
+    <!-- Mini slider de selección rápida de negocio -->
     <div id="businesses-slider" class="businesses-slider" style="display: none; margin-bottom: 12px;"></div>
 
-    <!-- Store Spotlight Banner (visible cuando se selecciona una pastelería) -->
-    <div id="store-spotlight-container" style="display: none; margin: 0 16px 16px;"></div>
+    <!-- Store Spotlight Banner -->
+    <div id="store-spotlight-container" style="display: none; margin: 0 16px 20px;"></div>
 
     <!-- Categorías tradicionales / Filtros rápidos -->
-    <div id="categories-slider" class="categories-slider" style="display: none;">
-      <!-- Generated by JS -->
-    </div>
+    <div id="categories-slider" class="categories-slider" style="display: none;"></div>
 
     <!-- Dynamic Product Showcase -->
     <main id="products-section-container">
       <!-- Rendered by JS -->
     </main>
 
-    <!-- Business Info & Guarantee Footer -->
-    <footer style="margin: 30px 16px 20px; padding: 28px 18px; background: var(--green-card); border-radius: var(--radius-md); border: 1px solid var(--green-border); text-align: center; position: relative; overflow: hidden;">
-      <!-- Gold glow top -->
-      <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 200px; height: 1px; background: linear-gradient(90deg, transparent, var(--primary), transparent);"></div>
+    <!-- Editorial Business Info & Guarantee Footer -->
+    <footer class="gm-footer">
+      <div class="gm-footer-top">
+        <div>
+          <div class="gm-footer-brand">GOD MARKET</div>
+          <div class="gm-footer-tagline">Food · Coffee · Artisan Bakery</div>
+          <p class="gm-footer-desc">
+            Conectamos las mejores cafeterías de especialidad y pastelerías artesanales de Buenos Aires directo con tu mesa y ocasiones especiales.
+          </p>
+          <div class="gm-footer-zones">
+            <span data-gm-icon="map-pin" data-gm-size="14"></span>
+            <span>Palermo · Recoleta · Belgrano · San Telmo · Colegiales</span>
+          </div>
+        </div>
 
-      <!-- Logo text -->
-      <div style="margin-bottom: 10px;">
-        <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.6rem; font-weight: 700; letter-spacing: 0.12em; color: var(--primary); line-height: 1;">GOD MARKET</div>
-        <div style="font-size: 0.6rem; letter-spacing: 0.2em; color: var(--cream-muted); margin-top: 3px;">FOOD · COFFEE · HEALTHY</div>
-      </div>
+        <div class="gm-footer-right">
+          <a href="https://wa.me/5491156192616" target="_blank" class="gm-footer-whatsapp">
+            <span data-gm-icon="whatsapp" data-gm-size="16"></span>
+            <span>Soporte WhatsApp · 11 5619-2616</span>
+          </a>
 
-      <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
-        Conectamos las mejores pastelerías y cafeterías artesanales de Buenos Aires<br>
-        con tu mesa y ocasiones especiales.<br>
-        <span style="color: var(--primary); font-weight: 600;">📍 Palermo · Recoleta · Belgrano · San Telmo · Colegiales</span>
-      </p>
-
-      <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
-        <a href="https://wa.me/5491156192616" target="_blank"
-          style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: #fff; padding: 9px 18px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 700; box-shadow: 0 4px 16px rgba(37,211,102,0.3);">
-          💬 WhatsApp: 11 5619-2616
-        </a>
-      </div>
-
-      <!-- Contador de Visitas en Tiempo Real -->
-      <div id="visit-counter-badge" style="display: inline-flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(212, 175, 55, 0.32); border-radius: 999px; padding: 7px 16px; margin-bottom: 18px; font-size: 0.74rem; color: var(--cream-muted); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);">
-        <span style="display: inline-flex; align-items: center; gap: 6px;">
-          <span style="width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; display: inline-block; box-shadow: 0 0 8px #4ADE80;"></span>
-          <span>👁️ Visitas Totales: <strong id="visit-counter-total" style="color: var(--primary); font-weight: 700;">0</strong></span>
-        </span>
-        <span style="opacity: 0.35;">|</span>
-        <span>⚡ Hoy: <strong id="visit-counter-today" style="color: #4ADE80; font-weight: 700;">0</strong></span>
+          <!-- Contador de Visitas en Tiempo Real -->
+          <div id="visit-counter-badge" class="gm-visit-pill" role="status" aria-label="Contador de visitas de GOD MARKET">
+            <span class="gm-inline-label">
+              <span class="gm-visit-dot"></span>
+              <span data-gm-icon="eye" data-gm-size="14"></span>
+              <span>Visitas totales: <strong id="visit-counter-total">0</strong></span>
+            </span>
+            <span style="opacity: 0.35;">·</span>
+            <span class="gm-visit-today">Hoy: <strong id="visit-counter-today">0</strong></span>
+          </div>
+        </div>
       </div>
 
       <!-- Enlaces Legales & Regulatorios Oficiales -->
-      <div class="footer-legal-links-grid" style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--green-border-subtle);">
+      <div class="footer-legal-links-grid" style="margin-bottom: 16px;">
         <button type="button" class="footer-legal-link" onclick="window.app.openLegalModal('terminos')">
-          📜 Términos y Condiciones
+          <span data-gm-icon="file-text" data-gm-size="14"></span>
+          <span>Términos y Condiciones</span>
         </button>
         <button type="button" class="footer-legal-link" onclick="window.app.openLegalModal('privacidad')">
-          🔒 Política de Privacidad
+          <span data-gm-icon="lock" data-gm-size="14"></span>
+          <span>Política de Privacidad</span>
         </button>
         <button type="button" class="footer-legal-link" onclick="window.app.openLegalModal('comercios')">
-          🏪 Términos para Comercios
+          <span data-gm-icon="store" data-gm-size="14"></span>
+          <span>Términos para Comercios</span>
         </button>
         <button type="button" class="footer-legal-link footer-revocation-pill" onclick="window.app.openLegalModal('arrepentimiento')">
-          ↩️ Botón de Arrepentimiento
+          <span data-gm-icon="undo" data-gm-size="14"></span>
+          <span>Botón de Arrepentimiento</span>
         </button>
       </div>
 
       <!-- Bloque Regulatorio Defensa del Consumidor & Protección de Datos (Argentina) -->
-      <div style="font-size: 0.69rem; color: #8FA295; line-height: 1.55; max-width: 620px; margin: 0 auto 16px auto; text-align: center; background: rgba(0,0,0,0.22); border-radius: 10px; padding: 12px 14px; border: 1px solid rgba(255,255,255,0.05);">
+      <div class="gm-footer-regulatory">
         <p style="margin: 0 0 6px 0;">
-          <strong>Defensa de las y los Consumidores:</strong> Conforme a la Ley Nacional 24.240 y la Res. 424/2020 de la Secretaría de Comercio Interior. Para consultas, orientación o reclamos ingrese a <a href="https://www.argentina.gob.ar/defensadelconsumidor" target="_blank" rel="noopener" style="color: #E5C07B; text-decoration: underline;">www.argentina.gob.ar/defensadelconsumidor</a> o llame a la línea gratuita nacional <strong>0800-666-1518</strong>. Dirección General de Defensa y Protección al Consumidor (CABA).
+          <strong>Defensa de las y los Consumidores:</strong> Conforme a la Ley Nacional 24.240 y la Res. 424/2020 de la Secretaría de Comercio Interior. Para consultas, orientación o reclamos ingrese a <a href="https://www.argentina.gob.ar/defensadelconsumidor" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: underline;">www.argentina.gob.ar/defensadelconsumidor</a> o llame a la línea gratuita nacional <strong>0800-666-1518</strong>. Dirección General de Defensa y Protección al Consumidor (CABA).
         </p>
         <p style="margin: 0 0 6px 0;">
           <strong>Protección de Datos Personales (Ley 25.326):</strong> El titular de los datos personales tiene la facultad de ejercer el derecho de acceso en forma gratuita. La Agencia de Acceso a la Información Pública (AAIP) tiene la atribución de atender denuncias relativas al incumplimiento de las normas sobre protección de datos.
         </p>
-        <p style="margin: 0; color: #768B7D;">
+        <p style="margin: 0; opacity: 0.85;">
           GOD MARKET es una plataforma tecnológica de intermediación. Los productos son elaborados y despachados bajo responsabilidad bromatológica y comercial exclusiva de cada cafetería o pastelería asociada habilitada.
         </p>
       </div>
 
-      <div style="font-size: 0.7rem; color: var(--text-muted); border-top: 1px solid var(--green-border-subtle); padding-top: 14px; line-height: 1.6;">
-        💳 Transferencia Bancaria · Mercado Pago · Efectivo contra entrega<br>
-        <span style="color: rgba(212,201,176,0.4);">© 2026 GOD MARKET — La red premium de cafeterías de especialidad y pastelerías de autor · Buenos Aires, Argentina</span>
+      <div class="gm-footer-bottom">
+        <span class="gm-inline-label">
+          <span data-gm-icon="card" data-gm-size="14"></span>
+          <span>Transferencia Bancaria · Mercado Pago · Efectivo contra entrega</span>
+        </span>
+        <span>© 2026 GOD MARKET · Buenos Aires, Argentina</span>
       </div>
     </footer>
 
-    <!-- Floating Sticky Cart Bar (PedidosYa style) -->
+    <!-- Floating Sticky Cart Bar -->
     <div id="floating-cart-bar" class="floating-cart-bar" style="display: none;" onclick="window.app.openModal('cart-drawer-modal')">
       <div class="cart-bar-left">
         <div id="cart-floating-count" class="cart-badge-circle">0</div>
@@ -936,51 +998,41 @@
       </div>
       <div class="cart-bar-cta">
         <span>Continuar</span>
-        <span>→</span>
+        <span data-gm-icon="arrow-right" data-gm-size="15"></span>
       </div>
     </div>
 
-        <!-- PWA Install Banner (Floating on mobile) -->
+    <!-- PWA Install Banner (Floating on mobile) -->
     <div id="pwa-install-pill" class="pwa-install-pill" style="display: none;">
-      <img src="assets/icons/icon-192.png" alt="GOD MARKET" class="pwa-pill-emblem" style="width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.4);">
+      <span class="brand-mark-svg" data-gm-icon="brand-mark" data-gm-size="20" style="width: 38px; height: 38px;"></span>
       <div class="pwa-pill-body">
-        <strong>Instalar GOD MARKET App</strong>
-        <span>Acceso directo y pedidos más rápidos en 1 toque</span>
+        <strong>Instalar GOD MARKET</strong>
+        <span>Acceso directo y pedidos más rápidos</span>
       </div>
       <div class="pwa-pill-buttons">
         <button type="button" class="btn-pwa-install-action" onclick="window.app.installPWA()">
           Instalar
         </button>
-        <button type="button" class="btn-pwa-close-action" onclick="window.app.dismissPWA()" aria-label="Cerrar">✕</button>
+        <button type="button" class="btn-pwa-close-action" onclick="window.app.dismissPWA()" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="15"></span></button>
       </div>
     </div>
 
-    <!-- Bottom Navigation Bar (GOD MARKET Mobile App Navigation) -->
+    <!-- Bottom Navigation Bar (Mobile) -->
     <nav class="bottom-nav">
-      <button class="nav-item active" id="nav-item-home"
-        onclick="window.app.goHome()">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" stroke="none">
-          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22" fill="#051610"/>
-        </svg>
+      <button class="nav-item active" id="nav-item-home" onclick="window.app.goHome()">
+        <span data-gm-icon="home" data-gm-size="21"></span>
         <span>Inicio</span>
       </button>
       <button class="nav-item" id="nav-item-search" onclick="window.app.focusSearch()">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-        </svg>
+        <span data-gm-icon="search" data-gm-size="21"></span>
         <span>Buscar</span>
       </button>
       <button class="nav-item" id="nav-item-favs" onclick="window.app.openFavorites()">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
-        </svg>
+        <span data-gm-icon="bookmark" data-gm-size="21"></span>
         <span>Favoritos</span>
       </button>
       <button class="nav-item" id="nav-item-profile" onclick="window.app.openProfileModal()">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-        </svg>
+        <span data-gm-icon="user" data-gm-size="21"></span>
         <span>Perfil</span>
       </button>
     </nav>
@@ -996,77 +1048,78 @@
   <div id="profile-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('profile-modal')">
     <div class="bottom-sheet">
       <div class="drag-handle"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('profile-modal')" aria-label="Cerrar">✕</button>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('profile-modal')" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
       
       <div style="text-align: center; margin-bottom: 22px;">
-        <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(212,175,55,0.14); border: 1.5px solid var(--primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.8rem; color: var(--primary);">
-          👤
+        <div style="width: 58px; height: 58px; border-radius: 50%; background: rgba(200,169,106,0.12); border: 1px solid rgba(200,169,106,0.34); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: var(--primary);">
+          <span data-gm-icon="user" data-gm-size="26"></span>
         </div>
-        <h3 class="font-serif" style="font-size: 1.4rem; color: var(--cream); margin-bottom: 4px;">Mi Perfil GOD MARKET</h3>
-        <p style="font-size: 0.82rem; color: var(--cream-muted);">Marketplace de Desayunos & Cafeterías de Autor</p>
+        <h3 class="font-serif" style="font-size: 1.45rem; color: var(--cream); margin-bottom: 4px;">Mi Perfil GOD MARKET</h3>
+        <p style="font-size: 0.82rem; color: var(--cream-muted);">Marketplace de Desayunos y Cafeterías de Autor</p>
       </div>
 
       <div class="profile-options-list">
-                <div class="profile-option-card highlight-pwa" onclick="window.app.closeModal('profile-modal'); window.app.installPWA();">
-          <span class="profile-opt-icon">📲</span>
+        <div class="profile-option-card highlight-pwa" onclick="window.app.closeModal('profile-modal'); window.app.installPWA();">
+          <span class="profile-opt-icon" data-gm-icon="smartphone" data-gm-size="19"></span>
           <div class="profile-opt-info">
-            <strong>Instalar GOD MARKET en tu Celular</strong>
+            <strong>Instalar GOD MARKET en tu celular</strong>
             <span>Acceso directo como app sin ocupar memoria</span>
           </div>
-          <span class="profile-opt-arrow">⬇️</span>
+          <span class="profile-opt-arrow" data-gm-icon="download" data-gm-size="16"></span>
         </div>
-<div class="profile-option-card" onclick="window.app.closeModal('profile-modal'); window.app.openOrdersHistoryModal();">
-          <span class="profile-opt-icon">📦</span>
+
+        <div class="profile-option-card" onclick="window.app.closeModal('profile-modal'); window.app.openOrdersHistoryModal();">
+          <span class="profile-opt-icon" data-gm-icon="package" data-gm-size="19"></span>
           <div class="profile-opt-info">
-            <strong>Mis Pedidos Realizados</strong>
+            <strong>Mis pedidos realizados</strong>
             <span>Historial de entregas y compras recientes</span>
           </div>
-          <span class="profile-opt-arrow">→</span>
+          <span class="profile-opt-arrow" data-gm-icon="chevron-right" data-gm-size="16"></span>
         </div>
 
         <div class="profile-option-card" onclick="window.app.closeModal('profile-modal'); window.app.openAddressModal();">
-          <span class="profile-opt-icon">📍</span>
+          <span class="profile-opt-icon" data-gm-icon="map-pin" data-gm-size="19"></span>
           <div class="profile-opt-info">
-            <strong>Dirección de Entrega</strong>
+            <strong>Dirección de entrega</strong>
             <span id="profile-current-address-label">Seleccionar ubicación</span>
           </div>
-          <span class="profile-opt-arrow">→</span>
+          <span class="profile-opt-arrow" data-gm-icon="chevron-right" data-gm-size="16"></span>
         </div>
 
         <div class="profile-option-card" onclick="window.app.closeModal('profile-modal'); window.app.openFavorites();">
-          <span class="profile-opt-icon">🔖</span>
+          <span class="profile-opt-icon" data-gm-icon="bookmark" data-gm-size="19"></span>
           <div class="profile-opt-info">
-            <strong>Mis Delicias Favoritas</strong>
+            <strong>Mis delicias favoritas</strong>
             <span>Cafeterías y productos que guardaste</span>
           </div>
-          <span class="profile-opt-arrow">→</span>
+          <span class="profile-opt-arrow" data-gm-icon="chevron-right" data-gm-size="16"></span>
         </div>
 
         <div class="profile-option-card" onclick="window.app.closeModal('profile-modal'); window.sellerPortal.chooseRole('vendedor');">
-          <span class="profile-opt-icon">🏪</span>
+          <span class="profile-opt-icon" data-gm-icon="store" data-gm-size="19"></span>
           <div class="profile-opt-info">
-            <strong>Portal Negocios & Cafeterías</strong>
-            <span>Publicar productos o gestionar local</span>
+            <strong>Portal negocios y cafeterías</strong>
+            <span>Publicar productos o gestionar tu local</span>
           </div>
-          <span class="profile-opt-arrow">→</span>
+          <span class="profile-opt-arrow" data-gm-icon="chevron-right" data-gm-size="16"></span>
         </div>
 
         <a href="https://wa.me/5491156192616?text=Hola%20GOD%20MARKET,%20necesito%20asistencia%20con%20un%20pedido." target="_blank" class="profile-option-card whatsapp-card">
-          <span class="profile-opt-icon">💬</span>
+          <span class="profile-opt-icon" data-gm-icon="whatsapp" data-gm-size="19"></span>
           <div class="profile-opt-info">
-            <strong>Soporte Oficial por WhatsApp</strong>
-            <span>Atención personalizada 11 5619-2616</span>
+            <strong>Soporte oficial por WhatsApp</strong>
+            <span>Atención personalizada · 11 5619-2616</span>
           </div>
-          <span class="profile-opt-arrow">→</span>
+          <span class="profile-opt-arrow" data-gm-icon="chevron-right" data-gm-size="16"></span>
         </a>
 
         <div class="profile-option-card" onclick="window.app.closeModal('profile-modal'); window.app.openLegalModal('terminos');">
-          <span class="profile-opt-icon">⚖️</span>
+          <span class="profile-opt-icon" data-gm-icon="scale" data-gm-size="19"></span>
           <div class="profile-opt-info">
-            <strong>Centro Legal & Privacidad</strong>
+            <strong>Centro legal y privacidad</strong>
             <span>Términos de servicio, Ley 25.326 y arrepentimiento</span>
           </div>
-          <span class="profile-opt-arrow">→</span>
+          <span class="profile-opt-arrow" data-gm-icon="chevron-right" data-gm-size="16"></span>
         </div>
       </div>
     </div>
@@ -1077,49 +1130,55 @@
     onclick="if(event.target === this) window.app.closeModal('product-detail-modal')">
     <div class="bottom-sheet">
       <div class="drag-handle"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('product-detail-modal')">✕</button>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('product-detail-modal')" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
 
       <div class="modal-desktop-layout">
         <div>
           <div class="modal-img-container">
-            <img id="modal-product-img" class="modal-product-img" src="" alt="Pastel" style="transition: opacity 0.25s ease, transform 0.3s ease; display: block; width: 100%;">
+            <img id="modal-product-img" class="modal-product-img" src="" alt="Producto" style="transition: opacity 0.25s ease, transform 0.3s ease; display: block; width: 100%;">
             
             <!-- Badge Dinámico del Sabor Seleccionado -->
-            <div id="modal-flavor-badge" class="flavor-preview-badge">
-              <span id="modal-flavor-badge-text">🍰 Clásica</span>
+            <div id="modal-flavor-badge" class="flavor-preview-badge gm-inline-label">
+              <span data-gm-icon="patisserie" data-gm-size="13" style="color: var(--primary);"></span>
+              <span id="modal-flavor-badge-text">Clásica</span>
             </div>
 
             <!-- Overlay Dinámico de Velita de Cumpleaños -->
-            <div id="modal-candle-badge" class="candle-preview-badge" style="display: none;">
-              <span class="candle-flame">🕯️</span>
-              <span>¡Con velita de cumpleaños!</span>
+            <div id="modal-candle-badge" class="candle-preview-badge gm-inline-label" style="display: none;">
+              <span class="candle-flame" data-gm-icon="candle" data-gm-size="13"></span>
+              <span>Con velita de cumpleaños</span>
+            </div>
+          </div>
+
+          <!-- Store Identity Card cleanly tucked under image on desktop -->
+          <div id="modal-product-store" class="modal-store-card-mini">
+            <span id="modal-store-avatar" class="modal-store-avatar-badge" data-gm-icon="store" data-gm-size="18"></span>
+            <div class="modal-store-meta-text">
+              <strong id="modal-store-name">Pastelería Asociada</strong>
+              <span id="modal-store-zone">Palermo</span>
             </div>
           </div>
         </div>
 
         <div>
-          <div id="modal-product-store" class="modal-store-pill">
-            <span id="modal-store-avatar">🏪</span>
-            <strong id="modal-store-name">Pastelería Asociada</strong>
-            <span id="modal-store-zone">• Palermo</span>
-          </div>
           <h3 id="modal-product-title" class="modal-product-title font-serif"></h3>
           <div id="modal-product-price" class="modal-product-price"></div>
-          <div id="modal-service-fee-pill" style="margin: -4px 0 10px 0;"></div>
+          <div id="modal-service-fee-pill" style="margin: -4px 0 12px 0;"></div>
           <p id="modal-product-desc"
-            style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 12px;"></p>
+            style="font-size: 0.88rem; color: var(--cream-muted); line-height: 1.5; margin-bottom: 12px;"></p>
 
           <div
-            style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
-            <span>📏 Rendimiento:</span>
-            <strong id="modal-product-portion" style="color: var(--text-main);"></strong>
+            style="display: inline-flex; align-items: center; gap: 7px; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
+            <span data-gm-icon="utensils" data-gm-size="14" style="color: var(--primary);"></span>
+            <span>Rendimiento:</span>
+            <strong id="modal-product-portion" style="color: var(--cream);"></strong>
           </div>
 
           <!-- Customization Section (Dedication, Candle, Notes) -->
           <div id="modal-customization-options" class="customization-section">
-            <!-- Flavor / Gustos Chips (Estilo ByronCode / Perlato) -->
+            <!-- Flavor / Gustos Chips -->
             <div class="form-group" id="modal-flavor-group">
-              <label class="form-label">🍯 Elige tu gusto o relleno favorito:</label>
+              <label class="form-label"><span data-gm-icon="patisserie" data-gm-size="14" style="color: var(--primary);"></span> Elegí tu gusto o relleno favorito</label>
               <div class="flavor-chips-grid" id="modal-flavor-chips">
                 <div class="flavor-chip active" data-flavor="Clásica de la Casa">Clásica</div>
                 <div class="flavor-chip" data-flavor="Dulce de Leche Repostero">Dulce de Leche</div>
@@ -1131,36 +1190,36 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="modal-dedication">✍️ Dedicatoria en placa de chocolate (Opcional):</label>
+              <label class="form-label" for="modal-dedication"><span data-gm-icon="pen" data-gm-size="14" style="color: var(--primary);"></span> Dedicatoria en placa de chocolate (opcional)</label>
               <input type="text" id="modal-dedication" class="custom-input" placeholder="Ej: ¡Feliz Cumpleaños Sofi!"
                 maxlength="50">
             </div>
 
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-              <input type="checkbox" id="modal-candle-checkbox"
-                style="width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
-              <label for="modal-candle-checkbox" style="font-size: 0.85rem; font-weight: 600; cursor: pointer;">
-                🕯️ Incluir velita de cumpleaños (Sin cargo)
+            <div class="gm-checkbox-row">
+              <input type="checkbox" id="modal-candle-checkbox">
+              <label for="modal-candle-checkbox">
+                <span data-gm-icon="candle" data-gm-size="15" style="color: var(--primary);"></span>
+                <span>Incluir velita de cumpleaños (sin cargo)</span>
               </label>
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="modal-note">📝 Aclaración o nota para el pastelero:</label>
+              <label class="form-label" for="modal-note"><span data-gm-icon="file-text" data-gm-size="14" style="color: var(--primary);"></span> Aclaración o nota para el pastelero</label>
               <input type="text" id="modal-note" class="custom-input"
-                placeholder="Ej: Entregar bien frío / Alergia a nuez...">
+                placeholder="Ej: Entregar bien frío / Alergia a frutos secos...">
             </div>
           </div>
 
           <!-- Actions: Quantity & Add Button -->
           <div style="display: flex; align-items: center; gap: 14px; margin-top: 18px;">
             <div class="quantity-stepper">
-              <button id="modal-qty-minus" class="stepper-btn">-</button>
+              <button id="modal-qty-minus" class="stepper-btn" aria-label="Restar"><span data-gm-icon="minus" data-gm-size="15"></span></button>
               <span id="modal-qty-val" class="stepper-value">1</span>
-              <button id="modal-qty-plus" class="stepper-btn">+</button>
+              <button id="modal-qty-plus" class="stepper-btn" aria-label="Sumar"><span data-gm-icon="plus" data-gm-size="15"></span></button>
             </div>
 
             <button id="btn-add-modal-cart" class="btn-primary" style="flex: 1;">
-              <span>Agregar al Pedido</span>
+              <span>Agregar al pedido</span>
             </button>
           </div>
         </div>
@@ -1174,29 +1233,29 @@
     onclick="if(event.target === this) window.app.closeModal('cart-drawer-modal')">
     <div class="bottom-sheet">
       <div class="drag-handle"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('cart-drawer-modal')">✕</button>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('cart-drawer-modal')" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
 
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 1.4rem;">🛍️</span>
-          <h3 class="font-serif" style="font-size: 1.25rem;">Tu Carrito de Delicias</h3>
-        </div>
+      <div class="modal-header-row">
+        <span class="modal-header-icon" data-gm-icon="bag" data-gm-size="18"></span>
+        <h3 class="font-serif" style="font-size: 1.35rem; margin: 0;">Tu carrito</h3>
       </div>
 
       <!-- Selector de Modalidad de Entrega en Carrito -->
-      <div class="side-delivery-switcher" style="margin-bottom: 10px;">
+      <div class="side-delivery-switcher">
         <button type="button" class="side-delivery-btn active" data-type="delivery" onclick="window.app.switchDeliveryType('delivery')">
-          🛵 Envío a Domicilio
+          <span data-gm-icon="delivery" data-gm-size="15"></span>
+          <span>Envío a domicilio</span>
         </button>
         <button type="button" class="side-delivery-btn" data-type="pickup" onclick="window.app.switchDeliveryType('pickup')">
-          🏪 Retiro en Local
+          <span data-gm-icon="store" data-gm-size="15"></span>
+          <span>Retiro en local</span>
         </button>
       </div>
 
       <!-- Aviso de Logística del Vendedor -->
-      <div style="background: rgba(42, 157, 143, 0.12); border: 1px dashed rgba(42, 157, 143, 0.45); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 12px; font-size: 0.74rem; color: #CBD8D1; display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 1.1rem;">🛵</span>
-        <span><strong style="color: #4ADE80;">Envío a cargo del vendedor:</strong> Cada local coordina su propio cadete para llevar tu pedido directo a tu puerta.</span>
+      <div class="cart-logistics-note">
+        <span data-gm-icon="delivery" data-gm-size="17"></span>
+        <span><strong>Envío a cargo del vendedor:</strong> Cada local coordina su propio cadete para llevar tu pedido directo a tu puerta.</span>
       </div>
 
       <div id="cart-drawer-items" class="cart-items-list">
@@ -1206,29 +1265,31 @@
       <div class="cart-footer">
         <div id="cart-promo-savings-note" class="cart-promo-savings-note" style="display: none;"></div>
         <div class="cart-summary-row">
-          <span>Subtotal (Precio de local):</span>
+          <span>Subtotal (precio de local)</span>
           <span id="cart-drawer-subtotal" class="cart-calc-subtotal">$0</span>
         </div>
         <div class="cart-summary-row" id="cart-service-fee-row">
-          <span>Servicio GOD MARKET (20%):</span>
+          <span>Servicio GOD MARKET (20%)</span>
           <span id="cart-drawer-service-fee" class="cart-calc-service-fee">$0</span>
         </div>
         <div class="cart-summary-row" id="cart-delivery-fee-row">
-          <span>Envío por el Vendedor:</span>
+          <span>Envío por el vendedor</span>
           <span id="cart-drawer-shipping" class="cart-calc-delivery">$1.500</span>
         </div>
         <div class="cart-summary-row total">
-          <span>Total:</span>
-          <span id="cart-drawer-total" class="cart-calc-total" style="color: var(--primary);">$0</span>
+          <span>Total</span>
+          <span id="cart-drawer-total" class="cart-calc-total">$0</span>
         </div>
 
-        <div
-          style="font-size: 0.72rem; color: var(--accent-mint); font-weight: 700; text-align: center; margin: 6px 0;">
-          🛵 Envío gratis por vendedor a partir de $45.000
+        <div class="gm-inline-label"
+          style="font-size: 0.75rem; color: var(--success); font-weight: 600; justify-content: center; width: 100%; margin: 10px 0 6px;">
+          <span data-gm-icon="delivery" data-gm-size="14"></span>
+          <span>Envío sin cargo por local superando $45.000</span>
         </div>
 
-        <button id="btn-proceed-checkout" class="btn-primary" style="margin-top: 10px;">
-          <span>Continuar con los Datos de Entrega →</span>
+        <button id="btn-proceed-checkout" class="btn-primary" style="margin-top: 8px;">
+          <span>Continuar con la entrega</span>
+          <span data-gm-icon="arrow-right" data-gm-size="16"></span>
         </button>
       </div>
     </div>
@@ -1240,26 +1301,31 @@
     onclick="if(event.target === this) window.app.closeModal('checkout-modal')">
     <div class="bottom-sheet">
       <div class="drag-handle"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('checkout-modal')">✕</button>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('checkout-modal')" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
 
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-        <span style="font-size: 1.4rem;">📋</span>
-        <h3 class="font-serif" style="font-size: 1.25rem;">Finalizar Pedido</h3>
+      <div class="modal-header-row">
+        <span class="modal-header-icon" data-gm-icon="receipt" data-gm-size="18"></span>
+        <h3 class="font-serif" style="font-size: 1.35rem; margin: 0;">Finalizar pedido</h3>
       </div>
 
       <!-- Resumen Compacto del Pedido -->
-      <div id="checkout-order-summary-pill" style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-secondary); padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 12px; font-size: 0.85rem; border: 1px solid var(--border-light);">
-        <span id="checkout-summary-items-count">🛒 Tu Pedido (0 ítems)</span>
-        <strong style="color: var(--primary); font-size: 1.05rem;" id="checkout-summary-total">$0</strong>
+      <div id="checkout-order-summary-pill" style="display: flex; justify-content: space-between; align-items: center; background: rgba(244,239,230,0.035); padding: 11px 14px; border-radius: 12px; margin-bottom: 12px; font-size: 0.86rem; border: 1px solid rgba(244,239,230,0.10);">
+        <span class="gm-inline-label" style="color: var(--cream);">
+          <span data-gm-icon="bag" data-gm-size="15" style="color: var(--primary);"></span>
+          <span id="checkout-summary-items-count">Tu pedido (0 productos)</span>
+        </span>
+        <strong style="color: var(--primary); font-size: 1.05rem; font-variant-numeric: tabular-nums;" id="checkout-summary-total">$0</strong>
       </div>
 
       <!-- Selector de Modalidad de Entrega en Checkout -->
-      <div class="side-delivery-switcher" style="margin-bottom: 14px;">
+      <div class="side-delivery-switcher">
         <button type="button" class="side-delivery-btn active" data-type="delivery" onclick="window.app.switchDeliveryType('delivery')">
-          🛵 Envío a Domicilio
+          <span data-gm-icon="delivery" data-gm-size="15"></span>
+          <span>Envío a domicilio</span>
         </button>
         <button type="button" class="side-delivery-btn" data-type="pickup" onclick="window.app.switchDeliveryType('pickup')">
-          🏪 Retiro en Local
+          <span data-gm-icon="store" data-gm-size="15"></span>
+          <span>Retiro en local</span>
         </button>
       </div>
 
@@ -1267,51 +1333,54 @@
         <input type="hidden" id="checkout-payment-method" value="cash">
 
         <div class="form-group">
-          <label class="form-label" for="cust-name">Nombre y Apellido *</label>
+          <label class="form-label" for="cust-name">Nombre y apellido *</label>
           <input type="text" id="cust-name" class="form-control" placeholder="Ej: Mariana Rodríguez" required>
-          <span class="invalid-feedback">Por favor ingresa tu nombre completo (mínimo 3 letras).</span>
+          <span class="invalid-feedback">Por favor ingresá tu nombre completo (mínimo 3 letras).</span>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="cust-phone">Teléfono / WhatsApp *</label>
           <input type="tel" id="cust-phone" class="form-control" placeholder="Ej: 11 5555-1234" required>
-          <span class="invalid-feedback">Ingresa un número de teléfono/WhatsApp válido (mínimo 8 dígitos).</span>
+          <span class="invalid-feedback">Ingresá un número de teléfono/WhatsApp válido (mínimo 8 dígitos).</span>
         </div>
 
         <!-- Address group (hidden if pickup) -->
         <div id="delivery-address-group">
           <div class="form-group">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <label class="form-label" for="cust-address" style="margin-bottom: 0;">Dirección de Entrega (Calle y Altura) *</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px;">
+              <label class="form-label" for="cust-address" style="margin-bottom: 0;">Dirección de entrega (calle y altura) *</label>
               <button type="button" id="btn-toggle-map" class="btn-map-toggle" onclick="window.app.toggleMapPicker()">
-                🗺️ Marcar en el Mapa
+                <span data-gm-icon="map" data-gm-size="14"></span>
+                <span>Marcar en el mapa</span>
               </button>
             </div>
             <input type="text" id="cust-address" class="form-control" placeholder="Ej: Av. del Libertador 4500">
-            <span class="invalid-feedback">Ingresa la calle y altura para realizar el envío a domicilio.</span>
+            <span class="invalid-feedback">Ingresá la calle y altura para realizar el envío a domicilio.</span>
           </div>
 
-          <!-- Contenedor del Mapa Interactivo con Pin Rojo y Buscador -->
-          <div id="checkout-map-container" style="display: none; margin-bottom: 14px; background: var(--bg-surface-secondary); padding: 12px; border-radius: var(--radius-md); border: 1.5px solid var(--border-light);">
-            <!-- Buscador directo en el mapa -->
+          <!-- Contenedor del Mapa Interactivo -->
+          <div id="checkout-map-container" style="display: none; margin-bottom: 14px; background: var(--bg-surface-secondary); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
             <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-              <input type="text" id="map-search-input" class="form-control" placeholder="Escribe tu calle (Ej: Cilento 81)..." style="font-size: 0.82rem; padding: 7px 10px;" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.app.searchAddressOnMap();}">
+              <input type="text" id="map-search-input" class="form-control" placeholder="Escribí tu calle (Ej: Gorriti 4800)..." style="font-size: 0.82rem; padding: 7px 10px;" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.app.searchAddressOnMap();}">
               <button type="button" class="btn-primary" onclick="window.app.searchAddressOnMap()" style="width: auto; padding: 6px 14px; font-size: 0.8rem; white-space: nowrap;">
-                🔍 Buscar
+                <span data-gm-icon="search" data-gm-size="14"></span>
+                <span>Buscar</span>
               </button>
-              <button type="button" class="btn-gps-locate" onclick="window.app.locateUserGPS()" title="Ubicar por GPS">
-                🎯 GPS
+              <button type="button" class="btn-gps-locate gm-inline-label" onclick="window.app.locateUserGPS()" title="Ubicar por GPS">
+                <span data-gm-icon="gps" data-gm-size="14"></span>
+                <span>GPS</span>
               </button>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.72rem; color: var(--text-secondary);">
-              <span>📍 Mueve el pin rojo o escribe tu calle para fijar el punto</span>
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 0.74rem; color: var(--text-secondary);">
+              <span data-gm-icon="map-pin" data-gm-size="13" style="color: var(--primary);"></span>
+              <span>Mové el marcador o escribí tu calle para fijar el punto exacto</span>
             </div>
 
             <div id="delivery-map" style="width: 100%; height: 220px; border-radius: var(--radius-sm); z-index: 1;"></div>
             
-            <div id="map-address-status" style="margin-top: 8px; font-size: 0.78rem; color: var(--primary); font-weight: 700; min-height: 18px; line-height: 1.35;">
-              📍 Mueve el pin o escribe tu calle para capturar la dirección
+            <div id="map-address-status" style="margin-top: 8px; font-size: 0.78rem; color: var(--primary); font-weight: 600; min-height: 18px; line-height: 1.35;">
+              Mové el marcador o escribí tu calle para capturar la dirección
             </div>
           </div>
 
@@ -1328,45 +1397,48 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="cust-time">Fecha y Horario preferido de entrega *</label>
+          <label class="form-label" for="cust-time">Fecha y horario preferido de entrega *</label>
           
-          <!-- Aviso si el local está cerrado (Horario 08:30 a 20:00 hs) -->
+          <!-- Aviso si el local está cerrado -->
           <div id="checkout-store-closed-banner" style="display: none;">
-            🌙 <strong>Local Cerrado en este momento</strong> (Horario de atención: 08:30 a 20:00 hs Argentina).<br>
+            <strong>Local cerrado en este momento</strong> (horario de atención: 08:30 a 20:00 hs Argentina).<br>
             Tu pedido quedará agendado para la próxima franja horaria o la fecha que elijas.
           </div>
 
-          <!-- Botones de selección rápida (Ahora / Programado) -->
+          <!-- Botones de selección rápida -->
           <div class="time-quick-chips">
             <button type="button" class="time-chip active" id="chip-time-now" data-time="Lo antes posible (Ahora)" onclick="window.app.selectQuickTime(this)">
-              ⚡ Ahora (40 a 60 min)
+              <span data-gm-icon="clock" data-gm-size="14"></span>
+              <span>Ahora (40–60 min)</span>
             </button>
             <button type="button" class="time-chip" id="chip-time-afternoon" data-time="Hoy por la tarde (16:00 a 19:30 hs)" onclick="window.app.selectQuickTime(this)">
-              🕒 Hoy por la tarde
+              <span data-gm-icon="sun" data-gm-size="14"></span>
+              <span>Hoy por la tarde</span>
             </button>
             <button type="button" class="time-chip" id="chip-time-tomorrow" data-time="Mañana por la mañana (09:00 a 12:30 hs)" onclick="window.app.selectQuickTime(this)">
-              ☀️ Mañana
+              <span data-gm-icon="calendar" data-gm-size="14"></span>
+              <span>Mañana</span>
             </button>
           </div>
 
           <input type="text" id="cust-time" class="form-control" placeholder="Ej: Hoy 16:30 hs / Mañana 9:00 hs" value="Lo antes posible (Ahora)" required>
-          <span class="invalid-feedback">Indica la fecha y franja horaria preferida para recibir tu pedido.</span>
+          <span class="invalid-feedback">Indicá la fecha y franja horaria preferida para recibir tu pedido.</span>
         </div>
 
         <!-- Payment Method Selection -->
         <div class="form-group">
-          <label class="form-label">Forma de Pago:</label>
+          <label class="form-label">Forma de pago</label>
           <div class="payment-options">
             <div class="payment-card" data-payment="transfer" hidden>
-              <div class="payment-icon">🏦</div>
+              <div class="payment-icon" data-gm-icon="bank" data-gm-size="22"></div>
               <div class="payment-name">Transferencia</div>
             </div>
             <div class="payment-card" data-payment="mercadopago" hidden>
-              <div class="payment-icon">💳</div>
+              <div class="payment-icon" data-gm-icon="card" data-gm-size="22"></div>
               <div class="payment-name">Mercado Pago</div>
             </div>
             <div class="payment-card active" data-payment="cash">
-              <div class="payment-icon">💵</div>
+              <div class="payment-icon" data-gm-icon="cash" data-gm-size="22"></div>
               <div class="payment-name">Efectivo</div>
             </div>
           </div>
@@ -1375,10 +1447,11 @@
         <!-- Bank details summary box -->
         <div id="bank-transfer-info" class="bank-details-box bank-transfer-theme" style="display: none;">
           <div class="bank-title">
-            <span>🏦</span> Datos para Transferencia Bancaria:
+            <span data-gm-icon="bank" data-gm-size="16"></span>
+            <span>Datos para transferencia bancaria</span>
           </div>
           <p class="bank-subtitle">
-            Transfiere desde cualquier Home Banking o billetera virtual:
+            Transferí desde cualquier Home Banking o billetera virtual:
           </p>
           <div class="bank-row">
             <span class="bank-label">Alias:</span>
@@ -1394,10 +1467,11 @@
         <!-- Mercado Pago details summary box -->
         <div id="mercadopago-info" class="bank-details-box bank-mp-theme" style="display: none;">
           <div class="bank-title mp-title">
-            <span>💳</span> Datos para Pagar con Mercado Pago:
+            <span data-gm-icon="card" data-gm-size="16"></span>
+            <span>Datos para pagar con Mercado Pago</span>
           </div>
           <p class="bank-subtitle">
-            Transfiere desde tu app de Mercado Pago o cualquier banco / billetera virtual:
+            Transferí desde tu app de Mercado Pago o cualquier banco / billetera virtual:
           </p>
           <div class="bank-row">
             <span class="bank-label">Alias MP:</span>
@@ -1414,55 +1488,57 @@
             <span class="bank-value" id="mp-account-holder"></span>
           </div>
           <div class="mp-footer-note">
-            ✨ También puedes solicitar el Link de Pago con tarjeta al confirmar por WhatsApp.
+            También podés solicitar el link de pago con tarjeta al confirmar por WhatsApp.
           </div>
         </div>
 
         <!-- Cash amount box (Shown if Cash) -->
         <div id="cash-payment-info" style="display: block;" class="form-group">
-          <label class="form-label" for="cust-cash-amount">¿Con cuánto abonas? (Para llevarte cambio):</label>
-          <input type="number" id="cust-cash-amount" class="form-control" placeholder="Ej: $50000">
+          <label class="form-label" for="cust-cash-amount">¿Con cuánto abonás? (para llevarte cambio)</label>
+          <input type="number" id="cust-cash-amount" class="form-control" placeholder="Ej: 50000">
           <span id="cash-amount-feedback" class="invalid-feedback">El monto ingresado debe ser mayor o igual al total a
             pagar.</span>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="cust-comments">Observaciones adicionales:</label>
+          <label class="form-label" for="cust-comments">Observaciones adicionales</label>
           <input type="text" id="cust-comments" class="form-control"
             placeholder="Ej: Tocar timbre de abajo / Dejar en recepción">
         </div>
 
         <!-- Submit to WhatsApp Button -->
         <button type="submit" class="btn-primary btn-whatsapp" style="margin-top: 8px;">
-          <span style="font-size: 1.2rem;">📲</span>
-          <span>Confirmar y Enviar Pedido a WhatsApp</span>
+          <span data-gm-icon="whatsapp" data-gm-size="18"></span>
+          <span>Confirmar y enviar pedido por WhatsApp</span>
         </button>
 
-        <p style="text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 8px; line-height: 1.45;">
-          Al hacer clic, se generará tu <strong>Número de Orden</strong> y se enviará el pedido al WhatsApp
-          <strong>1156192616</strong>.<br>
-          Al confirmar, aceptas los <a href="javascript:void(0)" onclick="window.app.openLegalModal('terminos')" style="color: var(--primary); text-decoration: underline;">Términos y Condiciones</a>, la <a href="javascript:void(0)" onclick="window.app.openLegalModal('privacidad')" style="color: var(--primary); text-decoration: underline;">Política de Privacidad</a> y la <a href="javascript:void(0)" onclick="window.app.openLegalModal('arrepentimiento')" style="color: var(--primary); text-decoration: underline;">Revocación de Compra</a>.
+        <p style="text-align: center; font-size: 0.73rem; color: var(--text-muted); margin-top: 10px; line-height: 1.5;">
+          Se generará tu <strong>número de orden</strong> y se abrirá WhatsApp (<strong>11 5619-2616</strong>).<br>
+          Al confirmar, aceptás los <a href="javascript:void(0)" onclick="window.app.openLegalModal('terminos')" style="color: var(--primary); text-decoration: underline;">Términos y Condiciones</a>, la <a href="javascript:void(0)" onclick="window.app.openLegalModal('privacidad')" style="color: var(--primary); text-decoration: underline;">Política de Privacidad</a> y la <a href="javascript:void(0)" onclick="window.app.openLegalModal('arrepentimiento')" style="color: var(--primary); text-decoration: underline;">Revocación de Compra</a>.
         </p>
       </form>
     </div>
   </div>
 
 
-  <!-- 4. Order Confirmation Ticket Modal (Estilo Exacto ByronCode / Perlato) -->
+  <!-- 4. Order Confirmation Ticket Modal -->
   <div id="order-success-modal" class="modal-overlay"
     onclick="if(event.target === this) window.app.closeModal('order-success-modal')">
     <div class="bottom-sheet" style="max-width: 500px; padding: 26px 20px; position: relative;">
       <div class="drag-handle"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('order-success-modal')" aria-label="Cerrar modal">✕</button>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('order-success-modal')" aria-label="Cerrar modal"><span data-gm-icon="x" data-gm-size="16"></span></button>
       <div class="order-ticket">
-        <div class="ticket-icon-top">🧁</div>
-
-        <div class="ticket-status-pill">
-          <span>🟢</span> ¡Orden Registrada con Éxito!
+        <div class="ticket-icon-top">
+          <span data-gm-icon="check-circle" data-gm-size="28"></span>
         </div>
 
-        <h3 class="font-serif" style="font-size: 1.45rem; margin-bottom: 2px;">Registramos tu orden</h3>
-        <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 10px;">
+        <div class="ticket-status-pill">
+          <span class="promo-dot"></span>
+          <span>Orden registrada con éxito</span>
+        </div>
+
+        <h3 class="font-serif" style="font-size: 1.5rem; margin-bottom: 4px;">Registramos tu orden</h3>
+        <p style="font-size: 0.84rem; color: var(--cream-muted); margin-bottom: 14px;">
           Tu pedido ya ingresó al sistema y estamos preparando todo.
         </p>
 
@@ -1474,7 +1550,8 @@
             <div class="ticket-order-num" id="ticket-order-id">#ORD-1041</div>
           </div>
           <button type="button" class="btn-copy-sm" onclick="window.app.copyOrderId()" id="btn-copy-order">
-            <span>📋</span> Copiar
+            <span data-gm-icon="copy" data-gm-size="13"></span>
+            <span>Copiar</span>
           </button>
         </div>
 
@@ -1489,40 +1566,41 @@
         </div>
 
         <div
-          style="display: flex; justify-content: space-between; align-items: center; padding: 6px 4px; font-weight: 800; font-size: 1.05rem; border-bottom: 1px solid var(--border-light); margin-bottom: 14px;">
-          <span>Total a Pagar:</span>
-          <span style="color: var(--primary);" id="ticket-order-total">$0</span>
+          style="display: flex; justify-content: space-between; align-items: center; padding: 8px 4px; font-weight: 700; font-size: 1.05rem; border-bottom: 1px solid var(--border-light); margin-bottom: 14px;">
+          <span>Total a pagar</span>
+          <span style="color: var(--primary); font-variant-numeric: tabular-nums;" id="ticket-order-total">$0</span>
         </div>
 
         <!-- Datos de Transferencia -->
         <div id="ticket-transfer-details" class="ticket-alias-box bank-transfer-theme" style="display: none;">
           <div class="ticket-alias-header">
-            <span>🏦</span> Para completar el pago, realiza la transferencia:
+            <span data-gm-icon="bank" data-gm-size="15"></span>
+            <span>Para completar el pago, realizá la transferencia:</span>
           </div>
 
           <div class="ticket-subtitle">
             <strong>Titular:</strong> <span id="ticket-bank-account-holder"></span>
           </div>
 
-          <!-- Fila Alias con botón copiar -->
           <div class="ticket-alias-value-row">
             <div>
-              <div class="ticket-label">ALIAS:</div>
+              <div class="ticket-label">ALIAS</div>
               <div class="ticket-alias-code" id="ticket-alias-code"></div>
             </div>
             <button type="button" class="btn-copy-sm" onclick="window.app.copyAlias()" id="btn-copy-alias-ticket">
-              <span>📋</span> Copiar
+              <span data-gm-icon="copy" data-gm-size="13"></span>
+              <span>Copiar</span>
             </button>
           </div>
 
-          <!-- Fila CVU con botón copiar -->
           <div class="ticket-alias-value-row">
             <div>
-              <div class="ticket-label">CVU:</div>
+              <div class="ticket-label">CVU</div>
               <div class="ticket-alias-code" style="font-size: 0.85rem;" id="ticket-cvu-code"></div>
             </div>
             <button type="button" class="btn-copy-sm" onclick="window.app.copyCVU('bank')" id="btn-copy-cvu-ticket">
-              <span>📋</span> Copiar
+              <span data-gm-icon="copy" data-gm-size="13"></span>
+              <span>Copiar</span>
             </button>
           </div>
 
@@ -1535,7 +1613,8 @@
         <!-- Mercado Pago Ticket Box -->
         <div id="ticket-mp-details" class="ticket-alias-box ticket-mp-theme" style="display: none;">
           <div class="ticket-alias-header mp-title">
-            <span>💳</span> Para completar el pago con Mercado Pago:
+            <span data-gm-icon="card" data-gm-size="15"></span>
+            <span>Para completar el pago con Mercado Pago:</span>
           </div>
           <div class="ticket-subtitle">
             <strong>Titular:</strong> <span id="ticket-mp-account-holder"></span>
@@ -1543,21 +1622,23 @@
 
           <div class="ticket-alias-value-row">
             <div>
-              <div class="ticket-label">ALIAS MERCADO PAGO:</div>
+              <div class="ticket-label">ALIAS MERCADO PAGO</div>
               <div class="ticket-alias-code mp-code" id="ticket-mp-alias-code"></div>
             </div>
             <button type="button" class="btn-copy-sm btn-copy-mp" onclick="window.app.copyMPAlias()" id="btn-copy-mp-alias-ticket">
-              <span>📋</span> Copiar
+              <span data-gm-icon="copy" data-gm-size="13"></span>
+              <span>Copiar</span>
             </button>
           </div>
 
           <div class="ticket-alias-value-row">
             <div>
-              <div class="ticket-label">CVU MERCADO PAGO:</div>
+              <div class="ticket-label">CVU MERCADO PAGO</div>
               <div class="ticket-alias-code" style="font-size: 0.85rem;" id="ticket-mp-cvu-code"></div>
             </div>
             <button type="button" class="btn-copy-sm btn-copy-mp" onclick="window.app.copyCVU('mp')" id="btn-copy-mp-cvu-ticket">
-              <span>📋</span> Copiar
+              <span data-gm-icon="copy" data-gm-size="13"></span>
+              <span>Copiar</span>
             </button>
           </div>
 
@@ -1570,60 +1651,62 @@
         <!-- Efectivo -->
         <div id="ticket-cash-details" class="ticket-alias-box ticket-cash-theme" style="display: none;">
           <div class="ticket-alias-header cash-title">
-            <span>💵</span> Pago en Efectivo al recibir o retirar:
+            <span data-gm-icon="cash" data-gm-size="15"></span>
+            <span>Pago en efectivo al recibir o retirar</span>
           </div>
           <p class="ticket-cash-text">
-            Abonarás el total de <strong id="ticket-cash-amount">$0</strong> en mano. ¡Por favor ten el cambio listo!
+            Abonarás el total de <strong id="ticket-cash-amount">$0</strong> en mano.
           </p>
         </div>
 
-        <!-- Botón Verde Principal: Enviar Comprobante / Ya transferí -->
+        <!-- Botón Verde Principal -->
         <a id="ticket-whatsapp-proof-btn" href="#" target="_blank" class="btn-primary btn-whatsapp"
           style="text-decoration: none; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <span style="font-size: 1.3rem;">📲</span>
+          <span data-gm-icon="whatsapp" data-gm-size="18"></span>
           <span id="ticket-btn-text">Ya transferí, enviar comprobante</span>
         </a>
 
-        <!-- Botón Reabrir Pedido en WhatsApp (App / Móvil) -->
+        <!-- Botón Reabrir Pedido en WhatsApp -->
         <a id="ticket-reopen-whatsapp-btn" href="#" target="_blank" class="btn-outline"
-          style="display: none; width: 100%; margin-bottom: 8px; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.84rem; padding: 10px 14px; border-radius: var(--radius-sm); border: 1.5px solid #25D366; color: #25D366; background: rgba(37, 211, 102, 0.1); font-weight: 700;">
-          <span style="font-size: 1.1rem;">💬</span>
+          style="display: none; width: 100%; margin-bottom: 8px; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.84rem; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid rgba(104,185,142,0.45); color: var(--success); background: rgba(104,185,142,0.10); font-weight: 600;">
+          <span data-gm-icon="whatsapp" data-gm-size="16"></span>
           <span>Abrir en WhatsApp (App)</span>
         </a>
 
-        <!-- Botón Abrir en WhatsApp Web (Directo para navegador de PC) -->
+        <!-- Botón Abrir en WhatsApp Web -->
         <a id="ticket-web-whatsapp-btn" href="#" target="_blank" class="btn-outline"
-          style="display: none; width: 100%; margin-bottom: 8px; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.84rem; padding: 10px 14px; border-radius: var(--radius-sm); border: 1.5px solid rgba(212, 175, 55, 0.4); color: #F5D77F; font-weight: 700; background: rgba(212, 175, 55, 0.1);">
-          <span style="font-size: 1.1rem;">💻</span>
+          style="display: none; width: 100%; margin-bottom: 8px; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.84rem; padding: 10px 14px; border-radius: var(--radius-sm);">
+          <span data-gm-icon="laptop" data-gm-size="16"></span>
           <span>Abrir en WhatsApp Web</span>
         </a>
 
         <!-- Botón Copiar Mensaje Completo del Pedido -->
         <button type="button" class="btn-secondary" id="btn-copy-full-order" onclick="window.app.copyOrderMessage()"
           style="width: 100%; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.84rem; padding: 10px 14px;">
-          <span>📋</span>
-          <span>Copiar Mensaje del Pedido</span>
+          <span data-gm-icon="copy" data-gm-size="15"></span>
+          <span>Copiar mensaje del pedido</span>
         </button>
 
-        <!-- Tiempo estimado y contacto directo como ByronCode -->
         <div
-          style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; color: var(--text-secondary); margin: 6px 0 12px;">
-          <span>🛵 Tiempo estimado de entrega:</span>
-          <strong style="color: var(--text-main);">40 a 60 min</strong>
+          style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; color: var(--cream-muted); margin: 8px 0 12px;">
+          <span data-gm-icon="delivery" data-gm-size="15" style="color: var(--primary);"></span>
+          <span>Tiempo estimado de entrega:</span>
+          <strong style="color: var(--cream);">40 a 60 min</strong>
         </div>
 
         <div class="ticket-contact-footer">
-          <div style="font-size: 0.78rem; color: var(--text-muted);">
-            Recuerda enviar el comprobante a nuestro WhatsApp:
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px;">
+            Recordá enviar el comprobante a nuestro WhatsApp:
           </div>
-          <a href="https://wa.me/5491156192616" target="_blank" class="phone-link-pill">
-            <span>💬</span> <strong>+54 9 11 5619-2616</strong>
+          <a href="https://wa.me/5491156192616" target="_blank" class="phone-link-pill gm-inline-label">
+            <span data-gm-icon="whatsapp" data-gm-size="15"></span>
+            <strong>+54 9 11 5619-2616</strong>
           </a>
         </div>
 
-        <button type="button" class="btn-secondary" style="width: 100%; margin-top: 10px;"
+        <button type="button" class="btn-secondary" style="width: 100%; margin-top: 12px;"
           onclick="window.app.closeModal('order-success-modal')">
-          Volver al Menú / Hacer otro pedido
+          Volver al menú
         </button>
       </div>
     </div>
@@ -1635,16 +1718,14 @@
     onclick="if(event.target === this) window.app.closeModal('orders-history-modal')">
     <div class="bottom-sheet" style="max-width: 520px; padding: 22px 18px; position: relative;">
       <div class="drag-handle"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('orders-history-modal')" aria-label="Cerrar modal">✕</button>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('orders-history-modal')" aria-label="Cerrar modal"><span data-gm-icon="x" data-gm-size="16"></span></button>
 
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding-right: 32px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 1.4rem;">📋</span>
-          <h3 class="font-serif" style="font-size: 1.25rem;">Mis Pedidos Realizados</h3>
-        </div>
+      <div class="modal-header-row" style="margin-bottom: 8px;">
+        <span class="modal-header-icon" data-gm-icon="package" data-gm-size="18"></span>
+        <h3 class="font-serif" style="font-size: 1.35rem; margin: 0;">Mis pedidos realizados</h3>
       </div>
-      <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
-        Tus pedidos quedan guardados en este celular para que puedas ver el detalle, reabrir el comprobante de pago o comunicarte por WhatsApp.
+      <p style="font-size: 0.8rem; color: var(--cream-muted); margin-bottom: 14px; line-height: 1.45;">
+        Tus pedidos quedan guardados en este dispositivo para ver el estado en vivo, reabrir el comprobante o escribir por WhatsApp.
       </p>
 
       <div id="orders-history-list" class="orders-history-list">
@@ -1658,29 +1739,29 @@
     onclick="if(event.target === this) window.app.closeModal('dispute-modal')">
     <div class="bottom-sheet" style="max-width: 520px; padding: 24px 20px; position: relative;">
       <div class="drag-handle"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('dispute-modal')" aria-label="Cerrar">✕</button>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('dispute-modal')" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
 
       <div style="text-align: center; margin-bottom: 20px;">
-        <div style="font-size: 2.5rem; margin-bottom: 8px;">⚠️</div>
-        <h3 class="font-serif" style="font-size: 1.25rem; margin-bottom: 6px;">¿El local no respondió?</h3>
-        <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+        <div class="gm-empty-icon-circle" style="color: var(--warning); border-color: rgba(217,155,82,0.35); background: rgba(217,155,82,0.10);">
+          <span data-gm-icon="alert" data-gm-size="26"></span>
+        </div>
+        <h3 class="font-serif" style="font-size: 1.35rem; margin-bottom: 6px;">¿El local no respondió?</h3>
+        <p style="font-size: 0.84rem; color: var(--cream-muted); line-height: 1.5;">
           Si tu pedido <strong id="dispute-order-id" style="color: var(--primary);"></strong> 
-          (<strong id="dispute-order-total"></strong>) no fue confirmado por el local en tiempo razonable,
-          GOD MARKET puede ayudarte.
+          (<strong id="dispute-order-total"></strong>) no fue confirmado en tiempo razonable,
+          GOD MARKET te ayuda a resolverlo.
         </p>
       </div>
 
-      <div style="background: rgba(255,107,53,0.08); border: 1px solid rgba(255,107,53,0.2); border-radius: 14px; padding: 16px; margin-bottom: 20px;">
-        <p style="font-size: 0.8rem; color: var(--cream-subtle); line-height: 1.6; margin: 0;">
-          🔴 Al confirmar, <strong>GOD MARKET te contactará por WhatsApp</strong> para revisar tu caso.<br>
-          ✅ Si corresponde, gestionaremos el reembolso con el local.<br>
-          📋 Se generará un número de caso para el seguimiento.
-        </p>
+      <div style="background: rgba(217,155,82,0.08); border: 1px solid rgba(217,155,82,0.25); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem; color: var(--cream-muted);">
+        <div class="gm-inline-label"><span data-gm-icon="whatsapp" data-gm-size="15" style="color: var(--success);"></span><span>Al confirmar, <strong style="color: var(--cream);">GOD MARKET te contactará por WhatsApp</strong> para revisar tu caso.</span></div>
+        <div class="gm-inline-label"><span data-gm-icon="check-circle" data-gm-size="15" style="color: var(--success);"></span><span>Si corresponde, gestionaremos el reembolso con el local.</span></div>
+        <div class="gm-inline-label"><span data-gm-icon="receipt" data-gm-size="15" style="color: var(--primary);"></span><span>Se generará un número de caso para seguimiento.</span></div>
       </div>
 
-      <div style="margin-bottom: 16px;">
-        <label style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Motivo del problema:</label>
-        <select id="dispute-reason" style="width: 100%; background: #1A1A1A; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #FFF; padding: 12px 16px; font-size: 0.9rem; appearance: none;">
+      <div class="form-group">
+        <label class="form-label" for="dispute-reason">Motivo del problema</label>
+        <select id="dispute-reason" class="form-control">
           <option value="no_response">El local no confirmó mi pedido</option>
           <option value="wrong_order">Recibí un pedido incorrecto</option>
           <option value="quality_issue">Problema con la calidad del producto</option>
@@ -1688,65 +1769,66 @@
         </select>
       </div>
 
-      <button id="btn-submit-dispute" type="button"
-        style="width: 100%; padding: 16px; background: linear-gradient(135deg, #FF6B35, #E63E00); color: #FFF; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;"
+      <button id="btn-submit-dispute" type="button" class="btn-primary"
+        style="width: 100%; padding: 14px; border: none;"
         onclick="window.app.submitDispute(document.getElementById('dispute-reason').value)">
-        ⚠️ Reportar problema y contactar a GOD MARKET
+        <span data-gm-icon="alert" data-gm-size="17"></span>
+        <span>Reportar problema y contactar a GOD MARKET</span>
       </button>
 
-      <p style="font-size: 0.73rem; color: var(--text-muted); text-align: center; margin-top: 12px; line-height: 1.4;">
-        Al reportar, se abrirá WhatsApp para que puedas comunicarte directamente con el equipo de GOD MARKET.
+      <p style="font-size: 0.74rem; color: var(--text-muted); text-align: center; margin-top: 12px; line-height: 1.45;">
+        Al reportar, se abrirá WhatsApp para comunicarte directamente con nuestro equipo de soporte.
       </p>
     </div>
   </div>
 
 
-  
   <!-- ============================================================================
        MODAL: CENTRO LEGAL, TÉRMINOS Y CONDICIONES, PRIVACIDAD & ARREPENTIMIENTO
-       Marco Normativo República Argentina (Ley 24.240, Res. 424/2020 y Ley 25.326)
        ============================================================================ -->
   <div id="legal-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('legal-modal')">
     <div class="bottom-sheet legal-modal-sheet" style="max-width: 680px; max-height: 90vh; display: flex; flex-direction: column; padding: 0; position: relative;">
       <div class="drag-handle" style="margin-top: 10px;"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('legal-modal')" aria-label="Cerrar" style="top: 12px; right: 14px;">✕</button>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('legal-modal')" aria-label="Cerrar" style="top: 12px; right: 14px;"><span data-gm-icon="x" data-gm-size="16"></span></button>
 
       <!-- Encabezado del Modal Legal -->
-      <div class="legal-modal-header" style="padding: 16px 22px 14px 22px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(8, 24, 15, 0.95);">
+      <div class="legal-modal-header" style="padding: 16px 22px 14px 22px; border-bottom: 1px solid rgba(244,239,230,0.08);">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(212,175,55,0.14); border: 1px solid rgba(212,175,55,0.38); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
-            ⚖️
-          </div>
+          <span class="modal-header-icon" data-gm-icon="scale" data-gm-size="18"></span>
           <div>
-            <h3 class="font-serif" style="font-size: 1.25rem; color: #FFFFFF; margin: 0; line-height: 1.2;">Centro Legal & Transparencia</h3>
-            <span style="font-size: 0.74rem; color: #9AB0A3;">GOD MARKET · Marco Normativo República Argentina</span>
+            <h3 class="font-serif" style="font-size: 1.3rem; color: var(--cream); margin: 0; line-height: 1.2;">Centro Legal y Transparencia</h3>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">GOD MARKET · Marco Normativo República Argentina</span>
           </div>
         </div>
 
         <!-- Selector de Pestañas Legales -->
         <nav class="legal-tabs-nav" style="display: flex; gap: 6px; overflow-x: auto; margin-top: 14px; padding-bottom: 2px;">
           <button type="button" class="legal-tab-btn active" data-legal-tab="terminos" onclick="window.app.switchLegalTab('terminos')">
-            <span>📜 Términos Generales</span>
+            <span data-gm-icon="file-text" data-gm-size="14"></span>
+            <span>Términos Generales</span>
           </button>
           <button type="button" class="legal-tab-btn" data-legal-tab="privacidad" onclick="window.app.switchLegalTab('privacidad')">
-            <span>🔒 Privacidad (Ley 25.326)</span>
+            <span data-gm-icon="lock" data-gm-size="14"></span>
+            <span>Privacidad (Ley 25.326)</span>
           </button>
           <button type="button" class="legal-tab-btn" data-legal-tab="comercios" onclick="window.app.switchLegalTab('comercios')">
-            <span>🏪 Términos Cafeterías</span>
+            <span data-gm-icon="store" data-gm-size="14"></span>
+            <span>Términos Cafeterías</span>
           </button>
           <button type="button" class="legal-tab-btn" data-legal-tab="arrepentimiento" onclick="window.app.switchLegalTab('arrepentimiento')">
-            <span>↩️ Botón de Arrepentimiento</span>
+            <span data-gm-icon="undo" data-gm-size="14"></span>
+            <span>Botón de Arrepentimiento</span>
           </button>
         </nav>
       </div>
 
       <!-- Contenido Scrolleable de las Pestañas -->
-      <div class="legal-modal-body" style="padding: 20px 22px 28px 22px; overflow-y: auto; flex: 1; font-size: 0.83rem; line-height: 1.6; color: #D7E2DC;">
+      <div class="legal-modal-body" style="padding: 20px 22px 28px 22px; overflow-y: auto; flex: 1; font-size: 0.84rem; line-height: 1.65; color: var(--cream-muted);">
 
-        <!-- PESTAÑA 1: TÉRMINOS Y CONDICIONES GENERALES (COMPRADORES & MARKETPLACE) -->
+        <!-- PESTAÑA 1: TÉRMINOS Y CONDICIONES GENERALES -->
         <section id="legal-pane-terminos" class="legal-tab-pane active">
           <div class="legal-callout-box highlight" style="margin-top: 0;">
-            <strong style="color: #4ADE80;">✦ Resumen de Confianza GOD MARKET:</strong>
+            <strong style="color: var(--success);">Resumen de Confianza GOD MARKET:</strong>
             Conectamos consumidores con cafeterías de especialidad y pastelerías artesanales independientes. Precios transparentes de local, desglose detallado de cargos y compras respaldadas.
           </div>
 
@@ -1798,8 +1880,8 @@
 
         <!-- PESTAÑA 2: POLÍTICA DE PRIVACIDAD Y PROTECCIÓN DE DATOS (LEY 25.326) -->
         <section id="legal-pane-privacidad" class="legal-tab-pane">
-          <div class="legal-callout-box" style="margin-top: 0; border-color: rgba(74, 222, 128, 0.4);">
-            <strong style="color: #4ADE80;">🔒 Ley Nacional 25.326 de Protección de los Datos Personales:</strong>
+          <div class="legal-callout-box" style="margin-top: 0; border-color: rgba(104, 185, 142, 0.35);">
+            <strong style="color: var(--success);">Ley Nacional 25.326 de Protección de los Datos Personales:</strong>
             GOD MARKET respeta tu privacidad. Solo solicitamos los datos estrictamente necesarios para entregarte tu pedido y jamás comercializamos tu información.
           </div>
 
@@ -1844,7 +1926,7 @@
             <p>
               Para solicitar la actualización, rectificación o eliminación total de sus datos de nuestros registros, el usuario puede comunicarse en cualquier momento a través del canal oficial de WhatsApp <strong>11 5619-2616</strong> o al correo de soporte.
             </p>
-            <div style="background: rgba(0,0,0,0.25); border-radius: 10px; padding: 10px 12px; margin-top: 8px; font-size: 0.74rem; color: #8FA295;">
+            <div style="background: rgba(14,27,22,0.5); border-radius: 10px; padding: 10px 12px; margin-top: 8px; font-size: 0.75rem; color: var(--text-muted);">
               "La Agencia de Acceso a la Información Pública (AAIP), Órgano de Control de la Ley N° 25.326, tiene la atribución de atender las denuncias y reclamos que se interpongan con relación al incumplimiento de las normas sobre protección de datos personales."
             </div>
           </div>
@@ -1852,8 +1934,8 @@
 
         <!-- PESTAÑA 3: TÉRMINOS PARA COMERCIOS Y CAFETERÍAS ASOCIADAS -->
         <section id="legal-pane-comercios" class="legal-tab-pane">
-          <div class="legal-callout-box" style="margin-top: 0; border-color: rgba(212, 175, 55, 0.45);">
-            <strong style="color: #E5C07B;">🏪 Alianza Comercial & Cafeterías de Autor:</strong>
+          <div class="legal-callout-box" style="margin-top: 0; border-color: rgba(200, 169, 106, 0.35);">
+            <strong style="color: var(--primary);">Alianza Comercial y Cafeterías de Autor:</strong>
             Buscamos potenciar los negocios gastronómicos locales cuidando su identidad, sus precios habituales y su rentabilidad.
           </div>
 
@@ -1893,10 +1975,10 @@
           </div>
         </section>
 
-        <!-- PESTAÑA 4: BOTÓN DE ARREPENTIMIENTO Y DEFENSORÍA (LEY 24.240 & RES. 424/2020) -->
+        <!-- PESTAÑA 4: BOTÓN DE ARREPENTIMIENTO Y DEFENSORÍA -->
         <section id="legal-pane-arrepentimiento" class="legal-tab-pane">
           <div class="legal-callout-box warning" style="margin-top: 0;">
-            <strong style="color: #FF8A50;">↩️ Botón de Arrepentimiento — Resolución 424/2020 Secretaría de Comercio:</strong>
+            <strong style="color: #E7B87D;">Botón de Arrepentimiento — Resolución 424/2020 Secretaría de Comercio:</strong>
             Si compraste en GOD MARKET y necesitás revocar tu aceptación o reportar un problema antes de la elaboración, podés hacerlo de forma inmediata desde este formulario.
           </div>
 
@@ -1923,52 +2005,54 @@
             </p>
           </div>
 
-          <!-- FORMULARIO DIRECTO DE ARREPENTIMIENTO (RES. 424/2020) -->
+          <!-- FORMULARIO DIRECTO DE ARREPENTIMIENTO -->
           <div class="legal-revocation-form">
-            <h4 style="color: #FFFFFF; font-size: 0.95rem; margin: 0 0 4px 0; display: flex; align-items: center; gap: 6px;">
-              <span>📝</span> Formulario Oficial de Revocación / Arrepentimiento
+            <h4 class="gm-inline-label" style="color: var(--cream); font-size: 0.96rem; margin: 0 0 6px 0;">
+              <span data-gm-icon="file-text" data-gm-size="16" style="color: var(--warning);"></span>
+              <span>Formulario Oficial de Revocación / Arrepentimiento</span>
             </h4>
-            <p style="font-size: 0.74rem; color: #9AB0A3; margin: 0 0 14px 0;">
-              Completa los datos del pedido que deseas revocar o cancelar para abrir tu solicitud formal de reintegro:
+            <p style="font-size: 0.76rem; color: var(--text-muted); margin: 0 0 14px 0;">
+              Completá los datos del pedido que deseás revocar o cancelar para abrir tu solicitud formal de reintegro:
             </p>
 
             <form id="revocation-form" onsubmit="window.app.submitRevocationForm(event)">
               <div class="form-group" style="margin-bottom: 12px;">
-                <label class="form-label" for="revocation-order-id" style="font-size: 0.78rem;">Número de Pedido / Orden *</label>
-                <input type="text" id="revocation-order-id" class="form-control" placeholder="Ej: ORD-1045" style="font-size: 0.85rem;" required>
+                <label class="form-label" for="revocation-order-id">Número de Pedido / Orden *</label>
+                <input type="text" id="revocation-order-id" class="form-control" placeholder="Ej: ORD-1045" required>
               </div>
 
               <div class="form-group" style="margin-bottom: 12px;">
-                <label class="form-label" for="revocation-phone" style="font-size: 0.78rem;">Teléfono / WhatsApp de contacto *</label>
-                <input type="tel" id="revocation-phone" class="form-control" placeholder="Ej: 11 5544-3322" style="font-size: 0.85rem;" required>
+                <label class="form-label" for="revocation-phone">Teléfono / WhatsApp de contacto *</label>
+                <input type="tel" id="revocation-phone" class="form-control" placeholder="Ej: 11 5544-3322" required>
               </div>
 
               <div class="form-group" style="margin-bottom: 12px;">
-                <label class="form-label" for="revocation-reason" style="font-size: 0.78rem;">Motivo de la solicitud *</label>
-                <select id="revocation-reason" class="form-control" style="font-size: 0.84rem; background: #16241D;">
-                  <option value="cancellation_revocation">↩️ Arrepentimiento de compra (antes de elaboración)</option>
-                  <option value="no_response">⏰ El local no respondió ni confirmó mi pedido</option>
-                  <option value="wrong_order">📦 Pedido recibido incorrecto o incompleto</option>
-                  <option value="quality_issue">⚠️ Problema con la calidad o estado del alimento</option>
-                  <option value="other">💬 Otro motivo particular</option>
+                <label class="form-label" for="revocation-reason">Motivo de la solicitud *</label>
+                <select id="revocation-reason" class="form-control">
+                  <option value="cancellation_revocation">Arrepentimiento de compra (antes de elaboración)</option>
+                  <option value="no_response">El local no respondió ni confirmó mi pedido</option>
+                  <option value="wrong_order">Pedido recibido incorrecto o incompleto</option>
+                  <option value="quality_issue">Problema con la calidad o estado del alimento</option>
+                  <option value="other">Otro motivo particular</option>
                 </select>
               </div>
 
               <div class="form-group" style="margin-bottom: 16px;">
-                <label class="form-label" for="revocation-notes" style="font-size: 0.78rem;">Detalle adicional (opcional)</label>
-                <input type="text" id="revocation-notes" class="form-control" placeholder="Describe brevemente lo ocurrido..." style="font-size: 0.82rem;">
+                <label class="form-label" for="revocation-notes">Detalle adicional (opcional)</label>
+                <input type="text" id="revocation-notes" class="form-control" placeholder="Describí brevemente lo ocurrido...">
               </div>
 
-              <button type="submit" id="btn-submit-revocation" class="btn-primary" style="width: 100%; padding: 13px; font-size: 0.88rem; background: linear-gradient(135deg, #FF6B35 0%, #E63E00 100%); border: none;">
-                ↩️ Enviar Solicitud de Arrepentimiento y Abrir Mediación
+              <button type="submit" id="btn-submit-revocation" class="btn-primary" style="width: 100%; padding: 13px; border: none;">
+                <span data-gm-icon="undo" data-gm-size="16"></span>
+                <span>Enviar solicitud de arrepentimiento y abrir mediación</span>
               </button>
             </form>
           </div>
 
           <div class="legal-section-block" style="margin-top: 18px;">
             <h4 class="legal-block-title" style="font-size: 0.85rem;">Organismos Oficiales de Defensa del Consumidor</h4>
-            <p style="font-size: 0.75rem; color: #9AB0A3;">
-              • <strong>Dirección Nacional de Defensa del Consumidor:</strong> Línea Gratuita Nacional <strong>0800-666-1518</strong> · Sitio web oficial: <a href="https://www.argentina.gob.ar/defensadelconsumidor" target="_blank" rel="noopener" style="color: #E5C07B; text-decoration: underline;">www.argentina.gob.ar/defensadelconsumidor</a>.<br>
+            <p style="font-size: 0.76rem; color: var(--text-muted);">
+              • <strong>Dirección Nacional de Defensa del Consumidor:</strong> Línea Gratuita Nacional <strong>0800-666-1518</strong> · Sitio web oficial: <a href="https://www.argentina.gob.ar/defensadelconsumidor" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: underline;">www.argentina.gob.ar/defensadelconsumidor</a>.<br>
               • <strong>Defensa y Protección al Consumidor CABA:</strong> Sede Central: Maipú 169, CABA · Teléfono: 147.
             </p>
           </div>
@@ -1977,12 +2061,13 @@
       </div>
 
       <!-- Pie del Modal Legal -->
-      <div style="padding: 12px 20px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(8, 24, 15, 0.98); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
-        <span style="font-size: 0.72rem; color: #8FA295;">
-          📍 GOD MARKET · Buenos Aires, Argentina
+      <div style="padding: 12px 20px; border-top: 1px solid rgba(244,239,230,0.08); background: rgba(14, 27, 22, 0.96); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <span class="gm-inline-label" style="font-size: 0.74rem; color: var(--text-muted);">
+          <span data-gm-icon="map-pin" data-gm-size="13" style="color: var(--primary);"></span>
+          <span>GOD MARKET · Buenos Aires, Argentina</span>
         </span>
-        <button type="button" class="btn-primary" onclick="window.app.closeModal('legal-modal')" style="width: auto; padding: 7px 18px; font-size: 0.78rem;">
-          Cerrar Centro Legal
+        <button type="button" class="btn-primary" onclick="window.app.closeModal('legal-modal')" style="width: auto; padding: 8px 18px; font-size: 0.8rem;">
+          Cerrar centro legal
         </button>
       </div>
 
@@ -1995,27 +2080,27 @@
     onclick="if(event.target === this) window.app.closeModal('admin-product-modal')">
     <div class="bottom-sheet" style="max-height: 92vh; overflow-y: auto;">
       <div class="drag-handle"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('admin-product-modal')">✕</button>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('admin-product-modal')" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
 
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-        <span style="font-size: 1.4rem;">🏪</span>
-        <h3 class="font-serif" style="font-size: 1.25rem;">Publicar Desayuno o Merienda</h3>
+      <div class="modal-header-row" style="margin-bottom: 6px;">
+        <span class="modal-header-icon" data-gm-icon="store" data-gm-size="18"></span>
+        <h3 class="font-serif" style="font-size: 1.35rem; margin: 0;">Publicar producto</h3>
       </div>
-      <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.35;">
-        Portal para negocios del Marketplace. Publica tu propuesta y comenzá a recibir pedidos.
+      <p style="font-size: 0.8rem; color: var(--cream-muted); margin-bottom: 14px; line-height: 1.4;">
+        Publicá tu propuesta en el catálogo del marketplace y empezá a recibir pedidos.
       </p>
 
       <form id="add-product-form">
         <!-- 1. Selección de Negocio / Pastelería -->
         <div class="form-group">
-          <label class="form-label" for="prod-business">🏪 Pastelería / Negocio que Publica *</label>
+          <label class="form-label" for="prod-business"><span data-gm-icon="store" data-gm-size="14" style="color: var(--primary);"></span> Pastelería / negocio que publica *</label>
           <select id="prod-business" class="form-control" required style="font-weight: 600;">
             <!-- Populated dynamically by JS -->
           </select>
         </div>
 
         <!-- Campos adicionales si registra un nuevo negocio -->
-        <div id="new-business-fields" style="display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; background: var(--bg-surface-secondary); padding: 10px; border-radius: var(--radius-sm); border: 1.5px dashed var(--border-light);">
+        <div id="new-business-fields" style="display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; background: var(--bg-surface-secondary); padding: 10px; border-radius: var(--radius-sm); border: 1px dashed var(--border-light);">
           <div>
             <label class="form-label" for="new-biz-name" style="font-size: 0.75rem;">Nombre del Local *</label>
             <input type="text" id="new-biz-name" class="form-control" placeholder="Ej: Café de las Flores" style="font-size: 0.82rem;">
@@ -2026,44 +2111,44 @@
           </div>
         </div>
 
-        <!-- 2. Fotos: Preset Rápido de Desayunos o Subida Propia -->
+        <!-- 2. Fotos -->
         <div class="form-group" style="margin-bottom: 12px;">
-          <label class="form-label">📸 Foto del Desayuno / Merienda:</label>
+          <label class="form-label"><span data-gm-icon="camera" data-gm-size="14" style="color: var(--primary);"></span> Foto del producto</label>
           
           <div class="preset-images-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px;">
             <div class="preset-img-chip active" data-img="assets/images/hero_breakfast.webp">
-              <span>☀️ Box Completo</span>
+              <span>Box completo</span>
             </div>
             <div class="preset-img-chip" data-img="assets/images/la_petite_croissant.webp">
-              <span>🥐 Croissants</span>
+              <span>Croissants</span>
             </div>
             <div class="preset-img-chip" data-img="assets/images/dulce_atelier.webp">
-              <span>🧇 Waffles & Berries</span>
+              <span>Waffles y berries</span>
             </div>
             <div class="preset-img-chip" data-img="assets/images/cafe_botanica.webp">
-              <span>🥑 Brunch Palta</span>
+              <span>Brunch palta</span>
             </div>
             <div class="preset-img-chip" data-img="assets/images/brew_and_co.webp">
-              <span>☕ Merienda & Té</span>
+              <span>Merienda y té</span>
             </div>
             <div class="preset-img-chip" data-img="assets/images/velvet_bakery.webp">
-              <span>🎂 Box Cumple</span>
+              <span>Box festejo</span>
             </div>
           </div>
 
           <!-- Cloudinary Upload Box -->
           <input type="file" id="product-image-input" accept="image/*" style="display: none;">
           <div id="cloudinary-upload-box" class="cloudinary-upload-box" style="padding: 10px; min-height: 80px;">
-            <img id="upload-preview-img" class="upload-preview" src="assets/images/hero_breakfast.webp" alt="Vista previa del desayuno" style="display: block; width: 100%; height: 120px; object-fit: cover; border-radius: 8px;">
+            <img id="upload-preview-img" class="upload-preview" src="assets/images/hero_breakfast.webp" alt="Vista previa del producto" style="display: block; width: 100%; height: 120px; object-fit: cover; border-radius: 8px;">
             <div class="upload-prompt hidden">
-              <span style="font-size: 1.5rem;">📁</span>
-              <div style="font-weight: 700; font-size: 0.8rem; margin-top: 2px;">O subir imagen desde tu dispositivo</div>
+              <span data-gm-icon="upload" data-gm-size="22" style="color: var(--primary);"></span>
+              <div style="font-weight: 600; font-size: 0.8rem; margin-top: 4px;">Subir imagen desde tu dispositivo</div>
             </div>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="prod-name">Título del Desayuno o Merienda *</label>
+          <label class="form-label" for="prod-name">Título del producto *</label>
           <input type="text" id="prod-name" class="form-control" placeholder="Ej: Box Desayuno Primavera con Croissant" required>
         </div>
 
@@ -2071,30 +2156,30 @@
           <div class="form-group">
             <label class="form-label" for="prod-category">Categoría *</label>
             <select id="prod-category" class="form-control" required>
-              <option value="desayunos">☀️ Desayunos Sorpresa</option>
-              <option value="meriendas">☕ Meriendas & Té</option>
-              <option value="brunch">🥐 Brunch & Salado</option>
-              <option value="boxes">🎁 Boxes de Regalo</option>
+              <option value="desayunos">Desayunos sorpresa</option>
+              <option value="meriendas">Meriendas y té</option>
+              <option value="brunch">Brunch y salado</option>
+              <option value="boxes">Boxes de regalo</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="prod-price">Precio Habitual de Local (ARS) *</label>
+            <label class="form-label" for="prod-price">Precio habitual de local (ARS) *</label>
             <input type="number" id="prod-price" class="form-control" placeholder="Ej: 21500" required>
-            <div id="prod-price-promo-hint" style="font-size: 0.71rem; color: #4ADE80; margin-top: 5px; line-height: 1.35;">
-              💡 Poné el mismo precio de tu mostrador sin aumentar nada. Con el Mes Lanzamiento activo, el cliente paga este mismo valor (0% cargo de servicio).
+            <div id="prod-price-promo-hint" style="font-size: 0.72rem; color: var(--success); margin-top: 5px; line-height: 1.4;">
+              Cargá el mismo precio de tu mostrador sin aumentar nada. Con el mes lanzamiento activo, el cliente paga este mismo valor (0% cargo de servicio).
             </div>
           </div>
         </div>
 
         <div class="form-row-2col">
           <div class="form-group">
-            <label class="form-label" for="prod-tag">Etiqueta Destacada</label>
-            <input type="text" id="prod-tag" class="form-control" placeholder="Ej: ⭐ Box Especial / 🥐 Recién horneado">
+            <label class="form-label" for="prod-tag">Etiqueta destacada</label>
+            <input type="text" id="prod-tag" class="form-control" placeholder="Ej: Recién horneado / Box especial">
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="prod-portion">Rendimiento / Porciones</label>
+            <label class="form-label" for="prod-portion">Rendimiento / porciones</label>
             <input type="text" id="prod-portion" class="form-control" placeholder="Ej: Para 1 o 2 personas">
           </div>
         </div>
@@ -2102,11 +2187,12 @@
         <div class="form-group">
           <label class="form-label" for="prod-desc">Descripción de qué incluye *</label>
           <textarea id="prod-desc" class="form-control" rows="3"
-            placeholder="Detalla qué incluye el desayuno (croissant, jugo natural, mini torta, taza de regalo, etc.)..." required></textarea>
+            placeholder="Detallá qué incluye la propuesta (croissant, jugo natural, café de especialidad, etc.)..." required></textarea>
         </div>
 
         <button type="submit" id="btn-save-product" class="btn-primary" style="margin-top: 10px;">
-          <span>Publicar en GOD MARKET →</span>
+          <span>Publicar en GOD MARKET</span>
+          <span data-gm-icon="arrow-right" data-gm-size="16"></span>
         </button>
       </form>
     </div>
@@ -2118,59 +2204,60 @@
     onclick="if(event.target === this) window.app.closeModal('cloudinary-modal')">
     <div class="bottom-sheet">
       <div class="drag-handle"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('cloudinary-modal')">✕</button>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('cloudinary-modal')" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
 
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
-        <span style="font-size: 1.4rem;">☁️</span>
-        <h3 class="font-serif" style="font-size: 1.25rem;">Credenciales de Cloudinary</h3>
+      <div class="modal-header-row">
+        <span class="modal-header-icon" data-gm-icon="cloud" data-gm-size="18"></span>
+        <h3 class="font-serif" style="font-size: 1.35rem; margin: 0;">Credenciales de Cloudinary</h3>
       </div>
 
-      <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
-        Tu cuenta de Cloudinary está configurada y conectada de forma segura con tu Cloud Name
+      <p style="font-size: 0.82rem; color: var(--cream-muted); margin-bottom: 14px; line-height: 1.45;">
+        Tu cuenta de Cloudinary está configurada y conectada con el Cloud Name
         <strong>dz6apjevd</strong>.
       </p>
 
       <form id="cloudinary-config-form">
         <div class="form-group">
-          <label class="form-label" for="cfg-cloud-name">Cloudinary Cloud Name:</label>
+          <label class="form-label" for="cfg-cloud-name">Cloudinary Cloud Name</label>
           <input type="text" id="cfg-cloud-name" class="form-control" value="dz6apjevd" placeholder="Ej: dz6apjevd">
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="cfg-upload-preset">Upload Preset (Opcional):</label>
+          <label class="form-label" for="cfg-upload-preset">Upload Preset (opcional)</label>
           <input type="text" id="cfg-upload-preset" class="form-control" placeholder="Ej: pasteleria_preset">
         </div>
 
         <button type="submit" class="btn-primary">
-          <span>Guardar Configuración</span>
+          <span>Guardar configuración</span>
         </button>
       </form>
     </div>
   </div>
 
-  <!-- 7. Address & Location Bottom Sheet Modal (PedidosYa style) -->
+  <!-- 7. Address & Location Bottom Sheet Modal -->
   <div id="address-picker-modal" class="modal-overlay"
     onclick="if(event.target === this) window.app.closeModal('address-picker-modal')">
     <div class="bottom-sheet" style="max-width: 500px;">
       <div class="drag-handle"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('address-picker-modal')">✕</button>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('address-picker-modal')" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
 
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-        <span style="font-size: 1.4rem;">📍</span>
-        <h3 class="font-serif" style="font-size: 1.25rem;">¿Dónde quieres recibir tu pedido?</h3>
+      <div class="modal-header-row" style="margin-bottom: 8px;">
+        <span class="modal-header-icon" data-gm-icon="map-pin" data-gm-size="18"></span>
+        <h3 class="font-serif" style="font-size: 1.35rem; margin: 0;">¿Dónde querés recibir tu pedido?</h3>
       </div>
-      <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.4;">
-        Elige tu barrio de Buenos Aires para coordinar el despacho directo con el cadete del local.
+      <p style="font-size: 0.82rem; color: var(--cream-muted); margin-bottom: 14px; line-height: 1.45;">
+        Elegí tu barrio de Buenos Aires para ver los locales que llegan a tu zona y el tiempo estimado.
       </p>
 
       <div style="margin-bottom: 14px;">
         <button type="button" class="btn-gps-detect" onclick="window.app.detectUserGPS()">
-          <span>📡 Usar mi ubicación actual por GPS</span>
+          <span data-gm-icon="gps" data-gm-size="16"></span>
+          <span>Usar mi ubicación actual por GPS</span>
         </button>
       </div>
 
       <div class="form-group" style="margin-bottom: 12px;">
-        <label class="form-label" for="custom-address-modal-input">O ingresa tu dirección exacta:</label>
+        <label class="form-label" for="custom-address-modal-input">O ingresá tu dirección exacta</label>
         <div style="display: flex; gap: 6px;">
           <input type="text" id="custom-address-modal-input" class="form-control" placeholder="Ej: Humboldt 1950, Palermo" style="font-size: 0.85rem;" onkeydown="if(event.key==='Enter'){event.preventDefault(); const val=this.value.trim(); if(val) window.app.selectNeighborhood(val);}">
           <button type="button" class="btn-primary" style="width: auto; padding: 0 16px; font-size: 0.82rem; white-space: nowrap;" onclick="const val = document.getElementById('custom-address-modal-input')?.value.trim(); if(val) window.app.selectNeighborhood(val);">
@@ -2179,41 +2266,41 @@
         </div>
       </div>
 
-      <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">
-        Zonas con Envío Propio por Vendedor
+      <div style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+        Barrios con envío propio
       </div>
       <div class="neighborhoods-grid">
         <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Palermo', -34.5885, -58.4285)">
-          <span>📍 Palermo</span>
-          <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">30-45 min</span>
+          <span class="gm-inline-label"><span data-gm-icon="map-pin" data-gm-size="14" style="color: var(--primary);"></span> Palermo</span>
+          <span style="font-size: 0.7rem; color: var(--success); font-weight: 600;">30–45 min</span>
         </button>
         <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Recoleta', -34.5925, -58.3970)">
-          <span>📍 Recoleta</span>
-          <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">30-45 min</span>
+          <span class="gm-inline-label"><span data-gm-icon="map-pin" data-gm-size="14" style="color: var(--primary);"></span> Recoleta</span>
+          <span style="font-size: 0.7rem; color: var(--success); font-weight: 600;">30–45 min</span>
         </button>
         <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Belgrano', -34.5620, -58.4560)">
-          <span>📍 Belgrano</span>
-          <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">25-40 min</span>
+          <span class="gm-inline-label"><span data-gm-icon="map-pin" data-gm-size="14" style="color: var(--primary);"></span> Belgrano</span>
+          <span style="font-size: 0.7rem; color: var(--success); font-weight: 600;">25–40 min</span>
         </button>
         <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('San Telmo', -34.6190, -58.3720)">
-          <span>📍 San Telmo</span>
-          <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">30-45 min</span>
+          <span class="gm-inline-label"><span data-gm-icon="map-pin" data-gm-size="14" style="color: var(--primary);"></span> San Telmo</span>
+          <span style="font-size: 0.7rem; color: var(--success); font-weight: 600;">30–45 min</span>
         </button>
         <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Villa Urquiza', -34.5730, -58.4860)">
-          <span>📍 Villa Urquiza</span>
-          <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">35-50 min</span>
+          <span class="gm-inline-label"><span data-gm-icon="map-pin" data-gm-size="14" style="color: var(--primary);"></span> Villa Urquiza</span>
+          <span style="font-size: 0.7rem; color: var(--success); font-weight: 600;">35–50 min</span>
         </button>
         <button type="button" class="neighborhood-btn" onclick="window.app.selectNeighborhood('Caballito', -34.6220, -58.4420)">
-          <span>📍 Caballito</span>
-          <span style="font-size: 0.68rem; color: var(--accent-mint); font-weight: 700;">30-40 min</span>
+          <span class="gm-inline-label"><span data-gm-icon="map-pin" data-gm-size="14" style="color: var(--primary);"></span> Caballito</span>
+          <span style="font-size: 0.7rem; color: var(--success); font-weight: 600;">30–40 min</span>
         </button>
       </div>
 
       <!-- Filtro exclusivo por radio de cobertura -->
       <div class="range-filter-box">
         <div style="flex: 1;">
-          <strong style="color: #FFF; font-size: 0.82rem; display: block; margin-bottom: 2px;">🛵 Filtrar locales por alcance</strong>
-          <span style="font-size: 0.72rem; color: #A3B8AC; line-height: 1.3; display: block;">Mostrar únicamente las pastelerías y cafeterías que llegan con delivery a mi ubicación actual</span>
+          <strong class="gm-inline-label" style="color: var(--cream); font-size: 0.82rem; margin-bottom: 3px;"><span data-gm-icon="delivery" data-gm-size="15" style="color: var(--primary);"></span> Filtrar locales por alcance</strong>
+          <span style="font-size: 0.74rem; color: var(--cream-muted); line-height: 1.35; display: block;">Mostrar únicamente las pastelerías y cafeterías que llegan con delivery a tu ubicación actual</span>
         </div>
         <label class="switch-luxury">
           <input type="checkbox" id="toggle-filter-in-range" onchange="window.app.setOnlyInRange(this.checked)">
@@ -2221,9 +2308,9 @@
         </label>
       </div>
 
-      <div style="background: rgba(42, 157, 143, 0.12); border: 1px dashed rgba(42, 157, 143, 0.45); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 0.74rem; color: #CBD8D1; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 1.1rem;">🛵</span>
-        <span><strong style="color: #4ADE80;">Logística del Vendedor:</strong> El reparto lo realiza el cadete del local en moto con caja térmica.</span>
+      <div class="cart-logistics-note" style="margin-top: 12px; margin-bottom: 0;">
+        <span data-gm-icon="delivery" data-gm-size="17"></span>
+        <span><strong>Logística del vendedor:</strong> El reparto lo realiza el cadete del local en moto con caja térmica.</span>
       </div>
     </div>
   </div>
@@ -2232,40 +2319,44 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Pure Standard JavaScript Scripts -->
-  <script charset="UTF-8" src="js/products.js?v=26.0"></script>
-  <script charset="UTF-8" src="js/cart.js?v=26.0"></script>
-  <script charset="UTF-8" src="js/checkout.js?v=26.0"></script>
-  <script charset="UTF-8" src="js/cloudinary.js?v=26.0"></script>
-  <script charset="UTF-8" src="js/seller.js?v=26.0"></script>
-  <script charset="UTF-8" src="js/admin.js?v=26.0"></script>
-  <script charset="UTF-8" src="js/app.js?v=27.0"></script>
+  <script charset="UTF-8" src="js/icons.js?v=1.1"></script>
+  <script charset="UTF-8" src="js/sounds.js?v=1.0"></script>
+  <script charset="UTF-8" src="js/products.js?v=27.0"></script>
+  <script charset="UTF-8" src="js/cart.js?v=27.0"></script>
+  <script charset="UTF-8" src="js/checkout.js?v=27.0"></script>
+  <script charset="UTF-8" src="js/cloudinary.js?v=27.0"></script>
+  <script charset="UTF-8" src="js/seller.js?v=27.0"></script>
+  <script charset="UTF-8" src="js/admin.js?v=27.0"></script>
+  <script charset="UTF-8" src="js/app.js?v=28.0"></script>
 
   <!-- Modal de Guía para Instalar en iPhone / iPad (iOS) -->
   <div id="ios-install-modal" class="modal-overlay" onclick="if(event.target === this) window.app.closeModal('ios-install-modal')">
     <div class="bottom-sheet" style="max-width: 440px;">
       <div class="drag-handle"></div>
-      <button class="sheet-close-btn" onclick="window.app.closeModal('ios-install-modal')">✕</button>
+      <button class="sheet-close-btn" onclick="window.app.closeModal('ios-install-modal')" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
       <div style="text-align: center; margin-bottom: 18px;">
-        <div style="font-size: 2.4rem; margin-bottom: 6px;">📲</div>
-        <h3 class="font-serif" style="font-size: 1.35rem; color: #FFF; margin-bottom: 4px;">Instalar GOD MARKET en iPhone</h3>
-        <p style="font-size: 0.8rem; color: #A3B8AC;">Agrégalo a tu pantalla de inicio en 2 toques:</p>
+        <div class="gm-empty-icon-circle">
+          <span data-gm-icon="smartphone" data-gm-size="26"></span>
+        </div>
+        <h3 class="font-serif" style="font-size: 1.4rem; color: var(--cream); margin-bottom: 4px;">Instalar GOD MARKET en iPhone</h3>
+        <p style="font-size: 0.82rem; color: var(--cream-muted);">Agregalo a tu pantalla de inicio en dos pasos:</p>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px;">
-        <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.25); border-radius: 14px; padding: 12px 14px;">
-          <span style="font-size: 1.5rem;">1️⃣</span>
-          <div style="font-size: 0.84rem; color: #E5EBE7; line-height: 1.35;">
-            Toca el botón <strong>Compartir</strong> <span style="display: inline-block; font-size: 1.1rem; vertical-align: middle;">📤</span> (el cuadrado con la flecha hacia arriba) en la barra de Safari.
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px; background: rgba(244,239,230,0.04); border: 1px solid rgba(244,239,230,0.10); border-radius: 12px; padding: 12px 14px;">
+          <span class="modal-header-icon" style="width: 30px; height: 30px; font-size: 0.82rem; font-weight: 700;">1</span>
+          <div style="font-size: 0.83rem; color: var(--cream); line-height: 1.4;">
+            Tocá el botón <strong>Compartir</strong> <span data-gm-icon="share" data-gm-size="14" style="color: var(--primary);"></span> en la barra inferior de Safari.
           </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.25); border-radius: 14px; padding: 12px 14px;">
-          <span style="font-size: 1.5rem;">2️⃣</span>
-          <div style="font-size: 0.84rem; color: #E5EBE7; line-height: 1.35;">
-            Desliza hacia abajo en las opciones y presiona <strong>"Agregar a pantalla de inicio"</strong> ➕.
+        <div style="display: flex; align-items: center; gap: 12px; background: rgba(244,239,230,0.04); border: 1px solid rgba(244,239,230,0.10); border-radius: 12px; padding: 12px 14px;">
+          <span class="modal-header-icon" style="width: 30px; height: 30px; font-size: 0.82rem; font-weight: 700;">2</span>
+          <div style="font-size: 0.83rem; color: var(--cream); line-height: 1.4;">
+            Deslizá hacia abajo y elegí <strong>"Agregar a pantalla de inicio"</strong>.
           </div>
         </div>
       </div>
-      <button type="button" class="btn-primary" onclick="window.app.closeModal('ios-install-modal')" style="width: 100%; padding: 12px; font-size: 0.9rem; border-radius: 999px;">
-        ¡Listo, entendido! 👍
+      <button type="button" class="btn-primary" onclick="window.app.closeModal('ios-install-modal')" style="width: 100%; padding: 12px; font-size: 0.9rem;">
+        Entendido
       </button>
     </div>
   </div>

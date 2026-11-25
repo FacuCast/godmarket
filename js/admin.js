@@ -80,7 +80,7 @@ class AdminManager {
         const cloudName = document.getElementById('cfg-cloud-name').value;
         const uploadPreset = document.getElementById('cfg-upload-preset').value;
         window.cloudinaryService.saveConfig(cloudName, uploadPreset);
-        window.app.showToast("☁️ Configuración de Cloudinary guardada");
+        window.app.showToast("Configuración de Cloudinary guardada");
         window.app.closeModal('cloudinary-modal');
       });
     }
@@ -97,17 +97,20 @@ class AdminManager {
       const esc = window.app && typeof window.app.escapeHTML === 'function'
         ? (v) => window.app.escapeHTML(String(v || ''))
         : (v) => String(v || '');
-      select.innerHTML = `<option value="${esc(currentSellerBiz.id)}">${esc(currentSellerBiz.avatar || '🏪')} ${esc(currentSellerBiz.name)} (${esc(currentSellerBiz.neighborhood || 'CABA')})</option>`;
+      select.innerHTML = `<option value="${esc(currentSellerBiz.id)}">${esc(currentSellerBiz.name)} (${esc(currentSellerBiz.neighborhood || 'CABA')})</option>`;
       select.value = currentSellerBiz.id;
       return;
     }
 
     const businesses = window.productManager.getAllBusinesses();
+    const esc = window.app && typeof window.app.escapeHTML === 'function'
+      ? (v) => window.app.escapeHTML(String(v || ''))
+      : (v) => String(v || '');
     let options = businesses.map(b => `
-      <option value="${b.id}">${b.avatar} ${b.name} (${b.neighborhood})</option>
+      <option value="${esc(b.id)}">${esc(b.name)} (${esc(b.neighborhood)})</option>
     `).join('');
 
-    options += `<option value="new_business">➕ Registrar un nuevo negocio...</option>`;
+    options += `<option value="new_business">+ Registrar un nuevo negocio...</option>`;
     select.innerHTML = options;
   }
 
@@ -126,19 +129,19 @@ class AdminManager {
     const description = descInput ? descInput.value.trim() : '';
 
     if (!name || name.length < 3) {
-      window.app.showToast("⚠️ El título del desayuno o merienda debe tener al menos 3 caracteres.");
+      window.app.showToast("El título del producto debe tener al menos 3 caracteres.", 'warn');
       if (nameInput) nameInput.focus();
       return;
     }
 
     if (isNaN(price) || price <= 0) {
-      window.app.showToast("⚠️ Ingresa un precio válido en pesos argentinos.");
+      window.app.showToast("Ingresá un precio válido en pesos argentinos.", 'warn');
       if (priceInput) priceInput.focus();
       return;
     }
 
     if (!description || description.length < 5) {
-      window.app.showToast("⚠️ La descripción debe tener al menos 5 caracteres.");
+      window.app.showToast("La descripción debe tener al menos 5 caracteres.", 'warn');
       if (descInput) descInput.focus();
       return;
     }
@@ -147,7 +150,7 @@ class AdminManager {
     let targetBusinessId = businessVal;
     let targetBusinessName = firstBiz ? firstBiz.name : "Atelier Café";
     let targetBusinessNeighborhood = "Palermo";
-    let targetBusinessAvatar = "🏪";
+    let targetBusinessAvatar = "store";
 
     if (businessVal === 'new_business') {
       const newNameInput = document.getElementById('new-biz-name');
@@ -156,7 +159,7 @@ class AdminManager {
       const newZone = newZoneInput ? newZoneInput.value.trim() : 'CABA';
 
       if (!newName || newName.length < 2) {
-        window.app.showToast("⚠️ Ingresa el nombre de la nueva pastelería.");
+        window.app.showToast("Ingresá el nombre de la nueva pastelería.", 'warn');
         if (newNameInput) newNameInput.focus();
         return;
       }
@@ -164,9 +167,9 @@ class AdminManager {
       const created = window.productManager.addBusiness({
         name: newName,
         neighborhood: newZone,
-        tagline: "Pastelería & Cafetería Artesanal",
-        avatar: "🏪",
-        badge: "✨ Nuevo en el Market"
+        tagline: "Pastelería y Cafetería Artesanal",
+        avatar: "store",
+        badge: "Nuevo en GOD MARKET"
       });
 
       targetBusinessId = created.id;
@@ -185,7 +188,7 @@ class AdminManager {
 
     const submitBtn = document.getElementById('btn-save-product');
     const originalBtnText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<span>⏳ Publicando en el Marketplace...</span>';
+    submitBtn.innerHTML = '<span>Publicando en el marketplace...</span>';
     submitBtn.disabled = true;
 
     try {
@@ -196,13 +199,13 @@ class AdminManager {
       }
 
       const category = document.getElementById('prod-category').value;
-      const tag = document.getElementById('prod-tag').value.trim() || '✨ Nuevo en Market';
+      const tag = document.getElementById('prod-tag').value.trim() || 'Nuevo';
       const portion = document.getElementById('prod-portion').value.trim() || 'Para 1 o 2 personas';
 
       const categoryNames = {
         desayunos: 'Desayunos Sorpresa',
-        meriendas: 'Meriendas & Té',
-        brunch: 'Brunch & Salado',
+        meriendas: 'Meriendas y Té',
+        brunch: 'Brunch y Salado',
         boxes: 'Boxes de Regalo'
       };
 
@@ -253,9 +256,11 @@ class AdminManager {
       }
 
       if (result.promoActivatedNow) {
-        window.app.showToast(`🎉 "${name}" publicado — ¡Comenzaron tus 30 días con 0% cargo de servicio!`);
+        window.gmSound?.('orderSuccess');
+        window.app.showToast(`"${name}" publicado. Comenzaron tus 30 días con 0% cargo de servicio.`, 'success');
       } else {
-        window.app.showToast(`✅ "${name}" publicado por ${targetBusinessName}`);
+        window.gmSound?.('success');
+        window.app.showToast(`"${name}" publicado en ${targetBusinessName}`, 'success');
       }
       window.app.renderBusinessesSlider();
       window.app.renderStoresCards?.();
@@ -273,7 +278,7 @@ class AdminManager {
 
     } catch (error) {
       console.error("Error al guardar producto:", error);
-      window.app.showToast("❌ " + (error.message || "Ocurrió un error al guardar el producto"));
+      window.app.showToast(error.message || "Ocurrió un error al guardar el producto", 'error');
     } finally {
       submitBtn.innerHTML = originalBtnText;
       submitBtn.disabled = false;

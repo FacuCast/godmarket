@@ -222,8 +222,8 @@ class ProductManager {
       lat: newBusiness.lat || -34.5885,
       lng: newBusiness.lng || -58.4285,
       deliveryRadiusKm: newBusiness.deliveryRadiusKm || 5.0,
-      avatar: "🏪",
-      badge: "✨ Nuevo en el Market",
+      avatar: "store",
+      badge: "Nuevo en GOD MARKET",
       phone: "5491156192616",
       ...newBusiness
     };

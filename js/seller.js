@@ -99,6 +99,14 @@ class SellerPortalManager {
     return window.app.escapeHTML(encoded);
   }
 
+  icon(name, size = 15, className = '') {
+    return window.gmIcon ? window.gmIcon(name, className, size) : '';
+  }
+
+  avatarIcon(val, size = 20) {
+    return window.gmAvatarIcon ? window.gmAvatarIcon(val, size) : '';
+  }
+
   evaluateRolePresentation() {
     // 1. Detectar si la URL indica acceso directo de vendedor (/vendedor, #vendedor o ?role=vendedor)
     const path = window.location.pathname.toLowerCase();
@@ -129,11 +137,8 @@ class SellerPortalManager {
       } else {
         this.showSellerAuthScreen();
       }
-    } else if (!savedRole) {
-      // Primera visita sin rol elegido: mostrar selector de bienvenida
-      this.openRoleModal();
     } else {
-      // Cliente: asegurarse de que la tienda principal esté visible
+      // Entrada directa a la vidriera sin modal bloqueante; los vendedores acceden desde el header o el hero.
       this.showCustomerMarketplace();
     }
   }
@@ -159,9 +164,6 @@ class SellerPortalManager {
         } catch (e) {}
       }
       this.showCustomerMarketplace();
-      if (window.app && typeof window.app.showToast === 'function') {
-        window.app.showToast('🛍️ ¡Bienvenido a GOD MARKET! Disfruta la mejor pastelería gourmet.');
-      }
     } else if (role === 'vendedor') {
       if (!window.location.hash.includes('vendedor') && !window.location.pathname.includes('vendedor')) {
         try {
@@ -247,7 +249,7 @@ class SellerPortalManager {
 
       const customIcon = L.divIcon({
         className: 'custom-seller-map-pin',
-        html: `<div class="custom-seller-pin"><span>🍰</span></div>`,
+        html: `<div class="custom-seller-pin">${this.icon('store', 18)}</div>`,
         iconSize: [38, 38],
         iconAnchor: [19, 38]
       });
@@ -259,10 +261,10 @@ class SellerPortalManager {
 
       this.onboardCircle = L.circle([this.onboardLat, this.onboardLng], {
         radius: this.onboardRadius * 1000,
-        color: '#D4AF37',
+        color: '#C8A96A',
         weight: 2,
-        fillColor: '#2A9D8F',
-        fillOpacity: 0.25
+        fillColor: '#4E9F77',
+        fillOpacity: 0.22
       }).addTo(this.onboardMap);
 
       this.onboardMarker.on('dragend', (e) => {
@@ -328,7 +330,7 @@ class SellerPortalManager {
           this.onboardMap.setView([pos.coords.latitude, pos.coords.longitude], 14);
         }
         if (window.app && typeof window.app.showToast === 'function') {
-          window.app.showToast('📍 Ubicación fijada con éxito por GPS');
+          window.app.showToast('Ubicación fijada con éxito por GPS');
         }
       },
       (err) => {
@@ -351,7 +353,7 @@ class SellerPortalManager {
     this.currentBusiness = null;
     this.showCustomerMarketplace();
     if (window.app && typeof window.app.showToast === 'function') {
-      window.app.showToast('🛍️ Has vuelto a la tienda como cliente.');
+      window.app.showToast('Volviste a la tienda como cliente.');
     }
   }
 
@@ -535,7 +537,7 @@ class SellerPortalManager {
     const description = document.getElementById('onboard-desc')?.value.trim();
     const transferAlias = document.getElementById('onboard-transfer-alias')?.value.trim() || '';
     const transferAccountHolder = document.getElementById('onboard-transfer-holder')?.value.trim() || '';
-    const avatar = document.getElementById('onboard-avatar')?.value || '🍰';
+    const avatar = document.getElementById('onboard-avatar')?.value || 'patisserie';
 
     const phoneDigits = phone ? phone.replace(/\D/g, '') : '';
     if (!bizName || phoneDigits.length < 8 || phoneDigits.length > 20) {
@@ -599,6 +601,7 @@ class SellerPortalManager {
         window.productManager.addBusiness(data.business);
       }
 
+      window.gmSound?.('success');
       this.showSellerDashboard();
     } catch (err) {
       console.error('Error al registrar negocio:', err);
@@ -606,7 +609,7 @@ class SellerPortalManager {
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = '🚀 Crear Mi Perfil de Vendedor y Empezar a Vender';
+        submitBtn.textContent = 'Crear mi perfil de vendedor y empezar a vender';
       }
     }
   }
@@ -663,9 +666,9 @@ class SellerPortalManager {
     const phoneEl = document.getElementById('dash-biz-phone');
 
     if (nameEl) nameEl.textContent = this.currentBusiness.name;
-    if (avatarEl) avatarEl.textContent = this.currentBusiness.avatar || '🍰';
-    if (zoneEl) zoneEl.textContent = `📍 ${this.currentBusiness.neighborhood}`;
-    if (phoneEl) phoneEl.textContent = `📱 WhatsApp: ${this.currentBusiness.phone}`;
+    if (avatarEl) avatarEl.innerHTML = this.avatarIcon(this.currentBusiness.avatar, 24);
+    if (zoneEl) zoneEl.innerHTML = `${this.icon('map-pin', 14)} ${window.app.escapeHTML(this.currentBusiness.neighborhood || 'Buenos Aires')}`;
+    if (phoneEl) phoneEl.innerHTML = `${this.icon('whatsapp', 14)} WhatsApp: ${window.app.escapeHTML(this.currentBusiness.phone || 'Sin configurar')}`;
 
     this.loadSellerVisitStats();
   }
@@ -703,11 +706,11 @@ class SellerPortalManager {
 
       if (products.length === 0) {
         container.innerHTML = `
-          <div style="grid-column: 1 / -1; background: rgba(255,255,255,0.03); border: 1.5px dashed rgba(212,175,55,0.3); border-radius: 16px; padding: 40px 20px; text-align: center;">
-            <div style="font-size: 2.5rem; margin-bottom: 10px;">🍰</div>
-            <h4 style="color: #FFF; font-size: 1.1rem; margin-bottom: 6px;">Aún no has publicado ningún producto</h4>
-            <p style="color: #8CA093; font-size: 0.85rem; max-width: 400px; margin: 0 auto 18px auto;">Comienza a subir tus tortas, desayunos sorpresa o meriendas para que los clientes puedan comprarlas.</p>
-            <button class="btn-add-prod" onclick="window.sellerPortal.openAddProductModal()">+ Publicar mi primer producto</button>
+          <div style="grid-column: 1 / -1; background: rgba(255,255,255,0.03); border: 1px dashed rgba(200,169,106,0.28); border-radius: 16px; padding: 40px 20px; text-align: center;">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:rgba(200,169,106,0.12);color:var(--primary);margin-bottom:12px;">${this.icon('cake', 24)}</div>
+            <h4 style="color: var(--text-main); font-size: 1.05rem; margin-bottom: 6px;">Aún no publicaste ningún producto</h4>
+            <p style="color: var(--text-muted); font-size: 0.86rem; max-width: 400px; margin: 0 auto 18px auto;">Subí tus tortas, desayunos o meriendas con foto para que los clientes puedan pedirlas.</p>
+            <button class="btn-add-prod" onclick="window.sellerPortal.openAddProductModal()">${this.icon('plus', 15)} Publicar mi primer producto</button>
           </div>
         `;
         return;
@@ -727,8 +730,8 @@ class SellerPortalManager {
               <span class="seller-prod-portion">${window.app.escapeHTML(p.portion || '1-2 personas')}</span>
             </div>
             <div class="seller-prod-actions">
-              <button class="btn-card-edit" onclick="window.sellerPortal.editProductPrompt(${this.escapeJSAttribute(p.id)}, ${Number(p.price)})">✏️ Cambiar Precio</button>
-              <button class="btn-card-delete" onclick="window.sellerPortal.deleteProduct(${this.escapeJSAttribute(p.id)}, ${this.escapeJSAttribute(p.name)})">🗑️ Eliminar</button>
+              <button class="btn-card-edit" onclick="window.sellerPortal.editProductPrompt(${this.escapeJSAttribute(p.id)}, ${Number(p.price)})">${this.icon('edit', 14)} Cambiar precio</button>
+              <button class="btn-card-delete" onclick="window.sellerPortal.deleteProduct(${this.escapeJSAttribute(p.id)}, ${this.escapeJSAttribute(p.name)})">${this.icon('trash', 14)} Eliminar</button>
             </div>
           </div>
         </div>
@@ -755,10 +758,10 @@ class SellerPortalManager {
 
       if (orders.length === 0) {
         container.innerHTML = `
-          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 36px 20px; text-align: center; color: #8CA093;">
-            <div style="font-size: 2.2rem; margin-bottom: 8px;">📦</div>
-            <strong style="color: #FFF; display: block; margin-bottom: 4px;">Aún no tienes pedidos recibidos</strong>
-            <span style="font-size: 0.82rem;">Cuando los clientes realicen pedidos a tu local, aparecerán aquí con el botón directo de WhatsApp.</span>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 14px; padding: 36px 20px; text-align: center; color: var(--text-muted);">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;background:rgba(200,169,106,0.1);color:var(--primary);margin-bottom:10px;">${this.icon('package', 22)}</div>
+            <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Aún no tenés pedidos recibidos</strong>
+            <span style="font-size: 0.84rem;">Cuando los clientes realicen pedidos a tu local, aparecerán acá con acceso directo a WhatsApp.</span>
           </div>
         `;
         return;
@@ -801,28 +804,28 @@ class SellerPortalManager {
             <strong>Productos:</strong>${itemsMarkup || ' Sin detalle'}<br>
             <strong>Total abonado por comprador:</strong> <span style="color: var(--primary); font-weight: 700;">$${Number(o.total || 0).toLocaleString('es-AR')}</span>
             ${o.isPromoOrder || (Number(o.serviceFee || 0) === 0 && Number(o.waivedServiceFee || 0) > 0)
-              ? `<div style="margin-top: 4px; font-size: 0.76rem; color: #4ADE80; font-weight: 600;">🎁 Mes Bonificado Activo: 0% cargo de servicio (Recibís el 100% de tu precio habitual · Ahorro comprador: $${Number(o.waivedServiceFee || 0).toLocaleString('es-AR')})</div>`
+              ? `<div style="margin-top: 4px; font-size: 0.78rem; color: var(--success); font-weight: 600;">Mes bonificado activo: 0% cargo de servicio (recibís el 100% de tu precio habitual · ahorro comprador: $${Number(o.waivedServiceFee || 0).toLocaleString('es-AR')})</div>`
               : (Number(o.serviceFee || 0) > 0
-                ? `<div style="margin-top: 4px; font-size: 0.76rem; color: #9AB0A3;">Neto de tu local (100% precio habitual + envío): <strong style="color:#FFF;">$${Number(o.merchantPayout || (Number(o.total || 0) - Number(o.serviceFee || 0))).toLocaleString('es-AR')}</strong> · Servicio GOD MARKET (${servicePercent}%): $${Number(o.serviceFee).toLocaleString('es-AR')}</div>`
+                ? `<div style="margin-top: 4px; font-size: 0.78rem; color: var(--text-muted);">Neto de tu local (100% precio habitual + envío): <strong style="color:var(--text-main);">$${Number(o.merchantPayout || (Number(o.total || 0) - Number(o.serviceFee || 0))).toLocaleString('es-AR')}</strong> · Servicio GOD MARKET (${servicePercent}%): $${Number(o.serviceFee).toLocaleString('es-AR')}</div>`
                 : '')}
           </div>
 
           <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
             ${customerWaPhone ? `
-              <a href="https://wa.me/${customerWaPhone}?text=Hola%20${encodeURIComponent(o.customerName || '')},%20somos%20${encodeURIComponent(this.currentBusiness.name)}%20de%20GOD%20MARKET%20por%20tu%20pedido%20%23${encodeURIComponent(safeOrderId)}" target="_blank" rel="noopener noreferrer" class="seller-action-pill" style="background: rgba(37, 211, 102, 0.15); border-color: rgba(37, 211, 102, 0.4); color: #25D366;">
-                💬 Escribir por WhatsApp
+              <a href="https://wa.me/${customerWaPhone}?text=Hola%20${encodeURIComponent(o.customerName || '')},%20somos%20${encodeURIComponent(this.currentBusiness.name)}%20de%20GOD%20MARKET%20por%20tu%20pedido%20%23${encodeURIComponent(safeOrderId)}" target="_blank" rel="noopener noreferrer" class="seller-action-pill" style="background: rgba(104, 185, 142, 0.14); border-color: rgba(104, 185, 142, 0.34); color: var(--success);">
+                ${this.icon('whatsapp', 14)} Escribir por WhatsApp
               </a>
             ` : ''}
 
             ${safeOrderId ? `
-              <select onchange="window.sellerPortal.updateOrderStatus(${this.escapeJSAttribute(safeOrderId)}, this.value)" style="background: rgba(0,0,0,0.4); color: #FFF; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 6px 10px; font-size: 0.78rem;">
-                <option value="pendiente" ${status === 'pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
-                <option value="en_preparacion" ${status === 'en_preparacion' ? 'selected' : ''}>👨‍🍳 En Preparación</option>
-                <option value="despachado" ${status === 'despachado' ? 'selected' : ''}>🛵 Despachado</option>
-                <option value="entregado" ${status === 'entregado' ? 'selected' : ''}>✅ Entregado</option>
-                ${status === 'en_disputa' ? '<option value="en_disputa" selected>⚠️ En Disputa</option>' : ''}
-                ${status === 'reembolsado' ? '<option value="reembolsado" selected>💸 Reembolsado</option>' : ''}
-                ${status === 'disputa_cerrada' ? '<option value="disputa_cerrada" selected>🔒 Disputa Cerrada</option>' : ''}
+              <select onchange="window.sellerPortal.updateOrderStatus(${this.escapeJSAttribute(safeOrderId)}, this.value)" style="background: rgba(0,0,0,0.35); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem;">
+                <option value="pendiente" ${status === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                <option value="en_preparacion" ${status === 'en_preparacion' ? 'selected' : ''}>En preparación</option>
+                <option value="despachado" ${status === 'despachado' ? 'selected' : ''}>Despachado</option>
+                <option value="entregado" ${status === 'entregado' ? 'selected' : ''}>Entregado</option>
+                ${status === 'en_disputa' ? '<option value="en_disputa" selected>En disputa</option>' : ''}
+                ${status === 'reembolsado' ? '<option value="reembolsado" selected>Reembolsado</option>' : ''}
+                ${status === 'disputa_cerrada' ? '<option value="disputa_cerrada" selected>Disputa cerrada</option>' : ''}
               </select>
             ` : '<span>Pedido sin identificador válido</span>'}
           </div>
@@ -845,6 +848,7 @@ class SellerPortalManager {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'No se pudo actualizar el estado del pedido.');
+      window.gmSound?.('success');
       this.renderSellerOrders();
     } catch (error) {
       alert(error.message || 'Error actualizando estado del pedido');
@@ -868,13 +872,13 @@ class SellerPortalManager {
         ? window.productManager.getBusinessPromoState(this.currentBusiness)
         : { isPromoActive: Boolean(this.currentBusiness.isPromoActive), promoState: this.currentBusiness.promoState };
       if (pState.isPromoActive) {
-        priceHint.style.color = '#4ADE80';
+        priceHint.style.color = 'var(--success)';
         priceHint.innerHTML = pState.promoState === 'pending_first_product'
-          ? '🎁 <strong>¡Este primer producto activará tus 30 días bonificados!</strong> Cargá el mismo precio habitual de tu cafetería: tus clientes comprarán con 0% de cargo de servicio.'
-          : `🎁 <strong>Mes Lanzamiento Activo (0% Servicio):</strong> Cargá el mismo precio habitual de tu cafetería. El comprador paga exactamente este precio sin el ${servicePercent}% adicional.`;
+          ? '<strong>Este primer producto activará tus 30 días bonificados.</strong> Cargá el mismo precio habitual de tu cafetería: tus clientes comprarán con 0% de cargo de servicio.'
+          : `<strong>Mes Lanzamiento activo (0% servicio):</strong> cargá el mismo precio habitual de tu cafetería. El comprador paga exactamente este precio sin el ${servicePercent}% adicional.`;
       } else {
-        priceHint.style.color = '#A3B8AC';
-        priceHint.innerHTML = `💡 Cargá el precio habitual de tu cafetería (recibís el 100% de este valor). El ${servicePercent}% de servicio de GOD MARKET se adiciona al comprador en el carrito.`;
+        priceHint.style.color = 'var(--text-muted)';
+        priceHint.innerHTML = `Cargá el precio habitual de tu cafetería (recibís el 100% de este valor). El ${servicePercent}% de servicio de GOD MARKET se adiciona al comprador en el carrito.`;
       }
     }
     if (window.app && typeof window.app.openModal === 'function') {
@@ -903,7 +907,8 @@ class SellerPortalManager {
           window.productManager.syncWithBackend?.();
         }
         if (window.app && typeof window.app.showToast === 'function') {
-          window.app.showToast('✅ Precio actualizado correctamente');
+          window.gmSound?.('success');
+          window.app.showToast('Precio actualizado correctamente');
         }
         this.renderSellerProducts();
       }
@@ -926,7 +931,8 @@ class SellerPortalManager {
           window.productManager.syncWithBackend?.();
         }
         if (window.app && typeof window.app.showToast === 'function') {
-          window.app.showToast(`🗑️ "${name}" eliminado`);
+          window.gmSound?.('remove');
+          window.app.showToast(`"${name}" eliminado del catálogo`);
         }
         this.renderSellerProducts();
       }
@@ -937,6 +943,7 @@ class SellerPortalManager {
 
   switchTab(tabName) {
     this.activeTab = tabName;
+    window.gmSound?.('tap');
     document.querySelectorAll('.seller-tab-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tabName);
     });
@@ -991,10 +998,9 @@ class SellerPortalManager {
         maxZoom: 19
       }).addTo(this.dashMap);
 
-      const avatarEmoji = this.currentBusiness.avatar || '🍰';
       const customIcon = L.divIcon({
         className: 'custom-seller-map-pin',
-        html: `<div class="custom-seller-pin"><span>${window.app.escapeHTML(avatarEmoji)}</span></div>`,
+        html: `<div class="custom-seller-pin">${this.avatarIcon(this.currentBusiness.avatar, 18)}</div>`,
         iconSize: [38, 38],
         iconAnchor: [19, 38]
       });
@@ -1006,10 +1012,10 @@ class SellerPortalManager {
 
       this.dashCircle = L.circle([this.dashLat, this.dashLng], {
         radius: this.dashRadius * 1000,
-        color: '#D4AF37',
+        color: '#C8A96A',
         weight: 2,
-        fillColor: '#2A9D8F',
-        fillOpacity: 0.25
+        fillColor: '#4E9F77',
+        fillOpacity: 0.22
       }).addTo(this.dashMap);
 
       this.dashMarker.on('dragend', (e) => {
@@ -1072,7 +1078,7 @@ class SellerPortalManager {
           this.dashMap.setView([pos.coords.latitude, pos.coords.longitude], 14);
         }
         if (window.app && typeof window.app.showToast === 'function') {
-          window.app.showToast('📍 Ubicación actualizada por GPS');
+          window.app.showToast('Ubicación actualizada por GPS');
         }
       },
       (err) => {
@@ -1145,7 +1151,8 @@ class SellerPortalManager {
       this.renderDashboardHeader();
 
       if (window.app && typeof window.app.showToast === 'function') {
-        window.app.showToast(`✅ ¡Cobertura guardada! Radio: ${this.dashRadius} km`);
+        window.gmSound?.('success');
+        window.app.showToast(`Cobertura guardada · Radio de envío: ${this.dashRadius} km`);
       }
     } catch (err) {
       console.error('Error guardando cobertura:', err);
@@ -1153,7 +1160,7 @@ class SellerPortalManager {
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = '💾 Guardar cobertura y pagos';
+        btn.textContent = 'Guardar cobertura y pagos';
       }
     }
   }
@@ -1166,7 +1173,7 @@ class SellerPortalManager {
       } else if (typeof window.app.filterByBusiness === 'function') {
         window.app.filterByBusiness(this.currentBusiness.id);
       }
-      window.app.showToast(`👁️ Viendo cómo los clientes ven tu pastelería "${this.currentBusiness.name}"`);
+      window.app.showToast(`Viendo tu vidriera "${this.currentBusiness.name}" como cliente`);
     }
   }
 
@@ -1176,7 +1183,7 @@ class SellerPortalManager {
     localStorage.setItem('godmarket_role', 'cliente');
     this.showCustomerMarketplace();
     if (window.app && typeof window.app.showToast === 'function') {
-      window.app.showToast('👋 Sesión cerrada. Has vuelto a la tienda como cliente.');
+      window.app.showToast('Sesión cerrada. Volviste a la tienda como cliente.');
     }
   }
 
@@ -1197,7 +1204,7 @@ class SellerPortalManager {
     }
 
     const days = Number(p.promoDurationDays) || 30;
-    const slotsLabel = `🎁 BENEFICIO COMERCIO FUNDADOR · QUEDAN ${p.remainingSlots} DE ${p.maxPromoBusinesses} CUPOS`;
+    const slotsLabel = `BENEFICIO COMERCIO FUNDADOR · QUEDAN ${p.remainingSlots} DE ${p.maxPromoBusinesses} CUPOS`;
 
     if (authBanner) {
       authBanner.style.display = 'block';
@@ -1300,10 +1307,10 @@ class SellerPortalManager {
       banner.innerHTML = `
         <div class="promo-timer-top">
           <div>
-            <span class="promo-timer-pill pending">🎁 MES BONIFICADO LISTO PARA ACTIVAR${slotInfo}</span>
+            <span class="promo-timer-pill pending">${this.icon('award', 13)} MES BONIFICADO LISTO PARA ACTIVAR${slotInfo}</span>
             <h4 class="promo-timer-heading">${durationDays} días completos con 0% Cargo de Servicio (${servicePercent}% bonificado para tus clientes)</h4>
             <p class="promo-timer-desc">
-              <strong>¡No perdés ni un solo día por registrarte antes!</strong> Tu reloj de ${durationDays} días está en espera y <strong>comenzará a correr recién cuando subas tu primer producto con foto</strong>. Publicá tus combos con los mismos precios habituales de tu cafetería.
+              <strong>No perdés ni un solo día por registrarte antes:</strong> tu reloj de ${durationDays} días queda en pausa y <strong>comienza recién cuando subís tu primer producto con foto</strong>. Publicá tus productos al mismo precio habitual de tu local.
             </p>
           </div>
           <div class="promo-countdown-boxes paused" title="El reloj comenzará cuando publiques tu 1° producto">
@@ -1318,7 +1325,7 @@ class SellerPortalManager {
         </div>
         <div class="promo-timer-actions">
           <button type="button" class="btn-activate-promo-upload" onclick="window.sellerPortal.openAddProductModal()">
-            📸 Subir mi 1° Producto con Foto y Activar los ${durationDays} Días
+            ${this.icon('upload', 15)} Subir mi 1° producto con foto y activar los ${durationDays} días
           </button>
         </div>
       `;
@@ -1338,7 +1345,7 @@ class SellerPortalManager {
       banner.innerHTML = `
         <div class="promo-timer-top">
           <div>
-            <span class="promo-timer-pill active">⏱️ MES LANZAMIENTO EN CURSO · 0% SERVICIO${slotInfo}</span>
+            <span class="promo-timer-pill active">${this.icon('clock', 13)} MES LANZAMIENTO EN CURSO · 0% SERVICIO${slotInfo}</span>
             <h4 class="promo-timer-heading">Tus clientes compran al mismo precio habitual de tu local</h4>
             <p class="promo-timer-desc">
               El cargo por servicio del <strong>${servicePercent}% de GOD MARKET está 100% bonificado ($0)</strong> para tus compradores${expStr ? ` hasta el <strong>${window.app.escapeHTML(expStr)}</strong>` : ''}. Aprovechá para difundir tu tienda y sumar ventas sin recargos.
@@ -1367,7 +1374,7 @@ class SellerPortalManager {
     banner.innerHTML = `
       <div class="promo-timer-top">
         <div>
-          <span class="promo-timer-pill standard">✦ MODALIDAD ESTÁNDAR GOD MARKET ACTIVA</span>
+          <span class="promo-timer-pill standard">MODALIDAD ESTÁNDAR GOD MARKET ACTIVA</span>
           <h4 class="promo-timer-heading">${state.promoState === 'expired' ? 'Período promocional de 30 días completado' : 'Precios habituales de local protegidos'}</h4>
           <p class="promo-timer-desc">
             Seguís cobrando el <strong>100% del precio habitual</strong> publicado en tus productos. El cargo de servicio del <strong>${servicePercent}% de GOD MARKET</strong> es abonado directamente por el comprador al finalizar su pedido.
@@ -1385,14 +1392,14 @@ class SellerPortalManager {
     if (!adminToken) {
       const token = prompt('Ingresá el token de administrador de GOD MARKET para gestionar los cupos y los 30 días:');
       if (!token) {
-        container.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.5);">🔐 Ingresá tu token de administrador haciendo clic en "Actualizar Panel".</div>';
+        container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);">Ingresá tu token de administrador haciendo clic en "Actualizar panel".</div>';
         return;
       }
       localStorage.setItem('godmarket_admin_token', token);
       adminToken = token;
     }
 
-    container.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.5);">⏳ Cargando panel de Cafeterías Fundadoras...</div>';
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);">Cargando panel de cafeterías fundadoras...</div>';
 
     try {
       const res = await fetch('/api/admin/promo', {
@@ -1401,14 +1408,14 @@ class SellerPortalManager {
 
       if (res.status === 403) {
         localStorage.removeItem('godmarket_admin_token');
-        container.innerHTML = '<div style="text-align:center;padding:30px;color:#EF4444;">❌ Token de administrador incorrecto. Presioná "Actualizar Panel" para reintentar.</div>';
+        container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--danger);">Token de administrador incorrecto. Presioná "Actualizar panel" para reintentar.</div>';
         return;
       }
 
       const data = await res.json();
       this.renderPromoAdminPanel(data);
     } catch (err) {
-      container.innerHTML = '<div style="text-align:center;padding:30px;color:#EF4444;">❌ Error de conexión al cargar el panel de promociones.</div>';
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--danger);">Error de conexión al cargar el panel de promociones.</div>';
     }
   }
 
@@ -1424,21 +1431,21 @@ class SellerPortalManager {
     const totalOrders = businesses.reduce((sum, b) => sum + (b.ordersCount || 0), 0);
 
     const bizCardsHtml = businesses.length === 0
-      ? `<div style="text-align:center;padding:32px;background:#141414;border-radius:16px;border:1px dashed rgba(255,255,255,0.12);color:rgba(255,255,255,0.5);">Aún no hay cafeterías registradas. Las primeras <strong>${settings.maxPromoBusinesses}</strong> cafeterías recibirán automáticamente sus <strong>${settings.promoDurationDays} días sin el ${servicePercent}% de servicio</strong> al registrarse y subir su 1° foto.</div>`
+      ? `<div style="text-align:center;padding:32px;background:var(--bg-surface);border-radius:16px;border:1px dashed var(--border-color);color:var(--text-muted);">Aún no hay cafeterías registradas. Las primeras <strong>${settings.maxPromoBusinesses}</strong> cafeterías recibirán automáticamente sus <strong>${settings.promoDurationDays} días sin el ${servicePercent}% de servicio</strong> al registrarse y subir su primera foto.</div>`
       : businesses.map(b => {
-          let badgeHtml = `<span class="dispute-status-badge" style="background:rgba(255,255,255,0.08);color:#A3B8AC;">⚪ Estándar (${servicePercent}% al comprador)</span>`;
+          let badgeHtml = `<span class="dispute-status-badge" style="background:rgba(255,255,255,0.06);color:var(--text-muted);">Estándar (${servicePercent}% al comprador)</span>`;
           let timerDetail = `El comprador abona el ${servicePercent}% de servicio GOD MARKET.`;
 
           if (b.promoState === 'pending_first_product') {
-            badgeHtml = '<span class="dispute-status-badge" style="background:rgba(255,179,0,0.15);color:#FFB300;border:1px solid rgba(255,179,0,0.35);">⏳ Esperando 1° Foto (' + (b.promoDurationDays || 30) + 'd listos)</span>';
+            badgeHtml = '<span class="dispute-status-badge" style="background:rgba(217,155,82,0.14);color:var(--warning);border:1px solid rgba(217,155,82,0.3);">Esperando 1° foto (' + (b.promoDurationDays || 30) + 'd listos)</span>';
             timerDetail = 'Registrado como fundador. Los 30 días arrancarán cuando suba su primer producto.';
           } else if (b.promoState === 'active') {
             const parts = this.formatDurationParts(b.promoMsRemaining || 0);
-            badgeHtml = '<span class="dispute-status-badge" style="background:rgba(0,200,83,0.15);color:#00C853;border:1px solid rgba(0,200,83,0.35);">🟢 0% Servicio · Quedan ' + parts.days + 'd ' + parts.hours + 'h ' + parts.minutes + 'm</span>';
+            badgeHtml = '<span class="dispute-status-badge" style="background:rgba(104,185,142,0.14);color:var(--success);border:1px solid rgba(104,185,142,0.3);">0% servicio · Quedan ' + parts.days + 'd ' + parts.hours + 'h ' + parts.minutes + 'm</span>';
             const expDate = b.promoExpiresAt ? new Date(b.promoExpiresAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
             timerDetail = `Vence el ${expDate} · Luego pasa automáticamente al ${servicePercent}% de servicio.`;
           } else if (b.promoState === 'expired') {
-            badgeHtml = `<span class="dispute-status-badge" style="background:rgba(239,68,68,0.12);color:#F87171;border:1px solid rgba(239,68,68,0.25);">⏹️ 30 Días Finalizados (${servicePercent}% Activo)</span>`;
+            badgeHtml = `<span class="dispute-status-badge" style="background:rgba(223,107,99,0.12);color:var(--danger);border:1px solid rgba(223,107,99,0.28);">30 días finalizados (${servicePercent}% activo)</span>`;
             timerDetail = `Completó su primer mes bonificado. Ahora opera con el ${servicePercent}% estándar.`;
           }
 
@@ -1446,33 +1453,33 @@ class SellerPortalManager {
             <div class="dispute-card">
               <div class="dispute-card-header">
                 <div style="display:flex;align-items:center;gap:10px;">
-                  <span style="font-size:1.5rem;">${window.app.escapeHTML(b.avatar || '☕')}</span>
+                  <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:rgba(200,169,106,0.1);color:var(--primary);">${this.avatarIcon(b.avatar, 18)}</span>
                   <div>
-                    <strong style="color:#FFF;font-size:0.95rem;">${window.app.escapeHTML(b.name)}</strong>
-                    <div style="font-size:0.75rem;color:#9AB0A3;">📍 ${window.app.escapeHTML(b.neighborhood || 'CABA')} · 🍰 ${b.productsCount || 0} productos · 📦 ${b.ordersCount || 0} pedidos</div>
+                    <strong style="color:var(--text-main);font-size:0.95rem;">${window.app.escapeHTML(b.name)}</strong>
+                    <div style="font-size:0.78rem;color:var(--text-muted);">${window.app.escapeHTML(b.neighborhood || 'CABA')} · ${b.productsCount || 0} productos · ${b.ordersCount || 0} pedidos</div>
                   </div>
                 </div>
                 ${badgeHtml}
               </div>
-              <div style="font-size:0.78rem;color:rgba(255,255,255,0.7);margin-bottom:12px;">
+              <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:12px;">
                 ${timerDetail}
               </div>
               <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button type="button" class="dispute-refund-btn" style="padding:7px 12px;border-radius:9px;font-size:0.76rem;font-weight:700;cursor:pointer;"
+                <button type="button" class="dispute-refund-btn" style="padding:7px 12px;border-radius:9px;font-size:0.78rem;font-weight:600;cursor:pointer;"
                   onclick="window.sellerPortal.updateBusinessPromoAdmin(${this.escapeJSAttribute(b.id)}, 'start_30d')">
-                  🚀 Activar / Reiniciar 30 Días Ya
+                  Activar / reiniciar 30 días
                 </button>
-                <button type="button" class="dispute-mark-btn" style="padding:7px 12px;border-radius:9px;font-size:0.76rem;font-weight:700;cursor:pointer;"
+                <button type="button" class="dispute-mark-btn" style="padding:7px 12px;border-radius:9px;font-size:0.78rem;font-weight:600;cursor:pointer;"
                   onclick="window.sellerPortal.updateBusinessPromoAdmin(${this.escapeJSAttribute(b.id)}, 'pending_first_product')">
-                  ⏳ Esperar 1° Producto (30d intactos)
+                  Esperar 1° producto (30d intactos)
                 </button>
-                <button type="button" class="dispute-filter-btn" style="padding:7px 12px;border-radius:9px;font-size:0.76rem;font-weight:700;cursor:pointer;"
+                <button type="button" class="dispute-filter-btn" style="padding:7px 12px;border-radius:9px;font-size:0.78rem;font-weight:600;cursor:pointer;"
                   onclick="window.sellerPortal.updateBusinessPromoAdmin(${this.escapeJSAttribute(b.id)}, 'extend_15d')">
-                  ➕ Sumar +15 Días
+                  + Sumar 15 días
                 </button>
-                <button type="button" class="dispute-reject-btn" style="padding:7px 12px;border-radius:9px;font-size:0.76rem;font-weight:700;cursor:pointer;"
+                <button type="button" class="dispute-reject-btn" style="padding:7px 12px;border-radius:9px;font-size:0.78rem;font-weight:600;cursor:pointer;"
                   onclick="window.sellerPortal.updateBusinessPromoAdmin(${this.escapeJSAttribute(b.id)}, 'end_promo')">
-                  ⏹️ Pasar a ${servicePercent}% Estándar
+                  Pasar a ${servicePercent}% estándar
                 </button>
               </div>
             </div>
@@ -1484,50 +1491,50 @@ class SellerPortalManager {
       <div class="promo-admin-metrics-grid">
         <div class="promo-metric-card">
           <span class="promo-metric-val">${businesses.length}</span>
-          <span class="promo-metric-lbl">Cafeterías Activas</span>
+          <span class="promo-metric-lbl">Cafeterías activas</span>
         </div>
         <div class="promo-metric-card">
-          <span class="promo-metric-val" style="color:#4ADE80;">${data.usedSlots} / ${settings.maxPromoBusinesses}</span>
-          <span class="promo-metric-lbl">Cupos Fundadores Usados</span>
+          <span class="promo-metric-val" style="color:var(--success);">${data.usedSlots} / ${settings.maxPromoBusinesses}</span>
+          <span class="promo-metric-lbl">Cupos fundadores usados</span>
         </div>
         <div class="promo-metric-card">
           <span class="promo-metric-val">${totalProducts}</span>
-          <span class="promo-metric-lbl">Productos en Carta</span>
+          <span class="promo-metric-lbl">Productos en carta</span>
         </div>
         <div class="promo-metric-card">
           <span class="promo-metric-val" style="color:var(--primary);">${totalOrders}</span>
-          <span class="promo-metric-lbl">Pedidos Generados</span>
+          <span class="promo-metric-lbl">Pedidos generados</span>
         </div>
       </div>
 
       <!-- Configuración de Cupos (3 o 5 Cafeterías Fundadoras) -->
-      <div class="dispute-card" style="margin-bottom: 18px; border-color: rgba(255,107,53,0.28);">
+      <div class="dispute-card" style="margin-bottom: 18px; border-color: rgba(200,169,106,0.28);">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:12px;">
           <div>
-            <h4 style="color:#FFF;font-size:1rem;margin-bottom:2px;">⚙️ Cupos de Cafeterías con 1er Mes Sin el ${servicePercent}% de Servicio</h4>
-            <p style="font-size:0.78rem;color:#9AB0A3;margin:0;">Elegí cuántas cafeterías entran automáticamente con 30 días al 0% (quedan <strong>${data.remainingSlots}</strong> cupos libres).</p>
+            <h4 style="color:var(--text-main);font-size:1rem;margin-bottom:2px;">Cupos de cafeterías con 1er mes sin el ${servicePercent}% de servicio</h4>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">Elegí cuántas cafeterías entran automáticamente con 30 días al 0% (quedan <strong>${data.remainingSlots}</strong> cupos libres).</p>
           </div>
-          <label style="display:inline-flex;align-items:center;gap:8px;font-size:0.8rem;color:#FFF;cursor:pointer;font-weight:600;">
+          <label style="display:inline-flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text-main);cursor:pointer;font-weight:600;">
             <input type="checkbox" id="admin-promo-enabled" ${settings.enabled ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--primary);" onchange="window.sellerPortal.savePromoSettingsAdmin()">
             Asignación automática activa
           </label>
         </div>
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <button type="button" class="dispute-filter-btn ${settings.maxPromoBusinesses === 3 ? 'active' : ''}" onclick="window.sellerPortal.setPromoMaxQuick(3)">3 Cafeterías</button>
-          <button type="button" class="dispute-filter-btn ${settings.maxPromoBusinesses === 5 ? 'active' : ''}" onclick="window.sellerPortal.setPromoMaxQuick(5)">5 Cafeterías</button>
-          <button type="button" class="dispute-filter-btn ${settings.maxPromoBusinesses === 10 ? 'active' : ''}" onclick="window.sellerPortal.setPromoMaxQuick(10)">10 Cafeterías</button>
+          <button type="button" class="dispute-filter-btn ${settings.maxPromoBusinesses === 3 ? 'active' : ''}" onclick="window.sellerPortal.setPromoMaxQuick(3)">3 cafeterías</button>
+          <button type="button" class="dispute-filter-btn ${settings.maxPromoBusinesses === 5 ? 'active' : ''}" onclick="window.sellerPortal.setPromoMaxQuick(5)">5 cafeterías</button>
+          <button type="button" class="dispute-filter-btn ${settings.maxPromoBusinesses === 10 ? 'active' : ''}" onclick="window.sellerPortal.setPromoMaxQuick(10)">10 cafeterías</button>
           <div style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;">
-            <span style="font-size:0.76rem;color:#9AB0A3;">Cupos:</span>
-            <input type="number" id="admin-promo-max-input" value="${settings.maxPromoBusinesses}" min="0" max="500" style="width:68px;background:#1F1F1F;border:1px solid rgba(255,255,255,0.15);color:#FFF;border-radius:8px;padding:6px 8px;font-size:0.84rem;">
-            <span style="font-size:0.76rem;color:#9AB0A3;">Días:</span>
-            <input type="number" id="admin-promo-days-input" value="${settings.promoDurationDays || 30}" min="1" max="365" style="width:68px;background:#1F1F1F;border:1px solid rgba(255,255,255,0.15);color:#FFF;border-radius:8px;padding:6px 8px;font-size:0.84rem;">
-            <button type="button" class="btn-add-prod" style="padding:7px 14px;font-size:0.78rem;" onclick="window.sellerPortal.savePromoSettingsAdmin()">💾 Guardar</button>
+            <span style="font-size:0.78rem;color:var(--text-muted);">Cupos:</span>
+            <input type="number" id="admin-promo-max-input" value="${settings.maxPromoBusinesses}" min="0" max="500" style="width:68px;background:var(--bg-elevated);border:1px solid var(--border-color);color:var(--text-main);border-radius:8px;padding:6px 8px;font-size:0.84rem;">
+            <span style="font-size:0.78rem;color:var(--text-muted);">Días:</span>
+            <input type="number" id="admin-promo-days-input" value="${settings.promoDurationDays || 30}" min="1" max="365" style="width:68px;background:var(--bg-elevated);border:1px solid var(--border-color);color:var(--text-main);border-radius:8px;padding:6px 8px;font-size:0.84rem;">
+            <button type="button" class="btn-add-prod" style="padding:7px 14px;font-size:0.8rem;" onclick="window.sellerPortal.savePromoSettingsAdmin()">Guardar</button>
           </div>
         </div>
       </div>
 
-      <h4 style="color:#FFF;font-size:0.95rem;margin-bottom:10px;">🏪 Estado del Minutero de 30 Días por Cafetería</h4>
+      <h4 style="color:var(--text-main);font-size:0.95rem;margin-bottom:10px;">Estado del minutero de 30 días por cafetería</h4>
       <div>${bizCardsHtml}</div>
     `;
   }
@@ -1553,12 +1560,12 @@ class SellerPortalManager {
         body: JSON.stringify({ enabled, maxPromoBusinesses, promoDurationDays })
       });
       if (res.ok) {
-        if (window.app) window.app.showToast(`✅ Cupos actualizados: ${maxPromoBusinesses} cafeterías (${promoDurationDays} días a 0%)`);
+        if (window.app) window.app.showToast(`Cupos actualizados: ${maxPromoBusinesses} cafeterías (${promoDurationDays} días a 0%)`);
         await this.loadConfig();
         await this.loadPromoAdmin();
       }
     } catch (e) {
-      if (window.app) window.app.showToast('❌ Error guardando configuración de cupos');
+      if (window.app) window.app.showToast('Error guardando configuración de cupos', 'error');
     }
   }
 
@@ -1582,13 +1589,13 @@ class SellerPortalManager {
         if (window.productManager) {
           window.productManager.syncWithBackend();
         }
-        if (window.app) window.app.showToast('✅ Estado promocional de la cafetería actualizado');
+        if (window.app) window.app.showToast('Estado promocional de la cafetería actualizado');
         await this.loadPromoAdmin();
       } else {
-        if (window.app) window.app.showToast('❌ ' + (data.error || 'No se pudo actualizar'));
+        if (window.app) window.app.showToast(data.error || 'No se pudo actualizar', 'error');
       }
     } catch (e) {
-      if (window.app) window.app.showToast('❌ Error de conexión');
+      if (window.app) window.app.showToast('Error de conexión', 'error');
     }
   }
 
@@ -1612,7 +1619,7 @@ class SellerPortalManager {
       localStorage.setItem('godmarket_admin_token', token);
     }
 
-    disputesList.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.4);">⏳ Cargando disputas...</div>';
+    disputesList.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);">Cargando disputas...</div>';
 
     try {
       const res = await fetch('/api/admin/disputes', {
@@ -1623,7 +1630,7 @@ class SellerPortalManager {
 
       if (res.status === 403) {
         localStorage.removeItem('godmarket_admin_token');
-        disputesList.innerHTML = '<div style="text-align:center;padding:30px;color:#EF4444;">❌ Token incorrecto. Intentá de nuevo.</div>';
+        disputesList.innerHTML = '<div style="text-align:center;padding:30px;color:var(--danger);">Token incorrecto. Intentá de nuevo.</div>';
         return;
       }
 
@@ -1639,7 +1646,7 @@ class SellerPortalManager {
         badge.textContent = openCount > 9 ? '9+' : String(openCount);
       }
     } catch (err) {
-      disputesList.innerHTML = '<div style="text-align:center;padding:30px;color:#EF4444;">❌ Error al cargar. Verificá la conexión.</div>';
+      disputesList.innerHTML = '<div style="text-align:center;padding:30px;color:var(--danger);">Error al cargar. Verificá la conexión.</div>';
     }
   }
 
@@ -1656,23 +1663,23 @@ class SellerPortalManager {
     if (!disputesList) return;
 
     if (!disputes || disputes.length === 0) {
-      disputesList.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);font-size:0.9rem;">No hay disputas en este estado. 🎉</div>';
+      disputesList.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:0.9rem;">No hay disputas en este estado.</div>';
       return;
     }
 
     const statusLabel = {
-      abierta: { icon: '🔴', label: 'Abierta', color: '#EF4444' },
-      en_revision: { icon: '🟡', label: 'En revisión', color: '#FFB300' },
-      reembolsada: { icon: '✅', label: 'Reembolsada', color: '#00C853' },
-      rechazada: { icon: '❌', label: 'Rechazada', color: '#666' }
+      abierta: { label: 'Abierta', color: '#DF6B63' },
+      en_revision: { label: 'En revisión', color: '#D99B52' },
+      reembolsada: { label: 'Reembolsada', color: '#68B98E' },
+      rechazada: { label: 'Rechazada', color: '#8FA398' }
     };
 
     const reasonLabel = {
       no_response: 'Local no respondió',
       wrong_order: 'Pedido incorrecto',
       quality_issue: 'Problema de calidad',
-      cancellation_revocation: '↩️ Arrepentimiento de Compra (Ley 24.240)',
-      arrepentimiento: '↩️ Arrepentimiento de Compra (Ley 24.240)',
+      cancellation_revocation: 'Arrepentimiento de compra (Ley 24.240)',
+      arrepentimiento: 'Arrepentimiento de compra (Ley 24.240)',
       other: 'Otro motivo'
     };
 
@@ -1681,7 +1688,7 @@ class SellerPortalManager {
       : String(val || '');
 
     disputesList.innerHTML = disputes.map(d => {
-      const st = statusLabel[d.status] || { icon: '❓', label: esc(d.status), color: '#888' };
+      const st = statusLabel[d.status] || { label: esc(d.status), color: '#8FA398' };
       const dateStr = d.createdAt ? new Date(d.createdAt).toLocaleDateString('es-AR', {
         day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
       }) : 'N/A';
@@ -1692,44 +1699,44 @@ class SellerPortalManager {
           <div class="dispute-card-header">
             <div>
               <span class="dispute-id">${esc(d.id)}</span>
-              <span class="dispute-order-ref">→ Pedido #${esc(d.orderId)}</span>
+              <span class="dispute-order-ref">Pedido #${esc(d.orderId)}</span>
             </div>
-            <span class="dispute-status-badge" style="background: ${st.color}20; color: ${st.color}; border: 1px solid ${st.color}40;">${st.icon} ${st.label}</span>
+            <span class="dispute-status-badge" style="background: ${st.color}20; color: ${st.color}; border: 1px solid ${st.color}40;">${st.label}</span>
           </div>
 
           <div class="dispute-card-body">
             <div class="dispute-info-row">
-              <span class="dispute-info-label">👤 Comprador:</span>
+              <span class="dispute-info-label">Comprador:</span>
               <span>${esc(d.customerName || 'N/A')}${d.customerPhone ? ' · +' + esc(d.customerPhone) : ''}</span>
             </div>
             <div class="dispute-info-row">
-              <span class="dispute-info-label">💰 Total:</span>
+              <span class="dispute-info-label">Total:</span>
               <span style="color: var(--primary); font-weight: 700;">$${Number(d.total || 0).toLocaleString('es-AR')}</span>
             </div>
             <div class="dispute-info-row">
-              <span class="dispute-info-label">📋 Motivo:</span>
+              <span class="dispute-info-label">Motivo:</span>
               <span>${esc(reasonLabel[d.reason] || d.reason)}</span>
             </div>
             <div class="dispute-info-row">
-              <span class="dispute-info-label">📅 Fecha:</span>
+              <span class="dispute-info-label">Fecha:</span>
               <span>${esc(dateStr)}</span>
             </div>
-            ${d.resolutionNote ? `<div class="dispute-info-row"><span class="dispute-info-label">📝 Nota:</span><span>${esc(d.resolutionNote)}</span></div>` : ''}
+            ${d.resolutionNote ? `<div class="dispute-info-row"><span class="dispute-info-label">Nota:</span><span>${esc(d.resolutionNote)}</span></div>` : ''}
           </div>
 
           ${canResolve ? `
           <div class="dispute-card-actions">
             <button class="dispute-contact-btn" onclick="window.sellerPortal.contactDisputeCustomer(${this.escapeJSAttribute(d.customerPhone || '')}, ${this.escapeJSAttribute(d.orderId || '')})">
-              💬 Contactar por WA
+              ${this.icon('whatsapp', 14)} Contactar por WA
             </button>
             <button class="dispute-mark-btn" onclick="window.sellerPortal.openResolveDispute(${this.escapeJSAttribute(d.id || '')}, 'en_revision')">
-              🔄 Marcar en revisión
+              Marcar en revisión
             </button>
             <button class="dispute-refund-btn" onclick="window.sellerPortal.openResolveDispute(${this.escapeJSAttribute(d.id || '')}, 'reembolso')">
-              ✅ Aprobar Reembolso
+              Aprobar reembolso
             </button>
             <button class="dispute-reject-btn" onclick="window.sellerPortal.openResolveDispute(${this.escapeJSAttribute(d.id || '')}, 'rechazo')">
-              ❌ Rechazar
+              Rechazar
             </button>
           </div>
           ` : ''}
@@ -1740,7 +1747,7 @@ class SellerPortalManager {
 
   contactDisputeCustomer(phone, orderId) {
     if (!phone) {
-      window.app.showToast('⚠️ No hay número de WhatsApp para este comprador');
+      window.app.showToast('No hay número de WhatsApp para este comprador', 'warning');
       return;
     }
     const normalizedPhone = window.formatWhatsAppPhone
@@ -1759,7 +1766,7 @@ class SellerPortalManager {
     } else if (resolution === 'rechazo') {
       note = prompt('Rechazar disputa — ingresá el motivo del rechazo:') || '';
       if (!note) {
-        window.app.showToast('⚠️ Debes ingresar un motivo para rechazar la disputa');
+        window.app.showToast('Debes ingresar un motivo para rechazar la disputa', 'warning');
         return;
       }
     } else if (resolution === 'en_revision') {
@@ -1787,17 +1794,17 @@ class SellerPortalManager {
       const data = await res.json();
       if (data.success) {
         const labels = {
-          reembolso: '✅ Reembolso aprobado',
-          rechazo: '❌ Disputa rechazada',
-          en_revision: '🟡 Marcada en revisión'
+          reembolso: 'Reembolso aprobado',
+          rechazo: 'Disputa rechazada',
+          en_revision: 'Marcada en revisión'
         };
         window.app.showToast(labels[resolution] || 'Disputa actualizada');
         this.loadDisputes(); // Recargar
       } else {
-        window.app.showToast('❌ ' + (data.error || 'Error al resolver la disputa'));
+        window.app.showToast(data.error || 'Error al resolver la disputa', 'error');
       }
     } catch (err) {
-      window.app.showToast('❌ Error de conexión al resolver la disputa');
+      window.app.showToast('Error de conexión al resolver la disputa', 'error');
     }
   }
 
