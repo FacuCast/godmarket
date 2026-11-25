@@ -4,6 +4,16 @@
    ============================================================================ */
 
 /* ── 1. Base & Icon System Alignment ───────────────────────────────────────── */
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+.app-container {
+  overflow-x: clip;
+}
+
 .gm-icon {
   display: inline-block;
   flex-shrink: 0;
@@ -1378,6 +1388,8 @@
   border: 1px solid rgba(244, 239, 230, 0.08);
   text-align: center;
   position: relative;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 @media (min-width: 1024px) {
@@ -1554,6 +1566,20 @@
   padding: 14px 16px;
   border: 1px solid rgba(244, 239, 230, 0.06);
   margin: 16px 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.gm-footer-regulatory p,
+.gm-footer-regulatory a,
+.legal-modal-body,
+.legal-modal-body a,
+.legal-section-block p,
+.legal-section-block a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .gm-footer-bottom {
@@ -1576,6 +1602,44 @@
   .gm-footer-bottom {
     justify-content: center;
     text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .gm-footer {
+    margin: 28px 0 0 !important;
+    padding: 26px 14px calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+    border-radius: 18px !important;
+  }
+
+  .gm-footer-regulatory {
+    padding: 12px 13px !important;
+    text-align: left;
+  }
+
+  .gm-footer-zones {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .gm-footer-whatsapp {
+    max-width: 100%;
+    font-size: 0.78rem;
+    padding: 8px 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .gm-visit-pill {
+    max-width: 100%;
+    padding: 6px 12px;
+    font-size: 0.72rem;
+    gap: 6px;
+  }
+
+  .gm-footer-bottom .gm-inline-label {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
 
@@ -1935,4 +1999,83 @@
 .sound-toggle-btn.is-muted:hover {
   opacity: 1;
   color: var(--cream) !important;
+}
+
+/* Mobile Narrow Viewport Safety (320px - 640px): Zero horizontal overflow */
+@media (max-width: 420px) {
+  #btn-add-modal-cart {
+    white-space: normal !important;
+    font-size: 0.82rem !important;
+    padding: 11px 12px !important;
+    min-width: 0 !important;
+    line-height: 1.25;
+  }
+
+  .seller-topbar {
+    padding: 10px 12px !important;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .seller-topbar-actions {
+    gap: 6px !important;
+  }
+
+  .seller-topbar .seller-action-pill {
+    padding: 6px 10px !important;
+    font-size: 0.74rem !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .seller-biz-hero {
+    padding: 18px 14px !important;
+    overflow-x: clip;
+  }
+
+  .seller-biz-header-card {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+
+  .seller-biz-identity {
+    gap: 12px !important;
+    min-width: 0;
+  }
+
+  .seller-biz-info {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .seller-biz-info h2 {
+    font-size: 1.3rem !important;
+    overflow-wrap: anywhere;
+  }
+
+  .seller-biz-stats-strip {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    padding: 10px !important;
+  }
+
+  .seller-stat-item {
+    border: 1px solid rgba(244, 239, 230, 0.07) !important;
+    border-radius: 10px;
+    padding: 8px 6px !important;
+    background: rgba(14, 27, 22, 0.45);
+    min-width: 0;
+  }
+
+  .seller-stat-val {
+    font-size: 1.08rem !important;
+  }
+
+  .seller-stat-lbl {
+    font-size: 0.62rem !important;
+    overflow-wrap: anywhere;
+  }
 }
