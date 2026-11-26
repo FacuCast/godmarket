@@ -68,6 +68,10 @@
     <filter id="starShadow" x="-30%" y="-30%" width="160%" height="160%">
       <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#020A07" flood-opacity="0.55"/>
     </filter>
+
+    <clipPath id="medallionClip">
+      <circle cx="256" cy="256" r="220"/>
+    </clipPath>
   </defs>
 
   <!-- Full-Bleed Luxury Botanical Emerald Canvas -->
@@ -77,7 +81,7 @@
 
   <!-- Inner Subtle Medallion Disc Depth -->
   <circle cx="256" cy="256" r="222" fill="#071B14" fill-opacity="0.48"/>
-  <ellipse cx="256" cy="118" rx="196" ry="118" fill="url(#topGlass)"/>
+  <ellipse cx="256" cy="120" rx="206" ry="120" fill="url(#topGlass)" clip-path="url(#medallionClip)"/>
 
   <!-- ==========================================
        MEDALLION RINGS (Crisp Metallic Bevel)

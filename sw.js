@@ -1,5 +1,5 @@
-// Service Worker para GOD MARKET PWA (v27 - Original Logo Restored Across App & Splash)
-const CACHE_NAME = 'godmarket-v27';
+// Service Worker para GOD MARKET PWA (v28 - Elevated Original Crest Jewel Edition + Adaptive Mobile Icons)
+const CACHE_NAME = 'godmarket-v28';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
