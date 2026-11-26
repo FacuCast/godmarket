@@ -1,5 +1,5 @@
-// Service Worker para GOD MARKET PWA (v26 - Animated Logo App Splash & PWA Medallion)
-const CACHE_NAME = 'godmarket-v26';
+// Service Worker para GOD MARKET PWA (v27 - Original Logo Restored Across App & Splash)
+const CACHE_NAME = 'godmarket-v27';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
