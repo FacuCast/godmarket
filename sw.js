@@ -1,5 +1,5 @@
-// Service Worker para GOD MARKET PWA (v24 - Mobile Overflow Fixes, Editorial UX & Web Audio)
-const CACHE_NAME = 'godmarket-v24';
+// Service Worker para GOD MARKET PWA (v26 - Animated Logo App Splash & PWA Medallion)
+const CACHE_NAME = 'godmarket-v26';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

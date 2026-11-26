@@ -259,6 +259,8 @@ class GodMarketApp {
 
   // Configuración de PWA y Service Worker
   setupPWA() {
+    this.initAppLaunchSplash();
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
@@ -292,6 +294,8 @@ class GodMarketApp {
       this.deferredPrompt = null;
       const installBanner = document.getElementById('pwa-install-pill');
       if (installBanner) installBanner.style.display = 'none';
+      this.playSound('orderSuccess');
+      this.playAppLaunchAnimation({ subtitle: 'App instalada · Bienvenido', duration: 1800 });
       this.showToast("App instalada en tu pantalla de inicio", 'success');
     });
 
@@ -305,10 +309,55 @@ class GodMarketApp {
     }, 2800);
   }
 
+  initAppLaunchSplash() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const isMobileViewport = window.innerWidth <= 768;
+    const alreadyShown = sessionStorage.getItem('godmarket_splash_shown') === '1';
+
+    // Mostrar animación cinematográfica del logo al abrir la app instalada en el celu (o primera apertura móvil de la sesión)
+    if (isStandalone || (isMobileViewport && !alreadyShown)) {
+      try { sessionStorage.setItem('godmarket_splash_shown', '1'); } catch (e) {}
+      this.playAppLaunchAnimation({
+        subtitle: isStandalone ? 'Bienvenido a GOD MARKET' : 'Buenos Aires · Café y Pastelería',
+        duration: isStandalone ? 1650 : 1400
+      });
+    }
+  }
+
+  playAppLaunchAnimation({ subtitle = 'Buenos Aires · Café y Pastelería', duration = 1550 } = {}) {
+    const splash = document.getElementById('gm-app-splash');
+    if (!splash) return;
+
+    const subEl = document.getElementById('gm-splash-subtitle');
+    if (subEl) subEl.textContent = subtitle;
+
+    clearTimeout(this._splashHideTimer);
+    clearTimeout(this._splashCleanTimer);
+
+    splash.classList.remove('is-leaving');
+    splash.classList.add('is-visible');
+    splash.setAttribute('aria-hidden', 'false');
+
+    // Permitir cerrar tocando la pantalla si el usuario quiere entrar antes
+    const dismissNow = () => {
+      clearTimeout(this._splashHideTimer);
+      splash.classList.add('is-leaving');
+      this._splashCleanTimer = setTimeout(() => {
+        splash.classList.remove('is-visible', 'is-leaving');
+        splash.setAttribute('aria-hidden', 'true');
+      }, 460);
+    };
+    splash.onclick = dismissNow;
+
+    this._splashHideTimer = setTimeout(dismissNow, duration);
+  }
+
   installPWA() {
+    this.playSound('tap');
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     if (isStandalone) {
-      this.showToast("Ya estás navegando desde la app de GOD MARKET", 'success');
+      this.playAppLaunchAnimation({ subtitle: 'Ya estás en la app de GOD MARKET', duration: 1450 });
       return;
     }
 
@@ -316,6 +365,8 @@ class GodMarketApp {
       this.deferredPrompt.prompt();
       this.deferredPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === 'accepted') {
+          this.playSound('orderSuccess');
+          this.playAppLaunchAnimation({ subtitle: 'App instalada · Bienvenido', duration: 1800 });
           this.showToast("App instalada con éxito", 'success');
         }
         this.deferredPrompt = null;

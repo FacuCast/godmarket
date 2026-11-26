@@ -10,7 +10,7 @@
     content="GOD MARKET: el marketplace premium de cafeterías de especialidad y pastelerías artesanales en Buenos Aires. Desayunos sorpresa, brunch y delicias de autor con envío o retiro.">
   <meta name="keywords"
     content="cafeteria de especialidad, desayunos sorpresa, pasteleria artesanal, brunch buenos aires, marketplace gastronomico, cafe de autor, tortas gourmet">
-  <meta name="theme-color" content="#0F2318">
+  <meta name="theme-color" content="#0E1B16">
 
   <!-- Indexabilidad y Rastreo Canónico -->
   <link rel="canonical" href="https://somosgodmarket.com/">
@@ -46,13 +46,13 @@
   <meta name="twitter:image" content="https://somosgodmarket.com/assets/images/og_banner.svg">
 
   <!-- PWA & Mobile Web App Meta -->
-  <link rel="manifest" href="manifest.json?v=4">
+  <link rel="manifest" href="manifest.json?v=6">
   <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="assets/icons/icon-512.png">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="GOD MARKET">
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 
@@ -76,7 +76,7 @@
   <link rel="stylesheet" href="css/responsive.css?v=24.0">
   <link rel="stylesheet" href="css/mejoras-premium.css?v=20.0">
   <link rel="stylesheet" href="css/seller-portal.css?v=27.0">
-  <link rel="stylesheet" href="css/editorial-ux.css?v=1.1">
+  <link rel="stylesheet" href="css/editorial-ux.css?v=1.2">
 
   <!-- Google Identity Services (GIS SDK oficial) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -137,6 +137,27 @@
 </head>
 
 <body>
+
+  <!-- Animated App Launch Splash Screen (PWA / Mobile Entry) -->
+  <div id="gm-app-splash" class="gm-app-splash" aria-hidden="true">
+    <div class="gm-splash-ambient"></div>
+    <div class="gm-splash-stage">
+      <div class="gm-splash-medallion-wrap">
+        <span class="gm-splash-ring gm-splash-ring-outer"></span>
+        <span class="gm-splash-ring gm-splash-ring-inner"></span>
+        <span class="gm-splash-orbit"><span class="gm-splash-orbit-spark"></span></span>
+        <div class="gm-splash-logo-frame">
+          <img src="assets/icons/icon.svg" alt="GOD MARKET" class="gm-splash-logo-img">
+          <span class="gm-logo-shimmer"></span>
+        </div>
+      </div>
+      <div class="gm-splash-wordmark">
+        <span class="gm-splash-title">GOD MARKET</span>
+        <span class="gm-splash-divider"></span>
+        <span id="gm-splash-subtitle" class="gm-splash-sub">Buenos Aires · Café y Pastelería</span>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
@@ -1004,7 +1025,10 @@
 
     <!-- PWA Install Banner (Floating on mobile) -->
     <div id="pwa-install-pill" class="pwa-install-pill" style="display: none;">
-      <span class="brand-mark-svg" data-gm-icon="brand-mark" data-gm-size="20" style="width: 38px; height: 38px;"></span>
+      <div class="pwa-logo-medallion">
+        <img src="assets/icons/icon.svg" alt="GOD MARKET" class="pwa-logo-img">
+        <span class="gm-logo-shimmer"></span>
+      </div>
       <div class="pwa-pill-body">
         <strong>Instalar GOD MARKET</strong>
         <span>Acceso directo y pedidos más rápidos</span>
@@ -2335,8 +2359,12 @@
       <div class="drag-handle"></div>
       <button class="sheet-close-btn" onclick="window.app.closeModal('ios-install-modal')" aria-label="Cerrar"><span data-gm-icon="x" data-gm-size="16"></span></button>
       <div style="text-align: center; margin-bottom: 18px;">
-        <div class="gm-empty-icon-circle">
-          <span data-gm-icon="smartphone" data-gm-size="26"></span>
+        <div class="ios-install-logo-showcase">
+          <span class="gm-splash-ring gm-splash-ring-inner"></span>
+          <div class="pwa-logo-medallion pwa-logo-medallion-lg">
+            <img src="assets/icons/icon.svg" alt="GOD MARKET" class="pwa-logo-img">
+            <span class="gm-logo-shimmer"></span>
+          </div>
         </div>
         <h3 class="font-serif" style="font-size: 1.4rem; color: var(--cream); margin-bottom: 4px;">Instalar GOD MARKET en iPhone</h3>
         <p style="font-size: 0.82rem; color: var(--cream-muted);">Agregalo a tu pantalla de inicio en dos pasos:</p>
